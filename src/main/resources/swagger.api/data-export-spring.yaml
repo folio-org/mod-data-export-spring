@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: Data Export Spring
+  version: 1.0
+servers:
+  - url: /data-export-spring/
+paths:
+  /jobs:
+    get:
+      responses:
+        "200":
+          description: Jobs successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobCollection"
+        "400":
+          description:
+            Bad request, e.g. malformed request body or query parameter.
+            Details of the error (e.g. name of the parameter or line/character number
+            with malformed data) provided in the response.
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
+        "500":
+          description: Internal server error, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
+      description: Get jobs
+      operationId: getJobs
+    post:
+      responses:
+        "201":
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/job"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/job"
+        required: true
+      operationId: upsertJob
+  /jobs/{id}:
+    get:
+      responses:
+        "200":
+          description: Job successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/job"
+        "400":
+          description:
+            Bad request, e.g. malformed request body or query parameter.
+            Details of the error (e.g. name of the parameter or line/character number
+            with malformed data) provided in the response.
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Job with a given ID not found
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
+        "500":
+          description: Internal server error, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
+      description: Get job by job ID
+      operationId: getJobById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the job
+          schema:
+            $ref: "#/components/schemas/UUID"
+components:
+  schemas:
+    job:
+      $ref: schemas/job.json
+    jobCollection:
+      $ref: schemas/jobCollection.json
+    error:
+      type: object
+    UUID:
+      type: string
+      format: uuid
+  examples:
+    error:
+      value:
+        $ref: examples/error.sample

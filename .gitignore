@@ -1,5 +1,5 @@
 HELP.md
-mod-data-export-spring/target/
+mod-data-export-worker/target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -15,6 +15,7 @@ mod-data-export-spring/target/
 
 ### IntelliJ IDEA ###
 .idea
+/.idea/
 *.iws
 *.iml
 *.ipr
@@ -34,3 +35,7 @@ build/
 
 **/postgres-conf.json
 /target/*
+/.settings/
+/.classpath
+/.project
+/.vertx/
