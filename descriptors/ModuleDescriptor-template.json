@@ -1,11 +1,68 @@
 {
   "id": "@artifactId@-@version@",
-  "name": "Data Export Worker Module",
+  "name": "Data Export Spring Module",
+  "requires": [
+    {
+      "id": "mod-data-export-worker",
+      "version": "1.0"
+    }
+  ],
   "provides": [
+    {
+      "id": "data-export-spring",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/data-export-spring/jobs",
+          "permissionsRequired": [],
+          "modulePermissions": []
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/data-export-spring/jobs/{id}",
+          "permissionsRequired": [],
+          "modulePermissions": []
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/data-export-spring/jobs",
+          "permissionsRequired": [],
+          "modulePermissions": []
+        }
+      ]
+    },
+    {
+      "id": "_tenant",
+      "version": "1.2",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": ["POST"],
+          "pathPattern": "/_/tenant",
+          "permissionsRequired": []
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/_/tenant",
+          "permissionsRequired": []
+        }
+      ]
+    },
+    {
+      "id": "_jsonSchemas",
+      "version": "1.0",
+      "interfaceType": "multiple",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/_/jsonSchemas",
+          "permissionsRequired": []
+        }
+      ]
+    }
   ],
   "permissionSets" : [
-  ],
-  "requires": [
   ],
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",
@@ -27,7 +84,10 @@
       { "name": "DB_DATABASE", "value": "okapi_modules" },
       { "name": "DB_QUERYTIMEOUT", "value": "60000" },
       { "name": "DB_CHARSET", "value": "UTF-8" },
-      { "name": "DB_MAXPOOLSIZE", "value": "5" }
+      { "name": "DB_MAXPOOLSIZE", "value": "5" },
+      { "name": "KAFKA_HOST", "value": "10.0.2.15" },
+      { "name": "KAFKA_PORT", "value": "9092" },
+      { "name": "ENV", "value": "folio" }
     ]
   }
 }
