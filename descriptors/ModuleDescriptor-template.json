@@ -1,31 +1,32 @@
 {
   "id": "@artifactId@-@version@",
   "name": "Data Export Spring Module",
-  "requires": [
-    {
-      "id": "mod-data-export-worker",
-      "version": "1.0"
-    }
-  ],
+  "requires": [],
   "provides": [
     {
       "id": "data-export-spring",
       "version": "1.0",
       "handlers": [
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/jobs",
           "permissionsRequired": [],
           "modulePermissions": []
         },
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/jobs/{id}",
           "permissionsRequired": [],
           "modulePermissions": []
         },
         {
-          "methods": ["POST"],
+          "methods": [
+            "POST"
+          ],
           "pathPattern": "/data-export-spring/jobs",
           "permissionsRequired": [],
           "modulePermissions": []
@@ -38,12 +39,16 @@
       "interfaceType": "system",
       "handlers": [
         {
-          "methods": ["POST"],
+          "methods": [
+            "POST"
+          ],
           "pathPattern": "/_/tenant",
           "permissionsRequired": []
         },
         {
-          "methods": ["DELETE"],
+          "methods": [
+            "DELETE"
+          ],
           "pathPattern": "/_/tenant",
           "permissionsRequired": []
         }
@@ -55,14 +60,16 @@
       "interfaceType": "multiple",
       "handlers": [
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/_/jsonSchemas",
           "permissionsRequired": []
         }
       ]
     }
   ],
-  "permissionSets" : [
+  "permissionSets": [
   ],
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",
@@ -70,24 +77,64 @@
     "dockerArgs": {
       "HostConfig": {
         "Memory": 357913941,
-        "PortBindings": { "8081/tcp": [ { "HostPort": "%p" } ] }
+        "PortBindings": {
+          "8081/tcp": [
+            {
+              "HostPort": "%p"
+            }
+          ]
+        }
       }
     },
     "env": [
-      { "name": "JAVA_OPTIONS",
+      {
+        "name": "JAVA_OPTIONS",
         "value": "-XX:MaxRAMPercentage=66.0"
       },
-      { "name": "DB_HOST", "value": "postgres" },
-      { "name": "DB_PORT", "value": "5432" },
-      { "name": "DB_USERNAME", "value": "folio_admin" },
-      { "name": "DB_PASSWORD", "value": "folio_admin" },
-      { "name": "DB_DATABASE", "value": "okapi_modules" },
-      { "name": "DB_QUERYTIMEOUT", "value": "60000" },
-      { "name": "DB_CHARSET", "value": "UTF-8" },
-      { "name": "DB_MAXPOOLSIZE", "value": "5" },
-      { "name": "KAFKA_HOST", "value": "10.0.2.15" },
-      { "name": "KAFKA_PORT", "value": "9092" },
-      { "name": "ENV", "value": "folio" }
+      {
+        "name": "DB_HOST",
+        "value": "postgres"
+      },
+      {
+        "name": "DB_PORT",
+        "value": "5432"
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": "folio_admin"
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": "folio_admin"
+      },
+      {
+        "name": "DB_DATABASE",
+        "value": "okapi_modules"
+      },
+      {
+        "name": "DB_QUERYTIMEOUT",
+        "value": "60000"
+      },
+      {
+        "name": "DB_CHARSET",
+        "value": "UTF-8"
+      },
+      {
+        "name": "DB_MAXPOOLSIZE",
+        "value": "5"
+      },
+      {
+        "name": "KAFKA_HOST",
+        "value": "10.0.2.15"
+      },
+      {
+        "name": "KAFKA_PORT",
+        "value": "9092"
+      },
+      {
+        "name": "ENV",
+        "value": "folio"
+      }
     ]
   }
 }
