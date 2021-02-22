@@ -21,7 +21,7 @@ More detail can be found on Data Export Spring wiki-page: [WIKI Data Export Spri
 
 ### Required Permissions
 Institutional users should be granted the following permissions in order to use this Data Export Spring API:
-- `records-editor.all`
+-
 
 ### Issue tracker
 See project [MODEXPS](https://issues.folio.org/browse/MODEXPS)
