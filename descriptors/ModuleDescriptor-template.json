@@ -29,6 +29,21 @@
           "pathPattern": "/data-export-spring/jobs",
           "permissionsRequired": [],
           "modulePermissions": []
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/bursar-export/config",
+          "permissionsRequired" : []
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/bursar-export/config",
+          "permissionsRequired" : []
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/bursar-export/config/{configId}",
+          "permissionsRequired" : []
         }
       ]
     },
