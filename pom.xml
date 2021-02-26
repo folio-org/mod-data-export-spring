@@ -122,11 +122,14 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <layers>
-                        <enabled>true</enabled>
-                    </layers>
-                </configuration>
+                <executions>
+                    <execution>
+                    <id>repackage</id>
+                    <configuration>
+                        <classifier>exec</classifier>
+                    </configuration>
+                  </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -213,7 +216,7 @@
                             <generateModelDocumentation>true</generateModelDocumentation>
                             <configOptions>
                                 <java8>true</java8>
-                                <dateLibrary>java</dateLibrary>
+                                 <dateLibrary>java8</dateLibrary>
                                 <interfaceOnly>true</interfaceOnly>
                             </configOptions>
                         </configuration>

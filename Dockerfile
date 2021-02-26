@@ -6,7 +6,7 @@ USER folio
 ENV APP_FILE mod-data-export-spring-fat.jar
 
 # - should be a single jar file
-ARG JAR_FILE=./target/*.jar
+ARG JAR_FILE=./target/*-exec.jar
 # - copy
 COPY ${JAR_FILE} ${JAVA_APP_DIR}/${APP_FILE}
 
