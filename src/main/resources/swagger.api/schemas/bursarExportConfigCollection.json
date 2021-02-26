@@ -1,0 +1,24 @@
+{
+  "description": "Configs Collection",
+  "type": "object",
+  "properties": {
+    "configs": {
+      "description": "List of configs",
+      "type": "array",
+      "id": "scheduleConfigurationList",
+      "items": {
+        "type": "object",
+        "$ref": "bursarExportConfig.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "configs",
+    "totalRecords"
+  ]
+}
+

@@ -8,7 +8,7 @@
       "description": "Jobs",
       "items": {
         "type": "object",
-        "$ref": "jobRecord.json"
+        "$ref": "job.json"
       }
     },
     "totalRecords": {

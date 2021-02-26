@@ -30,6 +30,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <data-export-spring.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export-spring.yaml
         </data-export-spring.yaml.file>
+        <bursar-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/bursar-export.yaml
+        </bursar-export.yaml.file>
+        <json.version>20200518</json.version>
 
         <folio-spring-base.version>1.0.2-SNAPSHOT</folio-spring-base.version>
         <commons-io.version>2.8.0</commons-io.version>
@@ -68,9 +71,20 @@
         </dependency>
 
         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
 
         <!-- Test dependencies -->
@@ -170,6 +184,33 @@
                             <importMappings>
                                 <importMapping>error=org.folio.tenant.domain.dto.Error</importMapping>
                             </importMappings>
+                            <configOptions>
+                                <java8>true</java8>
+                                <dateLibrary>java</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bursar-export</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${bursar-export.yaml.file}</inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+                            <generatorName>spring</generatorName>
+                            <modelPackage>${project.groupId}.des.domain.dto</modelPackage>
+                            <apiPackage>${project.groupId}.des.rest.resource</apiPackage>
+                            <generateApis>true</generateApis>
+                            <generateApiTests>true</generateApiTests>
+                            <generateApiDocumentation>true</generateApiDocumentation>
+                            <generateModels>true</generateModels>
+                            <modelsToGenerate>bursarExportConfig,bursarExportConfigCollection</modelsToGenerate>
+                            <generateModelTests>false</generateModelTests>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <generateModelDocumentation>true</generateModelDocumentation>
                             <configOptions>
                                 <java8>true</java8>
                                 <dateLibrary>java</dateLibrary>

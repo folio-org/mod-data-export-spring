@@ -1,0 +1,107 @@
+openapi: 3.0.0
+info:
+  title: Bursar export config
+  version: v1
+servers:
+  - url: /
+paths:
+  /bursar-export/config:
+    get:
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bursarExportConfigCollection"
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+      description: Get a list of existing validation rules for a tenant
+      operationId: getBursarExportConfig
+    post:
+      responses:
+        '201':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: good
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Bad request
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+      description: Add schedule configuration
+      operationId: postBursarExportConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bursarExportConfig"
+        required: true
+  /bursar-export/config/{configId}:
+    put:
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Ok
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Bad request
+        '404':
+          description: Schedule config not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Rule not found
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+      description: Change schedule configuration
+      operationId: putBursarExportConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bursarExportConfig"
+        required: true
+    parameters:
+      - name: configId
+        in: path
+        required: true
+        schema:
+          type: string
+components:
+  schemas:
+    bursarExportConfig:
+      $ref: schemas/bursarExportConfig.json
+    bursarExportConfigCollection:
+      $ref: schemas/bursarExportConfigCollection.json
