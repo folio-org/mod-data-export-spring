@@ -1,9 +1,8 @@
 package org.folio.des.repository;
 
+import java.util.UUID;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.domain.entity.JobExecution;
-
-import java.util.UUID;
 
 public interface IJobRepository {
 
@@ -12,5 +11,4 @@ public interface IJobRepository {
   void updateJobExecution(UUID jobId, JobExecution jobExecution);
 
   Job getJob(UUID jobId);
-
 }
