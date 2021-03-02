@@ -24,12 +24,12 @@
         ]
       },
       "type": {
-        "description": "Job type",
-        "type": "string",
-        "enum": [
-          "CIRCULATION_LOG_EXPORT",
-          "BURSAR_FEES_FINES_EXPORT"
-        ]
+        "description": "Export type",
+        "$ref": "exportType.json#/ExportType"
+      },
+      "query": {
+        "description": "CQL query to be passed to the module which data is being exported. Use it to filter data.",
+        "type": "string"
       },
       "files": {
         "description": "Export files URLs",
