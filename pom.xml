@@ -32,7 +32,7 @@
         <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
         <json.version>20200518</json.version>
 
-        <folio-spring-base.version>1.0.2-SNAPSHOT</folio-spring-base.version>
+        <folio-spring-base.version>1.0.2</folio-spring-base.version>
         <commons-io.version>2.8.0</commons-io.version>
 
         <openapi-generator.version>4.3.1</openapi-generator.version>
