@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Fees and fines for bursar export parameters",
+  "BursarFeeFines": {
+    "type": "object",
+    "properties": {
+      "ftpUrl": {
+        "type": "string",
+        "description": "Url to ftp server"
+      },
+      "daysOutstanding": {
+        "type": "integer",
+        "description": "Days outstanding"
+      },
+      "patronGroups": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

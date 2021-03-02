@@ -70,8 +70,9 @@ public class DataExportController implements JobsApi {
   }
 
   private void prepareJob(Job createdJob, StartJobCommandDto startJobCommandDto, ExportConfig exportConfig) {
-    Long daysOutstanding = (long) exportConfig.getDaysOutstanding();
-    String patronGroups = String.join(",", exportConfig.getPatronGroups());
+    BursarFeeFines bursarFeeFines = exportConfig.getExportTypeSpecificParameters().getBursarFeeFines();
+    Long daysOutstanding = (long) bursarFeeFines.getDaysOutstanding();
+    String patronGroups = String.join(",", bursarFeeFines.getPatronGroups());
 
     Map<String, JobParameterDto> params = new HashMap<>();
     params.put("daysOutstanding", new JobParameterDto(daysOutstanding));

@@ -177,7 +177,7 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>Metadata,Job,JobCollection</modelsToGenerate>
+                            <modelsToGenerate>ExportType,Metadata,Job,JobCollection</modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
@@ -207,7 +207,8 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>ExportConfig,ExportConfigCollection</modelsToGenerate>
+                            <modelsToGenerate>BursarFeeFines,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection
+                            </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>

@@ -7,6 +7,10 @@
       "id": {
         "type": "string"
       },
+      "type": {
+        "description": "Export type",
+        "$ref": "exportType.json#/ExportType"
+      },
       "scheduleFrequency": {
         "type": "integer",
         "description": "Number of time periods"
@@ -42,19 +46,8 @@
           ]
         }
       },
-      "ftpUrl": {
-        "type": "string",
-        "description": "Url to ftp server"
-      },
-      "daysOutstanding": {
-        "type": "integer",
-        "description": "Days outstanding"
-      },
-      "patronGroups": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+      "exportTypeSpecificParameters": {
+        "$ref": "exportTypeSpecificParameters.json#/ExportTypeSpecificParameters"
       }
     },
     "additionalProperties": false

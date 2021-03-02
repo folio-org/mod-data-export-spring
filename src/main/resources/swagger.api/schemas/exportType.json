@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Type of export",
+  "ExportType": {
+    "type": "string",
+    "enum": [
+      "CIRCULATION_LOG",
+      "BURSAR_FEES_FINES"
+    ]
+  }
+}
