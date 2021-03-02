@@ -11,6 +11,9 @@
         "description": "Export type",
         "$ref": "exportType.json#/ExportType"
       },
+      "exportTypeSpecificParameters": {
+        "$ref": "exportTypeSpecificParameters.json#/ExportTypeSpecificParameters"
+      },
       "scheduleFrequency": {
         "type": "integer",
         "description": "Number of time periods"
@@ -45,11 +48,9 @@
             "SUNDAY"
           ]
         }
-      },
-      "exportTypeSpecificParameters": {
-        "$ref": "exportTypeSpecificParameters.json#/ExportTypeSpecificParameters"
       }
     },
-    "additionalProperties": false
+    "additionalProperties": false,
+    "required": ["type"]
   }
 }
