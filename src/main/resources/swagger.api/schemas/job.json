@@ -1,77 +1,78 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
-  "description": "Job",
-  "properties": {
-    "id": {
-      "description": "Job ID",
-      "$ref": "common/uuid.json"
-    },
-    "name": {
-      "description": "Job name",
-      "type": "string"
-    },
-    "status": {
-      "description": "Job status",
-      "type": "string",
-      "enum": [
-        "SCHEDULED",
-        "IN_PROGRESS",
-        "SUCCESSFUL",
-        "FAILED"
-      ]
-    },
-    "type": {
-      "description": "Job type",
-      "type": "string",
-      "enum": [
-        "CIRCULATION_LOG_EXPORT",
-        "BURSAR_FEES_FINES_EXPORT"
-      ]
-    },
-    "files": {
-      "description": "Export files URLs",
-      "type": "array",
-      "items": {
+  "Job": {
+    "type": "object",
+    "description": "Job",
+    "properties": {
+      "id": {
+        "description": "Job ID",
+        "type": "string",
+        "format": "uuid"
+      },
+      "name": {
+        "description": "Job name",
+        "type": "string"
+      },
+      "status": {
+        "description": "Job status",
+        "type": "string",
+        "enum": [
+          "SCHEDULED",
+          "IN_PROGRESS",
+          "SUCCESSFUL",
+          "FAILED"
+        ]
+      },
+      "type": {
+        "description": "Job type",
+        "type": "string",
+        "enum": [
+          "CIRCULATION_LOG_EXPORT",
+          "BURSAR_FEES_FINES_EXPORT"
+        ]
+      },
+      "files": {
+        "description": "Export files URLs",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": {
+        "description": "Job description",
+        "type": "string"
+      },
+      "source": {
+        "description": "Job source",
+        "type": "string"
+      },
+      "isSystemSource": {
+        "description": "Was the job created by system",
+        "type": "boolean"
+      },
+      "startTime": {
+        "description": "Job start timestamp",
+        "type": "string",
+        "format": "date-time"
+      },
+      "endTime": {
+        "description": "Job end timestamp",
+        "type": "string",
+        "format": "date-time"
+      },
+      "metadata": {
+        "description": "Standard FOLIO metadata",
+        "$ref": "common/metadata.json#/Metadata"
+      },
+      "outputFormat": {
+        "description": "Job output format",
+        "type": "string"
+      },
+      "errorDetails": {
+        "description": "Job error details",
         "type": "string"
       }
     },
-    "description": {
-      "description": "Job description",
-      "type": "string"
-    },
-    "source": {
-      "description": "Job source",
-      "type": "string"
-    },
-    "isSystemSource": {
-      "description": "Was the job created by system",
-      "type": "boolean"
-    },
-    "startTime": {
-      "description": "Job start timestamp",
-      "type": "string",
-      "format": "date-time"
-    },
-    "endTime": {
-      "description": "Job end timestamp",
-      "type": "string",
-      "format": "date-time"
-    },
-    "metadata": {
-      "description": "Standard FOLIO metadata",
-      "type": "object",
-      "$ref" : "common/metadata.json"
-    },
-    "outputFormat": {
-      "description": "Job output format",
-      "type": "string"
-    },
-    "errorDetails": {
-      "description": "Job error details",
-      "type": "string"
-    }
-  },
-  "additionalProperties": false,
-  "required": []
+    "additionalProperties": false,
+    "required": []
+  }
 }

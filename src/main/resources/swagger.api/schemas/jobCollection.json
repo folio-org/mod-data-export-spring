@@ -1,22 +1,22 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
-  "description": "Collection of jobs",
-  "properties": {
-    "jobRecords": {
-      "type": "array",
-      "description": "Jobs",
-      "items": {
-        "type": "object",
-        "$ref": "job.json"
+  "JobCollection": {
+    "type": "object",
+    "description": "Collection of jobs",
+    "properties": {
+      "jobRecords": {
+        "type": "array",
+        "description": "Jobs",
+        "items": {
+          "$ref": "job.json#/Job"
+        }
+      },
+      "totalRecords": {
+        "type": "integer"
       }
     },
-    "totalRecords": {
-      "type": "integer"
-    }
-  },
-  "required": [
-    "jobRecords",
-    "totalRecords"
-  ]
+    "required": [
+      "jobRecords",
+      "totalRecords"
+    ]
+  }
 }

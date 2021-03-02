@@ -13,9 +13,12 @@ Data Export Spring API provides the following URLs:
 
 |  Method | URL| Permissions  | Description  | 
 |---|---|---|---|
-| GET  | /data-export-spring/jobs/     |  | Gets jobs                |
-| GET  | /data-export-spring/jobs/{id} |  | Gets a job by the job ID |
-| POST | /data-export-spring/jobs/     |  | Upserts a job            |
+| GET  | /data-export-spring/jobs/        |  | Gets jobs                                |
+| GET  | /data-export-spring/jobs/{id}    |  | Gets a job by the job ID                 |
+| POST | /data-export-spring/jobs/        |  | Upserts a job                            |
+| GET  | /data-export-spring/configs/     |  | Get a list of data export configurations |
+| PUT  | /data-export-spring/configs/{id} |  | Change an export configuration           |
+| POST | /data-export-spring/configs/     |  | Add an export configuration              |
 
 More detail can be found on Data Export Spring wiki-page: [WIKI Data Export Spring](https://wiki.folio.org/pages/viewpage.action?pageId=52134948).
 

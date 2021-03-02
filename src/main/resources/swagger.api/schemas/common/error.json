@@ -1,0 +1,28 @@
+{
+  "Error": {
+    "description": "An error",
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "Error message text"
+      },
+      "type": {
+        "type": "string",
+        "description": "Error message type"
+      },
+      "code": {
+        "type": "string",
+        "description": "Error message code"
+      },
+      "parameters": {
+        "description": "Error message parameters",
+        "$ref": "parameters.json#/Parameters"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "message"
+    ]
+  }
+}

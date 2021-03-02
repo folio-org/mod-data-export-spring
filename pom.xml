@@ -28,10 +28,8 @@
         <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <data-export-spring.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export-spring.yaml
-        </data-export-spring.yaml.file>
-        <bursar-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/bursar-export.yaml
-        </bursar-export.yaml.file>
+        <jobs.yaml.file>${project.basedir}/src/main/resources/swagger.api/jobs.yaml</jobs.yaml.file>
+        <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
         <json.version>20200518</json.version>
 
         <folio-spring-base.version>1.0.2-SNAPSHOT</folio-spring-base.version>
@@ -124,11 +122,11 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                    <id>repackage</id>
-                    <configuration>
-                        <classifier>exec</classifier>
-                    </configuration>
-                  </execution>
+                        <id>repackage</id>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -165,12 +163,12 @@
                 <version>${openapi-generator.version}</version>
                 <executions>
                     <execution>
-                        <id>data-export-spring</id>
+                        <id>jobs</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${data-export-spring.yaml.file}</inputSpec>
+                            <inputSpec>${jobs.yaml.file}</inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
                             <generatorName>spring</generatorName>
                             <modelPackage>${project.groupId}.des.domain.dto</modelPackage>
@@ -179,7 +177,7 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>job,jobCollection</modelsToGenerate>
+                            <modelsToGenerate>Metadata,Job,JobCollection</modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
@@ -195,12 +193,12 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>bursar-export</id>
+                        <id>export-configs</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${bursar-export.yaml.file}</inputSpec>
+                            <inputSpec>${export-configs.yaml.file}</inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
                             <generatorName>spring</generatorName>
                             <modelPackage>${project.groupId}.des.domain.dto</modelPackage>
@@ -209,14 +207,14 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>bursarExportConfig,bursarExportConfigCollection</modelsToGenerate>
+                            <modelsToGenerate>ExportConfig,ExportConfigCollection</modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                             <generateModelDocumentation>true</generateModelDocumentation>
                             <configOptions>
                                 <java8>true</java8>
-                                 <dateLibrary>java8</dateLibrary>
+                                <dateLibrary>java8</dateLibrary>
                                 <interfaceOnly>true</interfaceOnly>
                             </configOptions>
                         </configuration>
