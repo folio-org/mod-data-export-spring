@@ -177,7 +177,7 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>ExportType,Metadata,Job,JobCollection</modelsToGenerate>
+                            <modelsToGenerate>ExportType,JobStatus,Metadata,Job,JobCollection</modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>

@@ -13,31 +13,6 @@
         "description": "Job name",
         "type": "string"
       },
-      "status": {
-        "description": "Job status",
-        "type": "string",
-        "enum": [
-          "SCHEDULED",
-          "IN_PROGRESS",
-          "SUCCESSFUL",
-          "FAILED"
-        ]
-      },
-      "type": {
-        "description": "Export type",
-        "$ref": "exportType.json#/ExportType"
-      },
-      "query": {
-        "description": "CQL query to be passed to the module which data is being exported. Use it to filter data.",
-        "type": "string"
-      },
-      "files": {
-        "description": "Export files URLs",
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
       "description": {
         "description": "Job description",
         "type": "string"
@@ -49,6 +24,24 @@
       "isSystemSource": {
         "description": "Was the job created by system",
         "type": "boolean"
+      },
+      "type": {
+        "description": "Export type",
+        "$ref": "exportType.json#/ExportType"
+      },
+      "exportTypeSpecificParameters": {
+        "$ref": "exportTypeSpecificParameters.json#/ExportTypeSpecificParameters"
+      },
+      "status": {
+        "description": "Job status",
+        "$ref": "jobStatus.json#/JobStatus"
+      },
+      "files": {
+        "description": "Export files URLs",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       },
       "startTime": {
         "description": "Job start timestamp",
@@ -74,6 +67,6 @@
       }
     },
     "additionalProperties": false,
-    "required": []
+    "required": ["type"]
   }
 }

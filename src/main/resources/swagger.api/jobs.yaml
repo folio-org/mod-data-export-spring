@@ -7,6 +7,56 @@ servers:
 paths:
   /jobs:
     get:
+      description: Get jobs fy filter
+      operationId: getJobs
+      parameters:
+        - name: name
+          in: query
+          description: Job name to filter jobs by
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Job statuses to filter jobs by
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/jobStatus"
+        - name: type
+          in: query
+          description: Export types to filter jobs by
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/exportType"
+        - name: isSystemSource
+          in: query
+          description: Jobs created by users manually or by system
+          schema:
+            type: boolean
+        - name: source
+          in: query
+          description: Job sources to filter jobs by
+          schema:
+            type: array
+            items:
+              type: string
+        - name: startTime
+          in: query
+          description: Job start timestamp range to filter jobs by
+          schema:
+            type: array
+            items:
+              type: string
+              format: date-time
+        - name: endTime
+          in: query
+          description: Job end timestamp range to filter jobs by
+          schema:
+            type: array
+            items:
+              type: string
+              format: date-time
       responses:
         "200":
           description: Jobs successfully retrieved
@@ -33,10 +83,16 @@ paths:
                 $ref: "#/components/examples/error"
               schema:
                 $ref: "#/components/schemas/error"
-      description: Get jobs
-      operationId: getJobs
     post:
+      description: Create or update a job
+      operationId: upsertJob
       responses:
+        "200":
+          description: Job updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/job"
         "201":
           description: Job created
           content:
@@ -51,15 +107,31 @@ paths:
                 $ref: "#/components/examples/error"
               schema:
                 $ref: "#/components/schemas/error"
+        "500":
+          description: Internal server error, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/error"
+              schema:
+                $ref: "#/components/schemas/error"
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/job"
         required: true
-      operationId: upsertJob
   /jobs/{id}:
     get:
+      description: Get a job by the job ID
+      operationId: getJobById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the job
+          schema:
+            $ref: "#/components/schemas/UUID"
       responses:
         "200":
           description: Job successfully retrieved
@@ -94,17 +166,12 @@ paths:
                 $ref: "#/components/examples/error"
               schema:
                 $ref: "#/components/schemas/error"
-      description: Get job by job ID
-      operationId: getJobById
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: UUID of the job
-          schema:
-            $ref: "#/components/schemas/UUID"
 components:
   schemas:
+    jobStatus:
+      $ref: 'schemas/jobStatus.json#/JobStatus'
+    exportType:
+      $ref: 'schemas/exportType.json#/ExportType'
     job:
       $ref: 'schemas/job.json#/Job'
     jobCollection:
