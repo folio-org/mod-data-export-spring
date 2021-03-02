@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of jobs",
   "JobCollection": {
     "type": "object",
-    "description": "Collection of jobs",
     "properties": {
       "jobRecords": {
         "type": "array",

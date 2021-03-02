@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Export Configuration Collection",
   "ExportConfigCollection": {
-    "description": "Export Configuration Collection",
     "type": "object",
     "properties": {
       "configs": {
