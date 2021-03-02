@@ -32,19 +32,25 @@
           "modulePermissions": []
         },
         {
-          "methods": ["GET"],
-          "pathPattern": "/bursar-export/config",
-          "permissionsRequired" : []
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export-spring/configs",
+          "permissionsRequired": []
         },
         {
-          "methods": ["POST"],
-          "pathPattern": "/bursar-export/config",
-          "permissionsRequired" : []
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export-spring/configs",
+          "permissionsRequired": []
         },
         {
-          "methods": ["PUT"],
-          "pathPattern": "/bursar-export/config/{configId}",
-          "permissionsRequired" : []
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/data-export-spring/configs/{id}",
+          "permissionsRequired": []
         }
       ]
     },

@@ -1,0 +1,23 @@
+{
+  "ExportConfigCollection": {
+    "description": "Export Configuration Collection",
+    "type": "object",
+    "properties": {
+      "configs": {
+        "description": "List of configs",
+        "type": "array",
+        "items": {
+          "$ref": "exportConfig.json#/ExportConfig"
+        }
+      },
+      "totalRecords": {
+        "type": "integer"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "configs",
+      "totalRecords"
+    ]
+  }
+}

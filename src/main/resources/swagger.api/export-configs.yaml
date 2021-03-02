@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Bursar export config
+  title: Data Export Spring Configurations
   version: v1
 servers:
-  - url: /
+  - url: /data-export-spring/
 paths:
-  /bursar-export/config:
+  /configs:
     get:
       responses:
         '200':
@@ -13,7 +13,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/bursarExportConfigCollection"
+                $ref: "#/components/schemas/exportConfigCollection"
         '500':
           description: Internal server error
           content:
@@ -21,8 +21,8 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-      description: Get a list of existing validation rules for a tenant
-      operationId: getBursarExportConfig
+      description: Get a list of data export configurations
+      operationId: getExportConfigs
     post:
       responses:
         '201':
@@ -46,15 +46,15 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-      description: Add schedule configuration
-      operationId: postBursarExportConfig
+      description: Add an export configuration
+      operationId: postExportConfig
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/bursarExportConfig"
+              $ref: "#/components/schemas/exportConfig"
         required: true
-  /bursar-export/config/{configId}:
+  /configs/{id}:
     put:
       responses:
         '200':
@@ -72,7 +72,7 @@ paths:
                 type: string
                 example: Bad request
         '404':
-          description: Schedule config not found
+          description: Export config not found
           content:
             text/plain:
               schema:
@@ -85,23 +85,23 @@ paths:
               schema:
                 type: string
                 example: Internal server error
-      description: Change schedule configuration
-      operationId: putBursarExportConfig
+      description: Change an export configuration
+      operationId: putExportConfig
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/bursarExportConfig"
+              $ref: "#/components/schemas/exportConfig"
         required: true
     parameters:
-      - name: configId
+      - name: id
         in: path
         required: true
         schema:
           type: string
 components:
   schemas:
-    bursarExportConfig:
-      $ref: schemas/bursarExportConfig.json
-    bursarExportConfigCollection:
-      $ref: schemas/bursarExportConfigCollection.json
+    exportConfig:
+      $ref: 'schemas/exportConfig.json#/ExportConfig'
+    exportConfigCollection:
+      $ref: 'schemas/exportConfigCollection.json#/ExportConfigCollection'

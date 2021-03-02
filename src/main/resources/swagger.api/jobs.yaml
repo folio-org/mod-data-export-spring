@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Data Export Spring
-  version: 1.0
+  title: Data Export Spring Jobs
+  version: v1
 servers:
   - url: /data-export-spring/
 paths:
@@ -106,15 +106,15 @@ paths:
 components:
   schemas:
     job:
-      $ref: schemas/job.json
+      $ref: 'schemas/job.json#/Job'
     jobCollection:
-      $ref: schemas/jobCollection.json
+      $ref: 'schemas/jobCollection.json#/JobCollection'
     error:
-      type: object
+      $ref: 'schemas/common/error.json#/Error'
     UUID:
       type: string
       format: uuid
   examples:
     error:
       value:
-        $ref: examples/error.sample
+        $ref: 'examples/error.sample'
