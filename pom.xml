@@ -38,6 +38,7 @@
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
         <sonar.exclusions>
+            **/src/main/java/org/folio/des/**
         </sonar.exclusions>
 
         <!-- Test properties-->
