@@ -1,7 +1,8 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Metadata about creation and changes to records, provided by the server (client should not provide)",
   "Metadata": {
     "title": "Metadata Schema",
-    "description": "Metadata about creation and changes to records, provided by the server (client should not provide)",
     "type": "object",
     "properties": {
       "createdDate": {

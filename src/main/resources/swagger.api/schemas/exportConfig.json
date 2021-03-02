@@ -1,6 +1,7 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Export Configuration",
   "ExportConfig": {
-    "description": "Export Configuration",
     "type": "object",
     "properties": {
       "id": {
