@@ -10,53 +10,9 @@ paths:
       description: Get jobs fy filter
       operationId: getJobs
       parameters:
-        - name: name
-          in: query
-          description: Job name to filter jobs by
-          schema:
-            type: string
-        - name: status
-          in: query
-          description: Job statuses to filter jobs by
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/jobStatus"
-        - name: type
-          in: query
-          description: Export types to filter jobs by
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/exportType"
-        - name: isSystemSource
-          in: query
-          description: Jobs created by users manually or by system
-          schema:
-            type: boolean
-        - name: source
-          in: query
-          description: Job sources to filter jobs by
-          schema:
-            type: array
-            items:
-              type: string
-        - name: startTime
-          in: query
-          description: Job start timestamp range to filter jobs by
-          schema:
-            type: array
-            items:
-              type: string
-              format: date-time
-        - name: endTime
-          in: query
-          description: Job end timestamp range to filter jobs by
-          schema:
-            type: array
-            items:
-              type: string
-              format: date-time
+        - $ref: "#/components/parameters/trait_pageable_offset"
+        - $ref: "#/components/parameters/trait_pageable_limit"
+        - $ref: "#/components/parameters/trait_queryable_query"
       responses:
         "200":
           description: Jobs successfully retrieved
@@ -181,6 +137,32 @@ components:
     UUID:
       type: string
       format: uuid
+  parameters:
+    trait_queryable_query:
+      name: query
+      in: query
+      description: A query string to filter rules based on matching criteria in fields.
+      schema:
+        type: string
+    trait_pageable_offset:
+      name: offset
+      in: query
+      description: Skip over a number of elements by specifying an offset value for
+        the query
+      schema:
+        default: 0
+        minimum: 0
+        maximum: 2147483647
+        type: integer
+    trait_pageable_limit:
+      name: limit
+      in: query
+      description: Limit the number of elements returned in the response
+      schema:
+        default: 10
+        minimum: 0
+        maximum: 2147483647
+        type: integer
   examples:
     error:
       value:
