@@ -18,6 +18,10 @@
           "type": "string"
         }
       }
-    }
+    },
+    "required": [
+      "daysOutstanding",
+      "patronGroups"
+    ]
   }
 }

@@ -51,6 +51,11 @@
       }
     },
     "additionalProperties": false,
-    "required": ["type"]
+    "required": [
+      "type",
+      "exportTypeSpecificParameters",
+      "scheduleFrequency",
+      "schedulePeriod"
+    ]
   }
 }
