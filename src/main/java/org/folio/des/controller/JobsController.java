@@ -6,7 +6,9 @@ import org.folio.des.repository.IJobRepository;
 import org.folio.des.rest.resource.JobsApi;
 import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobExecutionService;
+import org.folio.des.service.JobService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,18 +25,19 @@ public class JobsController implements JobsApi {
 
   private final ModelMapper modelMapper = new ModelMapper();
   private final IJobRepository jobRepository;
+  private final JobService jobService;
   private final ExportConfigService exportConfigService;
   private final JobExecutionService jobExecutionService;
 
   @Override
   public ResponseEntity<Job> getJobById(UUID id) {
-    return null;
+    return new ResponseEntity<>(jobService.get(id), HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<JobCollection> getJobs(@Min(0) @Max(2147483647) @Valid Integer offset,
       @Min(0) @Max(2147483647) @Valid Integer limit, @Valid String query) {
-    return null;
+    return new ResponseEntity<>(jobService.get(offset, limit, query), HttpStatus.OK);
   }
 
   @Override
