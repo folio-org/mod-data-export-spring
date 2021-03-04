@@ -1,0 +1,99 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="MODEXPS-1@@create-pgcrypto-extension" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA public;
+        </sql>
+    </changeSet>
+
+    <changeSet id="MODEXPS-1@@create-export-type-enum" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE TYPE ExportType as ENUM ('CIRCULATION_LOG', 'BURSAR_FEES_FINES');
+        </sql>
+    </changeSet>
+    <changeSet id="MODEXPS-1@@create-export-type-enum-cast" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE CAST (character varying as ExportType) WITH INOUT AS IMPLICIT;
+        </sql>
+    </changeSet>
+
+    <changeSet id="MODEXPS-1@@create-job-status-enum" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE TYPE JobStatus as ENUM ('SCHEDULED', 'IN_PROGRESS', 'SUCCESSFUL', 'FAILED');
+        </sql>
+    </changeSet>
+    <changeSet id="MODEXPS-1@@create-job-status-enum-cast" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE CAST (character varying as JobStatus) WITH INOUT AS IMPLICIT;
+        </sql>
+    </changeSet>
+
+    <changeSet id="MODEXPS-1@@create-batch-status-enum" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE TYPE BatchStatus as ENUM ('COMPLETED', 'STARTING', 'STARTED', 'STOPPING', 'STOPPED', 'FAILED', 'ABANDONED', 'UNKNOWN');
+        </sql>
+    </changeSet>
+    <changeSet id="MODEXPS-1@@create-batch-status-enum-cast" author="prokhorovalexey">
+        <sql dbms="postgresql">
+            CREATE CAST (character varying as BatchStatus) WITH INOUT AS IMPLICIT;
+        </sql>
+    </changeSet>
+
+    <changeSet id="MODEXPS-1@@create-job-table" author="prokhorovalexey">
+        <createTable tableName="job">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="pk_job" nullable="false"/>
+            </column>
+
+            <column name="name" type="varchar(100)"/>
+
+            <column name="description" type="text"/>
+
+            <column name="source" type="varchar(50)"/>
+
+            <column name="is_system_source" type="boolean"/>
+
+            <column name="type" type="ExportType">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="export_type_specific_parameters" type="jsonb">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="JobStatus" defaultValue="SCHEDULED"/>
+
+            <column name="files" type="jsonb"/>
+
+            <column name="start_time" type="timestamp"/>
+
+            <column name="end_time" type="timestamp"/>
+
+            <column name="created_date" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by_user_id" type="uuid"/>
+
+            <column name="created_by_username" type="varchar(50)"/>
+
+            <column name="updated_date" type="timestamp"/>
+
+            <column name="updated_by_user_id" type="uuid"/>
+
+            <column name="updated_by_username" type="varchar(50)"/>
+
+            <column name="output_format" type="varchar(50)"/>
+
+            <column name="error_details" type="text"/>
+
+            <column name="batch_status" type="BatchStatus"/>
+
+            <column name="exit_status" type="jsonb"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

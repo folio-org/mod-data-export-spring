@@ -14,7 +14,7 @@ public class JobExecutionService {
   private final KafkaTemplate<String, StartJobCommandDto> kafkaTemplate;
 
   public void startJob(StartJobCommandDto startJobCommand) {
-    this.kafkaTemplate.send(
-        DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME, startJobCommand.getId().toString(), startJobCommand);
+    this.kafkaTemplate.send(DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME, startJobCommand.getId().toString(), startJobCommand);
   }
+
 }
