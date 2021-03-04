@@ -7,6 +7,7 @@ import org.folio.des.rest.resource.JobsApi;
 import org.folio.des.service.JobService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -15,6 +16,7 @@ import javax.validation.constraints.Min;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/data-export-spring")
 @RequiredArgsConstructor
 public class JobsController implements JobsApi {
 

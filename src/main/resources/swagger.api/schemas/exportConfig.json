@@ -54,7 +54,6 @@
     "required": [
       "type",
       "exportTypeSpecificParameters",
-      "scheduleFrequency",
       "schedulePeriod"
     ]
   }

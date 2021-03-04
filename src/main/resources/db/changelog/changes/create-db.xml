@@ -34,8 +34,7 @@
 
     <changeSet id="MODEXPS-1@@create-batch-status-enum" author="prokhorovalexey">
         <sql dbms="postgresql">
-            CREATE TYPE BatchStatus as ENUM ('COMPLETED', 'STARTING', 'STARTED', 'STOPPING', 'STOPPED', 'FAILED', 'ABANDONED',
-            'UNKNOWN');
+            CREATE TYPE BatchStatus as ENUM ('COMPLETED', 'STARTING', 'STARTED', 'STOPPING', 'STOPPED', 'FAILED', 'ABANDONED', 'UNKNOWN');
         </sql>
     </changeSet>
     <changeSet id="MODEXPS-1@@create-batch-status-enum-cast" author="prokhorovalexey">
@@ -45,9 +44,9 @@
     </changeSet>
 
     <changeSet id="MODEXPS-1@@create-job-table" author="prokhorovalexey">
-        <createTable tableName="record_creation_status">
+        <createTable tableName="job">
             <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
-                <constraints primaryKey="true" primaryKeyName="pk_record_creation_status" nullable="false"/>
+                <constraints primaryKey="true" primaryKeyName="pk_job" nullable="false"/>
             </column>
 
             <column name="name" type="varchar(100)"/>

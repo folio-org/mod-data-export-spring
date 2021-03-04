@@ -7,11 +7,13 @@ import org.folio.des.rest.resource.ConfigsApi;
 import org.folio.des.service.ExportConfigService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
 @RestController
+@RequestMapping("/data-export-spring")
 @RequiredArgsConstructor
 public class ConfigsController implements ConfigsApi {
 
