@@ -29,14 +29,18 @@ public class ExportConfigServiceImpl implements ExportConfigService {
 
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
+    log.info("Putting {} {}.", configId, exportConfig);
     ConfigModel config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
+    log.info("Put {} {}.", configId, config);
   }
 
   @Override
   public ConfigModel postConfig(ExportConfig exportConfig) {
-    ConfigModel config = createConfigModel(exportConfig);
-    return client.postConfiguration(config);
+    log.info("Posting {}.", exportConfig);
+    ConfigModel config = client.postConfiguration(createConfigModel(exportConfig));
+    log.info("Posted {}.", config);
+    return config;
   }
 
   @SneakyThrows

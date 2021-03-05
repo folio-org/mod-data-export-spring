@@ -7,6 +7,6 @@ public class BaseJobDto {
 
   private String name;
   private String description;
-  private ExportType exportType;
+  private ExportType type;
 
 }
