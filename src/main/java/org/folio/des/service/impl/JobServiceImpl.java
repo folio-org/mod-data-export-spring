@@ -47,33 +47,37 @@ public class JobServiceImpl implements JobService {
   @Override
   public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto) {
     log.info("Upserting {}.", jobDto);
-    Job job = dtoToEntity(jobDto);
+    Job result = dtoToEntity(jobDto);
 
-    if (StringUtils.isBlank(job.getName())) {
-      job.setName("Job #TBD");
+    if (StringUtils.isBlank(result.getName())) {
+      result.setName("Job #TBD");
     }
-    if (job.getIsSystemSource() == null) {
-      job.setIsSystemSource(false);
+    if (result.getIsSystemSource() == null) {
+      result.setIsSystemSource(false);
     }
-    if (job.getStatus() == null) {
-      job.setStatus(JobStatus.SCHEDULED);
+    if (result.getStatus() == null) {
+      result.setStatus(JobStatus.SCHEDULED);
     }
     Date now = new Date();
-    if (job.getCreatedDate() == null) {
-      job.setCreatedDate(now);
+    if (result.getCreatedDate() == null) {
+      result.setCreatedDate(now);
     }
-    job.setUpdatedDate(now);
-    if (job.getBatchStatus() != null) {
-      job.setBatchStatus(BatchStatus.UNKNOWN);
+    result.setUpdatedDate(now);
+    if (result.getBatchStatus() != null) {
+      result.setBatchStatus(BatchStatus.UNKNOWN);
     }
-    if (job.getExitStatus() != null) {
-      job.setExitStatus(ExitStatus.UNKNOWN);
+    if (result.getExitStatus() != null) {
+      result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    jobExecutionService.startJob(prepareStartJobCommand(job));
+    StartJobCommandDto startJobCommand = prepareStartJobCommand(result);
 
-    Job result = repository.save(job);
+    result = repository.save(result);
     log.info("Upserted {}.", result);
+
+    startJobCommand.setId(result.getId());
+    jobExecutionService.startJob(startJobCommand);
+
     return entityToDto(result);
   }
 
@@ -85,7 +89,7 @@ public class JobServiceImpl implements JobService {
   private StartJobCommandDto prepareStartJobCommand(Job job) {
     if (job.getType() == ExportType.BURSAR_FEES_FINES && job.getExportTypeSpecificParameters().getBursarFeeFines() == null) {
       throw new IllegalArgumentException(
-          String.format("Job of %s type should contain %s parameters", job.getType(), BursarFeeFines.class.getSimpleName()));
+          String.format("%s of %s type should contain %s parameters", job, job.getType(), BursarFeeFines.class.getSimpleName()));
     }
 
     StartJobCommandDto result = new StartJobCommandDto();
