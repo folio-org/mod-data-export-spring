@@ -22,6 +22,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
 
+  private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
+  static {
+    OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Cornell Fees & Fines Bursar Report");
+    OUTPUT_FORMATS.put(ExportType.CIRCULATION_LOG, "Comma-Separated Values (CSV)");
+  }
+
   private final JobExecutionService jobExecutionService;
   private final JobRepository repository;
 
@@ -62,10 +68,13 @@ public class JobServiceImpl implements JobService {
       result.setCreatedDate(now);
     }
     result.setUpdatedDate(now);
-    if (result.getBatchStatus() != null) {
+    if (StringUtils.isBlank(result.getOutputFormat())) {
+      result.setOutputFormat(OUTPUT_FORMATS.get(result.getType()));
+    }
+    if (result.getBatchStatus() == null) {
       result.setBatchStatus(BatchStatus.UNKNOWN);
     }
-    if (result.getExitStatus() != null) {
+    if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
