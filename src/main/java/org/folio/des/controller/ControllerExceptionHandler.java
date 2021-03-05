@@ -18,7 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 @Log4j2
-public class DefaultExceptionHandler {
+public class ControllerExceptionHandler {
 
   @ExceptionHandler({ IllegalArgumentException.class, javax.validation.ConstraintViolationException.class,
       HttpMessageNotReadableException.class, MissingServletRequestParameterException.class,
