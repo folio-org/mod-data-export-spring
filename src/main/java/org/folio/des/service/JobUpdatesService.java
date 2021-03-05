@@ -8,6 +8,7 @@ import org.folio.des.repository.JobRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -21,20 +22,34 @@ public class JobUpdatesService {
 
   @KafkaListener(topics = { DATA_EXPORT_JOB_EXECUTION_UPDATES_TOPIC_NAME })
   public void receiveJobExecutionUpdate(JobExecutionUpdateDto jobExecutionUpdate) {
+    log.info("Received {}.", jobExecutionUpdate);
+
     Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getJobId());
     if (jobOptional.isEmpty()) {
-      log.error("Got update for unknown job {}", jobExecutionUpdate.getJobId());
+      log.error("Update for unknown job {}.", jobExecutionUpdate.getJobId());
       return;
     }
     Job job = jobOptional.get();
 
-    job.setBatchStatus(jobExecutionUpdate.getStatus());
-    job.setStartTime(jobExecutionUpdate.getStartTime());
-    job.setCreatedDate(jobExecutionUpdate.getCreateTime());
-    job.setEndTime(jobExecutionUpdate.getEndTime());
-    job.setUpdatedDate(jobExecutionUpdate.getLastUpdated());
+    boolean changed = false;
+    if (job.getBatchStatus() != jobExecutionUpdate.getStatus()) {
+      job.setBatchStatus(jobExecutionUpdate.getStatus());
+      changed = true;
+    }
+    if (jobExecutionUpdate.getStartTime() != null && !jobExecutionUpdate.getStartTime().equals(job.getStartTime())) {
+      job.setStartTime(jobExecutionUpdate.getStartTime());
+      changed = true;
+    }
+    if (jobExecutionUpdate.getEndTime() != null && !jobExecutionUpdate.getEndTime().equals(job.getEndTime())) {
+      job.setEndTime(jobExecutionUpdate.getEndTime());
+      changed = true;
+    }
 
-    repository.save(job);
+    if (changed) {
+      job.setUpdatedDate(new Date());
+      job = repository.save(job);
+      log.info("Updated {}.", job);
+    }
   }
 
 }
