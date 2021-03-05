@@ -23,22 +23,22 @@ paths:
         "400":
           description:
             Bad request, e.g. malformed request body or query parameter.
-            Details of the error (e.g. name of the parameter or line/character number
+            Details of the errors (e.g. name of the parameter or line/character number
             with malformed data) provided in the response.
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
         "500":
-          description: Internal server error, e.g. due to misconfiguration
+          description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
     post:
       description: Create or update a job
       operationId: upsertJob
@@ -60,17 +60,17 @@ paths:
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
         "500":
-          description: Internal server error, e.g. due to misconfiguration
+          description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
       requestBody:
         content:
           application/json:
@@ -98,30 +98,30 @@ paths:
         "400":
           description:
             Bad request, e.g. malformed request body or query parameter.
-            Details of the error (e.g. name of the parameter or line/character number
+            Details of the errors (e.g. name of the parameter or line/character number
             with malformed data) provided in the response.
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
         "404":
           description: Job with a given ID not found
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
         "500":
-          description: Internal server error, e.g. due to misconfiguration
+          description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
               example:
-                $ref: "#/components/examples/error"
+                $ref: "#/components/examples/errors"
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/errors"
 components:
   schemas:
     jobStatus:
@@ -132,8 +132,8 @@ components:
       $ref: 'schemas/job.json#/Job'
     jobCollection:
       $ref: 'schemas/jobCollection.json#/JobCollection'
-    error:
-      $ref: 'schemas/common/error.json#/Error'
+    errors:
+      $ref: 'schemas/common/errors.json#/Errors'
     UUID:
       type: string
       format: uuid
@@ -164,6 +164,6 @@ components:
         maximum: 2147483647
         type: integer
   examples:
-    error:
+    errors:
       value:
-        $ref: 'examples/error.sample'
+        $ref: 'examples/errors.sample'

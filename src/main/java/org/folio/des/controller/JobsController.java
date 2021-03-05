@@ -20,22 +20,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobsController implements JobsApi {
 
-  private final JobService jobService;
+  private final JobService service;
 
   @Override
   public ResponseEntity<Job> getJobById(UUID id) {
-    return new ResponseEntity<>(jobService.get(id), HttpStatus.OK);
+    return ResponseEntity.ok(service.get(id));
   }
 
   @Override
   public ResponseEntity<JobCollection> getJobs(@Min(0) @Max(2147483647) @Valid Integer offset,
       @Min(0) @Max(2147483647) @Valid Integer limit, @Valid String query) {
-    return new ResponseEntity<>(jobService.get(offset, limit, query), HttpStatus.OK);
+    return ResponseEntity.ok(service.get(offset, limit, query));
   }
 
   @Override
   public ResponseEntity<Job> upsertJob(@Valid Job job) {
-    return ResponseEntity.ok(jobService.upsert(job));
+    return new ResponseEntity<>(service.upsert(job), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
   }
 
 }

@@ -7,6 +7,8 @@ servers:
 paths:
   /configs:
     get:
+      description: Get a list of data export configurations
+      operationId: getExportConfigs
       responses:
         '200':
           description: ''
@@ -15,15 +17,22 @@ paths:
               schema:
                 $ref: "#/components/schemas/exportConfigCollection"
         '500':
-          description: Internal server error
+          description: Internal server errors, e.g. due to misconfiguration
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Internal server error
-      description: Get a list of data export configurations
-      operationId: getExportConfigs
+                $ref: "#/components/schemas/errors"
     post:
+      description: Add an export configuration
+      operationId: postExportConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/exportConfig"
+        required: true
       responses:
         '201':
           description: ''
@@ -35,27 +44,35 @@ paths:
         '400':
           description: Bad request
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Bad request
+                $ref: "#/components/schemas/errors"
         '500':
-          description: Internal server error
+          description: Internal server errors, e.g. due to misconfiguration
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Internal server error
-      description: Add an export configuration
-      operationId: postExportConfig
+                $ref: "#/components/schemas/errors"
+  /configs/{id}:
+    put:
+      description: Change an export configuration
+      operationId: putExportConfig
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/exportConfig"
         required: true
-  /configs/{id}:
-    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: ''
@@ -67,41 +84,36 @@ paths:
         '400':
           description: Bad request
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Bad request
+                $ref: "#/components/schemas/errors"
         '404':
           description: Export config not found
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Rule not found
+                $ref: "#/components/schemas/errors"
         '500':
-          description: Internal server error
+          description: Internal server errors, e.g. due to misconfiguration
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Internal server error
-      description: Change an export configuration
-      operationId: putExportConfig
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/exportConfig"
-        required: true
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+                $ref: "#/components/schemas/errors"
 components:
   schemas:
     exportConfig:
       $ref: 'schemas/exportConfig.json#/ExportConfig'
     exportConfigCollection:
       $ref: 'schemas/exportConfigCollection.json#/ExportConfigCollection'
+    errors:
+      $ref: 'schemas/common/errors.json#/Errors'
+  examples:
+    errors:
+      value:
+        $ref: 'examples/errors.sample'
