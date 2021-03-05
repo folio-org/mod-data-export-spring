@@ -17,23 +17,22 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class ConfigsController implements ConfigsApi {
 
-  private final ExportConfigService configService;
+  private final ExportConfigService service;
 
   @Override
   public ResponseEntity<ExportConfigCollection> getExportConfigs() {
-    var configs = configService.getConfigCollection();
-    return new ResponseEntity<>(configs, HttpStatus.OK);
+    return ResponseEntity.ok(service.getConfigCollection());
   }
 
   @Override
   public ResponseEntity<String> postExportConfig(@Valid ExportConfig exportConfig) {
-    configService.postConfig(exportConfig);
-    return ResponseEntity.ok("Export configuration added");
+    service.postConfig(exportConfig);
+    return new ResponseEntity<>("Export configuration added", HttpStatus.CREATED);
   }
 
   @Override
   public ResponseEntity<String> putExportConfig(String configId, @Valid ExportConfig exportConfig) {
-    configService.updateConfig(configId, exportConfig);
+    service.updateConfig(configId, exportConfig);
     return ResponseEntity.ok("Export configuration updated");
   }
 

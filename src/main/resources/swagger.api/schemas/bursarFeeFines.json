@@ -10,13 +10,16 @@
       },
       "daysOutstanding": {
         "type": "integer",
+        "minimum": 0,
         "description": "Days outstanding"
       },
       "patronGroups": {
         "type": "array",
         "items": {
-          "type": "string"
-        }
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1
       }
     },
     "required": [

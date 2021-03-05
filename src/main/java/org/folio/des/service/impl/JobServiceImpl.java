@@ -12,6 +12,7 @@ import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,12 +36,10 @@ public class JobServiceImpl implements JobService {
 
   @Override
   public JobCollection get(Integer offset, Integer limit, String query) {
-    List<org.folio.des.domain.dto.Job> jobDtos = repository.findAll(new OffsetRequest(offset, limit))
-        .map(JobServiceImpl::entityToDto)
-        .getContent();
+    Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
     JobCollection result = new JobCollection();
-    result.setJobRecords(jobDtos);
-    result.setTotalRecords(jobDtos.size());
+    result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
+    result.setTotalRecords((int) page.getTotalElements());
     return result;
   }
 
