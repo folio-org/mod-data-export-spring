@@ -62,9 +62,7 @@ public class JobServiceImpl implements JobService {
     if (job.getCreatedDate() == null) {
       job.setCreatedDate(now);
     }
-    if (job.getUpdatedDate() == null) {
-      job.setUpdatedDate(now);
-    }
+    job.setUpdatedDate(now);
     if (job.getBatchStatus() != null) {
       job.setBatchStatus(BatchStatus.UNKNOWN);
     }

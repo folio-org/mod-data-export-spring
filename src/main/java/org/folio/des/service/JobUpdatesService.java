@@ -32,7 +32,7 @@ public class JobUpdatesService {
     Job job = jobOptional.get();
 
     boolean changed = false;
-    if (job.getBatchStatus() != jobExecutionUpdate.getStatus()) {
+    if (jobExecutionUpdate.getStatus() != null && jobExecutionUpdate.getStatus() != job.getBatchStatus()) {
       job.setBatchStatus(jobExecutionUpdate.getStatus());
       changed = true;
     }
