@@ -1,5 +1,10 @@
 folio:
+  okapi:
+    url: http://localhost:9130
   tenant:
+    name: diku
+    username: diku_admin
+    password: admin
     validation:
       enabled: true
 server:
@@ -37,6 +42,10 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
     default-property-inclusion: non_empty
+  datasource:
+    username: folio_admin
+    password: folio_admin
+    url: jdbc:postgresql://localhost:5433/okapi_modules
 management:
   endpoints:
     web:
