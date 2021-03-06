@@ -10,10 +10,8 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.domain.dto.ConfigModel;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
-import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.service.ExportConfigService;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -27,19 +25,12 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   private static final String CONFIG_DESCRIPTION = "Data export configuration parameters";
   private final ConfigurationClient client;
   private final ObjectMapper objectMapper;
-  private BursarExportScheduler scheduler;
-
-  @Autowired
-  public void setScheduler(BursarExportScheduler scheduler) {
-    this.scheduler = scheduler;
-  }
 
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("Putting {} {}.", configId, exportConfig);
     ConfigModel config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
-    scheduler.updateTasks(exportConfig);
     log.info("Put {} {}.", configId, config);
   }
 
@@ -47,9 +38,6 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   public ConfigModel postConfig(ExportConfig exportConfig) {
     log.info("Posting {}.", exportConfig);
     ConfigModel config = client.postConfiguration(createConfigModel(exportConfig));
-    if (config != null) {
-      scheduler.updateTasks(exportConfig);
-    }
     log.info("Posted {}.", config);
     return config;
   }

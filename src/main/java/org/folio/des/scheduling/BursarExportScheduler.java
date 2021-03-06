@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.client.AuthClient;
@@ -52,10 +51,13 @@ public class BursarExportScheduler implements SchedulingConfigurer {
   @Value("${folio.okapi.url}")
   private String okapiUrl;
 
-  @PostConstruct
-  public void init() {
+  private void initConfiguration() {
     authorizeWithToken();
 
+    fetchConfiguration();
+  }
+
+  private void fetchConfiguration() {
     Optional<ExportConfig> savedConfig = configService.getConfig();
     savedConfig.ifPresent(trigger::setConfig);
     savedConfig.ifPresent(exportConfig -> scheduledJob = defaultBursarJob(exportConfig));
@@ -97,6 +99,7 @@ public class BursarExportScheduler implements SchedulingConfigurer {
   @Override
   public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
     registrar = taskRegistrar;
+    initConfiguration();
     taskRegistrar.setScheduler(taskExecutor());
     taskRegistrar.addTriggerTask(() -> jobService.upsert(scheduledJob), trigger);
   }
