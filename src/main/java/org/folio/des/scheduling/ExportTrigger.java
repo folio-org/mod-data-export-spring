@@ -1,18 +1,5 @@
 package org.folio.des.scheduling;
 
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Setter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -21,8 +8,16 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.stereotype.Component;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
-public class BursarExportTrigger implements Trigger {
+public class ExportTrigger implements Trigger {
 
   @Setter
   private ExportConfig config;
@@ -34,25 +29,27 @@ public class BursarExportTrigger implements Trigger {
   }
 
   private Date getNextTime(Date lastActualExecutionTime) {
-    if (config == null) return null;
+    if (config == null)
+      return null;
     SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
-    if (schedulePeriod == SchedulePeriodEnum.NONE) return null;
-    if (config.getExportTypeSpecificParameters() == null) return null;
-    if (config.getExportTypeSpecificParameters().getBursarFeeFines() == null) return null;
+    if (schedulePeriod == SchedulePeriodEnum.NONE)
+      return null;
+    if (config.getExportTypeSpecificParameters() == null)
+      return null;
 
     Date nextExecutionTime = null;
     Integer scheduleFrequency = config.getScheduleFrequency();
 
     switch (schedulePeriod) {
-      case DAY:
-        nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-        break;
-      case WEEK:
-        nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-        break;
-      case HOUR:
-        nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-        break;
+    case DAY:
+      nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
+      break;
+    case WEEK:
+      nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
+      break;
+    case HOUR:
+      nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+      break;
     }
 
     return nextExecutionTime;
@@ -68,10 +65,9 @@ public class BursarExportTrigger implements Trigger {
       return Date.from(offsetDateTime.toInstant());
 
     } else {
-      OffsetDateTime lastExecutionOffsetDateTime =
-          OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(), ZoneId.systemDefault());
-      Instant instant =
-          findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
+      OffsetDateTime lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
+          ZoneId.systemDefault());
+      Instant instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
       return Date.from(instant);
     }
   }
@@ -93,10 +89,7 @@ public class BursarExportTrigger implements Trigger {
 
   private List<DayOfWeek> normalizeDayOfWeek() {
     List<WeekDaysEnum> weekDays = config.getWeekDays();
-    return weekDays.stream()
-        .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString()))
-        .sorted()
-        .collect(Collectors.toList());
+    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
   }
 
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
@@ -125,4 +118,5 @@ public class BursarExportTrigger implements Trigger {
       return Date.from(newScheduledDate.toInstant(time.getOffset()));
     }
   }
+
 }

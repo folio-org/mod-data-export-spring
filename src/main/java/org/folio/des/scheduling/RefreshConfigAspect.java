@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RefreshConfigAspect {
 
-  private final BursarExportScheduler scheduler;
+  private final ExportScheduler scheduler;
 
   @After("(execution(* org.folio.des.service.ExportConfigService.updateConfig(..)) && args(..,config))")
   public void refreshAfterUpdate(ExportConfig config) {

@@ -12,6 +12,8 @@ import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.util.*;
 public class JobServiceImpl implements JobService {
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
+
   static {
     OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Cornell Fees & Fines Bursar Report");
     OUTPUT_FORMATS.put(ExportType.CIRCULATION_LOG, "Comma-Separated Values (CSV)");
@@ -78,7 +81,7 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    StartJobCommandDto startJobCommand = prepareStartJobCommand(result);
+    StartJobCommand startJobCommand = prepareStartJobCommand(result);
 
     result = repository.save(result);
     log.info("Upserted {}.", result);
@@ -94,27 +97,27 @@ public class JobServiceImpl implements JobService {
     repository.deleteById(id);
   }
 
-  private StartJobCommandDto prepareStartJobCommand(Job job) {
+  private StartJobCommand prepareStartJobCommand(Job job) {
     if (job.getType() == ExportType.BURSAR_FEES_FINES && job.getExportTypeSpecificParameters().getBursarFeeFines() == null) {
       throw new IllegalArgumentException(
           String.format("%s of %s type should contain %s parameters", job, job.getType(), BursarFeeFines.class.getSimpleName()));
     }
 
-    StartJobCommandDto result = new StartJobCommandDto();
+    StartJobCommand result = new StartJobCommand();
     result.setId(job.getId());
     result.setName(job.getName());
     result.setDescription(job.getDescription());
     result.setType(job.getType());
 
-    Map<String, JobParameterDto> params = new HashMap<>();
+    Map<String, JobParameter> params = new HashMap<>();
     if (job.getType() == ExportType.CIRCULATION_LOG) {
-      params.put("query", new JobParameterDto(job.getExportTypeSpecificParameters().getQuery()));
+      params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
     } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
       BursarFeeFines bursarFeeFines = job.getExportTypeSpecificParameters().getBursarFeeFines();
-      params.put("daysOutstanding", new JobParameterDto((long) bursarFeeFines.getDaysOutstanding()));
-      params.put("patronGroups", new JobParameterDto(String.join(",", bursarFeeFines.getPatronGroups())));
+      params.put("daysOutstanding", new JobParameter((long) bursarFeeFines.getDaysOutstanding()));
+      params.put("patronGroups", new JobParameter(String.join(",", bursarFeeFines.getPatronGroups())));
     }
-    result.setJobInputParameters(params);
+    result.setJobParameters(new JobParameters(params));
 
     return result;
   }
