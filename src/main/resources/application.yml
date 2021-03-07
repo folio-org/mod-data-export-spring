@@ -1,6 +1,6 @@
 folio:
   okapi:
-    url: http://localhost:9130
+    url: ${OKAPI_URL:http://localhost:9130}
   tenant:
     name: diku
     username: diku_admin
@@ -43,9 +43,9 @@ spring:
       fail-on-unknown-properties: false
     default-property-inclusion: non_empty
   datasource:
-    username: folio_admin
-    password: folio_admin
-    url: jdbc:postgresql://localhost:5433/okapi_modules
+    username: ${DB_USERNAME:folio_admin}
+    password: ${DB_PASSWORD:folio_admin}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_DATABASE:okapi_modules}
 management:
   endpoints:
     web:
