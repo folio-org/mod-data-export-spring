@@ -1,18 +1,10 @@
 package org.folio.des.scheduling;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.client.AuthClient;
 import org.folio.des.domain.dto.AuthCredentials;
 import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobService;
@@ -28,15 +20,19 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Component;
 
+import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 @Log4j2
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
-public class BursarExportScheduler implements SchedulingConfigurer {
+public class ExportScheduler implements SchedulingConfigurer {
 
   private ScheduledTaskRegistrar registrar;
   private Job scheduledJob;
-  private final BursarExportTrigger trigger;
+  private final ExportTrigger trigger;
   private final AuthClient authClient;
   private final FolioModuleMetadata folioModuleMetadata;
   private final JobService jobService;
@@ -60,7 +56,7 @@ public class BursarExportScheduler implements SchedulingConfigurer {
   private void fetchConfiguration() {
     Optional<ExportConfig> savedConfig = configService.getConfig();
     savedConfig.ifPresent(trigger::setConfig);
-    savedConfig.ifPresent(exportConfig -> scheduledJob = defaultBursarJob(exportConfig));
+    savedConfig.ifPresent(exportConfig -> scheduledJob = defaultJob(exportConfig));
   }
 
   private void authorizeWithToken() {
@@ -86,10 +82,8 @@ public class BursarExportScheduler implements SchedulingConfigurer {
   }
 
   private void initializeFolioScope(Map<String, Collection<String>> okapiHeaders) {
-    var defaultFolioExecutionContext =
-        new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
-        defaultFolioExecutionContext);
+    var defaultFolioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
+    FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(defaultFolioExecutionContext);
   }
 
   private Executor taskExecutor() {
@@ -112,17 +106,18 @@ public class BursarExportScheduler implements SchedulingConfigurer {
     }
   }
 
-  private Job defaultBursarJob(ExportConfig exportConfig) {
+  private Job defaultJob(ExportConfig exportConfig) {
     Job job = new Job();
-    job.setType(ExportType.BURSAR_FEES_FINES);
+    job.setType(exportConfig.getType());
     var exportTypeSpecificParameters = exportConfig.getExportTypeSpecificParameters();
 
     if (exportTypeSpecificParameters == null) {
-      log.error("There is no configuration for scheduled bursar job");
+      log.error("There is no configuration for scheduled job");
       return job;
     }
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 
     return job;
   }
+
 }

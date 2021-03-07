@@ -43,10 +43,6 @@ spring:
       properties:
         interceptor:
           classes: org.folio.des.config.OkapiProducerInterceptor
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: false
-    default-property-inclusion: non_empty
   datasource:
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}

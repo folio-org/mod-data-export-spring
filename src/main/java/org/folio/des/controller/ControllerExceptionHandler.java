@@ -1,7 +1,6 @@
 package org.folio.des.controller;
 
 import feign.FeignException;
-import feign.Util;
 import lombok.extern.log4j.Log4j2;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.response.ResponseErrors;
@@ -22,7 +21,7 @@ public class ControllerExceptionHandler {
 
   @ExceptionHandler({ IllegalArgumentException.class, javax.validation.ConstraintViolationException.class,
       HttpMessageNotReadableException.class, MissingServletRequestParameterException.class,
-      MethodArgumentTypeMismatchException.class })
+      MethodArgumentTypeMismatchException.class, FeignException.class })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseErrors handleIllegalArgumentException(Exception exception) {
     log.error(exception.getMessage(), exception);
@@ -44,16 +43,6 @@ public class ControllerExceptionHandler {
     }
     log.error(exception.getMessage(), exception);
     return ErrorUtility.buildError(exception, HttpStatus.BAD_REQUEST);
-  }
-
-  @ExceptionHandler(FeignException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseErrors handleFeignStatusException(FeignException exception) {
-    String message = exception.responseBody()
-        .map(byteBuffer -> new String(byteBuffer.array(), Util.UTF_8))
-        .orElse(exception.getLocalizedMessage());
-    log.error(message, exception);
-    return ErrorUtility.buildError(message, exception.getClass().getSimpleName(), HttpStatus.BAD_REQUEST.toString());
   }
 
   @ExceptionHandler(NotFoundException.class)
