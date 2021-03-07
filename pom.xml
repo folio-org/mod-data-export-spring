@@ -35,7 +35,6 @@
         <folio-spring-base.version>1.0.2</folio-spring-base.version>
         <folio-spring-tenant.version>1.0.0</folio-spring-tenant.version>
 
-        <commons-io.version>2.8.0</commons-io.version>
         <json.version>20200518</json.version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
@@ -85,6 +84,12 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>${json.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
         </dependency>
 
         <dependency>
@@ -193,7 +198,8 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection</modelsToGenerate>
+                            <modelsToGenerate>Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection
+                            </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>

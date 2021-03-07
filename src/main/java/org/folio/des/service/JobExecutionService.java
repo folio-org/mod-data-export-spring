@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class JobExecutionService {
 
-  private static final String DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME = "dataExportJobCommandsTopic";
+  public static final String DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME = "dataExportJobCommandsTopic";
 
   private final KafkaTemplate<String, StartJobCommandDto> kafkaTemplate;
 
   public void startJob(StartJobCommandDto startJobCommand) {
-    log.info("Starting {}.", startJobCommand);
+    log.info("Sending {}.", startJobCommand);
     kafkaTemplate.send(DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME, startJobCommand.getId().toString(), startJobCommand);
-    log.info("Started {}.", startJobCommand);
+    log.info("Sent job {} start.", startJobCommand.getId());
   }
 
 }
