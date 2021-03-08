@@ -21,7 +21,7 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
-    open-in-view: true
+    open-in-view: false
   liquibase:
     changeLog: classpath:db/changelog/changelog-master.xml
     enabled: true
@@ -32,17 +32,11 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring:
-          json:
-            trusted:
-              packages: "*"
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        interceptor:
-          classes: org.folio.des.config.OkapiProducerInterceptor
+        interceptor.classes: org.folio.des.config.OkapiProducerInterceptor
   datasource:
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}

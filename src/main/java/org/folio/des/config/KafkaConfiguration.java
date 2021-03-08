@@ -2,19 +2,20 @@ package org.folio.des.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.kafka.DefaultKafkaConsumerFactoryCustomizer;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 @RequiredArgsConstructor
-public class KafkaConfiguration {
+public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer {
 
   private final ObjectMapper objectMapper;
 
-  @Bean
-  public JsonDeserializer<?> jsonDeserializer() {
-    return new JsonDeserializer<>(objectMapper);
+  @Override
+  public void customize(DefaultKafkaConsumerFactory<?, ?> consumerFactory) {
+    consumerFactory.setValueDeserializer(((JsonDeserializer) new JsonDeserializer<>(objectMapper)).trustedPackages("*"));
   }
 
 }
