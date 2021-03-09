@@ -154,7 +154,7 @@
       },
       {
         "name": "OKAPI_URL",
-        "value": "http://10.0.2.15:9130"
+        "value": "http://okapi:9130"
       },
       {
         "name": "ENV",

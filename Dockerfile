@@ -3,7 +3,6 @@ FROM folioci/alpine-jre-openjdk11:latest
 USER folio
 
 # Copy your fat jar to the container
-ENV OKAPI_URL http://10.0.2.15:9130
 ENV APP_FILE mod-data-export-spring-fat.jar
 
 # - should be a single jar file
