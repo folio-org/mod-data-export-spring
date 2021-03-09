@@ -7,6 +7,10 @@
       "id": {
         "type": "string"
       },
+      "description": {
+        "description": "Export configuration description",
+        "type": "string"
+      },
       "type": {
         "description": "Export type",
         "$ref": "exportType.json#/ExportType"

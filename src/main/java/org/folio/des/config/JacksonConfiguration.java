@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.vladmihalcea.hibernate.type.util.ObjectMapperSupplier;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,20 +18,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class JacksonConfiguration {
+public class JacksonConfiguration implements ObjectMapperSupplier {
 
-  private static final Map<String, ExitStatus> EXIT_STATUSES = new HashMap<>();
+  private static final ObjectMapper OBJECT_MAPPER;
 
   static {
-    EXIT_STATUSES.put("UNKNOWN", ExitStatus.UNKNOWN);
-    EXIT_STATUSES.put("EXECUTING", ExitStatus.EXECUTING);
-    EXIT_STATUSES.put("COMPLETED", ExitStatus.COMPLETED);
-    EXIT_STATUSES.put("NOOP", ExitStatus.NOOP);
-    EXIT_STATUSES.put("FAILED", ExitStatus.FAILED);
-    EXIT_STATUSES.put("STOPPED", ExitStatus.STOPPED);
+    OBJECT_MAPPER = new ObjectMapper().registerModule(
+        new SimpleModule().addDeserializer(ExitStatus.class, new ExitStatusDeserializer()))
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
   }
 
   static class ExitStatusDeserializer extends StdDeserializer<ExitStatus> {
+
+    private static final Map<String, ExitStatus> EXIT_STATUSES = new HashMap<>();
+
+    static {
+      EXIT_STATUSES.put("UNKNOWN", ExitStatus.UNKNOWN);
+      EXIT_STATUSES.put("EXECUTING", ExitStatus.EXECUTING);
+      EXIT_STATUSES.put("COMPLETED", ExitStatus.COMPLETED);
+      EXIT_STATUSES.put("NOOP", ExitStatus.NOOP);
+      EXIT_STATUSES.put("FAILED", ExitStatus.FAILED);
+      EXIT_STATUSES.put("STOPPED", ExitStatus.STOPPED);
+    }
 
     public ExitStatusDeserializer() {
       this(null);
@@ -49,9 +59,12 @@ public class JacksonConfiguration {
 
   @Bean
   public ObjectMapper objectMapper() {
-    return new ObjectMapper().registerModule(new SimpleModule().addDeserializer(ExitStatus.class, new ExitStatusDeserializer()))
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    return OBJECT_MAPPER;
+  }
+
+  @Override
+  public ObjectMapper get() {
+    return OBJECT_MAPPER;
   }
 
 }

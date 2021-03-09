@@ -3,11 +3,13 @@ package org.folio.des.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.*;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.JobRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
@@ -33,6 +35,8 @@ public class JobServiceImpl implements JobService {
 
   private final JobExecutionService jobExecutionService;
   private final JobRepository repository;
+  private final FolioExecutionContext context;
+  private final FolioExecutionContextHelper contextHelper;
 
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
@@ -60,8 +64,12 @@ public class JobServiceImpl implements JobService {
     if (StringUtils.isBlank(result.getName())) {
       result.setName("Job #TBD");
     }
+    String userName = contextHelper.getUserName();
+    if (StringUtils.isBlank(result.getSource())) {
+      result.setSource(userName);
+    }
     if (result.getIsSystemSource() == null) {
-      result.setIsSystemSource(false);
+      result.setIsSystemSource(StringUtils.isBlank(userName));
     }
     if (result.getStatus() == null) {
       result.setStatus(JobStatus.SCHEDULED);
@@ -70,7 +78,16 @@ public class JobServiceImpl implements JobService {
     if (result.getCreatedDate() == null) {
       result.setCreatedDate(now);
     }
+    UUID userId = contextHelper.getUserId(context);
+    if (result.getCreatedByUserId() == null) {
+      result.setCreatedByUserId(userId);
+    }
+    if (StringUtils.isBlank(result.getCreatedByUsername())) {
+      result.setCreatedByUsername(userName);
+    }
     result.setUpdatedDate(now);
+    result.setUpdatedByUserId(userId);
+    result.setUpdatedByUsername(userName);
     if (StringUtils.isBlank(result.getOutputFormat())) {
       result.setOutputFormat(OUTPUT_FORMATS.get(result.getType()));
     }
