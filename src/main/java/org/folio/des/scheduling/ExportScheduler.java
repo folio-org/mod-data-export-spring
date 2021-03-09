@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
-import org.folio.des.security.AuthtService;
+import org.folio.des.security.AuthService;
 import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobService;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -26,27 +26,17 @@ public class ExportScheduler implements SchedulingConfigurer {
   private final ExportTrigger trigger;
   private final JobService jobService;
   private final ExportConfigService configService;
-  private final AuthtService authtService;
-
-  private void fetchConfiguration() {
-    Optional<ExportConfig> savedConfig = configService.getConfig();
-    savedConfig.ifPresent(trigger::setConfig);
-    savedConfig.ifPresent(exportConfig -> scheduledJob = defaultJob(exportConfig));
-  }
-
-  private Executor taskExecutor() {
-    return Executors.newScheduledThreadPool(100);
-  }
+  private final AuthService authService;
 
   @Override
   public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
     registrar = taskRegistrar;
     taskRegistrar.setScheduler(taskExecutor());
-
+    log.info("Scheduled {}.", scheduledJob);
     taskRegistrar.addTriggerTask(
         () -> {
-          if (authtService.isTenantRegistered()) {
-            authtService.initializeFolioScope();
+          if (authService.isTenantRegistered()) {
+            authService.initializeFolioScope();
             jobService.upsert(scheduledJob);
           }
         },
@@ -83,5 +73,15 @@ public class ExportScheduler implements SchedulingConfigurer {
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 
     return job;
+  }
+
+  private void fetchConfiguration() {
+    Optional<ExportConfig> savedConfig = configService.getConfig();
+    savedConfig.ifPresent(trigger::setConfig);
+    savedConfig.ifPresent(exportConfig -> scheduledJob = defaultJob(exportConfig));
+  }
+
+  private Executor taskExecutor() {
+    return Executors.newScheduledThreadPool(100);
   }
 }

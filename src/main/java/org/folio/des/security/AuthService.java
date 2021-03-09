@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthtService {
+public class AuthService {
   private final AuthClient authClient;
   private final FolioExecutionContext folioExecutionContext;
   private final FolioExecutionContextHelper executionContextHelper;
