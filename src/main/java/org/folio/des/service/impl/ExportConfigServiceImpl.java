@@ -2,17 +2,16 @@ package org.folio.des.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.client.ConfigurationClient;
-import org.folio.des.domain.dto.ConfigModel;
-import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportConfigCollection;
+import org.folio.des.domain.dto.*;
 import org.folio.des.service.ExportConfigService;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -26,9 +25,17 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   private final ConfigurationClient client;
   private final ObjectMapper objectMapper;
 
+  public static void checkConfig(ExportType type, ExportTypeSpecificParameters exportTypeSpecificParameters) {
+    if (type == ExportType.BURSAR_FEES_FINES && exportTypeSpecificParameters.getBursarFeeFines() == null) {
+      throw new IllegalArgumentException(
+          String.format("%s type should contain %s parameters", type, BursarFeeFines.class.getSimpleName()));
+    }
+  }
+
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("Putting {} {}.", configId, exportConfig);
+    checkConfig(exportConfig.getType(), exportConfig.getExportTypeSpecificParameters());
     ConfigModel config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
     log.info("Put {} {}.", configId, config);
@@ -37,6 +44,7 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   @Override
   public ConfigModel postConfig(ExportConfig exportConfig) {
     log.info("Posting {}.", exportConfig);
+    checkConfig(exportConfig.getType(), exportConfig.getExportTypeSpecificParameters());
     ConfigModel config = client.postConfiguration(createConfigModel(exportConfig));
     log.info("Posted {}.", config);
     return config;
@@ -57,15 +65,12 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   @SneakyThrows
   @Override
   public ExportConfigCollection getConfigCollection() {
-    return getConfig()
-        .map(this::createExportConfigCollection)
-        .orElse(emptyExportConfigCollection());
+    return getConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());
   }
 
   @Override
   public Optional<ExportConfig> getConfig() {
-    final String configuration =
-        client.getConfiguration(String.format(CONFIG_QUERY, MODULE_NAME, CONFIG_NAME));
+    final String configuration = client.getConfiguration(String.format(CONFIG_QUERY, MODULE_NAME, CONFIG_NAME));
 
     final JSONObject jsonObject = new JSONObject(configuration);
     if (jsonObject.getInt("totalRecords") == 0) {
@@ -76,16 +81,12 @@ public class ExportConfigServiceImpl implements ExportConfigService {
       var config = parseExportConfig(jsonObject);
       return Optional.of(config);
     } catch (JsonProcessingException e) {
-      log.error(
-          "Can not parse configuration for module {} with config name {}",
-          MODULE_NAME,
-          CONFIG_NAME);
+      log.error("Can not parse configuration for module {} with config name {}", MODULE_NAME, CONFIG_NAME);
       return Optional.empty();
     }
   }
 
-  private ExportConfig parseExportConfig(JSONObject jsonObject)
-      throws com.fasterxml.jackson.core.JsonProcessingException {
+  private ExportConfig parseExportConfig(JSONObject jsonObject) throws com.fasterxml.jackson.core.JsonProcessingException {
     final JSONObject configs = jsonObject.getJSONArray("configs").getJSONObject(0);
     final ConfigModel configModel = objectMapper.readValue(configs.toString(), ConfigModel.class);
     final String value = configModel.getValue();
@@ -106,4 +107,5 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     configCollection.setTotalRecords(0);
     return configCollection;
   }
+
 }

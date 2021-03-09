@@ -115,10 +115,7 @@ public class JobServiceImpl implements JobService {
   }
 
   private StartJobCommand prepareStartJobCommand(Job job) {
-    if (job.getType() == ExportType.BURSAR_FEES_FINES && job.getExportTypeSpecificParameters().getBursarFeeFines() == null) {
-      throw new IllegalArgumentException(
-          String.format("%s of %s type should contain %s parameters", job, job.getType(), BursarFeeFines.class.getSimpleName()));
-    }
+    ExportConfigServiceImpl.checkConfig(job.getType(), job.getExportTypeSpecificParameters());
 
     StartJobCommand result = new StartJobCommand();
     result.setId(job.getId());

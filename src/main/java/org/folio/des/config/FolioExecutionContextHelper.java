@@ -45,7 +45,6 @@ public class FolioExecutionContextHelper {
     SecurityContext context = SecurityContextHolder.getContext();
     Authentication authentication = context == null ? null : context.getAuthentication();
     return authentication != null && !(authentication instanceof AnonymousAuthenticationToken) ? authentication.getName() : null;
-
   }
 
   public UUID getUserId(FolioExecutionContext context) {
