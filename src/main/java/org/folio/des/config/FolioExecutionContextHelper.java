@@ -37,6 +37,8 @@ public class FolioExecutionContextHelper {
     String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
     String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
     if (StringUtils.isNotBlank(tenant) && StringUtils.isNotBlank(url)) {
+      FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
+          new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
       okapiHeaders.put(XOkapiHeaders.TOKEN, authService.login(tenant, url));
       FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
           new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
