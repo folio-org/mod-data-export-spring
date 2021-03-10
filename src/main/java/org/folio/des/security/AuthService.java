@@ -29,23 +29,14 @@ public class AuthService {
 
   private Map<String, Collection<String>> okapiHeaders;
 
-  public void authorizeModuleWithSystemUser() {
+  public void storeOkapiHeaders() {
     okapiHeaders = folioExecutionContext.getOkapiHeaders();
-    AuthCredentials authDto = createCredentials();
-
-    String tenant = executionContextHelper.getHeader(folioExecutionContext, XOkapiHeaders.TENANT);
-    String okapiUrl = executionContextHelper.getHeader(folioExecutionContext, XOkapiHeaders.URL);
-
-    ResponseEntity<String> authResponse = authClient.getApiKey(tenant, okapiUrl, authDto);
-
-    HttpHeaders headers = authResponse.getHeaders();
-    List<String> token = headers.get(XOkapiHeaders.TOKEN);
-
-    okapiHeaders.put(XOkapiHeaders.TOKEN, token);
+    login();
   }
 
   public void initializeFolioScope() {
     if (isTenantRegistered() && folioExecutionContext.getTenantId() == null) {
+      login();
       executionContextHelper.init(okapiHeaders);
     }
   }
@@ -59,6 +50,18 @@ public class AuthService {
     authDto.setPassword(password);
     authDto.setUsername(username);
     return authDto;
+  }
+
+  private void login() {
+    AuthCredentials authDto = createCredentials();
+    String tenant = executionContextHelper.getHeader(folioExecutionContext, XOkapiHeaders.TENANT);
+    String okapiUrl = executionContextHelper.getHeader(folioExecutionContext, XOkapiHeaders.URL);
+
+    ResponseEntity<String> authResponse = authClient.getApiKey(tenant, okapiUrl, authDto);
+
+    HttpHeaders headers = authResponse.getHeaders();
+    List<String> token = headers.get(XOkapiHeaders.TOKEN);
+    okapiHeaders.put(XOkapiHeaders.TOKEN, token);
   }
 
 }
