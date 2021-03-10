@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
-@Log4j2
 @Component
 @EnableScheduling
+@Log4j2
 @RequiredArgsConstructor
 public class ExportScheduler implements SchedulingConfigurer {
 
@@ -34,14 +34,13 @@ public class ExportScheduler implements SchedulingConfigurer {
     registrar = taskRegistrar;
     taskRegistrar.setScheduler(Executors.newScheduledThreadPool(100));
     taskRegistrar.addTriggerTask(() -> {
-      if (authService.isTenantRegistered()) {
-        authService.initializeFolioScope();
-        jobService.upsert(scheduledJob);
-      }
+      authService.initializeFolioScope();
+      jobService.upsert(scheduledJob);
     }, trigger);
   }
 
   public void initScheduleConfiguration() {
+    authService.initializeFolioScope();
     updateTasks(fetchConfiguration());
   }
 

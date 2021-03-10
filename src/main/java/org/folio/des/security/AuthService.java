@@ -1,20 +1,22 @@
 package org.folio.des.security;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.AuthClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.AuthCredentials;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Map;
+
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -22,45 +24,43 @@ public class AuthService {
   private final FolioExecutionContext folioExecutionContext;
   private final FolioExecutionContextHelper executionContextHelper;
 
-  @Value("${folio.tenant.password}")
-  private String password;
-  @Value("${folio.tenant.username}")
+  @Value("${folio.username}")
   private String username;
+  @Value("${folio.password}")
+  private String password;
 
   private Map<String, Collection<String>> okapiHeaders;
 
   public void storeOkapiHeaders() {
+    log.info("Got OKAPI headers.");
     okapiHeaders = folioExecutionContext.getOkapiHeaders();
   }
 
   public void initializeFolioScope() {
-    if (isTenantRegistered() && folioExecutionContext.getTenantId() == null) {
+    if (okapiHeadersExist()) {
       login();
       executionContextHelper.init(okapiHeaders);
+    } else {
+      throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
     }
   }
 
-  public boolean isTenantRegistered() {
-    return okapiHeaders != null;
-  }
-
-  private AuthCredentials createCredentials() {
-    AuthCredentials authDto = new AuthCredentials();
-    authDto.setPassword(password);
-    authDto.setUsername(username);
-    return authDto;
+  public boolean okapiHeadersExist() {
+    return okapiHeaders != null && StringUtils.isNotBlank(
+        executionContextHelper.getHeader(okapiHeaders, XOkapiHeaders.TENANT)) && StringUtils.isNotBlank(
+        executionContextHelper.getHeader(okapiHeaders, XOkapiHeaders.URL));
   }
 
   private void login() {
-    AuthCredentials authDto = createCredentials();
-    String tenant = executionContextHelper.getHeader(folioExecutionContext, XOkapiHeaders.TENANT);
-    String okapiUrl = executionContextHelper.getHeader(folioExecutionContext, XOkapiHeaders.URL);
+    AuthCredentials credentials = new AuthCredentials();
+    credentials.setUsername(username);
+    credentials.setPassword(password);
 
-    ResponseEntity<String> authResponse = authClient.getApiKey(tenant, okapiUrl, authDto);
+    ResponseEntity<String> authResponse = authClient.getApiKey(executionContextHelper.getHeader(okapiHeaders, XOkapiHeaders.TENANT),
+        executionContextHelper.getHeader(okapiHeaders, XOkapiHeaders.URL), credentials);
+    log.info("Logged in as {}.", username);
 
-    HttpHeaders headers = authResponse.getHeaders();
-    List<String> token = headers.get(XOkapiHeaders.TOKEN);
-    okapiHeaders.put(XOkapiHeaders.TOKEN, token);
+    okapiHeaders.put(XOkapiHeaders.TOKEN, authResponse.getHeaders().get(XOkapiHeaders.TOKEN));
   }
 
 }
