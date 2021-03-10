@@ -31,7 +31,6 @@ public class AuthService {
 
   public void storeOkapiHeaders() {
     okapiHeaders = folioExecutionContext.getOkapiHeaders();
-    login();
   }
 
   public void initializeFolioScope() {
