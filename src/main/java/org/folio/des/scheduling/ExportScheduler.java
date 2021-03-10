@@ -2,9 +2,9 @@ package org.folio.des.scheduling;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
-import org.folio.des.security.AuthService;
 import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobService;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -24,7 +24,7 @@ public class ExportScheduler implements SchedulingConfigurer {
   private final ExportTrigger trigger;
   private final JobService jobService;
   private final ExportConfigService configService;
-  private final AuthService authService;
+  private final FolioExecutionContextHelper contextHelper;
 
   private ScheduledTaskRegistrar registrar;
   private Job scheduledJob;
@@ -34,13 +34,13 @@ public class ExportScheduler implements SchedulingConfigurer {
     registrar = taskRegistrar;
     taskRegistrar.setScheduler(Executors.newScheduledThreadPool(100));
     taskRegistrar.addTriggerTask(() -> {
-      authService.initializeFolioScope();
+      contextHelper.init();
       jobService.upsert(scheduledJob);
     }, trigger);
   }
 
   public void initScheduleConfiguration() {
-    authService.initializeFolioScope();
+    contextHelper.init();
     updateTasks(fetchConfiguration());
   }
 
