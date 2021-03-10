@@ -52,6 +52,7 @@ public class JobUpdatesService {
 
     if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
       job.setUpdatedDate(new Date());
+      log.info("Updating {}.", job);
       job = repository.save(job);
       log.info("Updated {}.", job);
     }
