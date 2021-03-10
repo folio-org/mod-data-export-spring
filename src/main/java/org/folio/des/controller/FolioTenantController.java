@@ -1,8 +1,8 @@
 package org.folio.des.controller;
 
 import lombok.extern.log4j.Log4j2;
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.scheduling.ExportScheduler;
-import org.folio.des.security.AuthService;
 import org.folio.spring.controller.TenantController;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class FolioTenantController extends TenantController {
 
+  private final FolioExecutionContextHelper contextHelper;
   private final ExportScheduler scheduler;
-  private final AuthService authService;
 
-  public FolioTenantController(TenantService baseTenantService, ExportScheduler scheduler, AuthService authService) {
+  public FolioTenantController(TenantService baseTenantService, FolioExecutionContextHelper contextHelper,
+      ExportScheduler scheduler) {
     super(baseTenantService);
+    this.contextHelper = contextHelper;
     this.scheduler = scheduler;
-    this.authService = authService;
   }
 
   @Override
@@ -31,7 +32,7 @@ public class FolioTenantController extends TenantController {
 
     if (tenantInit.getStatusCode() == HttpStatus.OK) {
       try {
-        authService.storeOkapiHeaders();
+        contextHelper.storeOkapiHeaders();
         scheduler.initScheduleConfiguration();
       } catch (Exception e) {
         log.error(e.getMessage(), e);
