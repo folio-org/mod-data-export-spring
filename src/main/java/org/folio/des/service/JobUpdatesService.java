@@ -3,10 +3,10 @@ package org.folio.des.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.JobRepository;
+import org.folio.des.security.AuthService;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -36,12 +36,12 @@ public class JobUpdatesService {
   }
 
   private final JobRepository repository;
-  private final FolioExecutionContextHelper contextHelper;
+  private final AuthService authService;
 
   @KafkaListener(topics = { DATA_EXPORT_JOB_EXECUTION_UPDATES_TOPIC_NAME })
   public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
     log.info("Received {}.", jobExecutionUpdate);
-    contextHelper.init(null);
+    authService.initializeFolioScope();
 
     Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
     if (jobOptional.isEmpty()) {

@@ -2,7 +2,6 @@ folio:
   okapi:
     url: ${OKAPI_URL:http://localhost:9130}
   tenant:
-    name: diku
     username: diku_admin
     password: admin
     validation:

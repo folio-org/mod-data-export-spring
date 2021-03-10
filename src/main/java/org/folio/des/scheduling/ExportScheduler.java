@@ -77,11 +77,17 @@ public class ExportScheduler implements SchedulingConfigurer {
 
   private void fetchConfiguration() {
     Optional<ExportConfig> savedConfig = configService.getConfig();
-    savedConfig.ifPresent(trigger::setConfig);
-    savedConfig.ifPresent(exportConfig -> scheduledJob = defaultJob(exportConfig));
+    if (savedConfig.isPresent()) {
+      log.info("Got {}.", savedConfig.get());
+      trigger.setConfig(savedConfig.get());
+      scheduledJob = defaultJob(savedConfig.get());
+    } else {
+      log.info("No export schedules found.");
+    }
   }
 
   private Executor taskExecutor() {
     return Executors.newScheduledThreadPool(100);
   }
+
 }

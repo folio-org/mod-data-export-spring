@@ -64,7 +64,7 @@ public class JobServiceImpl implements JobService {
     if (StringUtils.isBlank(result.getName())) {
       result.setName("Job #TBD");
     }
-    String userName = contextHelper.getUserName();
+    String userName = contextHelper.getUserName(context);
     if (StringUtils.isBlank(result.getSource())) {
       result.setSource(userName);
     }
