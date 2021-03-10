@@ -35,7 +35,8 @@ public class FolioExecutionContextHelper {
   public String getUserName(FolioExecutionContext context) {
     String jwt = getHeader(context, XOkapiHeaders.TOKEN);
     Optional<JWTokenUtils.UserInfo> userInfo = StringUtils.isBlank(jwt) ? Optional.empty() : JWTokenUtils.parseToken(jwt);
-    return userInfo.map(JWTokenUtils.UserInfo::getUserName).orElse(null);
+    String result = userInfo.map(JWTokenUtils.UserInfo::getUserName).orElse(null);
+    return result == null ? null : result.substring(0, 50);
   }
 
   public UUID getUserId(FolioExecutionContext context) {
