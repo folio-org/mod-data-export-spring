@@ -31,7 +31,7 @@ public class FolioTenantController extends TenantController {
     var tenantInit = super.postTenant(tenantAttributes);
 
     if (tenantInit.getStatusCode() == HttpStatus.OK) {
-      authService.authorizeModuleWithSystemUser();
+      authService.storeOkapiHeaders();
       scheduler.initScheduleConfiguration();
     }
 
