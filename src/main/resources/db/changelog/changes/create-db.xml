@@ -34,7 +34,8 @@
 
     <changeSet id="MODEXPS-1@@create-batch-status-enum" author="prokhorovalexey">
         <sql dbms="postgresql">
-            CREATE TYPE BatchStatus as ENUM ('COMPLETED', 'STARTING', 'STARTED', 'STOPPING', 'STOPPED', 'FAILED', 'ABANDONED', 'UNKNOWN');
+            CREATE TYPE BatchStatus as ENUM ('COMPLETED', 'STARTING', 'STARTED', 'STOPPING', 'STOPPED', 'FAILED', 'ABANDONED',
+            'UNKNOWN');
         </sql>
     </changeSet>
     <changeSet id="MODEXPS-1@@create-batch-status-enum-cast" author="prokhorovalexey">
@@ -95,5 +96,12 @@
 
             <column name="exit_status" type="jsonb"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="MODEXPS-1@@create-job-number-sequence" author="prokhorovalexey">
+        <createSequence
+                sequenceName="job-number"
+                dataType="int"
+                cycle="true"/>
     </changeSet>
 </databaseChangeLog>
