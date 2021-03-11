@@ -2,6 +2,7 @@ package org.folio.des.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.security.AuthService;
 import org.folio.des.security.JWTokenUtils;
@@ -12,10 +13,7 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.scope.FolioExecutionScopeExecutionContextManager;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @Log4j2
@@ -26,22 +24,29 @@ public class FolioExecutionContextHelper {
   private final FolioExecutionContext folioExecutionContext;
   private final AuthService authService;
 
-  private Map<String, Collection<String>> okapiHeaders;
+  private final Map<String, Collection<String>> okapiHeaders = new HashMap<>();
 
   public void storeOkapiHeaders() {
-    log.info("Got OKAPI headers.");
-    okapiHeaders = folioExecutionContext.getOkapiHeaders();
+    if (folioExecutionContext.getOkapiHeaders() != null && !folioExecutionContext.getOkapiHeaders().isEmpty()) {
+      log.info("Got OKAPI headers.");
+      okapiHeaders.putAll(folioExecutionContext.getOkapiHeaders());
+    }
   }
 
   public void init() {
     String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
-    String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
-    if (StringUtils.isNotBlank(tenant) && StringUtils.isNotBlank(url)) {
+    if (StringUtils.isNotBlank(tenant)) {
       FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
           new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
-      okapiHeaders.put(XOkapiHeaders.TOKEN, authService.login(tenant, url));
-      FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
-          new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
+      String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
+      if (StringUtils.isNotBlank(url)) {
+        List<String> token = authService.login(tenant, url);
+        if (CollectionUtils.isNotEmpty(token) && StringUtils.isNotBlank(token.get(0))) {
+          okapiHeaders.put(XOkapiHeaders.TOKEN, token);
+          FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
+              new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
+        }
+      }
       log.info("FOLIO context initialized.");
     } else {
       throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
