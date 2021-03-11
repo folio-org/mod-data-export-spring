@@ -1,13 +1,17 @@
 package org.folio.des.repository.criteria;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
@@ -77,21 +81,29 @@ public class CQL2JPACriteria<E> {
 
   private CriteriaQuery<E> toCriteria(CQLNode node, Class<E> entityCls)
       throws QueryValidationException {
+    Predicate predicates;
 
     if (node instanceof CQLSortNode) {
-      List<Order> orders = new ArrayList<>();
-      for (ModifierSet sortIndex : ((CQLSortNode) node).getSortIndexes()) {
-        final CqlModifiers modifiers = new CqlModifiers(sortIndex);
-        orders.add(
-            CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-                ? builder.desc(root.get(sortIndex.getBase()))
-                : builder.asc(root.get(sortIndex.getBase())));
-      }
-      criteria.orderBy(orders);
+      CQLSortNode sortNode = (CQLSortNode) node;
+      processSort(sortNode);
+      predicates = process(sortNode.getSubtree());
+    } else {
+      predicates = process(node);
     }
 
-    Predicate predicates = process(node);
     return criteria.where(predicates);
+  }
+
+  private void processSort(CQLSortNode node) throws CQLFeatureUnsupportedException {
+    List<Order> orders = new ArrayList<>();
+    for (ModifierSet sortIndex : node.getSortIndexes()) {
+      final CqlModifiers modifiers = new CqlModifiers(sortIndex);
+      orders.add(
+          CqlSort.DESCENDING.equals(modifiers.getCqlSort())
+              ? builder.desc(root.get(sortIndex.getBase()))
+              : builder.asc(root.get(sortIndex.getBase())));
+    }
+    criteria.orderBy(orders);
   }
 
   private Predicate process(CQLNode node) throws QueryValidationException {
@@ -187,6 +199,7 @@ public class CQL2JPACriteria<E> {
     String fieldName = node.getIndex();
     if ("cql.allRecords".equalsIgnoreCase(fieldName)) {
       // TODO: something like return builder.isTrue(true);
+      return builder.and();
     }
 
     // TODO: create aliases if there is "." in the field name to search over linked tables
@@ -266,7 +279,7 @@ public class CQL2JPACriteria<E> {
   }
 
   private <E extends Comparable<? super E>> Predicate toPredicate(
-      Path<E> field, E value, String comparator) throws QueryValidationException {
+      Expression<E> field, E value, String comparator) throws QueryValidationException {
 
     switch (comparator) {
       case ">":
@@ -376,7 +389,7 @@ public class CQL2JPACriteria<E> {
 
   /** Create an SQL expression using SQL as is syntax. */
   private Predicate queryBySql(
-      Path field, CQLTermNode node, String comparator, CqlModifiers modifiers)
+      Expression field, CQLTermNode node, String comparator, CqlModifiers modifiers)
       throws QueryValidationException {
 
     // String term = "'" + Cql2SqlUtil.cql2like(node.getTerm()) + "'";
@@ -385,12 +398,18 @@ public class CQL2JPACriteria<E> {
 
     Comparable val = node.getTerm();
 
-    if (Number.class.equals(field.getJavaType())) {
+    Class javaType = field.getJavaType();
+    if (Number.class.equals(javaType)) {
       val = Integer.parseInt((String) val);
-    } else if (UUID.class.equals(field.getJavaType())) {
+    } else if (UUID.class.equals(javaType)) {
       val = UUID.fromString((String) val);
-    } else if (Boolean.class.equals(field.getJavaType())) {
+    } else if (Boolean.class.equals(javaType)) {
       val = Boolean.valueOf((String) val);
+    } else if (Date.class.equals(javaType)) {
+      LocalDateTime dateTime = LocalDateTime.parse((String) val);
+      val = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+    } else if (javaType.isEnum()) {
+      field = field.as(String.class);
     }
 
     return toPredicate(field, val, comparator);
