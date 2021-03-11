@@ -1,10 +1,24 @@
 package org.folio.des.service.impl;
 
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.*;
+import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.JobCollection;
+import org.folio.des.domain.dto.JobStatus;
+import org.folio.des.domain.dto.Metadata;
+import org.folio.des.domain.dto.StartJobCommand;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobRepository;
@@ -19,8 +33,6 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 @Log4j2
@@ -51,22 +63,19 @@ public class JobServiceImpl implements JobService {
   @Override
   public JobCollection get(Integer offset, Integer limit, String query) {
     JobCollection result = new JobCollection();
-/*
     if (StringUtils.isBlank(query)) {
-*/
-    Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
-    result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
-    result.setTotalRecords((int) page.getTotalElements());
-/*
+      Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
+      result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
+      result.setTotalRecords((int) page.getTotalElements());
     } else {
       List<Job> jobs = cqlService.getByCQL(Job.class, query, offset, limit);
-      List<org.folio.des.domain.dto.Job> jobsResult = jobs.stream().map(JobServiceImpl::entityToDto).collect(Collectors.toList());
+      List<org.folio.des.domain.dto.Job> jobsResult =
+          jobs.stream().map(JobServiceImpl::entityToDto).collect(Collectors.toList());
       result.setJobRecords(jobsResult);
 
       Integer count = cqlService.countByCQL(Job.class, query);
       result.setTotalRecords(count);
     }
-*/
     return result;
   }
 
