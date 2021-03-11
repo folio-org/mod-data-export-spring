@@ -42,14 +42,13 @@ public class JobServiceImpl implements JobService {
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
-    OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Cornell Fees & Fines Bursar Report");
+    OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Fees & Fines Bursar Report");
     OUTPUT_FORMATS.put(ExportType.CIRCULATION_LOG, "Comma-Separated Values (CSV)");
   }
 
   private final JobExecutionService jobExecutionService;
   private final JobRepository repository;
   private final FolioExecutionContext context;
-  private final FolioExecutionContextHelper contextHelper;
   private final CQLService cqlService;
 
   @Override
@@ -86,9 +85,9 @@ public class JobServiceImpl implements JobService {
     Job result = dtoToEntity(jobDto);
 
     if (StringUtils.isBlank(result.getName())) {
-      result.setName("Job #TBD");
+      result.setName(String.format("%d", repository.getNextJobNumber()));
     }
-    String userName = contextHelper.getUserName(context);
+    String userName = FolioExecutionContextHelper.getUserName(context);
     if (StringUtils.isBlank(result.getSource())) {
       result.setSource(userName);
     }
@@ -102,7 +101,7 @@ public class JobServiceImpl implements JobService {
     if (result.getCreatedDate() == null) {
       result.setCreatedDate(now);
     }
-    UUID userId = contextHelper.getUserId(context);
+    UUID userId = FolioExecutionContextHelper.getUserId(context);
     if (result.getCreatedByUserId() == null) {
       result.setCreatedByUserId(userId);
     }
