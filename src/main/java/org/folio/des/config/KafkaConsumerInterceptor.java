@@ -1,6 +1,6 @@
 package org.folio.des.config;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -9,16 +9,22 @@ import org.apache.kafka.common.header.Headers;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionScopeExecutionContextManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Component
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class KafkaConsumerInterceptor implements ConsumerInterceptor<Object, Object> {
 
-  private final FolioModuleMetadata folioModuleMetadata;
+  private FolioModuleMetadata folioModuleMetadata;
+
+  @Autowired
+  public void setFolioModuleMetadata(FolioModuleMetadata folioModuleMetadata) {
+    this.folioModuleMetadata = folioModuleMetadata;
+  }
 
   @Override
   public ConsumerRecords<Object, Object> onConsume(ConsumerRecords<Object, Object> records) {
