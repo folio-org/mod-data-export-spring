@@ -17,7 +17,8 @@
       },
       "createdByUsername": {
         "description": "Username of the user who created the record (when available)",
-        "type": "string"
+        "type": "string",
+        "maxLength": 50
       },
       "updatedDate": {
         "description": "Date and time when the record was last updated",
@@ -31,7 +32,8 @@
       },
       "updatedByUsername": {
         "description": "Username of the user who last updated the record (when available)",
-        "type": "string"
+        "type": "string",
+        "maxLength": 50
       }
     },
     "additionalProperties": false
