@@ -19,8 +19,8 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 @Component
-@NoArgsConstructor
 @Log4j2
+@NoArgsConstructor
 public class KafkaProducerInterceptor implements ProducerInterceptor<Object, Object> {
 
   @Override
