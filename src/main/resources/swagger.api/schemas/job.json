@@ -11,7 +11,8 @@
       },
       "name": {
         "description": "Job name",
-        "type": "string"
+        "type": "string",
+        "maxLength": 100
       },
       "description": {
         "description": "Job description",
@@ -19,7 +20,8 @@
       },
       "source": {
         "description": "Job source",
-        "type": "string"
+        "type": "string",
+        "maxLength": 50
       },
       "isSystemSource": {
         "description": "Was the job created by system",
@@ -59,7 +61,8 @@
       },
       "outputFormat": {
         "description": "Job output format",
-        "type": "string"
+        "type": "string",
+        "maxLength": 50
       },
       "errorDetails": {
         "description": "Job error details",
