@@ -12,7 +12,9 @@
             "GET"
           ],
           "pathPattern": "/data-export-spring/jobs",
-          "permissionsRequired": [],
+          "permissionsRequired": [
+            "data-export.job.collection.get"
+          ],
           "modulePermissions": []
         },
         {
@@ -20,7 +22,9 @@
             "GET"
           ],
           "pathPattern": "/data-export-spring/jobs/{id}",
-          "permissionsRequired": [],
+          "permissionsRequired": [
+            "data-export.job.item.get"
+          ],
           "modulePermissions": []
         },
         {
@@ -28,7 +32,9 @@
             "POST"
           ],
           "pathPattern": "/data-export-spring/jobs",
-          "permissionsRequired": [],
+          "permissionsRequired": [
+            "data-export.job.item.post"
+          ],
           "modulePermissions": []
         },
         {
@@ -36,21 +42,36 @@
             "GET"
           ],
           "pathPattern": "/data-export-spring/configs",
-          "permissionsRequired": []
+          "permissionsRequired": [
+            "data-export.config.collection.get"
+          ],
+          "modulePermissions": [
+            "configuration.entries.collection.get"
+          ]
         },
         {
           "methods": [
             "POST"
           ],
           "pathPattern": "/data-export-spring/configs",
-          "permissionsRequired": []
+          "permissionsRequired": [
+            "data-export.config.item.post"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.post"
+          ]
         },
         {
           "methods": [
             "PUT"
           ],
           "pathPattern": "/data-export-spring/configs/{id}",
-          "permissionsRequired": []
+          "permissionsRequired": [
+            "data-export.config.item.put"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.put"
+          ]
         }
       ]
     },
@@ -64,14 +85,14 @@
             "POST"
           ],
           "pathPattern": "/_/tenant",
-          "permissionsRequired": []
+          "modulePermissions": []
         },
         {
           "methods": [
             "DELETE"
           ],
           "pathPattern": "/_/tenant",
-          "permissionsRequired": []
+          "modulePermissions": []
         }
       ]
     },
@@ -85,12 +106,62 @@
             "GET"
           ],
           "pathPattern": "/_/jsonSchemas",
-          "permissionsRequired": []
+          "modulePermissions": []
         }
       ]
     }
   ],
   "permissionSets": [
+    {
+      "permissionName": "data-export.config.collection.get",
+      "displayName": "get data export configurations",
+      "description": "Get data export configurations"
+    },
+    {
+      "permissionName": "data-export.config.item.post",
+      "displayName": "create a data export configuration",
+      "description": "Create a data export configuration"
+    },
+    {
+      "permissionName": "data-export.config.item.put",
+      "displayName": "change a data export configuration",
+      "description": "Change a data export configuration"
+    },
+    {
+      "permissionName": "data-export.job.item.post",
+      "displayName": "create/update a data export job",
+      "description": "Create/update a data export job"
+    },
+    {
+      "permissionName": "data-export.job.item.get",
+      "displayName": "get a data export job",
+      "description": "Get a data export job"
+    },
+    {
+      "permissionName": "data-export.job.collection.get",
+      "displayName": "get data export jobs",
+      "description": "Get data export jobs"
+    },
+    {
+      "permissionName": "data-export.config.all",
+      "displayName": "data export configurations - all permissions",
+      "description": "All permissions for data export configurations",
+      "subPermissions": [
+        "data-export.config.collection.get",
+        "data-export.config.item.post",
+        "data-export.config.item.put"
+      ]
+    },
+    {
+      "permissionName": "data-export.job.all",
+      "displayName": "data export jobs - all permissions",
+      "description": "All permissions for data export jobs",
+      "subPermissions": [
+        "data-export.job.item.post",
+        "data-export.job.item.get",
+        "data-export.job.collection.get"
+      ]
+    }
   ],
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",
