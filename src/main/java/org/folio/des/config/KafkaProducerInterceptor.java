@@ -26,12 +26,13 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<Object, Obj
   @Override
   public ProducerRecord<Object, Object> onSend(ProducerRecord<Object, Object> record) {
     FolioExecutionContext folioExecutionContext = fetchContext();
-
     if (folioExecutionContext != null) {
-      Map<String, Collection<String>> okapiHeaders = folioExecutionContext.getOkapiHeaders();
-      okapiHeaders.entrySet().stream().map(toRecordHeader()).forEach(recordHeader -> record.headers().add(recordHeader));
+      folioExecutionContext.getOkapiHeaders()
+          .entrySet()
+          .stream()
+          .map(toRecordHeader())
+          .forEach(recordHeader -> record.headers().add(recordHeader));
     }
-
     return record;
   }
 
