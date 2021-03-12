@@ -13,18 +13,19 @@ Data Export Spring API provides the following URLs:
 
 |  Method | URL| Permissions  | Description  | 
 |---|---|---|---|
-| GET  | /data-export-spring/jobs/        |  | Gets jobs                                |
-| GET  | /data-export-spring/jobs/{id}    |  | Gets a job by the job ID                 |
-| POST | /data-export-spring/jobs/        |  | Upserts a job                            |
-| GET  | /data-export-spring/configs/     |  | Get a list of data export configurations |
-| PUT  | /data-export-spring/configs/{id} |  | Change an export configuration           |
-| POST | /data-export-spring/configs/     |  | Add an export configuration              |
+| GET  | /data-export-spring/jobs/        | data-export.job.collection.get    | Gets jobs                                |
+| GET  | /data-export-spring/jobs/{id}    | data-export.job.item.get          | Gets a job by the job ID                 |
+| POST | /data-export-spring/jobs/        | data-export.job.item.post         | Upserts a job                            |
+| GET  | /data-export-spring/configs/     | data-export.config.collection.get | Get a list of data export configurations |
+| PUT  | /data-export-spring/configs/{id} | data-export.config.item.put       | Change an export configuration           |
+| POST | /data-export-spring/configs/     | data-export.config.item.post      | Add an export configuration              |
 
 More detail can be found on Data Export Spring wiki-page: [WIKI Data Export Spring](https://wiki.folio.org/pages/viewpage.action?pageId=52134948).
 
 ### Required Permissions
 Institutional users should be granted the following permissions in order to use this Data Export Spring API:
--
+- data-export.config.all
+- data-export.job.all
 
 ### Issue tracker
 See project [MODEXPS](https://issues.folio.org/browse/MODEXPS)
