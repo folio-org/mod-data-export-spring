@@ -9,7 +9,8 @@
       },
       "query": {
         "description": "CQL query to be passed to the module which data is being exported. Use it to filter data.",
-        "type": "string"
+        "type": "string",
+        "maxLength": 5000
       }
     }
   }
