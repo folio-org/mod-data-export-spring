@@ -1,5 +1,7 @@
 package org.folio.des.controller;
 
+import static org.springframework.http.ResponseEntity.status;
+
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.scheduling.ExportScheduler;
@@ -19,8 +21,9 @@ public class FolioTenantController extends TenantController {
   private final FolioExecutionContextHelper contextHelper;
   private final ExportScheduler scheduler;
 
-  public FolioTenantController(TenantService baseTenantService, FolioExecutionContextHelper contextHelper,
-      ExportScheduler scheduler) {
+  public FolioTenantController(TenantService baseTenantService,
+    FolioExecutionContextHelper contextHelper,
+    ExportScheduler scheduler) {
     super(baseTenantService);
     this.contextHelper = contextHelper;
     this.scheduler = scheduler;
@@ -32,10 +35,11 @@ public class FolioTenantController extends TenantController {
 
     if (tenantInit.getStatusCode() == HttpStatus.OK) {
       try {
-        contextHelper.storeOkapiHeaders();
+        contextHelper.registerTenant();
         scheduler.initScheduleConfiguration();
       } catch (Exception e) {
         log.error(e.getMessage(), e);
+        return status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
       }
     }
 

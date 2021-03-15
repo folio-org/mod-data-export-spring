@@ -132,6 +132,8 @@ components:
       $ref: 'schemas/job.json#/Job'
     jobCollection:
       $ref: 'schemas/jobCollection.json#/JobCollection'
+    userdataCollection:
+      $ref: 'schemas/user/userCollection.json#/UserCollection'
     errors:
       $ref: 'schemas/common/errors.json#/Errors'
     UUID:

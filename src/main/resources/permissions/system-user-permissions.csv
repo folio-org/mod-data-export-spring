@@ -1,0 +1,10 @@
+circulation-logs.collection.get
+feefineactions.collection.get
+accounts.transfer.post
+accounts.collection.get
+users.collection.get
+users.item.post
+users.item.put
+configuration.entries.collection.get
+configuration.entries.item.post
+configuration.entries.item.put
