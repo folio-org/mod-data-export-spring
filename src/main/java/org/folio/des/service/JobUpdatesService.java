@@ -1,5 +1,9 @@
 package org.folio.des.service;
 
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -10,11 +14,6 @@ import org.folio.des.repository.JobRepository;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Log4j2
@@ -41,7 +40,6 @@ public class JobUpdatesService {
   @KafkaListener(topics = { DATA_EXPORT_JOB_EXECUTION_UPDATES_TOPIC_NAME })
   public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
     log.info("Received {}.", jobExecutionUpdate);
-    contextHelper.init();
 
     Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
     if (jobOptional.isEmpty()) {

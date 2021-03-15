@@ -1,7 +1,20 @@
 {
   "id": "@artifactId@-@version@",
   "name": "Data Export Spring Module",
-  "requires": [],
+  "requires": [
+    {
+      "id": "login",
+      "version": "7.0"
+    },
+    {
+      "id": "permissions",
+      "version": "5.3"
+    },
+    {
+      "id": "users",
+      "version": "15.3"
+    }
+  ],
   "provides": [
     {
       "id": "data-export-spring",
@@ -85,7 +98,15 @@
             "POST"
           ],
           "pathPattern": "/_/tenant",
-          "modulePermissions": []
+          "modulePermissions": [
+            "users.collection.get",
+            "users.item.post",
+            "users.item.put",
+            "login.item.post",
+            "perms.users.item.post",
+            "perms.users.get",
+            "configuration.entries.collection.get"
+          ]
         },
         {
           "methods": [

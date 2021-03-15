@@ -1,6 +1,6 @@
 folio:
-  username: diku_admin
-  password: admin
+  system:
+    username: data-export-system-user
   tenant:
     validation:
       enabled: true

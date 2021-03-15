@@ -1,5 +1,11 @@
 package org.folio.des.config;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.consumer.ConsumerInterceptor;
@@ -14,15 +20,12 @@ import org.folio.spring.scope.FolioExecutionScopeExecutionContextManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
 @Component
 @Log4j2
 @NoArgsConstructor
 public class KafkaConsumerInterceptor implements ConsumerInterceptor<Object, Object> {
 
-  private FolioModuleMetadata folioModuleMetadata;
+  private static FolioModuleMetadata folioModuleMetadata;
 
   @Autowired
   public void setFolioModuleMetadata(FolioModuleMetadata folioModuleMetadata) {
