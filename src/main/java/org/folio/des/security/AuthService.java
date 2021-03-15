@@ -35,10 +35,8 @@ public class AuthService {
     ResponseEntity<String> authResponse = authClient.getApiKey(userParameters);
 
     var token = authResponse.getHeaders().get(XOkapiHeaders.TOKEN);
-    var userId = authResponse.getHeaders().get(XOkapiHeaders.USER_ID);
-    if (isNotEmpty(token) && isNotEmpty(userId)) {
+    if (isNotEmpty(token)) {
 
-      userParameters.setUserId(userId.get(0));
       userParameters.setOkapiToken(token.get(0));
       log.info("Logged in as {}.", username);
     } else {

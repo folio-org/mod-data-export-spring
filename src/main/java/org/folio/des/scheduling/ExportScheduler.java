@@ -2,6 +2,7 @@ package org.folio.des.scheduling;
 
 import java.util.Optional;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
@@ -12,6 +13,7 @@ import org.folio.des.service.JobService;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,9 +35,12 @@ public class ExportScheduler implements SchedulingConfigurer {
     registrar = taskRegistrar;
     taskRegistrar.setScheduler(Executors.newScheduledThreadPool(100));
     taskRegistrar.addTriggerTask(() -> {
-      contextHelper.initScope();
-      jobService.upsert(scheduledJob);
-    }, trigger);
+      if (contextHelper.isModuleRegistered()) {
+        contextHelper.initScope();
+        jobService.upsert(scheduledJob);
+      }
+
+    }, new PeriodicTrigger(5, TimeUnit.MINUTES));
   }
 
   public void initScheduleConfiguration() {

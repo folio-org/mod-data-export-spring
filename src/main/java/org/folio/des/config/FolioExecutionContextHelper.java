@@ -12,6 +12,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.security.AuthService;
 import org.folio.des.security.JWTokenUtils;
+import org.folio.des.security.SecurityManagerService;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -27,22 +28,31 @@ public class FolioExecutionContextHelper {
   private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
   private final AuthService authService;
+  private final SecurityManagerService securityManagerService;
+  private boolean registered = false;
 
   private final Map<String, Collection<String>> okapiHeaders = new ConcurrentHashMap<>();
 
   public void storeOkapiHeaders() {
-    if (folioExecutionContext.getOkapiHeaders() != null && !folioExecutionContext.getOkapiHeaders().isEmpty()) {
+    if (MapUtils.isNotEmpty(folioExecutionContext.getOkapiHeaders())) {
       log.info("Got OKAPI headers.");
       okapiHeaders.putAll(folioExecutionContext.getOkapiHeaders());
     }
   }
 
+  public void registerTenant() {
+    storeOkapiHeaders();
+    securityManagerService.prepareSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
+    registered = true;
+  }
+
+  public boolean isModuleRegistered() {
+    return registered;
+  }
+
   public void initScope() {
 
-    if (MapUtils.isNotEmpty(folioExecutionContext.getOkapiHeaders())) {
-      FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(folioExecutionContext);
-      log.info("FOLIO context initialized.");
-    } else if (MapUtils.isNotEmpty(okapiHeaders)) {
+    if (MapUtils.isNotEmpty(okapiHeaders)) {
       String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
       String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
 
@@ -52,7 +62,6 @@ public class FolioExecutionContextHelper {
       var systemUserParameters = authService.loginSystemUser(tenant, url);
       if (StringUtils.isNotBlank(systemUserParameters.getOkapiToken())) {
         okapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserParameters.getOkapiToken()));
-        okapiHeaders.put(XOkapiHeaders.USER_ID, List.of(systemUserParameters.getUserId()));
         FolioExecutionScopeExecutionContextManager.endFolioExecutionContext();
         FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
             new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
