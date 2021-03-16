@@ -45,3 +45,8 @@ management:
     web:
       exposure:
         include: info,health,env,httptrace,liquibase
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: basic
