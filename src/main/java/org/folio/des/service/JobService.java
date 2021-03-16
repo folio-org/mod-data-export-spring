@@ -15,4 +15,6 @@ public interface JobService {
 
   void delete(UUID id);
 
+  void deleteOldJobs();
+
 }

@@ -1,23 +1,10 @@
 package org.folio.des.service.impl;
 
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.BursarFeeFines;
-import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.JobCollection;
-import org.folio.des.domain.dto.JobStatus;
-import org.folio.des.domain.dto.Metadata;
-import org.folio.des.domain.dto.StartJobCommand;
+import org.folio.des.domain.dto.*;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobRepository;
@@ -28,12 +15,18 @@ import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
+@EnableScheduling
 @Log4j2
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
@@ -118,7 +111,7 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    StartJobCommand startJobCommand = prepareStartJobCommand(result);
+    StartJobCommand startJobCommand = JobExecutionService.prepareStartJobCommand(result);
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
@@ -136,26 +129,12 @@ public class JobServiceImpl implements JobService {
     log.info("Deleted job {}.", id);
   }
 
-  private StartJobCommand prepareStartJobCommand(Job job) {
-    ExportConfigServiceImpl.checkConfig(job.getType(), job.getExportTypeSpecificParameters());
-
-    StartJobCommand result = new StartJobCommand();
-    result.setId(job.getId());
-    result.setName(job.getName());
-    result.setDescription(job.getDescription());
-    result.setType(job.getType());
-
-    Map<String, JobParameter> params = new HashMap<>();
-    if (job.getType() == ExportType.CIRCULATION_LOG) {
-      params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
-    } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
-      BursarFeeFines bursarFeeFines = job.getExportTypeSpecificParameters().getBursarFeeFines();
-      params.put("daysOutstanding", new JobParameter((long) bursarFeeFines.getDaysOutstanding()));
-      params.put("patronGroups", new JobParameter(String.join(",", bursarFeeFines.getPatronGroups())));
-    }
-    result.setJobParameters(new JobParameters(params));
-
-    return result;
+  @Scheduled(fixedRateString = "P1D")
+  @Override
+  public void deleteOldJobs() {
+    Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    log.info("Deleting jobs with 'updatedDate' less than {}.", toDelete);
+    repository.deleteByUpdatedDateBefore(toDelete);
   }
 
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
