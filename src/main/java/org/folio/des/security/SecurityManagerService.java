@@ -1,11 +1,13 @@
 package org.folio.des.security;
 
-import java.nio.file.Files;
+import com.google.common.io.Resources;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,14 +20,13 @@ import org.folio.des.domain.dto.SystemUserParameters;
 import org.folio.des.domain.dto.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 @Component
 @Log4j2
 @RequiredArgsConstructor
 public class SecurityManagerService {
 
-  private static final String PERMISSIONS_FILE_PATH = "classpath:permissions/system-user-permissions.csv";
+  private static final String PERMISSIONS_FILE_PATH = "permissions/system-user-permissions.csv";
   private static final String USER_LAST_NAME = "SystemDataExportS";
 
   private final PermissionsClient permissionsClient;
@@ -114,9 +115,17 @@ public class SecurityManagerService {
         });
   }
 
-  @SneakyThrows
   private List<String> readPermissionsFromResource(String permissionsFilePath) {
-    return Files.readAllLines(ResourceUtils.getFile(permissionsFilePath).toPath());
+    List<String> permissions = new ArrayList<>();
+    var url = Resources.getResource(permissionsFilePath);
+
+    try {
+      permissions = Resources.readLines(url, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      log.error("Error reading permissions from {}", permissionsFilePath);
+    }
+
+    return permissions;
   }
 
   private User createUserObject(String username) {
