@@ -102,7 +102,7 @@ public class SecurityManagerService {
       try {
         permissionsClient.addPermission(userId, p);
       } catch (Exception e) {
-        log.error("Error adding permission {} to {}. Permission may be already assigned.", permission, username);
+        log.error(String.format("Error adding permission %s to %s.", permission, username), e);
       }
     });
   }
@@ -114,7 +114,7 @@ public class SecurityManagerService {
     try {
       permissions = Resources.readLines(url, StandardCharsets.UTF_8);
     } catch (IOException e) {
-      log.error("Error reading permissions from {}.", permissionsFilePath);
+      log.error(String.format("Error reading permissions from %s.", permissionsFilePath), e);
     }
 
     return permissions;
