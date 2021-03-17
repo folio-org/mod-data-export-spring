@@ -1,5 +1,6 @@
 package org.folio.des.security;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,6 +20,7 @@ public class AuthService {
   private final AuthClient authClient;
 
   @Value("${folio.system.username}")
+  @Getter
   private String username;
 
   public SystemUserParameters loginSystemUser(String tenant, String url) {
@@ -30,13 +32,12 @@ public class AuthService {
             .password(username)
             .build();
 
-    log.info("Login with url={} tenant={} username={}", url, tenant, username);
+    log.info("Login with url={} tenant={} username={}.", url, tenant, username);
 
     ResponseEntity<String> authResponse = authClient.getApiKey(userParameters);
 
     var token = authResponse.getHeaders().get(XOkapiHeaders.TOKEN);
     if (isNotEmpty(token)) {
-
       userParameters.setOkapiToken(token.get(0));
       log.info("Logged in as {}.", username);
     } else {
@@ -50,9 +51,9 @@ public class AuthService {
   }
 
   public void saveCredentials(SystemUserParameters systemUserParameters) {
-
     authClient.saveCredentials(systemUserParameters);
 
-    log.info("Saved credentials for user: [{}]", systemUserParameters.getUsername());
+    log.info("Saved credentials for user {}.", systemUserParameters.getUsername());
   }
+
 }

@@ -41,6 +41,7 @@ public class JobServiceImpl implements JobService {
   private final JobExecutionService jobExecutionService;
   private final JobRepository repository;
   private final FolioExecutionContext context;
+  private final FolioExecutionContextHelper contextHelper;
   private final CQLService cqlService;
 
   @Override
@@ -132,9 +133,13 @@ public class JobServiceImpl implements JobService {
   @Scheduled(fixedRateString = "P1D")
   @Override
   public void deleteOldJobs() {
-    Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-    log.info("Deleting jobs with 'updatedDate' less than {}.", toDelete);
-    repository.deleteByUpdatedDateBefore(toDelete);
+    if (contextHelper.isModuleRegistered()) {
+      contextHelper.initScope();
+
+      Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+      log.info("Deleting jobs with 'updatedDate' less than {}.", toDelete);
+      repository.deleteByUpdatedDateBefore(toDelete);
+    }
   }
 
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
