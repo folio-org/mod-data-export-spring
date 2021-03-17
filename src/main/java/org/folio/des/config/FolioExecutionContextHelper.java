@@ -1,11 +1,5 @@
 package org.folio.des.config;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
@@ -19,6 +13,9 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.scope.FolioExecutionScopeExecutionContextManager;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Log4j2
@@ -51,7 +48,6 @@ public class FolioExecutionContextHelper {
   }
 
   public void initScope() {
-
     if (MapUtils.isNotEmpty(okapiHeaders)) {
       String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
       String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
@@ -66,11 +62,10 @@ public class FolioExecutionContextHelper {
         FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
             new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
 
-        log.info("FOLIO context initialized with System user");
+        log.info("FOLIO context initialized with {} user.", authService.getUsername());
       }
     } else {
-      throw new IllegalStateException(
-          "Can't log in and initialize FOLIO context because of absent OKAPI headers");
+      throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
     }
   }
 
@@ -100,4 +95,5 @@ public class FolioExecutionContextHelper {
     }
     return result;
   }
+
 }
