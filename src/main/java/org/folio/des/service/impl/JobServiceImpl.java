@@ -2,6 +2,7 @@ package org.folio.des.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.*;
@@ -112,14 +113,14 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    StartJobCommand startJobCommand = JobExecutionService.prepareStartJobCommand(result);
+    JobCommand jobCommand = JobExecutionService.prepareStartJobCommand(result);
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
     log.info("Upserted {}.", result);
 
-    startJobCommand.setId(result.getId());
-    jobExecutionService.startJob(startJobCommand);
+    jobCommand.setId(result.getId());
+    jobExecutionService.sendJobCommand(jobCommand);
 
     return entityToDto(result);
   }
@@ -137,8 +138,19 @@ public class JobServiceImpl implements JobService {
       contextHelper.initScope();
 
       Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-      log.info("Deleting jobs with 'updatedDate' less than {}.", toDelete);
-      repository.deleteByUpdatedDateBefore(toDelete);
+      log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
+
+      List<Job> jobs = repository.findByUpdatedDateBefore(toDelete);
+      if (CollectionUtils.isEmpty(jobs)) {
+        log.info("Deleted no old jobs.");
+        return;
+      }
+
+      List<UUID> ids = jobs.stream().map(Job::getId).collect(Collectors.toList());
+      repository.deleteByIdIn(ids);
+      log.info("Deleted old jobs [{}].", StringUtils.join(ids, ','));
+
+      jobExecutionService.deleteJobs(jobs);
     }
   }
 
