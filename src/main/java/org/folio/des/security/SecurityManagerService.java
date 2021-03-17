@@ -1,25 +1,22 @@
 package org.folio.des.security;
 
 import com.google.common.io.Resources;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.PermissionsClient;
 import org.folio.des.client.UsersClient;
-import org.folio.des.domain.dto.Permission;
-import org.folio.des.domain.dto.Permissions;
-import org.folio.des.domain.dto.Personal;
-import org.folio.des.domain.dto.SystemUserParameters;
-import org.folio.des.domain.dto.User;
+import org.folio.des.domain.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @Log4j2
@@ -37,15 +34,13 @@ public class SecurityManagerService {
   private String username;
 
   public void prepareSystemUser(String okapiUrl, String tenantId) {
-
-    SystemUserParameters systemUserParameters =
-        SystemUserParameters.builder()
-            .id(UUID.randomUUID())
-            .username(username)
-            .password(username)
-            .okapiUrl(okapiUrl)
-            .tenantId(tenantId)
-            .build();
+    SystemUserParameters systemUserParameters = SystemUserParameters.builder()
+        .id(UUID.randomUUID())
+        .username(username)
+        .password(username)
+        .okapiUrl(okapiUrl)
+        .tenantId(tenantId)
+        .build();
 
     var folioUser = getFolioUser(username);
 
@@ -74,12 +69,12 @@ public class SecurityManagerService {
   }
 
   private void updateUser(User existingUser) {
-    log.info("Have to update  user [{}]", existingUser.getUsername());
+    log.info("Have to update user {}.", existingUser.getUsername());
     if (existingUserUpToDate(existingUser)) {
-      log.info("The user [{}] is up to date", existingUser.getUsername());
+      log.info("User {} is up to date.", existingUser.getUsername());
     }
     usersClient.updateUser(existingUser.getId(), populateMissingUserProperties(existingUser));
-    log.info("Update the user [{}]", existingUser.getId());
+    log.info("Updated user {}.", existingUser.getId());
   }
 
   private void assignPermissions(String userId) {
@@ -101,18 +96,15 @@ public class SecurityManagerService {
       throw new IllegalStateException("No permissions found to assign to user with id: " + userId);
     }
 
-    permissions.forEach(
-        permission -> {
-          var p = new Permission();
-          p.setPermissionName(permission);
-          try {
-            permissionsClient.addPermission(userId, p);
-          } catch (Exception e) {
-            log.info(
-                "Error adding permission {} to System User. Permission may be already assigned.",
-                permission);
-          }
-        });
+    permissions.forEach(permission -> {
+      var p = new Permission();
+      p.setPermissionName(permission);
+      try {
+        permissionsClient.addPermission(userId, p);
+      } catch (Exception e) {
+        log.error("Error adding permission {} to {}. Permission may be already assigned.", permission, username);
+      }
+    });
   }
 
   private List<String> readPermissionsFromResource(String permissionsFilePath) {
@@ -122,7 +114,7 @@ public class SecurityManagerService {
     try {
       permissions = Resources.readLines(url, StandardCharsets.UTF_8);
     } catch (IOException e) {
-      log.error("Error reading permissions from {}", permissionsFilePath);
+      log.error("Error reading permissions from {}.", permissionsFilePath);
     }
 
     return permissions;
@@ -142,8 +134,7 @@ public class SecurityManagerService {
   }
 
   private boolean existingUserUpToDate(User existingUser) {
-    return existingUser.getPersonal() != null
-        && StringUtils.isNotBlank(existingUser.getPersonal().getLastName());
+    return existingUser.getPersonal() != null && StringUtils.isNotBlank(existingUser.getPersonal().getLastName());
   }
 
   private User populateMissingUserProperties(User existingUser) {
@@ -152,4 +143,5 @@ public class SecurityManagerService {
 
     return existingUser;
   }
+
 }
