@@ -6,12 +6,15 @@ import org.springframework.batch.core.JobParameters;
 import java.util.UUID;
 
 @Data
-public class StartJobCommand {
+public class JobCommand {
 
+  public enum Type {START, DELETE}
+
+  private Type type;
   private UUID id;
   private String name;
   private String description;
-  private ExportType type;
+  private ExportType exportType;
   private JobParameters jobParameters;
 
 }
