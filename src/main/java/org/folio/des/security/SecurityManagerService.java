@@ -34,14 +34,6 @@ public class SecurityManagerService {
   private String username;
 
   public void prepareSystemUser(String okapiUrl, String tenantId) {
-    SystemUserParameters systemUserParameters = SystemUserParameters.builder()
-        .id(UUID.randomUUID())
-        .username(username)
-        .password(username)
-        .okapiUrl(okapiUrl)
-        .tenantId(tenantId)
-        .build();
-
     var folioUser = getFolioUser(username);
 
     if (folioUser.isPresent()) {
@@ -49,7 +41,18 @@ public class SecurityManagerService {
       addPermissions(folioUser.get().getId());
     } else {
       var userId = createFolioUser(username);
-      authService.saveCredentials(systemUserParameters);
+      folioUser = getFolioUser(username);
+      if (folioUser.isEmpty()) {
+        log.error("Can't find user {} after creation.", username);
+      }
+
+      authService.saveCredentials(SystemUserParameters.builder()
+          .id(UUID.randomUUID())
+          .username(username)
+          .password(username)
+          .okapiUrl(okapiUrl)
+          .tenantId(tenantId)
+          .build());
       assignPermissions(userId);
     }
 
@@ -63,9 +66,9 @@ public class SecurityManagerService {
 
   private String createFolioUser(String username) {
     final var user = createUserObject(username);
-    final var id = user.getId();
+    log.info("Creating {}.", user);
     usersClient.saveUser(user);
-    return id;
+    return user.getId();
   }
 
   private void updateUser(User existingUser) {

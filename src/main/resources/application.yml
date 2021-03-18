@@ -9,6 +9,7 @@ server:
 logging:
   level:
     liquibase: debug
+    org.folio.des.client.*: debug
 spring:
   application:
     name: mod-data-export-spring
