@@ -2,16 +2,20 @@ package org.folio.des.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.client.ConfigurationClient;
-import org.folio.des.domain.dto.*;
+import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.ConfigModel;
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportConfigCollection;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.service.ExportConfigService;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -62,7 +66,6 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     return config;
   }
 
-  @SneakyThrows
   @Override
   public ExportConfigCollection getConfigCollection() {
     return getConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());

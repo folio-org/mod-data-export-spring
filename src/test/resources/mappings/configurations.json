@@ -1,0 +1,44 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/configurations/entries?query=module%3D%3Dmod-data-export-spring%20and%20configName%3D%3Dexport_config_parameters"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n    \"configs\": [],\n    \"totalRecords\": 0,\n    \"resultInfo\": {\n        \"totalRecords\": 0,\n        \"facets\": [],\n        \"diagnostics\": []\n    }\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/configurations/entries"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n            \"id\": \"0a3cba78-16e7-498e-b75b-98713000277b\",\n            \"module\": \"mod-data-export-spring\",\n            \"configName\": \"export_config_parameters\",\n            \"description\": \"Data export configuration parameters\",\n            \"default\": true,\n            \"enabled\": true,\n            \"value\": \"{\\\"id\\\":\\\"0a3cba78-16e7-498e-b75b-98713000277b\\\",\\\"type\\\":\\\"BURSAR_FEES_FINES\\\",\\\"exportTypeSpecificParameters\\\":{\\\"bursarFeeFines\\\":{\\\"daysOutstanding\\\":10,\\\"patronGroups\\\":[\\\"3684a786-6671-4268-8ed0-9db82ebca60b\\\"]}},\\\"scheduleFrequency\\\":5,\\\"schedulePeriod\\\":\\\"DAY\\\",\\\"scheduleTime\\\":\\\"00:20:00.000Z\\\"}\",\n            \"metadata\": {\n                \"createdDate\": \"2021-03-05T15:23:40.943+00:00\",\n                \"createdByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\",\n                \"updatedDate\": \"2021-03-15T14:50:11.807+00:00\",\n                \"updatedByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\"\n            }\n        }",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/configurations/entries/c8303ff3-7dec-49a1-acc8-7ce4f311fe21"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\n            \"id\": \"0a3cba78-16e7-498e-b75b-98713000277b\",\n            \"module\": \"mod-data-export-spring\",\n            \"configName\": \"export_config_parameters\",\n            \"description\": \"Data export configuration parameters\",\n            \"default\": true,\n            \"enabled\": true,\n            \"value\": \"{\\\"id\\\":\\\"0a3cba78-16e7-498e-b75b-98713000277b\\\",\\\"type\\\":\\\"BURSAR_FEES_FINES\\\",\\\"exportTypeSpecificParameters\\\":{\\\"bursarFeeFines\\\":{\\\"daysOutstanding\\\":10,\\\"patronGroups\\\":[\\\"3684a786-6671-4268-8ed0-9db82ebca60b\\\"]}},\\\"scheduleFrequency\\\":5,\\\"schedulePeriod\\\":\\\"DAY\\\",\\\"scheduleTime\\\":\\\"00:20:00.000Z\\\"}\",\n            \"metadata\": {\n                \"createdDate\": \"2021-03-05T15:23:40.943+00:00\",\n                \"createdByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\",\n                \"updatedDate\": \"2021-03-15T14:50:11.807+00:00\",\n                \"updatedByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\"\n            }\n        }\\\"id\\\":\\\"6c163f99-9df5-419d-9174-da638a1c76ed\\\",\\\"schedulePeriod\\\":\\\"DAY\\\",\\\"weekDays\\\":[\\\"FRIDAY\\\",\\\"MONDAY\\\"]}\",\n    \"metadata\": {\n        \"createdDate\": \"2021-03-24T11:13:48.222+00:00\",\n        \"createdByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\",\n        \"updatedDate\": \"2021-03-24T11:13:48.222+00:00\",\n        \"updatedByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\"\n    }\n}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}
+

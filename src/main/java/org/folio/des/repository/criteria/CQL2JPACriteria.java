@@ -22,14 +22,10 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.cql2pgjson.exception.CQLFeatureUnsupportedException;
 import org.folio.cql2pgjson.exception.QueryValidationException;
-import org.folio.cql2pgjson.model.CqlAccents;
-import org.folio.cql2pgjson.model.CqlCase;
 import org.folio.cql2pgjson.model.CqlModifiers;
 import org.folio.cql2pgjson.model.CqlSort;
 import org.folio.cql2pgjson.model.CqlTermFormat;
 import org.folio.cql2pgjson.util.Cql2SqlUtil;
-import org.folio.dbschema.Index;
-import org.folio.dbschema.util.SqlUtil.Cql2PgUtil;
 import org.z3950.zing.cql.CQLAndNode;
 import org.z3950.zing.cql.CQLBooleanNode;
 import org.z3950.zing.cql.CQLNode;
@@ -120,56 +116,6 @@ public class CQL2JPACriteria<E> {
     return new CQLFeatureUnsupportedException("Not implemented yet: " + node.getClass().getName());
   }
 
-  /**
-   * Return $term, lower($term), f_unaccent($term) or lower(f_unaccent($term)) according to the
-   * cqlModifiers. If undefined use CqlAccents.IGNORE_ACCENTS and CqlCase.IGNORE_CASE as default.
-   *
-   * @param term the String to wrap
-   * @param cqlModifiers what functions to use
-   * @return wrapped term
-   */
-  private static String wrapInLowerUnaccent(String term, CqlModifiers cqlModifiers) {
-    return Cql2PgUtil.wrapInLowerUnaccent(
-        term,
-        cqlModifiers.getCqlCase() != CqlCase.RESPECT_CASE,
-        cqlModifiers.getCqlAccents() != CqlAccents.RESPECT_ACCENTS);
-  }
-
-  /**
-   * Return $term, lower($term), f_unaccent($term) or lower(f_unaccent($term)) according to the
-   * modifiers of index.
-   *
-   * @param term the String to wrap
-   * @param index where to get the modifiers from
-   * @return wrapped term
-   */
-  private static String wrapIndexExpression(String term, Index index) {
-    if (index == null) {
-      return Cql2PgUtil.wrapInLowerUnaccent(term, true, true);
-    }
-    return Cql2PgUtil.wrapInLowerUnaccent(term, !index.isCaseSensitive(), index.isRemoveAccents());
-  }
-
-  /**
-   * Return $term, lower($term), f_unaccent($term), lower(f_unaccent($term)) or $term wrapped using
-   * custom sqlExpressionQuery wrapper according to the modifiers of index.
-   *
-   * @param term the String to wrap
-   * @param index where to get the modifiers from
-   * @return wrapped term
-   */
-  private static String wrapQueryExpression(String term, Index index) {
-    if (index == null) {
-      return Cql2PgUtil.wrapInLowerUnaccent(term, true, true);
-    }
-    String wrapper = index.getSqlExpressionQuery();
-    if (wrapper == null) {
-      return Cql2PgUtil.wrapInLowerUnaccent(
-          term, !index.isCaseSensitive(), index.isRemoveAccents());
-    }
-    return wrapper.replace("$", term);
-  }
-
   private Predicate processBoolean(CQLBooleanNode node) throws QueryValidationException {
     if (node instanceof CQLAndNode) {
       return builder.and(process(node.getLeftOperand()), process(node.getRightOperand()));
@@ -185,9 +131,6 @@ public class CQL2JPACriteria<E> {
       }
       return builder.or(process(node.getLeftOperand()), process(node.getRightOperand()));
     } else if (node instanceof CQLNotNode) {
-      // CQL "NOT" means SQL "AND NOT", see section "7. Boolean Operators" in
-      // https://www.loc.gov/standards/sru/cql/spec.html
-      // TODO: manage case when the field does not exist.
       return builder.not(
           builder.and(process(node.getLeftOperand()), process(node.getRightOperand())));
     } else {
@@ -198,14 +141,7 @@ public class CQL2JPACriteria<E> {
   private Predicate processTerm(CQLTermNode node) throws QueryValidationException {
     String fieldName = node.getIndex();
     if ("cql.allRecords".equalsIgnoreCase(fieldName)) {
-      // TODO: something like return builder.isTrue(true);
       return builder.and();
-    }
-
-    // TODO: create aliases if there is "." in the field name to search over linked tables
-
-    if ("cql.serverChoice".equalsIgnoreCase(fieldName)) {
-      // TODO: what is serverChoice?
     }
 
     Path field;
@@ -243,39 +179,6 @@ public class CQL2JPACriteria<E> {
     }
 
     return toPredicate(field, UUID.fromString(term), comparator);
-
-    // TODO: consider removal or handle asterisks
-    /*
-    if (StringUtils.isEmpty(term)) {
-      term = ASTERISKS_SIGN;
-    }
-    if (ASTERISKS_SIGN.equals(term) && "id".equals(columnName)) {
-      return equals ? "true" : "false";  // no need to check
-      // since id is a mandatory field, so
-      // "all that have id" is the same as "all records"
-    }
-    if (!term.contains(ASTERISKS_SIGN)) { // exact match
-      if (!isValidUUID(term)) {
-        log.warn("Invalid UUID: " + term);
-      }
-      return equals ?  : ;
-    }
-    String truncTerm = term;
-    while (truncTerm.endsWith(ASTERISKS_SIGN)) {  // remove trailing stars
-      truncTerm = truncTerm.substring(0, truncTerm.length() - 1);
-    }
-    if (truncTerm.contains(ASTERISKS_SIGN)) { // any remaining '*' is an error
-      throw new QueryValidationException("CQL: only right truncation supported for id:  " + term);
-    }
-    String lo = new StringBuilder("00000000-0000-0000-0000-000000000000")
-        .replace(0, truncTerm.length(), truncTerm).toString();
-    String hi = new StringBuilder("ffffffff-ffff-ffff-ffff-ffffffffffff")
-        .replace(0, truncTerm.length(), truncTerm).toString();
-    if (!isValidUUID(lo) || !isValidUUID(hi)) {
-      log.warn("Invalid UUID" + hi + " or " + lo);
-    }
-    return equals ? "(" + columnName + " BETWEEN '" + lo + "' AND '" + hi + "')"
-        : "(" + columnName + " NOT BETWEEN '" + lo + "' AND '" + hi + "')";*/
   }
 
   private <E extends Comparable<? super E>> Predicate toPredicate(
@@ -308,68 +211,42 @@ public class CQL2JPACriteria<E> {
     return uuidPattern.matcher(term).matches();
   }
 
-  private String lookupModifier(Index schemaIndex, String modifierName) {
-    if (schemaIndex != null) {
-      List<String> schemaModifiers = schemaIndex.getArrayModifiers();
-      if (schemaModifiers != null) {
-        for (String schemaModifier : schemaModifiers) {
-          if (schemaModifier.equalsIgnoreCase(modifierName)) {
-            return schemaModifier;
-          }
-        }
-      }
-      String subfield = schemaIndex.getArraySubfield();
-      if (subfield != null && subfield.equalsIgnoreCase(modifierName)) {
-        return subfield;
-      }
-    }
-    return null;
-  }
-
   private Predicate indexNode(Path field, CQLTermNode node, CqlModifiers modifiers)
       throws QueryValidationException {
 
-    // primary key
     if ("id".equals(field.getAlias()) || field.equals(root.getModel().getId(Object.class))) {
       return processId(node, field);
     }
 
     boolean isString = String.class.equals(field.getJavaType());
 
-    /* if (dbIndex.isForeignKey()) {
-      return pgId(node, field);
-    }*/
-
     String comparator = node.getRelation().getBase().toLowerCase();
 
     switch (comparator) {
       case "=":
         if (CqlTermFormat.NUMBER.equals(modifiers.getCqlTermFormat())) {
-          return queryBySql(field, node, comparator, modifiers);
-        } /*else {
-            return queryByFt(node, comparator, modifiers);
-          }*/
+          return queryBySql(field, node, comparator);
+        }
       case "adj":
       case "all":
       case "any":
-        // return queryByFt(field, node, comparator, modifiers);
         if (isString) {
-          return queryByLike(field, node, comparator, modifiers);
+          return queryByLike(field, node, comparator);
         } else {
-          return queryBySql(field, node, comparator, modifiers);
+          return queryBySql(field, node, comparator);
         }
       case "==":
       case NOT_EQUALS_OPERATOR:
         if (isString) {
-          return queryByLike(field, node, comparator, modifiers);
+          return queryByLike(field, node, comparator);
         } else {
-          return queryBySql(field, node, comparator, modifiers);
+          return queryBySql(field, node, comparator);
         }
       case "<":
       case ">":
       case "<=":
       case ">=":
-        return queryBySql(field, node, comparator, modifiers);
+        return queryBySql(field, node, comparator);
       default:
         throw new CQLFeatureUnsupportedException(
             "Relation " + comparator + " not implemented yet: " + node.toString());
@@ -377,8 +254,7 @@ public class CQL2JPACriteria<E> {
   }
 
   /** Create an SQL expression using LIKE query syntax. */
-  private Predicate queryByLike(
-      Path field, CQLTermNode node, String comparator, CqlModifiers modifiers) {
+  private Predicate queryByLike(Path field, CQLTermNode node, String comparator) {
 
     if (NOT_EQUALS_OPERATOR.equals(comparator)) {
       return builder.notLike(field, Cql2SqlUtil.cql2like(node.getTerm()));
@@ -388,13 +264,8 @@ public class CQL2JPACriteria<E> {
   }
 
   /** Create an SQL expression using SQL as is syntax. */
-  private Predicate queryBySql(
-      Expression field, CQLTermNode node, String comparator, CqlModifiers modifiers)
+  private Predicate queryBySql(Expression field, CQLTermNode node, String comparator)
       throws QueryValidationException {
-
-    // String term = "'" + Cql2SqlUtil.cql2like(node.getTerm()) + "'";
-    // TODO: maybe handle: if (CqlTermFormat.NUMBER.equals(modifiers.getCqlTermFormat())) {
-    // sql = "(" + indexMod + ")::numeric " + comparator + term;
 
     Comparable val = node.getTerm();
 
@@ -413,9 +284,5 @@ public class CQL2JPACriteria<E> {
     }
 
     return toPredicate(field, val, comparator);
-  }
-
-  private static String wrapForLength(String term) {
-    return "left(" + term + ",600)";
   }
 }
