@@ -30,7 +30,7 @@
         <jobs.yaml.file>${project.basedir}/src/main/resources/swagger.api/jobs.yaml</jobs.yaml.file>
         <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
 
-        <folio-spring-base.version>1.0.2</folio-spring-base.version>
+        <folio-spring-base.version>1.0.4</folio-spring-base.version>
         <folio-spring-tenant.version>1.0.0</folio-spring-tenant.version>
 
         <json.version>20200518</json.version>
