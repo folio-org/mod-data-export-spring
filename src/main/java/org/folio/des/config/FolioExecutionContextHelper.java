@@ -62,9 +62,10 @@ public class FolioExecutionContextHelper {
         FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
             new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
 
-        log.info("FOLIO context initialized with tenant {}, user {}.", tenant, authService.getUsername());
+        log.info("FOLIO context initialized with tenant {}, user {}.", folioExecutionContext.getTenantId(),
+            folioExecutionContext.getUserId());
       } else {
-        log.info("FOLIO context initialized with tenant {}, no logged user.", tenant);
+        log.info("FOLIO context initialized with tenant {}, no logged user.", folioExecutionContext.getTenantId());
       }
     } else {
       throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
