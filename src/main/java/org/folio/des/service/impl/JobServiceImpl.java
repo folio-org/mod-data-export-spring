@@ -161,22 +161,7 @@ public class JobServiceImpl implements JobService {
     result.setSource(entity.getSource());
     result.setIsSystemSource(entity.getIsSystemSource());
     result.setType(entity.getType());
-
-    if (entity.getExportTypeSpecificParameters() != null) {
-      ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
-
-      if (entity.getExportTypeSpecificParameters().getBursarFeeFines() != null) {
-        BursarFeeFines bursarFeeFines = new BursarFeeFines();
-        bursarFeeFines.setFtpUrl(entity.getExportTypeSpecificParameters().getBursarFeeFines().getFtpUrl());
-        bursarFeeFines.setDaysOutstanding(entity.getExportTypeSpecificParameters().getBursarFeeFines().getDaysOutstanding());
-        bursarFeeFines.setPatronGroups(entity.getExportTypeSpecificParameters().getBursarFeeFines().getPatronGroups());
-        exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
-      }
-
-      exportTypeSpecificParameters.setQuery(entity.getExportTypeSpecificParameters().getQuery());
-      result.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-    }
-
+    result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
     result.setFiles(entity.getFiles());
     result.setStartTime(entity.getStartTime());
@@ -206,22 +191,7 @@ public class JobServiceImpl implements JobService {
     result.setSource(dto.getSource());
     result.setIsSystemSource(dto.getIsSystemSource());
     result.setType(dto.getType());
-
-    if (dto.getExportTypeSpecificParameters() != null) {
-      ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
-
-      if (dto.getExportTypeSpecificParameters().getBursarFeeFines() != null) {
-        BursarFeeFines bursarFeeFines = new BursarFeeFines();
-        bursarFeeFines.setFtpUrl(dto.getExportTypeSpecificParameters().getBursarFeeFines().getFtpUrl());
-        bursarFeeFines.setDaysOutstanding(dto.getExportTypeSpecificParameters().getBursarFeeFines().getDaysOutstanding());
-        bursarFeeFines.setPatronGroups(dto.getExportTypeSpecificParameters().getBursarFeeFines().getPatronGroups());
-        exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
-      }
-
-      exportTypeSpecificParameters.setQuery(dto.getExportTypeSpecificParameters().getQuery());
-      result.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-    }
-
+    result.setExportTypeSpecificParameters(dto.getExportTypeSpecificParameters());
     result.setStatus(dto.getStatus());
     result.setFiles(dto.getFiles());
     result.setStartTime(dto.getStartTime());
