@@ -68,6 +68,7 @@ public class JobExecutionService {
 
     JobCommand jobCommand = new JobCommand();
     jobCommand.setType(JobCommand.Type.DELETE);
+    jobCommand.setId(UUID.randomUUID());
     jobCommand.setJobParameters(new JobParameters(
         Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter(StringUtils.join(files, ';')))));
     sendJobCommand(jobCommand);
