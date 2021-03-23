@@ -55,8 +55,12 @@ public class SecurityManagerService {
           .build());
     }
 
-    if (permissionsClient.get("userId==" + user.getId()).getTotalRecords() > 0) {
-      addPermissions(user.getId());
+    Optional<PermissionUser> permissionUserOptional = permissionsClient.get("userId==" + user.getId())
+        .getPermissionUsers()
+        .stream()
+        .findFirst();
+    if (permissionUserOptional.isPresent()) {
+      addPermissions(permissionUserOptional.get());
     } else {
       createPermissionUser(user.getId());
     }
@@ -83,7 +87,7 @@ public class SecurityManagerService {
     }
   }
 
-  private void createPermissionUser(String userId) {
+  private PermissionUser createPermissionUser(String userId) {
     List<String> perms = readPermissionsFromResource(PERMISSIONS_FILE_PATH);
     if (CollectionUtils.isEmpty(perms)) {
       throw new IllegalStateException("No user permissions found in " + PERMISSIONS_FILE_PATH);
@@ -91,21 +95,22 @@ public class SecurityManagerService {
 
     PermissionUser permissionUser = PermissionUser.of(UUID.randomUUID().toString(), userId, perms);
     log.info("Creating {}.", permissionUser);
-    permissionsClient.create(permissionUser);
+    return permissionsClient.create(permissionUser);
   }
 
-  private void addPermissions(String userId) {
+  private void addPermissions(PermissionUser permissionUser) {
     var permissions = readPermissionsFromResource(PERMISSIONS_FILE_PATH);
     if (CollectionUtils.isEmpty(permissions)) {
       throw new IllegalStateException("No user permissions found in " + PERMISSIONS_FILE_PATH);
     }
 
+    permissions.removeAll(permissionUser.getPermissions());
     permissions.forEach(permission -> {
       var p = new Permission();
       p.setPermissionName(permission);
       try {
-        log.info("Adding to user {} permission {}.", userId, p);
-        permissionsClient.addPermission(userId, p);
+        log.info("Adding to user {} permission {}.", permissionUser.getUserId(), p);
+        permissionsClient.addPermission(permissionUser.getUserId(), p);
       } catch (Exception e) {
         log.error(String.format("Error adding permission %s to %s.", permission, username), e);
       }
