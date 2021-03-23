@@ -5,7 +5,8 @@
     "type": "object",
     "properties": {
       "feefineTypeId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid"
       },
       "itemType": {
         "type": "string"

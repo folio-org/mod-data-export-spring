@@ -1,11 +1,12 @@
 package org.folio.des.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.JobParameterNames;
-import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCommand;
 import org.folio.des.domain.entity.Job;
@@ -26,8 +27,9 @@ public class JobExecutionService {
   public static final String DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME = "dataExportJobCommandsTopic";
 
   private final KafkaTemplate<String, JobCommand> kafkaTemplate;
+  private final ObjectMapper objectMapper;
 
-  public static JobCommand prepareStartJobCommand(Job job) {
+  public JobCommand prepareStartJobCommand(Job job) {
     ExportConfigServiceImpl.checkConfig(job.getType(), job.getExportTypeSpecificParameters());
 
     JobCommand result = new JobCommand();
@@ -41,9 +43,13 @@ public class JobExecutionService {
     if (job.getType() == ExportType.CIRCULATION_LOG) {
       params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
     } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
-      BursarFeeFines bursarFeeFines = job.getExportTypeSpecificParameters().getBursarFeeFines();
-      params.put("daysOutstanding", new JobParameter((long) bursarFeeFines.getDaysOutstanding()));
-      params.put("patronGroups", new JobParameter(String.join(",", bursarFeeFines.getPatronGroups())));
+      String bursarFeeFines;
+      try {
+        bursarFeeFines = objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getBursarFeeFines());
+      } catch (JsonProcessingException e) {
+        throw new IllegalArgumentException(e);
+      }
+      params.put("bursarFeeFines", new JobParameter(bursarFeeFines));
     }
     result.setJobParameters(new JobParameters(params));
 

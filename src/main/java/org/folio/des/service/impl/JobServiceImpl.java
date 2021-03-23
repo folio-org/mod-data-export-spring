@@ -115,7 +115,7 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    JobCommand jobCommand = JobExecutionService.prepareStartJobCommand(result);
+    JobCommand jobCommand = jobExecutionService.prepareStartJobCommand(result);
 
     log.info("Upserting {}.", result);
     result = repository.save(result);

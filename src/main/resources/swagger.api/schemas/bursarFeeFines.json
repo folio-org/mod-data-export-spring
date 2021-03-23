@@ -18,13 +18,16 @@
         "minItems": 1
       },
       "servicePointId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid"
       },
       "feefineOwnerId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid"
       },
       "transferAccountId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid"
       },
       "typeMappings": {
         "type": "array",
