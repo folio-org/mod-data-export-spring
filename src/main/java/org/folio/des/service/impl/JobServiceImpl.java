@@ -18,7 +18,6 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +42,9 @@ public class JobServiceImpl implements JobService {
   private final JobExecutionService jobExecutionService;
   private final JobRepository repository;
   private final FolioExecutionContext context;
-  private final FolioExecutionContextHelper contextHelper;
   private final CQLService cqlService;
 
+  @Transactional(readOnly = true)
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
     Optional<Job> jobDtoOptional = repository.findById(id);
@@ -55,6 +54,7 @@ public class JobServiceImpl implements JobService {
     return entityToDto(jobDtoOptional.get());
   }
 
+  @Transactional(readOnly = true)
   @Override
   public JobCollection get(Integer offset, Integer limit, String query) {
     JobCollection result = new JobCollection();
@@ -72,6 +72,7 @@ public class JobServiceImpl implements JobService {
     return result;
   }
 
+  @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto) {
     log.info("Upserting DTO {}.", jobDto);
@@ -126,34 +127,29 @@ public class JobServiceImpl implements JobService {
     return entityToDto(result);
   }
 
+  @Transactional
   @Override
   public void delete(UUID id) {
     repository.deleteById(id);
     log.info("Deleted job {}.", id);
   }
 
-  @Scheduled(fixedRateString = "P1D")
   @Transactional
   @Override
   public void deleteOldJobs() {
-    if (contextHelper.isModuleRegistered()) {
-      contextHelper.initScope();
+    Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
 
-      Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-      log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
-
-      List<Job> jobs = repository.findByUpdatedDateBefore(toDelete);
-      if (CollectionUtils.isEmpty(jobs)) {
-        log.info("Deleted no old jobs.");
-        return;
-      }
-
-      List<UUID> ids = jobs.stream().map(Job::getId).collect(Collectors.toList());
-      repository.deleteByIdIn(ids);
-      log.info("Deleted old jobs [{}].", StringUtils.join(ids, ','));
-
-      jobExecutionService.deleteJobs(jobs);
+    List<Job> jobs = repository.findByUpdatedDateBefore(toDelete);
+    if (CollectionUtils.isEmpty(jobs)) {
+      log.info("Deleted no old jobs.");
+      return;
     }
+
+    repository.deleteInBatch(jobs);
+    log.info("Deleted old jobs [{}].", StringUtils.join(jobs, ','));
+
+    jobExecutionService.deleteJobs(jobs);
   }
 
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {

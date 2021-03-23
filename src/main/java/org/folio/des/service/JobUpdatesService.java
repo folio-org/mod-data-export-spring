@@ -9,6 +9,7 @@ import org.folio.des.repository.JobRepository;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.EnumMap;
@@ -37,6 +38,7 @@ public class JobUpdatesService {
   private final JobRepository repository;
 
   @KafkaListener(topics = { DATA_EXPORT_JOB_EXECUTION_UPDATES_TOPIC_NAME })
+  @Transactional
   public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
     log.info("Received {}.", jobExecutionUpdate);
 
