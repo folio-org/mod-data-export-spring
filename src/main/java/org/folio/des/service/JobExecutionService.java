@@ -43,13 +43,12 @@ public class JobExecutionService {
     if (job.getType() == ExportType.CIRCULATION_LOG) {
       params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
     } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
-      String bursarFeeFines;
       try {
-        bursarFeeFines = objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getBursarFeeFines());
+        params.put("bursarFeeFines",
+            new JobParameter(objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getBursarFeeFines())));
       } catch (JsonProcessingException e) {
         throw new IllegalArgumentException(e);
       }
-      params.put("bursarFeeFines", new JobParameter(bursarFeeFines));
     }
     result.setJobParameters(new JobParameters(params));
 
