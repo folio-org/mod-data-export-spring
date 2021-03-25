@@ -13,8 +13,6 @@ public interface JobService {
 
   Job upsert(Job job);
 
-  void delete(UUID id);
-
   void deleteOldJobs();
 
 }

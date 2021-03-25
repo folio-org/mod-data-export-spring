@@ -129,13 +129,6 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
-  public void delete(UUID id) {
-    repository.deleteById(id);
-    log.info("Deleted job {}.", id);
-  }
-
-  @Transactional
-  @Override
   public void deleteOldJobs() {
     Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
