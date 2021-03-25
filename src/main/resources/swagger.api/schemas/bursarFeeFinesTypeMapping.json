@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Fees and fines for bursar type mapping",
+  "BursarFeeFinesTypeMapping": {
+    "type": "object",
+    "properties": {
+      "feefineTypeId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "itemType": {
+        "type": "string"
+      },
+      "itemDescription": {
+        "type": "string"
+      },
+      "itemCode": {
+        "type": "string",
+        "enum": [
+          "CHARGE",
+          "PAYMENT"
+        ]
+      }
+    }
+  }
+}

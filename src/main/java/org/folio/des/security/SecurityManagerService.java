@@ -7,7 +7,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.PermissionsClient;
 import org.folio.des.client.UsersClient;
-import org.folio.des.domain.dto.*;
+import org.folio.des.domain.dto.Personal;
+import org.folio.des.domain.dto.SystemUserParameters;
+import org.folio.des.domain.dto.User;
+import org.folio.des.domain.dto.permissions.Permission;
+import org.folio.des.domain.dto.permissions.PermissionUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -34,18 +38,14 @@ public class SecurityManagerService {
   private String username;
 
   public void prepareSystemUser(String okapiUrl, String tenantId) {
-    var folioUser = getFolioUser(username);
+    Optional<User> userOptional = getUser(username);
 
-    if (folioUser.isPresent()) {
-      updateUser(folioUser.get());
-      addPermissions(folioUser.get().getId());
+    User user;
+    if (userOptional.isPresent()) {
+      user = userOptional.get();
+      updateUser(user);
     } else {
-      var userId = createFolioUser(username);
-      folioUser = getFolioUser(username);
-      if (folioUser.isEmpty()) {
-        log.error("Can't find user {} after creation.", username);
-      }
-
+      user = createUser(username);
       authService.saveCredentials(SystemUserParameters.builder()
           .id(UUID.randomUUID())
           .username(username)
@@ -53,57 +53,64 @@ public class SecurityManagerService {
           .okapiUrl(okapiUrl)
           .tenantId(tenantId)
           .build());
-      assignPermissions(userId);
     }
 
-  }
-
-  private Optional<User> getFolioUser(String username) {
-    var query = "username==" + username;
-    var results = usersClient.getUsersByQuery(query);
-    return results.getUsers().stream().findFirst();
-  }
-
-  private String createFolioUser(String username) {
-    final var user = createUserObject(username);
-    log.info("Creating {}.", user);
-    usersClient.saveUser(user);
-    return user.getId();
-  }
-
-  private void updateUser(User existingUser) {
-    log.info("Have to update user {}.", existingUser.getUsername());
-    if (existingUserUpToDate(existingUser)) {
-      log.info("User {} is up to date.", existingUser.getUsername());
+    Optional<PermissionUser> permissionUserOptional = permissionsClient.get("userId==" + user.getId())
+        .getPermissionUsers()
+        .stream()
+        .findFirst();
+    if (permissionUserOptional.isPresent()) {
+      addPermissions(permissionUserOptional.get());
+    } else {
+      createPermissionUser(user.getId());
     }
-    usersClient.updateUser(existingUser.getId(), populateMissingUserProperties(existingUser));
-    log.info("Updated user {}.", existingUser.getId());
   }
 
-  private void assignPermissions(String userId) {
+  private Optional<User> getUser(String username) {
+    return usersClient.getUsersByQuery("username==" + username).getUsers().stream().findFirst();
+  }
+
+  private User createUser(String username) {
+    User result = createUserObject(username);
+    log.info("Creating {}.", result);
+    usersClient.saveUser(result);
+    return result;
+  }
+
+  private void updateUser(User user) {
+    if (existingUserUpToDate(user)) {
+      log.info("{} is up to date.", user);
+    } else {
+      populateMissingUserProperties(user);
+      log.info("Updating {}.", user);
+      usersClient.updateUser(user.getId(), user);
+    }
+  }
+
+  private PermissionUser createPermissionUser(String userId) {
     List<String> perms = readPermissionsFromResource(PERMISSIONS_FILE_PATH);
-
     if (CollectionUtils.isEmpty(perms)) {
-      throw new IllegalStateException("No permissions found to assign to user with id: " + userId);
+      throw new IllegalStateException("No user permissions found in " + PERMISSIONS_FILE_PATH);
     }
 
-    var permissions = Permissions.of(UUID.randomUUID().toString(), userId, perms);
-
-    permissionsClient.assignPermissionsToUser(permissions);
+    PermissionUser permissionUser = PermissionUser.of(UUID.randomUUID().toString(), userId, perms);
+    log.info("Creating {}.", permissionUser);
+    return permissionsClient.create(permissionUser);
   }
 
-  private void addPermissions(String userId) {
+  private void addPermissions(PermissionUser permissionUser) {
     var permissions = readPermissionsFromResource(PERMISSIONS_FILE_PATH);
-
     if (CollectionUtils.isEmpty(permissions)) {
-      throw new IllegalStateException("No permissions found to assign to user with id: " + userId);
+      throw new IllegalStateException("No user permissions found in " + PERMISSIONS_FILE_PATH);
     }
 
+    permissions.removeAll(permissionUser.getPermissions());
     permissions.forEach(permission -> {
       var p = new Permission();
       p.setPermissionName(permission);
       try {
-        permissionsClient.addPermission(userId, p);
+        log.info("Adding to user {} permission {}.", permissionUser.getUserId(), p);
+        permissionsClient.addPermission(permissionUser.getUserId(), p);
       } catch (Exception e) {
         log.error(String.format("Error adding permission %s to %s.", permission, username), e);
       }
@@ -111,40 +118,38 @@ public class SecurityManagerService {
   }
 
   private List<String> readPermissionsFromResource(String permissionsFilePath) {
-    List<String> permissions = new ArrayList<>();
+    List<String> result = new ArrayList<>();
     var url = Resources.getResource(permissionsFilePath);
 
     try {
-      permissions = Resources.readLines(url, StandardCharsets.UTF_8);
+      result = Resources.readLines(url, StandardCharsets.UTF_8);
     } catch (IOException e) {
-      log.error(String.format("Error reading permissions from %s.", permissionsFilePath), e);
+      log.error(String.format("Can't read user permissions from %s.", permissionsFilePath), e);
     }
 
-    return permissions;
+    return result;
   }
 
   private User createUserObject(String username) {
-    final var user = new User();
+    final var result = new User();
 
-    user.setId(UUID.randomUUID().toString());
-    user.setActive(true);
-    user.setUsername(username);
+    result.setId(UUID.randomUUID().toString());
+    result.setActive(true);
+    result.setUsername(username);
 
+    populateMissingUserProperties(result);
+
+    return result;
+  }
+
+  private boolean existingUserUpToDate(User user) {
+    return user.getPersonal() != null && StringUtils.isNotBlank(user.getPersonal().getLastName());
+  }
+
+  private User populateMissingUserProperties(User user) {
     user.setPersonal(new Personal());
     user.getPersonal().setLastName(USER_LAST_NAME);
-
     return user;
-  }
-
-  private boolean existingUserUpToDate(User existingUser) {
-    return existingUser.getPersonal() != null && StringUtils.isNotBlank(existingUser.getPersonal().getLastName());
-  }
-
-  private User populateMissingUserProperties(User existingUser) {
-    existingUser.setPersonal(new Personal());
-    existingUser.getPersonal().setLastName(USER_LAST_NAME);
-
-    return existingUser;
   }
 
 }

@@ -4,10 +4,6 @@
   "BursarFeeFines": {
     "type": "object",
     "properties": {
-      "ftpUrl": {
-        "type": "string",
-        "description": "Url to ftp server"
-      },
       "daysOutstanding": {
         "type": "integer",
         "minimum": 0,
@@ -20,6 +16,24 @@
           "minLength": 1
         },
         "minItems": 1
+      },
+      "servicePointId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "feefineOwnerId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "transferAccountId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "typeMappings": {
+        "type": "array",
+        "items": {
+          "$ref": "bursarFeeFinesTypeMapping.json#/BursarFeeFinesTypeMapping"
+        }
       }
     },
     "required": [
