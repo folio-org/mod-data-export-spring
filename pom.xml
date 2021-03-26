@@ -37,9 +37,9 @@
         <json.version>20200518</json.version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
-        <sonar.exclusions>
-            **/src/main/java/org/folio/des/**
-        </sonar.exclusions>
+<!--        <sonar.exclusions>-->
+<!--            **/src/main/java/org/folio/des/**-->
+<!--        </sonar.exclusions>-->
 
         <!-- Test properties-->
         <mockito.version>3.7.7</mockito.version>
