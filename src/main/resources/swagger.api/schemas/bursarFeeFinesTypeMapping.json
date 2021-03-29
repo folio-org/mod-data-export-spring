@@ -9,10 +9,14 @@
         "format": "uuid"
       },
       "itemType": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12
       },
       "itemDescription": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 30
       },
       "itemCode": {
         "type": "string",
@@ -21,6 +25,12 @@
           "PAYMENT"
         ]
       }
-    }
+    },
+    "required": [
+      "feefineTypeId",
+      "itemType",
+      "itemDescription",
+      "itemCode"
+    ]
   }
 }
