@@ -4,7 +4,7 @@ INSERT INTO diku_mod_data_export_spring.job (id, name, description, source, is_s
                                              created_by_username, updated_date, updated_by_user_id,
                                              updated_by_username, output_format, error_details,
                                              batch_status, exit_status)
-VALUES ('12ae5d0f-1525-44a1-a361-0bc9b88e8179', '000112', null, 'data-export-system-user', true,
+VALUES ('12ae5d0f-1525-44a1-a361-0bc9b88e8179', '000112', 'test-desc', 'data-export-system-user', true,
         'BURSAR_FEES_FINES', '{
     "bursarFeeFines": {
       "patronGroups": [

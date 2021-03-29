@@ -1,6 +1,5 @@
 package org.folio.des.security;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,7 +19,6 @@ public class AuthService {
   private final AuthClient authClient;
 
   @Value("${folio.system.username}")
-  @Getter
   private String username;
 
   public SystemUserParameters loginSystemUser(String tenant, String url) {

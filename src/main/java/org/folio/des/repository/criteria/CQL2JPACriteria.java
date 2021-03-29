@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -19,7 +18,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.cql2pgjson.exception.CQLFeatureUnsupportedException;
 import org.folio.cql2pgjson.exception.QueryValidationException;
 import org.folio.cql2pgjson.model.CqlModifiers;
@@ -40,21 +38,15 @@ import org.z3950.zing.cql.ModifierSet;
 @Log4j2
 public class CQL2JPACriteria<E> {
 
-  private final Pattern uuidPattern =
-      Pattern.compile(
-          "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-
   private final CriteriaBuilder builder;
 
   public final Root<E> root;
   public static final String NOT_EQUALS_OPERATOR = "<>";
-  private final Class<E> entityCls;
   public final CriteriaQuery<E> criteria;
   private static final String ASTERISKS_SIGN = "*";
 
   public CQL2JPACriteria(Class<E> entityCls, EntityManager entityManager) {
     this.builder = entityManager.getCriteriaBuilder();
-    this.entityCls = entityCls;
     criteria = builder.createQuery(entityCls);
     root = criteria.from(entityCls);
   }
@@ -69,13 +61,13 @@ public class CQL2JPACriteria<E> {
     try {
       CQLParser parser = new CQLParser();
       CQLNode node = parser.parse(cql);
-      return toCriteria(node, entityCls);
+      return toCriteria(node);
     } catch (IOException | CQLParseException e) {
       throw new QueryValidationException(e);
     }
   }
 
-  private CriteriaQuery<E> toCriteria(CQLNode node, Class<E> entityCls)
+  private CriteriaQuery<E> toCriteria(CQLNode node)
       throws QueryValidationException {
     Predicate predicates;
 
@@ -144,41 +136,21 @@ public class CQL2JPACriteria<E> {
       return builder.and();
     }
 
-    Path field;
+    var field = getPath(fieldName);
+    CqlModifiers cqlModifiers = new CqlModifiers(node);
+    return indexNode(field, node, cqlModifiers);
+  }
+
+  private Path<?> getPath(String fieldName) {
     if (fieldName.contains(".")) {
       final int dotIdx = fieldName.indexOf(".");
       final String attributeName = fieldName.substring(0, dotIdx);
       Join<E, Object> children = root.join(attributeName, JoinType.LEFT);
       root.fetch(attributeName);
-      field = children.get(fieldName.substring(dotIdx + 1));
+      return children.get(fieldName.substring(dotIdx + 1));
     } else {
-      field = root.get(fieldName);
+      return root.get(fieldName);
     }
-    CqlModifiers cqlModifiers = new CqlModifiers(node);
-    return indexNode(field, node, cqlModifiers);
-  }
-
-  /**
-   * Search a UUID field that we've extracted from the jsonb into a proper UUID database table
-   * column. This is either the primary key id or a foreign key. There always exists an index. Using
-   * BETWEEN lo AND hi with UUIDs is faster than a string comparison with truncation.
-   *
-   * @param node the CQL to convert into SQL
-   * @return SQL where clause component for this term
-   * @throws QueryValidationException on invalid UUID format or invalid operator
-   */
-  private Predicate processId(CQLTermNode node, Path field) throws QueryValidationException {
-    String comparator = StringUtils.defaultString(node.getRelation().getBase());
-    if (!node.getRelation().getModifiers().isEmpty()) {
-      throw new QueryValidationException(
-          "CQL: Unsupported modifier " + node.getRelation().getModifiers().get(0).getType());
-    }
-    String term = node.getTerm();
-    if (!isValidUUID(term)) {
-      throw new QueryValidationException("CQL: Invalid UUID after '" + comparator + "': " + term);
-    }
-
-    return toPredicate(field, UUID.fromString(term), comparator);
   }
 
   private <E extends Comparable<? super E>> Predicate toPredicate(
@@ -207,16 +179,8 @@ public class CQL2JPACriteria<E> {
     }
   }
 
-  private boolean isValidUUID(String term) {
-    return uuidPattern.matcher(term).matches();
-  }
-
-  private Predicate indexNode(Path field, CQLTermNode node, CqlModifiers modifiers)
+  private Predicate indexNode(Path<?> field, CQLTermNode node, CqlModifiers modifiers)
       throws QueryValidationException {
-
-    if ("id".equals(field.getAlias()) || field.equals(root.getModel().getId(Object.class))) {
-      return processId(node, field);
-    }
 
     boolean isString = String.class.equals(field.getJavaType());
 
@@ -230,18 +194,10 @@ public class CQL2JPACriteria<E> {
       case "adj":
       case "all":
       case "any":
-        if (isString) {
-          return queryByLike(field, node, comparator);
-        } else {
-          return queryBySql(field, node, comparator);
-        }
+        return buildQuery(field, node, isString, comparator);
       case "==":
       case NOT_EQUALS_OPERATOR:
-        if (isString) {
-          return queryByLike(field, node, comparator);
-        } else {
-          return queryBySql(field, node, comparator);
-        }
+        return buildQuery(field, node, isString, comparator);
       case "<":
       case ">":
       case "<=":
@@ -253,8 +209,17 @@ public class CQL2JPACriteria<E> {
     }
   }
 
+  private Predicate buildQuery(Path<?> field, CQLTermNode node, boolean isString, String comparator)
+    throws QueryValidationException {
+    if (isString) {
+      return queryByLike((Path<String>) field, node, comparator);
+    } else {
+      return queryBySql(field, node, comparator);
+    }
+  }
+
   /** Create an SQL expression using LIKE query syntax. */
-  private Predicate queryByLike(Path field, CQLTermNode node, String comparator) {
+  private Predicate queryByLike(Path<String> field, CQLTermNode node, String comparator) {
 
     if (NOT_EQUALS_OPERATOR.equals(comparator)) {
       return builder.notLike(field, Cql2SqlUtil.cql2like(node.getTerm()));
@@ -269,7 +234,7 @@ public class CQL2JPACriteria<E> {
 
     Comparable val = node.getTerm();
 
-    Class javaType = field.getJavaType();
+    Class<?> javaType = field.getJavaType();
     if (Number.class.equals(javaType)) {
       val = Integer.parseInt((String) val);
     } else if (UUID.class.equals(javaType)) {

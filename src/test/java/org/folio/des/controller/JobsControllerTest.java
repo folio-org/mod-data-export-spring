@@ -83,6 +83,83 @@ class JobsControllerTest extends BaseTest {
   }
 
   @Test
+  @DisplayName("Find jobs by dates")
+  void findJobsByQueryDateRange() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs?limit=30&offset=0&query=(endTime>=2020-12-12T00:00:00.000 and endTime<=2020-12-13T23:59:59.999) sortby name/sort.descending")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().isOk(),
+                content().contentType(MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.totalRecords", is(0))));
+  }
+
+  @Test
+  @DisplayName("Find jobs excluding by id")
+  void excludeJobById() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs?limit=30&offset=0&query=(id<>12ae5d0f-1525-44a1-a361-0bc9b88e8179 or name=*)")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().isOk(),
+                content().contentType(MediaType.APPLICATION_JSON_VALUE),
+              jsonPath("$.totalRecords", is(4)),
+              jsonPath("$.jobRecords", hasSize(4))));
+  }
+
+  @Test
+  @DisplayName("Find jobs by source or desc")
+  void findJobsBySourceOrDesc() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs?limit=30&offset=0&query=(source<>data-export-system-user or description==test-desc)")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().isOk(),
+                content().contentType(MediaType.APPLICATION_JSON_VALUE),
+              jsonPath("$.totalRecords", is(4)),
+              jsonPath("$.jobRecords", hasSize(4))));
+  }
+
+  @Test
+  @DisplayName("Find jobs by date range")
+  void findJobsByStrictDateRange() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs?limit=30&offset=0&query=(endTime>2020-12-12T00:00:00.000 and endTime<2020-12-13T23:59:59.999)")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().isOk(),
+                content().contentType(MediaType.APPLICATION_JSON_VALUE),
+              jsonPath("$.totalRecords", is(0))));
+  }
+
+  @Test
+  @DisplayName("Find jobs by attribute")
+  void findJobsAttribute() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs?limit=30&offset=0&query=(metadata.endTime>2020-12-12T00:00:00.000)")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().isBadRequest(),
+                content().contentType(MediaType.APPLICATION_JSON_VALUE),
+              jsonPath("$.errors[0].type", is("IllegalArgumentException"))));
+  }
+
+  @Test
   @DisplayName("Find jobs by status and type sorted by type")
   void findJobsByQuery() throws Exception {
     mockMvc
