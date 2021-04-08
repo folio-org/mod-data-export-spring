@@ -3,11 +3,13 @@ package org.folio.des.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.JobRepository;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.listener.AcknowledgingMessageListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +21,8 @@ import java.util.Optional;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class JobUpdatesService {
+public class JobUpdatesService implements AcknowledgingMessageListener<String, Job> {
 
-  public static final String DATA_EXPORT_JOB_EXECUTION_UPDATES_TOPIC_NAME = "dataExportJobExecutionUpdatesTopic";
   private static final Map<BatchStatus, JobStatus> JOB_STATUSES = new EnumMap<>(BatchStatus.class);
 
   static {
@@ -37,10 +38,12 @@ public class JobUpdatesService {
 
   private final JobRepository repository;
 
-  @KafkaListener(topics = { DATA_EXPORT_JOB_EXECUTION_UPDATES_TOPIC_NAME })
   @Transactional
-  public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
+  @Override
+  public void onMessage(ConsumerRecord<String, Job> data, Acknowledgment acknowledgment) {
+    Job jobExecutionUpdate = data.value();
     log.info("Received {}.", jobExecutionUpdate);
+    acknowledgment.acknowledge();
 
     Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
     if (jobOptional.isEmpty()) {
