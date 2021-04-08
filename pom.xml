@@ -38,9 +38,7 @@
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
         <sonar.exclusions>
-            /src/main/java/org/folio/des/ModDataExportSpringApplication.java,
-            /src/main/java/org/folio/des/rest/resource/**,
-            /src/main/java/org/folio/des/domain/**
+            **/src/main/java/org/folio/des/**
         </sonar.exclusions>
 
         <!-- Test properties-->
@@ -149,31 +147,31 @@
             <scope>test</scope>
         </dependency>
 
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${testcontainers.version}</version>
-        <scope>test</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${testcontainers.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.github.tomakehurst</groupId>
-        <artifactId>wiremock-standalone</artifactId>
-        <version>${wiremock.version}</version>
-        <scope>test</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-      <dependency>
-        <groupId>org.springframework.kafka</groupId>
-        <artifactId>spring-kafka-test</artifactId>
-        <scope>test</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
