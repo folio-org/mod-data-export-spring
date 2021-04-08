@@ -20,6 +20,7 @@ spring:
     properties:
       hibernate.format_sql: true
     open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
   liquibase:
     changeLog: classpath:db/changelog/changelog-master.xml
     enabled: true

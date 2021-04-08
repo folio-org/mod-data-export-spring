@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.config.KafkaConfiguration;
 import org.folio.des.domain.JobParameterNames;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCommand;
@@ -13,7 +14,6 @@ import org.folio.des.domain.entity.Job;
 import org.folio.des.service.impl.ExportConfigServiceImpl;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,9 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JobExecutionService {
 
-  public static final String DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME = "dataExportJobCommandsTopic";
-
-  private final KafkaTemplate<String, JobCommand> kafkaTemplate;
+  private final KafkaConfiguration kafka;
   private final ObjectMapper objectMapper;
 
   public JobCommand prepareStartJobCommand(Job job) {
@@ -56,9 +54,7 @@ public class JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
-    log.info("Sending {}.", jobCommand);
-    kafkaTemplate.send(DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME, jobCommand.getId().toString(), jobCommand);
-    log.info("Sent job {}.", jobCommand.getId());
+    kafka.send(kafka.getCommandTopic(), jobCommand.getId().toString(), jobCommand);
   }
 
   public void deleteJobs(List<Job> jobs) {
