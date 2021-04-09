@@ -49,18 +49,19 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
   @Value(value = "${spring.kafka.bootstrap-servers}")
   private String boostrapServers;
 
-  private ConsumerFactory<?, ?> consumerFactory;
-
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final FolioExecutionContext folioExecutionContext;
   private final ObjectMapper objectMapper;
+
+  private ConsumerFactory<String, Object> consumerFactory;
+  private KafkaMessageListenerContainer<String, Object> listenerContainer;
 
   @Override
   @SuppressWarnings("java:S2095")
   // JsonDeserializer is passed to Kafka and will be used there so it can not be closed here as Sonar kindly suggests
   public void customize(DefaultKafkaConsumerFactory<?, ?> consumerFactory) {
     consumerFactory.setValueDeserializer(((JsonDeserializer) new JsonDeserializer<>(objectMapper)).trustedPackages("*"));
-    this.consumerFactory = consumerFactory;
+    this.consumerFactory = (ConsumerFactory<String, Object>) consumerFactory;
   }
 
   public void init(Topic consumerTopic, AcknowledgingMessageListener<String, ?> listener) {
@@ -76,7 +77,8 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
     ContainerProperties containerProperties = new ContainerProperties(consumerTopic.getName());
     containerProperties.setMessageListener(listener);
     log.info("Creating Kafka listener container for topic {}.", consumerTopic.getName());
-    new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
+    listenerContainer = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
+    listenerContainer.start();
 
     log.info("Kafka initialized.");
   }
