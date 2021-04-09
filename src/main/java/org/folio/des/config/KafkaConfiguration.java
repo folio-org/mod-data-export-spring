@@ -48,6 +48,8 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
 
   @Value(value = "${spring.kafka.bootstrap-servers}")
   private String boostrapServers;
+  @Value(value = "${spring.kafka.listener.ack-mode:batch}")
+  private ContainerProperties.AckMode ackMode;
 
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final FolioExecutionContext folioExecutionContext;
@@ -76,6 +78,7 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
 
     ContainerProperties containerProperties = new ContainerProperties(consumerTopic.getName());
     containerProperties.setMessageListener(listener);
+    containerProperties.setAckMode(ackMode);
     log.info("Creating Kafka listener container for topic {}.", consumerTopic.getName());
     listenerContainer = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
     listenerContainer.start();
