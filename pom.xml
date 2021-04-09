@@ -40,6 +40,7 @@
         <sonar.exclusions>
             **/src/main/java/org/folio/des/ModDataExportSpringApplication.java,
             **/src/main/java/org/folio/des/rest/**,
+            **/src/main/java/org/folio/des/config/**,
             **/src/main/java/org/folio/des/domain/**
         </sonar.exclusions>
 
