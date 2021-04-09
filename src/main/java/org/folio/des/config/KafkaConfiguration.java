@@ -56,6 +56,8 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
   private final ObjectMapper objectMapper;
 
   @Override
+  @SuppressWarnings("java:S2095")
+  // JsonDeserializer is passed to Kafka and will be used there so it can not be closed here as Sonar kindly suggests
   public void customize(DefaultKafkaConsumerFactory<?, ?> consumerFactory) {
     consumerFactory.setValueDeserializer(((JsonDeserializer) new JsonDeserializer<>(objectMapper)).trustedPackages("*"));
     this.consumerFactory = consumerFactory;
