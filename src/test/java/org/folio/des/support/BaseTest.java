@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import lombok.SneakyThrows;
-import org.folio.des.config.KafkaConfiguration;
 import org.folio.des.scheduling.ExportTrigger;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -39,8 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(initializers = BaseTest.DockerPostgreDataSourceInitializer.class)
 @AutoConfigureMockMvc
 @Testcontainers
-@EmbeddedKafka(topics = { KafkaConfiguration.DATA_EXPORT_JOB_UPDATE_TOPIC_NAME,
-    KafkaConfiguration.DATA_EXPORT_JOB_COMMAND_TOPIC_NAME })
+@EmbeddedKafka(topics = { "diku.data-export.job.update", "diku.data-export.job.command" })
 @EnableKafka
 public abstract class BaseTest {
 

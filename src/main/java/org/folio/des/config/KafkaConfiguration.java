@@ -34,8 +34,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer {
 
-  public static final String DATA_EXPORT_JOB_COMMAND_TOPIC_NAME = "data-export.job.command";
-  public static final String DATA_EXPORT_JOB_UPDATE_TOPIC_NAME = "data-export.job.update";
+  @RequiredArgsConstructor
+  @Getter
+  public enum Topic {
+    JOB_COMMAND("data-export.job.command"), JOB_UPDATE("data-export.job.update");
+
+    private final String pattern;
+    private String name;
+  }
 
   private static final int DEFAULT_OPERATION_TIMEOUT = 30;
   private static final String TOPICS_CREATION_ERROR = "Failed to create topics";
@@ -43,10 +49,6 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
   @Value(value = "${spring.kafka.bootstrap-servers}")
   private String boostrapServers;
 
-  @Getter
-  private String commandTopic;
-  @Getter
-  private String updateTopic;
   private ConsumerFactory<?, ?> consumerFactory;
 
   private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -59,52 +61,51 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
     this.consumerFactory = consumerFactory;
   }
 
-  public void init(AcknowledgingMessageListener<String, ?> listener) {
+  public void init(Topic consumerTopic, AcknowledgingMessageListener<String, ?> listener) {
     log.info("Kafka initializing.");
 
+    String tenantId = folioExecutionContext.getTenantId();
+    Arrays.stream(Topic.values()).forEach(t -> t.name = tenantId + '.' + t.getPattern());
     try (Admin admin = Admin.create(Collections.singletonMap(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers))) {
-      List<NewTopic> topics = new ArrayList<>(2);
-      String tenantId = folioExecutionContext.getTenantId();
-      topics.add(createTopicObject(tenantId + '.' + DATA_EXPORT_JOB_COMMAND_TOPIC_NAME));
-      topics.add(createTopicObject(tenantId + '.' + DATA_EXPORT_JOB_UPDATE_TOPIC_NAME));
-      addTopicsIfNeeded(admin, topics);
-      commandTopic = tenantId + '.' + DATA_EXPORT_JOB_COMMAND_TOPIC_NAME;
-      updateTopic = tenantId + '.' + DATA_EXPORT_JOB_UPDATE_TOPIC_NAME;
+      addTopicsIfNeeded(admin,
+          Arrays.stream(Topic.values()).map(t -> KafkaConfiguration.createTopicObject(t.getName())).collect(Collectors.toList()));
     }
 
-    ContainerProperties containerProperties = new ContainerProperties(updateTopic);
+    ContainerProperties containerProperties = new ContainerProperties(consumerTopic.getName());
     containerProperties.setMessageListener(listener);
+    log.info("Creating Kafka listener container for topic {}.", consumerTopic.getName());
     new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
 
     log.info("Kafka initialized.");
   }
 
-  public void send(String topic, String key, Object data) {
+  public void send(Topic topic, String key, Object data) {
     log.info("Sending {}.", data);
-    if (StringUtils.isBlank(topic)) {
+    if (StringUtils.isBlank(topic.getName())) {
       throw new IllegalStateException("Kafka connection is not initialized yet (it is done while tenant registration)");
     }
-    kafkaTemplate.send(topic, key, data);
+    kafkaTemplate.send(topic.getName(), key, data);
     log.info("Sent {}.", data);
   }
 
-  private NewTopic createTopicObject(String topic) {
+  private static NewTopic createTopicObject(String topic) {
     return TopicBuilder.name(topic).build();
   }
 
   private void addTopicsIfNeeded(Admin admin, Collection<NewTopic> topics) {
-    if (!topics.isEmpty()) {
-      Map<String, NewTopic> topicNameToTopic = new HashMap<>();
-      topics.forEach(t -> topicNameToTopic.compute(t.name(), (k, v) -> t));
-      DescribeTopicsResult topicInfo = admin.describeTopics(topics.stream().map(NewTopic::name).collect(Collectors.toList()));
-      List<NewTopic> topicsToAdd = new ArrayList<>();
-      Map<String, NewPartitions> topicsToModify = checkPartitions(topicNameToTopic, topicInfo, topicsToAdd);
-      if (!topicsToAdd.isEmpty()) {
-        addTopics(admin, topicsToAdd);
-      }
-      if (!topicsToModify.isEmpty()) {
-        modifyTopics(admin, topicsToModify);
-      }
+    if (topics.isEmpty()) {
+      return;
+    }
+    Map<String, NewTopic> topicNameToTopic = new HashMap<>();
+    topics.forEach(t -> topicNameToTopic.compute(t.name(), (k, v) -> t));
+    DescribeTopicsResult topicInfo = admin.describeTopics(topics.stream().map(NewTopic::name).collect(Collectors.toList()));
+    List<NewTopic> topicsToAdd = new ArrayList<>();
+    Map<String, NewPartitions> topicsToModify = checkPartitions(topicNameToTopic, topicInfo, topicsToAdd);
+    if (!topicsToAdd.isEmpty()) {
+      addTopics(admin, topicsToAdd);
+    }
+    if (!topicsToModify.isEmpty()) {
+      modifyTopics(admin, topicsToModify);
     }
   }
 

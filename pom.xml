@@ -38,7 +38,9 @@
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
         <sonar.exclusions>
-            **/src/main/java/org/folio/des/**
+            **/src/main/java/org/folio/des/ModDataExportSpringApplication.java,
+            **/src/main/java/org/folio/des/rest/**,
+            **/src/main/java/org/folio/des/domain/**
         </sonar.exclusions>
 
         <!-- Test properties-->

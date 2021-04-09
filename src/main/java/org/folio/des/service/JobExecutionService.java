@@ -54,7 +54,7 @@ public class JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
-    kafka.send(kafka.getCommandTopic(), jobCommand.getId().toString(), jobCommand);
+    kafka.send(KafkaConfiguration.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
 
   public void deleteJobs(List<Job> jobs) {

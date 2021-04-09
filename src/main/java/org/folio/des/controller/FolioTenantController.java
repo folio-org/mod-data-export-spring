@@ -39,8 +39,8 @@ public class FolioTenantController extends TenantController {
     if (tenantInit.getStatusCode() == HttpStatus.OK) {
       try {
         contextHelper.registerTenant();
+        kafka.init(KafkaConfiguration.Topic.JOB_UPDATE, jobUpdatesService);
         scheduler.initScheduleConfiguration();
-        kafka.init(jobUpdatesService);
       } catch (Exception e) {
         log.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
