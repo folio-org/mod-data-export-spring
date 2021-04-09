@@ -43,7 +43,10 @@ public class JobUpdatesService implements AcknowledgingMessageListener<String, J
   public void onMessage(ConsumerRecord<String, Job> data, Acknowledgment acknowledgment) {
     Job jobExecutionUpdate = data.value();
     log.info("Received {}.", jobExecutionUpdate);
-    acknowledgment.acknowledge();
+
+    if (acknowledgment != null) {
+      acknowledgment.acknowledge();
+    }
 
     Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
     if (jobOptional.isEmpty()) {
