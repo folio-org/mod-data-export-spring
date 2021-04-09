@@ -54,8 +54,8 @@ class JobUpdatesServiceTest extends BaseTest {
     job.setErrorDetails("No errors");
     job.setExitStatus(ExitStatus.COMPLETED);
 
-    updatesService.onMessage(
-        new ConsumerRecord<>(KafkaConfiguration.DATA_EXPORT_JOB_UPDATE_TOPIC_NAME, 0, 0, job.getId().toString(), job), () -> {
+    updatesService.onMessage(new ConsumerRecord<>(KafkaConfiguration.Topic.JOB_UPDATE.getName(), 0, 0, job.getId().toString(), job),
+        () -> {
         });
 
     final Job savedJob = repository.findById(id).get();
@@ -65,7 +65,6 @@ class JobUpdatesServiceTest extends BaseTest {
         () -> assertEquals(job.getStatus(), savedJob.getStatus()), () -> assertEquals(job.getStartTime(), savedJob.getStartTime()),
         () -> assertEquals(job.getEndTime(), savedJob.getEndTime()), () -> assertEquals(job.getFiles(), savedJob.getFiles()),
         () -> assertEquals(job.getErrorDetails(), savedJob.getErrorDetails()));
-
   }
 
 }
