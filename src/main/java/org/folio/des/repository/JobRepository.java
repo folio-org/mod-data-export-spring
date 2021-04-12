@@ -15,6 +15,4 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
 
   List<Job> findByUpdatedDateBefore(Date updatedDate);
 
-  void deleteByIdIn(List<UUID> ids);
-
 }

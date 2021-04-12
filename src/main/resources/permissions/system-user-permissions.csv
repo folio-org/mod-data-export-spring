@@ -8,3 +8,5 @@ users.item.put
 configuration.entries.collection.get
 configuration.entries.item.post
 configuration.entries.item.put
+transfers.collection.get
+inventory-storage.service-points.collection.get

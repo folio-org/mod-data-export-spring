@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.4.RELEASE</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <groupId>org.folio</groupId>
@@ -30,19 +31,24 @@
         <jobs.yaml.file>${project.basedir}/src/main/resources/swagger.api/jobs.yaml</jobs.yaml.file>
         <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
 
-        <folio-spring-base.version>1.0.2</folio-spring-base.version>
+        <folio-spring-base.version>1.0.4</folio-spring-base.version>
         <folio-spring-tenant.version>1.0.0</folio-spring-tenant.version>
 
         <json.version>20200518</json.version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
         <sonar.exclusions>
-            **/src/main/java/org/folio/des/**
+            **/src/main/java/org/folio/des/ModDataExportSpringApplication.java,
+            **/src/main/java/org/folio/des/rest/**,
+            **/src/main/java/org/folio/des/config/**,
+            **/src/main/java/org/folio/des/domain/**
         </sonar.exclusions>
 
         <!-- Test properties-->
         <mockito.version>3.7.7</mockito.version>
         <junit-extensions.version>2.4.0</junit-extensions.version>
+        <testcontainers.version>1.15.1</testcontainers.version>
+        <wiremock.version>2.27.2</wiremock.version>
     </properties>
 
     <dependencies>
@@ -143,6 +149,32 @@
             <version>${junit-extensions.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -208,7 +240,9 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue</modelsToGenerate>
+                            <modelsToGenerate>
+                                Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue
+                            </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
@@ -238,7 +272,8 @@
                             <generateApiTests>true</generateApiTests>
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
-                            <modelsToGenerate>BursarFeeFines,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection
+                            <modelsToGenerate>
+                                BursarFeeFinesTypeMapping,BursarFeeFines,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection
                             </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
@@ -332,7 +367,7 @@
         <url>https://github.com/folio-org/${project.artifactId}</url>
         <connection>scm:git:git://github.com/folio-org/${project.artifactId}.git</connection>
         <developerConnection>scm:git:git@github.com:folio-org/${project.artifactId}.git</developerConnection>
-        <tag>v1.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>

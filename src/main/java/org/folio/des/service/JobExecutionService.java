@@ -1,18 +1,19 @@
 package org.folio.des.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.config.KafkaConfiguration;
 import org.folio.des.domain.JobParameterNames;
-import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCommand;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.service.impl.ExportConfigServiceImpl;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -23,11 +24,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JobExecutionService {
 
-  public static final String DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME = "dataExportJobCommandsTopic";
+  private final KafkaConfiguration kafka;
+  private final ObjectMapper objectMapper;
 
-  private final KafkaTemplate<String, JobCommand> kafkaTemplate;
-
-  public static JobCommand prepareStartJobCommand(Job job) {
+  public JobCommand prepareStartJobCommand(Job job) {
     ExportConfigServiceImpl.checkConfig(job.getType(), job.getExportTypeSpecificParameters());
 
     JobCommand result = new JobCommand();
@@ -41,9 +41,12 @@ public class JobExecutionService {
     if (job.getType() == ExportType.CIRCULATION_LOG) {
       params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
     } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
-      BursarFeeFines bursarFeeFines = job.getExportTypeSpecificParameters().getBursarFeeFines();
-      params.put("daysOutstanding", new JobParameter((long) bursarFeeFines.getDaysOutstanding()));
-      params.put("patronGroups", new JobParameter(String.join(",", bursarFeeFines.getPatronGroups())));
+      try {
+        params.put("bursarFeeFines",
+            new JobParameter(objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getBursarFeeFines())));
+      } catch (JsonProcessingException e) {
+        throw new IllegalArgumentException(e);
+      }
     }
     result.setJobParameters(new JobParameters(params));
 
@@ -51,9 +54,7 @@ public class JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
-    log.info("Sending {}.", jobCommand);
-    kafkaTemplate.send(DATA_EXPORT_JOB_COMMANDS_TOPIC_NAME, jobCommand.getId().toString(), jobCommand);
-    log.info("Sent job {}.", jobCommand.getId());
+    kafka.send(KafkaConfiguration.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
 
   public void deleteJobs(List<Job> jobs) {
@@ -68,6 +69,7 @@ public class JobExecutionService {
 
     JobCommand jobCommand = new JobCommand();
     jobCommand.setType(JobCommand.Type.DELETE);
+    jobCommand.setId(UUID.randomUUID());
     jobCommand.setJobParameters(new JobParameters(
         Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter(StringUtils.join(files, ';')))));
     sendJobCommand(jobCommand);

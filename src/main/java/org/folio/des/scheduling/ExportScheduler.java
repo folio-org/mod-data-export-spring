@@ -1,7 +1,5 @@
 package org.folio.des.scheduling;
 
-import java.util.Optional;
-import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
@@ -10,9 +8,13 @@ import org.folio.des.domain.dto.Job;
 import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobService;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.concurrent.Executors;
 
 @Component
 @EnableScheduling
@@ -49,6 +51,14 @@ public class ExportScheduler implements SchedulingConfigurer {
     trigger.setConfig(exportConfig);
     createScheduledJob(exportConfig);
     reconfigureSchedule();
+  }
+
+  @Scheduled(fixedRateString = "P1D")
+  public void deleteOldJobs() {
+    if (contextHelper.isModuleRegistered()) {
+      contextHelper.initScope();
+      jobService.deleteOldJobs();
+    }
   }
 
   private void reconfigureSchedule() {
