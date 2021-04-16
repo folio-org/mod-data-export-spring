@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,10 +38,11 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
   @RequiredArgsConstructor
   @Getter
   public enum Topic {
-    JOB_COMMAND("data-export.job.command"), JOB_UPDATE("data-export.job.update");
+    JOB_COMMAND(".data-export.job.command", Pattern.compile(".+\\.data-export\\.job\\.command$")), JOB_UPDATE(
+        ".data-export.job.update", Pattern.compile(".+\\.data-export\\.job\\.update$"));
 
-    private final String pattern;
-    private String name;
+    private final String nameWithoutTenant;
+    private final Pattern pattern;
   }
 
   private static final int DEFAULT_OPERATION_TIMEOUT = 30;
@@ -56,7 +58,6 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
   private final ObjectMapper objectMapper;
 
   private ConsumerFactory<String, Object> consumerFactory;
-  private KafkaMessageListenerContainer<String, Object> listenerContainer;
 
   @Override
   @SuppressWarnings("java:S2095")
@@ -66,32 +67,33 @@ public class KafkaConfiguration implements DefaultKafkaConsumerFactoryCustomizer
     this.consumerFactory = (ConsumerFactory<String, Object>) consumerFactory;
   }
 
-  public void init(Topic consumerTopic, AcknowledgingMessageListener<String, ?> listener) {
-    log.info("Kafka initializing.");
-
-    String tenantId = folioExecutionContext.getTenantId();
-    Arrays.stream(Topic.values()).forEach(t -> t.name = tenantId + '.' + t.getPattern());
-    try (Admin admin = Admin.create(Collections.singletonMap(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers))) {
-      addTopicsIfNeeded(admin,
-          Arrays.stream(Topic.values()).map(t -> KafkaConfiguration.createTopicObject(t.getName())).collect(Collectors.toList()));
+  public void createTopics() {
+    String tenant = folioExecutionContext.getTenantId();
+    if (StringUtils.isBlank(tenant)) {
+      throw new IllegalStateException("Can't create Kafka topics because tenant is blank");
     }
+    try (Admin admin = Admin.create(Collections.singletonMap(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, boostrapServers))) {
+      addTopicsIfNeeded(admin, Arrays.stream(Topic.values())
+          .map(t -> KafkaConfiguration.createTopicObject(tenant + t.getNameWithoutTenant()))
+          .collect(Collectors.toList()));
+    }
+  }
 
-    ContainerProperties containerProperties = new ContainerProperties(consumerTopic.getName());
+  public void startListener(Topic consumerTopic, AcknowledgingMessageListener<String, ?> listener) {
+    ContainerProperties containerProperties = new ContainerProperties(consumerTopic.getPattern());
     containerProperties.setMessageListener(listener);
     containerProperties.setAckMode(ackMode);
-    log.info("Creating Kafka listener container for topic {}.", consumerTopic.getName());
-    listenerContainer = new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
-    listenerContainer.start();
-
-    log.info("Kafka initialized.");
+    log.info("Creating listener container for topic pattern '{}'.", consumerTopic.getPattern());
+    new KafkaMessageListenerContainer<>(consumerFactory, containerProperties).start();
   }
 
   public void send(Topic topic, String key, Object data) {
     log.info("Sending {}.", data);
-    if (StringUtils.isBlank(topic.getName())) {
-      throw new IllegalStateException("Kafka connection is not initialized yet (it is done while tenant registration)");
+    String tenant = folioExecutionContext.getTenantId();
+    if (StringUtils.isBlank(tenant)) {
+      throw new IllegalStateException("Can't send to Kafka because tenant is blank");
     }
-    kafkaTemplate.send(topic.getName(), key, data);
+    kafkaTemplate.send(tenant + topic.getNameWithoutTenant(), key, data);
     log.info("Sent {}.", data);
   }
 

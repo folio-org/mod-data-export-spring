@@ -21,8 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:job.sql")
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
 class JobUpdatesServiceTest extends BaseTest {
@@ -54,17 +52,21 @@ class JobUpdatesServiceTest extends BaseTest {
     job.setErrorDetails("No errors");
     job.setExitStatus(ExitStatus.COMPLETED);
 
-    updatesService.onMessage(new ConsumerRecord<>(KafkaConfiguration.Topic.JOB_UPDATE.getName(), 0, 0, job.getId().toString(), job),
-        () -> {
+    updatesService.onMessage(
+        new ConsumerRecord<>(TENANT + KafkaConfiguration.Topic.JOB_UPDATE.getNameWithoutTenant(), 0, 0, job.getId().toString(),
+            job), () -> {
         });
 
-    final Job savedJob = repository.findById(id).get();
-    Assertions.assertAll(() -> assertEquals(job.getBatchStatus(), savedJob.getBatchStatus()),
-        () -> assertEquals(job.getExitStatus(), savedJob.getExitStatus()),
-        () -> assertEquals(job.getDescription(), savedJob.getDescription()),
-        () -> assertEquals(job.getStatus(), savedJob.getStatus()), () -> assertEquals(job.getStartTime(), savedJob.getStartTime()),
-        () -> assertEquals(job.getEndTime(), savedJob.getEndTime()), () -> assertEquals(job.getFiles(), savedJob.getFiles()),
-        () -> assertEquals(job.getErrorDetails(), savedJob.getErrorDetails()));
+    final Job savedJob = repository.findById(id).orElse(null);
+    Assertions.assertAll(() -> Assertions.assertNotNull(savedJob),
+        () -> Assertions.assertEquals(job.getBatchStatus(), savedJob.getBatchStatus()),
+        () -> Assertions.assertEquals(job.getExitStatus(), savedJob.getExitStatus()),
+        () -> Assertions.assertEquals(job.getDescription(), savedJob.getDescription()),
+        () -> Assertions.assertEquals(job.getStatus(), savedJob.getStatus()),
+        () -> Assertions.assertEquals(job.getStartTime(), savedJob.getStartTime()),
+        () -> Assertions.assertEquals(job.getEndTime(), savedJob.getEndTime()),
+        () -> Assertions.assertEquals(job.getFiles(), savedJob.getFiles()),
+        () -> Assertions.assertEquals(job.getErrorDetails(), savedJob.getErrorDetails()));
   }
 
 }
