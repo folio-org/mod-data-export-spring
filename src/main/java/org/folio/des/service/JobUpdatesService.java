@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.folio.des.config.KafkaConfiguration;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.JobRepository;
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.listener.AcknowledgingMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,12 @@ public class JobUpdatesService implements AcknowledgingMessageListener<String, J
   }
 
   private final JobRepository repository;
+  private final KafkaConfiguration kafka;
+
+  @EventListener(ContextRefreshedEvent.class)
+  public void onContextRefreshed() {
+    kafka.startListener(KafkaConfiguration.Topic.JOB_UPDATE, this);
+  }
 
   @Transactional
   @Override
