@@ -1,3 +1,6 @@
+## 2021-05-06 v1.0.4
+ * [MODEXPS-17](https://issues.folio.org/browse/MODEXPS-17) Username and password expressed in plain text in module logs
+
 ## 2021-04-19 v1.0.3
  * [MODEXPS-15](https://issues.folio.org/browse/MODEXPS-15) Kafka connection does not start without tenant registration
 
