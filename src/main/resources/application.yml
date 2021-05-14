@@ -47,7 +47,11 @@ management:
     web:
       base-path: /admin
       exposure:
-        include: info,health,env,httptrace,liquibase
+        include: health
+  metrics:
+    export:
+      influx:
+        enabled: false
 feign:
   client:
     config:
