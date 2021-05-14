@@ -45,6 +45,7 @@ spring:
 management:
   endpoints:
     web:
+      base-path: /admin
       exposure:
         include: info,health,env,httptrace,liquibase
 feign:
