@@ -1,3 +1,6 @@
+## 2021-05-14 v1.0.5
+ * [MODEXPS-12](https://issues.folio.org/browse/MODEXPS-12) Add standard health check endpoint
+
 ## 2021-05-06 v1.0.4
  * [MODEXPS-17](https://issues.folio.org/browse/MODEXPS-17) Username and password expressed in plain text in module logs
 
