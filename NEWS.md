@@ -1,3 +1,6 @@
+## 2021-06-18 v1.1.0
+ * No changes since last release.
+
 ## 2021-05-14 v1.0.5
  * [MODEXPS-12](https://issues.folio.org/browse/MODEXPS-12) Add standard health check endpoint
 
