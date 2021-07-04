@@ -2,7 +2,7 @@ package org.folio.des.controller;
 
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.config.KafkaConfiguration;
+import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.ExportScheduler;
 import org.folio.spring.controller.TenantController;
 import org.folio.spring.service.TenantService;
@@ -19,10 +19,10 @@ public class FolioTenantController extends TenantController {
 
   private final FolioExecutionContextHelper contextHelper;
   private final ExportScheduler scheduler;
-  private final KafkaConfiguration kafka;
+  private final KafkaService kafka;
 
   public FolioTenantController(TenantService baseTenantService, FolioExecutionContextHelper contextHelper,
-      ExportScheduler scheduler, KafkaConfiguration kafka) {
+      ExportScheduler scheduler, KafkaService kafka) {
     super(baseTenantService);
     this.contextHelper = contextHelper;
     this.scheduler = scheduler;
@@ -36,8 +36,9 @@ public class FolioTenantController extends TenantController {
     if (tenantInit.getStatusCode() == HttpStatus.OK) {
       try {
         contextHelper.registerTenant();
-        kafka.createTopics();
         scheduler.initScheduleConfiguration();
+        kafka.createKafkaTopics();
+        kafka.restartEventListeners();
       } catch (Exception e) {
         log.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

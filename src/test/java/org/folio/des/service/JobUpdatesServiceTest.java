@@ -1,8 +1,9 @@
 package org.folio.des.service;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.config.KafkaConfiguration;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.JobRepository;
@@ -16,10 +17,6 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:job.sql")
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
@@ -52,10 +49,7 @@ class JobUpdatesServiceTest extends BaseTest {
     job.setErrorDetails("No errors");
     job.setExitStatus(ExitStatus.COMPLETED);
 
-    updatesService.onMessage(
-        new ConsumerRecord<>(TENANT + KafkaConfiguration.Topic.JOB_UPDATE.getNameWithoutTenant(), 0, 0, job.getId().toString(),
-            job), () -> {
-        });
+    updatesService.receiveJobExecutionUpdate(job);
 
     final Job savedJob = repository.findById(id).orElse(null);
     Assertions.assertAll(() -> Assertions.assertNotNull(savedJob),

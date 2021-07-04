@@ -1,30 +1,25 @@
 package org.folio.des.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.folio.des.config.KafkaConfiguration;
-import org.folio.des.domain.dto.JobStatus;
-import org.folio.des.domain.entity.Job;
-import org.folio.des.repository.JobRepository;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.kafka.listener.AcknowledgingMessageListener;
-import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.domain.dto.JobStatus;
+import org.folio.des.domain.entity.Job;
+import org.folio.des.repository.JobRepository;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class JobUpdatesService implements AcknowledgingMessageListener<String, Job> {
+public class JobUpdatesService {
 
   private static final Map<BatchStatus, JobStatus> JOB_STATUSES = new EnumMap<>(BatchStatus.class);
 
@@ -40,22 +35,15 @@ public class JobUpdatesService implements AcknowledgingMessageListener<String, J
   }
 
   private final JobRepository repository;
-  private final KafkaConfiguration kafka;
-
-  @EventListener(ContextRefreshedEvent.class)
-  public void onContextRefreshed() {
-    kafka.startListener(KafkaConfiguration.Topic.JOB_UPDATE, this);
-  }
 
   @Transactional
-  @Override
-  public void onMessage(ConsumerRecord<String, Job> data, Acknowledgment acknowledgment) {
-    Job jobExecutionUpdate = data.value();
+  @KafkaListener(
+      id = KafkaService.EVENT_LISTENER_ID,
+      containerFactory = "kafkaListenerContainerFactory",
+      topicPattern = "${application.kafka.topic-pattern}",
+      groupId = "${application.kafka.group-id}")
+  public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
     log.info("Received {}.", jobExecutionUpdate);
-
-    if (acknowledgment != null) {
-      acknowledgment.acknowledge();
-    }
 
     Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
     if (jobOptional.isEmpty()) {
