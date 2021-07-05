@@ -2,11 +2,18 @@ package org.folio.des.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.des.config.KafkaConfiguration;
+import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.JobParameterNames;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCommand;
@@ -16,15 +23,12 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Service
 @Log4j2
 @RequiredArgsConstructor
 public class JobExecutionService {
 
-  private final KafkaConfiguration kafka;
+  private final KafkaService kafka;
   private final ObjectMapper objectMapper;
 
   public JobCommand prepareStartJobCommand(Job job) {
@@ -54,7 +58,7 @@ public class JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
-    kafka.send(KafkaConfiguration.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
+    kafka.send(KafkaService.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
 
   public void deleteJobs(List<Job> jobs) {

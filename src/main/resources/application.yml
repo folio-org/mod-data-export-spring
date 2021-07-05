@@ -26,18 +26,6 @@ spring:
     enabled: true
   kafka:
     bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
-    consumer:
-      group-id: jobExecutionUpdateCG
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        interceptor.classes: org.folio.des.config.KafkaConsumerInterceptor
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        interceptor.classes: org.folio.des.config.KafkaProducerInterceptor
   datasource:
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}
@@ -57,3 +45,7 @@ feign:
     config:
       default:
         loggerLevel: basic
+application:
+  kafka:
+    topic-pattern: (${ENV:folio}\.)?(.*\.)?data-export.job.update
+    group-id: ${ENV:folio}-mod-data-export-spring-events-group
