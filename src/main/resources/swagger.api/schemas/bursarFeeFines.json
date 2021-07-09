@@ -30,9 +30,17 @@
         "format": "uuid"
       },
       "typeMappings": {
-        "type": "array",
-        "items": {
-          "$ref": "bursarFeeFinesTypeMapping.json#/BursarFeeFinesTypeMapping"
+        "type": "object",
+        "properties": {
+          "default": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties" : {
+          "type": "array",
+          "items": {
+            "$ref": "bursarFeeFinesTypeMapping.json#/BursarFeeFinesTypeMapping"
+          }
         }
       }
     },
