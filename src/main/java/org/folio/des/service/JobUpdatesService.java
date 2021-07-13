@@ -50,7 +50,7 @@ public class JobUpdatesService {
       log.error("Update for unknown job {}.", jobExecutionUpdate.getId());
       return;
     }
-    Job job = jobOptional.get();
+    var job = jobOptional.get();
 
     if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
       job.setUpdatedDate(new Date());
@@ -61,7 +61,7 @@ public class JobUpdatesService {
   }
 
   private boolean updateJobPropsIfChanged(Job jobExecutionUpdate, Job job) {
-    boolean result = false;
+    var result = false;
     if (jobExecutionUpdate.getDescription() != null && !jobExecutionUpdate.getDescription().equals(job.getDescription())) {
       job.setDescription(jobExecutionUpdate.getDescription());
       result = true;
@@ -87,7 +87,7 @@ public class JobUpdatesService {
       job.setBatchStatus(jobExecutionUpdate.getBatchStatus());
       result = true;
 
-      JobStatus jobStatus = JOB_STATUSES.get(jobExecutionUpdate.getBatchStatus());
+      var jobStatus = JOB_STATUSES.get(jobExecutionUpdate.getBatchStatus());
       if (jobStatus != null) {
         job.setStatus(jobStatus);
       }

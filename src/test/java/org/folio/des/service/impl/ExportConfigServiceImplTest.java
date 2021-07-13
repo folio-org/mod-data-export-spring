@@ -12,11 +12,12 @@ import java.util.UUID;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.domain.dto.BursarFeeFines;
-import org.folio.des.domain.dto.ConfigModel;
+import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
 import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ModelConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ class ExportConfigServiceImplTest {
           + "        \"diagnostics\": []\n"
           + "      }\n"
           + "    }";
-  public static final String EMPTY_CONFIG_RESPONSE = "{configs: [], totalRecords: 0}";
+  public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
   private ExportConfigServiceImpl service;
@@ -72,7 +73,7 @@ class ExportConfigServiceImplTest {
     bursarFeeFines.setDaysOutstanding(9);
     bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
     parameters.setBursarFeeFines(bursarFeeFines);
-    ConfigModel mockResponse = mockResponse(bursarExportConfig);
+    ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
 
     var response = service.postConfig(bursarExportConfig);
@@ -82,28 +83,29 @@ class ExportConfigServiceImplTest {
       () -> assertEquals(mockResponse.getConfigName(), response.getConfigName()),
       () -> assertEquals(mockResponse.getModule(), response.getModule()),
       () -> assertEquals(mockResponse.getDescription(), response.getDescription()),
-      () -> assertEquals(mockResponse.isDefaultFlag(), response.isDefaultFlag()),
-      () -> assertEquals(mockResponse.isEnabled(), response.isEnabled())
+      () -> assertEquals(mockResponse.getDefault(), response.getDefault()),
+      () -> assertEquals(mockResponse.getEnabled(), response.getEnabled())
     );
   }
 
-  private ConfigModel mockResponse(ExportConfig bursarExportConfig)
+  private ModelConfiguration mockResponse(ExportConfig bursarExportConfig)
     throws JsonProcessingException {
-    var mockResponse = new ConfigModel();
+    var mockResponse = new ModelConfiguration();
     mockResponse.setId(UUID.randomUUID().toString());
     mockResponse.setModule("test_module");
     mockResponse.setConfigName("bursar_config");
     mockResponse.setDescription("test description");
     mockResponse.setEnabled(true);
-    mockResponse.setDefaultFlag(true);
+    mockResponse.setDefault(true);
     mockResponse.setValue(objectMapper.writeValueAsString(bursarExportConfig));
     return mockResponse;
   }
 
   @Test
   @DisplayName("Config is not set")
-  void noConfig() {
-    Mockito.when(client.getConfiguration(any())).thenReturn(EMPTY_CONFIG_RESPONSE);
+  void noConfig() throws JsonProcessingException {
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfiguration(any())).thenReturn(mockedResponse);
 
     var config = service.getConfig();
 
@@ -112,8 +114,9 @@ class ExportConfigServiceImplTest {
 
   @Test
   @DisplayName("Fetch empty config collection")
-  void fetchEmptyConfigCollection() {
-    Mockito.when(client.getConfiguration(any())).thenReturn(EMPTY_CONFIG_RESPONSE);
+  void fetchEmptyConfigCollection() throws JsonProcessingException {
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfiguration(any())).thenReturn(mockedResponse);
 
     var config = service.getConfigCollection();
 
@@ -124,8 +127,9 @@ class ExportConfigServiceImplTest {
 
   @Test
   @DisplayName("Fetch config collection")
-  void fetchConfigCollection() {
-    Mockito.when(client.getConfiguration(any())).thenReturn(CONFIG_RESPONSE);
+  void fetchConfigCollection() throws JsonProcessingException {
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfiguration(any())).thenReturn(mockedResponse);
 
     var config = service.getConfigCollection();
 
@@ -144,8 +148,9 @@ class ExportConfigServiceImplTest {
 
   @Test
   @DisplayName("Config exists and parsed correctly")
-  void getConfig() {
-    Mockito.when(client.getConfiguration(any())).thenReturn(CONFIG_RESPONSE);
+  void getConfig() throws JsonProcessingException {
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfiguration(any())).thenReturn(mockedResponse);
 
     var config = service.getConfig();
 

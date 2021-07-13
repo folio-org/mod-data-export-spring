@@ -8,13 +8,13 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.domain.dto.BursarFeeFines;
-import org.folio.des.domain.dto.ConfigModel;
+import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.service.ExportConfigService;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -40,28 +40,28 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("Putting {} {}.", configId, exportConfig);
     checkConfig(exportConfig.getType(), exportConfig.getExportTypeSpecificParameters());
-    ConfigModel config = createConfigModel(exportConfig);
+    var config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
     log.info("Put {} {}.", configId, config);
   }
 
   @Override
-  public ConfigModel postConfig(ExportConfig exportConfig) {
+  public ModelConfiguration postConfig(ExportConfig exportConfig) {
     log.info("Posting {}.", exportConfig);
     checkConfig(exportConfig.getType(), exportConfig.getExportTypeSpecificParameters());
-    ConfigModel config = client.postConfiguration(createConfigModel(exportConfig));
+    ModelConfiguration config = client.postConfiguration(createConfigModel(exportConfig));
     log.info("Posted {}.", config);
     return config;
   }
 
   @SneakyThrows
-  private ConfigModel createConfigModel(ExportConfig exportConfig) {
-    var config = new ConfigModel();
+  private ModelConfiguration createConfigModel(ExportConfig exportConfig) {
+    var config = new ModelConfiguration();
     config.setModule(MODULE_NAME);
     config.setConfigName(CONFIG_NAME);
     config.setDescription(CONFIG_DESCRIPTION);
     config.setEnabled(true);
-    config.setDefaultFlag(true);
+    config.setDefault(true);
     config.setValue(objectMapper.writeValueAsString(exportConfig));
     return config;
   }
@@ -73,15 +73,14 @@ public class ExportConfigServiceImpl implements ExportConfigService {
 
   @Override
   public Optional<ExportConfig> getConfig() {
-    final String configuration = client.getConfiguration(String.format(CONFIG_QUERY, MODULE_NAME, CONFIG_NAME));
+    var configurationCollection = client.getConfiguration(String.format(CONFIG_QUERY, MODULE_NAME, CONFIG_NAME));
 
-    final JSONObject jsonObject = new JSONObject(configuration);
-    if (jsonObject.getInt("totalRecords") == 0) {
+    if (configurationCollection.getTotalRecords() == 0) {
       return Optional.empty();
     }
 
     try {
-      var config = parseExportConfig(jsonObject);
+      var config = parseExportConfig(configurationCollection);
       return Optional.of(config);
     } catch (JsonProcessingException e) {
       log.error("Can not parse configuration for module {} with config name {}", MODULE_NAME, CONFIG_NAME);
@@ -89,12 +88,11 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     }
   }
 
-  private ExportConfig parseExportConfig(JSONObject jsonObject) throws com.fasterxml.jackson.core.JsonProcessingException {
-    final JSONObject configs = jsonObject.getJSONArray("configs").getJSONObject(0);
-    final ConfigModel configModel = objectMapper.readValue(configs.toString(), ConfigModel.class);
-    final String value = configModel.getValue();
+  private ExportConfig parseExportConfig(ConfigurationCollection configurationCollection) throws com.fasterxml.jackson.core.JsonProcessingException {
+    var configs = configurationCollection.getConfigs().get(0);
+    final String value = configs.getValue();
     var config = objectMapper.readValue(value, ExportConfig.class);
-    config.setId(configModel.getId());
+    config.setId(configs.getId());
     return config;
   }
 

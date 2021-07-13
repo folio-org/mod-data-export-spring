@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class JobExecutionService {
+public class  JobExecutionService {
 
   private final KafkaService kafka;
   private final ObjectMapper objectMapper;
@@ -34,7 +34,7 @@ public class JobExecutionService {
   public JobCommand prepareStartJobCommand(Job job) {
     ExportConfigServiceImpl.checkConfig(job.getType(), job.getExportTypeSpecificParameters());
 
-    JobCommand result = new JobCommand();
+    var result = new JobCommand();
     result.setType(JobCommand.Type.START);
     result.setId(job.getId());
     result.setName(job.getName());
@@ -71,7 +71,7 @@ public class JobExecutionService {
       return;
     }
 
-    JobCommand jobCommand = new JobCommand();
+    var jobCommand = new JobCommand();
     jobCommand.setType(JobCommand.Type.DELETE);
     jobCommand.setId(UUID.randomUUID());
     jobCommand.setJobParameters(new JobParameters(

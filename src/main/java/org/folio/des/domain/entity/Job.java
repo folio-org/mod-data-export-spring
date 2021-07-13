@@ -1,6 +1,15 @@
 package org.folio.des.domain.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import lombok.Data;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -11,11 +20,6 @@ import org.hibernate.annotations.TypeDef;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 
-import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 @Entity
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Data
@@ -23,7 +27,7 @@ public class Job {
 
   @Id
   @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.folio.spring.domain.generator.CustomUUIDGenerator")
+  @GenericGenerator(name = "UUID", strategy = "org.folio.des.repository.generator.CustomUUIDGenerator")
   @Column(updatable = false, nullable = false)
   private UUID id;
 

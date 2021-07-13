@@ -1,10 +1,12 @@
 package org.folio.des.controller;
 
 import feign.FeignException;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.extern.log4j.Log4j2;
+import org.folio.des.domain.dto.Error;
+import org.folio.des.domain.dto.Errors;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.spring.model.response.ResponseErrors;
-import org.folio.spring.utility.ErrorUtility;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,18 +21,22 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @Log4j2
 public class ControllerExceptionHandler {
 
-  @ExceptionHandler({ IllegalArgumentException.class, javax.validation.ConstraintViolationException.class,
-      HttpMessageNotReadableException.class, MissingServletRequestParameterException.class,
-      MethodArgumentTypeMismatchException.class, FeignException.class })
+  @ExceptionHandler({
+    IllegalArgumentException.class,
+    javax.validation.ConstraintViolationException.class,
+    HttpMessageNotReadableException.class,
+    MissingServletRequestParameterException.class,
+    MethodArgumentTypeMismatchException.class,
+    FeignException.class
+  })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseErrors handleIllegalArgumentException(Exception exception) {
-    log.error(exception.getMessage(), exception);
-    return ErrorUtility.buildError(exception, HttpStatus.BAD_REQUEST);
+  public Errors handleIllegalArgumentException(Exception exception) {
+    return buildError(exception, HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class })
+  @ExceptionHandler({DataIntegrityViolationException.class, ConstraintViolationException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseErrors handleConstraintViolationException(Exception exception) {
+  public Errors handleConstraintViolationException(Exception exception) {
     /*
      * In the case of Constraint Violation exceptions, we must reach the main cause of the wrapped in each other exceptions
      * It will be either SQLException or platform-specific exception like PSQLException and it should contain
@@ -41,22 +47,41 @@ public class ControllerExceptionHandler {
       exception = (Exception) cause;
       cause = exception.getCause();
     }
-    log.error(exception.getMessage(), exception);
-    return ErrorUtility.buildError(exception, HttpStatus.BAD_REQUEST);
+    return buildError(exception, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ResponseErrors handleNotFoundException(NotFoundException exception) {
-    log.error(exception.getMessage(), exception);
-    return ErrorUtility.buildError(exception, HttpStatus.NOT_FOUND);
+  public Errors handleNotFoundException(NotFoundException exception) {
+    return buildError(exception, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ResponseErrors handleException(Exception exception) {
+  public Errors handleException(Exception exception) {
+    return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  private Errors buildError(Exception exception, HttpStatus status) {
     log.error(exception.getMessage(), exception);
-    return ErrorUtility.buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+    return buildError(exception.getLocalizedMessage(), exception.getClass().getSimpleName(), status.toString());
+  }
+
+  private Errors buildError(String message, String type, String code) {
+    var error = new Error();
+    error.setMessage(message);
+    error.setType(type);
+    error.setCode(code);
+    List<Error> listOfErrors = new ArrayList<>();
+    listOfErrors.add(error);
+    return buildErrors(listOfErrors);
+  }
+
+  private Errors buildErrors(List<Error> listOfErrors) {
+    var errors = new Errors();
+    errors.setErrors(listOfErrors);
+    errors.setTotalRecords(listOfErrors.size());
+    return errors;
   }
 
 }

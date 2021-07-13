@@ -31,8 +31,12 @@
         <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
 
         <folio-spring-base.version>1.0.5</folio-spring-base.version>
-        <folio-spring-tenant.version>1.0.0</folio-spring-tenant.version>
-
+        <hibernate-types-52.version>2.10.3</hibernate-types-52.version>
+        <spring-security-core.version>5.4.5</spring-security-core.version>
+        <cql2pgjson.version>32.2.0</cql2pgjson.version>
+        <log4j-web.version>2.14.0</log4j-web.version>
+        <lombok.version>1.18.18</lombok.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
         <json.version>20200518</json.version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
 
@@ -56,11 +60,6 @@
             <artifactId>folio-spring-base</artifactId>
             <version>${folio-spring-base.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.folio</groupId>
-            <artifactId>spring-tenant</artifactId>
-            <version>${folio-spring-tenant.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -70,12 +69,23 @@
         <dependency>
             <groupId>com.vladmihalcea</groupId>
             <artifactId>hibernate-types-52</artifactId>
-            <version>2.10.3</version>
+            <version>${hibernate-types-52.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-logging</artifactId>
+            </exclusion>
+          </exclusions>
         </dependency>
 
         <dependency>
@@ -86,7 +96,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>5.4.5</version>
+            <version>${spring-security-core.version}</version>
         </dependency>
 
         <dependency>
@@ -109,26 +119,26 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
+            <version>${commons-collections4.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.18</version>
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-web</artifactId>
-            <version>2.14.0</version>
+            <version>${log4j-web.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.folio</groupId>
             <artifactId>cql2pgjson</artifactId>
-            <version>32.2.0</version>
+            <version>${cql2pgjson.version}</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -251,7 +261,7 @@
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
                             <modelsToGenerate>
-                                Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue
+                                Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection
                             </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>

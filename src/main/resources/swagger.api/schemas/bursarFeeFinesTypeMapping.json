@@ -27,10 +27,7 @@
       }
     },
     "required": [
-      "feefineTypeId",
-      "itemType",
-      "itemDescription",
-      "itemCode"
+      "feefineTypeId"
     ]
   }
 }

@@ -33,7 +33,7 @@
         "type": "object",
         "properties": {
           "default": {
-            "type": "integer"
+            "type": "string"
           }
         },
         "additionalProperties" : {
