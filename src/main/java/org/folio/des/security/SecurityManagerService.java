@@ -1,6 +1,12 @@
 package org.folio.des.security;
 
 import com.google.common.io.Resources;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,13 +20,6 @@ import org.folio.des.domain.dto.permissions.Permission;
 import org.folio.des.domain.dto.permissions.PermissionUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Component
 @Log4j2
@@ -71,7 +70,7 @@ public class SecurityManagerService {
   }
 
   private User createUser(String username) {
-    User result = createUserObject(username);
+    var result = createUserObject(username);
     log.info("Creating {}.", result);
     usersClient.saveUser(result);
     return result;
@@ -93,7 +92,7 @@ public class SecurityManagerService {
       throw new IllegalStateException("No user permissions found in " + PERMISSIONS_FILE_PATH);
     }
 
-    PermissionUser permissionUser = PermissionUser.of(UUID.randomUUID().toString(), userId, perms);
+    var permissionUser = PermissionUser.of(UUID.randomUUID().toString(), userId, perms);
     log.info("Creating {}.", permissionUser);
     return permissionsClient.create(permissionUser);
   }

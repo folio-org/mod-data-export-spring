@@ -37,7 +37,7 @@ class ExportTriggerTest {
   @Test
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
-    trigger.setConfig(new ExportConfig());
+    trigger.setConfig(null);
 
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
@@ -99,7 +99,6 @@ class ExportTriggerTest {
     config.setScheduleTime("12:00:00.000Z");
     trigger.setConfig(config);
 
-    final Date now = new Date();
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
     assertNotNull(date);
@@ -131,7 +130,6 @@ class ExportTriggerTest {
     config.setScheduleTime("12:00:00.000Z");
     trigger.setConfig(config);
 
-    final Date now = new Date();
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
     assertNotNull(date);

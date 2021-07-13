@@ -1,5 +1,17 @@
 package org.folio.des.scheduling;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Setter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -7,14 +19,6 @@ import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.stereotype.Component;
-
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class ExportTrigger implements Trigger {
@@ -29,27 +33,26 @@ public class ExportTrigger implements Trigger {
   }
 
   private Date getNextTime(Date lastActualExecutionTime) {
-    if (config == null)
-      return null;
-    SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
-    if (schedulePeriod == SchedulePeriodEnum.NONE)
-      return null;
-    if (config.getExportTypeSpecificParameters() == null)
-      return null;
+    if (config == null) return null;
 
-    Date nextExecutionTime = null;
+    SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
+    if (schedulePeriod == SchedulePeriodEnum.NONE) return null;
+
+    Date nextExecutionTime;
     Integer scheduleFrequency = config.getScheduleFrequency();
 
     switch (schedulePeriod) {
-    case DAY:
-      nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-      break;
-    case WEEK:
-      nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-      break;
-    case HOUR:
-      nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-      break;
+      case DAY:
+        nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
+        break;
+      case WEEK:
+        nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
+        break;
+      case HOUR:
+        nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+        break;
+      default:
+        return null;
     }
 
     return nextExecutionTime;
@@ -59,15 +62,15 @@ public class ExportTrigger implements Trigger {
     String scheduleTime = config.getScheduleTime();
     var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
 
-    OffsetDateTime offsetDateTime = LocalDate.now().atTime(time);
+    var offsetDateTime = LocalDate.now().atTime(time);
 
     if (lastActualExecutionTime == null) {
       return Date.from(offsetDateTime.toInstant());
 
     } else {
-      OffsetDateTime lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
+      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
           ZoneId.systemDefault());
-      Instant instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
+      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
       return Date.from(instant);
     }
   }
@@ -75,7 +78,7 @@ public class ExportTrigger implements Trigger {
   private OffsetDateTime findNextDayOfWeek(OffsetDateTime offsetDateTime, Integer weeks) {
     List<DayOfWeek> week = normalizeDayOfWeek();
 
-    DayOfWeek currentDayOfWeek = offsetDateTime.getDayOfWeek();
+    var currentDayOfWeek = offsetDateTime.getDayOfWeek();
     for (DayOfWeek ofWeek : week) {
       int nextWeekDay = currentDayOfWeek.getValue() - ofWeek.getValue();
       if (nextWeekDay >= 1) {
@@ -108,13 +111,13 @@ public class ExportTrigger implements Trigger {
     var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
 
     if (lastActualExecutionTime == null) {
-      LocalDateTime nextExecutionDateTime = LocalDateTime.of(LocalDate.now(), time.toLocalTime());
+      var nextExecutionDateTime = LocalDateTime.of(LocalDate.now(), time.toLocalTime());
       return Date.from(nextExecutionDateTime.toInstant(time.getOffset()));
 
     } else {
-      Instant instant = lastActualExecutionTime.toInstant();
-      LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-      LocalDateTime newScheduledDate = localDateTime.plusDays(days);
+      var instant = lastActualExecutionTime.toInstant();
+      var localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+      var newScheduledDate = localDateTime.plusDays(days);
       return Date.from(newScheduledDate.toInstant(time.getOffset()));
     }
   }

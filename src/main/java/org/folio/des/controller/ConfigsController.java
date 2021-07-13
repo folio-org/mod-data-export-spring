@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/data-export-spring")
@@ -25,13 +24,13 @@ public class ConfigsController implements ConfigsApi {
   }
 
   @Override
-  public ResponseEntity<String> postExportConfig(@Valid ExportConfig exportConfig) {
+  public ResponseEntity<String> postExportConfig(ExportConfig exportConfig) {
     service.postConfig(exportConfig);
     return new ResponseEntity<>("Export configuration added", HttpStatus.CREATED);
   }
 
   @Override
-  public ResponseEntity<String> putExportConfig(String configId, @Valid ExportConfig exportConfig) {
+  public ResponseEntity<String> putExportConfig(String configId, ExportConfig exportConfig) {
     service.updateConfig(configId, exportConfig);
     return ResponseEntity.ok("Export configuration updated");
   }

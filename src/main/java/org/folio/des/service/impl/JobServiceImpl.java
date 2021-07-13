@@ -1,11 +1,23 @@
 package org.folio.des.service.impl;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.*;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.JobCollection;
+import org.folio.des.domain.dto.JobStatus;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobRepository;
@@ -20,11 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @EnableScheduling
@@ -57,7 +64,7 @@ public class JobServiceImpl implements JobService {
   @Transactional(readOnly = true)
   @Override
   public JobCollection get(Integer offset, Integer limit, String query) {
-    JobCollection result = new JobCollection();
+    var result = new JobCollection();
     if (StringUtils.isBlank(query)) {
       Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
       result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
@@ -91,7 +98,7 @@ public class JobServiceImpl implements JobService {
     if (result.getStatus() == null) {
       result.setStatus(JobStatus.SCHEDULED);
     }
-    Date now = new Date();
+    var now = new Date();
     if (result.getCreatedDate() == null) {
       result.setCreatedDate(now);
     }
@@ -115,7 +122,7 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    JobCommand jobCommand = jobExecutionService.prepareStartJobCommand(result);
+    var jobCommand = jobExecutionService.prepareStartJobCommand(result);
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
@@ -130,7 +137,7 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void deleteOldJobs() {
-    Date toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    var toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
 
     List<Job> jobs = repository.findByUpdatedDateBefore(toDelete);
@@ -146,7 +153,7 @@ public class JobServiceImpl implements JobService {
   }
 
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
-    org.folio.des.domain.dto.Job result = new org.folio.des.domain.dto.Job();
+    var result = new org.folio.des.domain.dto.Job();
 
     result.setId(entity.getId());
     result.setName(entity.getName());
@@ -160,7 +167,7 @@ public class JobServiceImpl implements JobService {
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
 
-    Metadata metadata = new Metadata();
+    var metadata = new Metadata();
     metadata.setCreatedDate(entity.getCreatedDate());
     metadata.setCreatedByUserId(entity.getCreatedByUserId());
     metadata.setCreatedByUsername(entity.getCreatedByUsername());
@@ -176,7 +183,7 @@ public class JobServiceImpl implements JobService {
   }
 
   public static Job dtoToEntity(org.folio.des.domain.dto.Job dto) {
-    Job result = new Job();
+    var result = new Job();
 
     result.setId(dto.getId());
     result.setName(dto.getName());
