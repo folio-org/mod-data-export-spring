@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+  <changeSet id="MODEXPS-23@@change-json-parameter" author="romanleshchenko">
+    <sql dbms="postgresql">
+      update job
+      SET export_type_specific_parameters = jsonb_set(export_type_specific_parameters, '{bursarFeeFines,typeMappings}', concat(' { ', export_type_specific_parameters::json -> 'bursarFeeFines' -> 'feefineOwnerId', ':', export_type_specific_parameters::json -> 'bursarFeeFines' -> 'typeMappings', ' } ')::jsonb)
+      where type='BURSAR_FEES_FINES'
+      and json_typeof(export_type_specific_parameters::json->'bursarFeeFines'->'typeMappings') ='array';
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>
