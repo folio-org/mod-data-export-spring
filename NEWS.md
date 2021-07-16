@@ -1,12 +1,7 @@
-## 2021-07-05 v1.1.2
+## 2021-07-16 v1.0.6
  * [MODEXPS-23](https://issues.folio.org/browse/MODEXPS-23) MODEXPS-23 Enable mutiowner mapping feature
-
-## 2021-07-05 v1.1.1
  * [MODEXPS-19](https://issues.folio.org/browse/MODEXPS-19) Update topics to use ENV configuration in naming
  * [MODEXPS-22](https://issues.folio.org/browse/MODEXPS-22) Data export job status, start/end time not updated
-
-## 2021-06-18 v1.1.0
- * No changes since last release.
 
 ## 2021-05-14 v1.0.5
  * [MODEXPS-12](https://issues.folio.org/browse/MODEXPS-12) Add standard health check endpoint
