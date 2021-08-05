@@ -47,5 +47,5 @@ feign:
         loggerLevel: basic
 application:
   kafka:
-    topic-pattern: (${ENV:folio}\.)?(.*\.)?data-export.job.update
+    topic-pattern: ${ENV:folio}.(.*\.)?data-export.job.update
     group-id: ${ENV:folio}-mod-data-export-spring-events-group
