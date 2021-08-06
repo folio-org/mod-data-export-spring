@@ -1,3 +1,6 @@
+## 2021-08-06 v1.1.3
+* [MODEXPS-24](https://issues.folio.org/browse/MODEXPS-24) Kafka topic created with incorrect ENV and tenantId combination
+
 ## 2021-07-05 v1.1.2
  * [MODEXPS-23](https://issues.folio.org/browse/MODEXPS-23) MODEXPS-23 Enable mutiowner mapping feature
 
