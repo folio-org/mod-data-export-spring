@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public interface JobRepository extends JpaRepository<Job, UUID> {
+public interface JobDataExportRepository extends JpaRepository<Job, UUID> {
 
   @Query(value = "SELECT nextval('job-number')", nativeQuery = true)
   Integer getNextJobNumber();
