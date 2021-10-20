@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.entity.Job;
-import org.folio.des.repository.JobRepository;
+import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ class JobUpdatesServiceTest extends BaseTest {
   @Autowired
   private JobUpdatesService updatesService;
   @Autowired
-  private JobRepository repository;
+  private JobDataExportRepository repository;
   @Autowired
   private FolioExecutionContextHelper contextHelper;
 

@@ -20,7 +20,7 @@ import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.repository.CQLService;
-import org.folio.des.repository.JobRepository;
+import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.spring.FolioExecutionContext;
@@ -47,7 +47,7 @@ public class JobServiceImpl implements JobService {
   }
 
   private final JobExecutionService jobExecutionService;
-  private final JobRepository repository;
+  private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
   private final CQLService cqlService;
 

@@ -10,7 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.entity.Job;
-import org.folio.des.repository.JobRepository;
+import org.folio.des.repository.JobDataExportRepository;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class JobUpdatesService {
     JOB_STATUSES.put(BatchStatus.UNKNOWN, null);
   }
 
-  private final JobRepository repository;
+  private final JobDataExportRepository repository;
 
   @Transactional
   @KafkaListener(
