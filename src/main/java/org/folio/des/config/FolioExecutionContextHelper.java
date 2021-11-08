@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.security.AuthService;
 import org.folio.des.security.JWTokenUtils;
 import org.folio.des.security.SecurityManagerService;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -23,9 +24,9 @@ public class FolioExecutionContextHelper {
 
   private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
+  private final AuthService authService;
   private final SecurityManagerService securityManagerService;
   private boolean registered = false;
-  private String tenantId;
 
   private final Map<String, Collection<String>> okapiHeaders = new ConcurrentHashMap<>();
 
@@ -38,9 +39,8 @@ public class FolioExecutionContextHelper {
 
   public void registerTenant() {
     storeOkapiHeaders();
-    securityManagerService.prepareOrUpdateSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
+    securityManagerService.prepareSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
     registered = true;
-    tenantId = folioExecutionContext.getTenantId();
   }
 
   public boolean isModuleRegistered() {
@@ -50,11 +50,12 @@ public class FolioExecutionContextHelper {
   public void initScope() {
     if (MapUtils.isNotEmpty(okapiHeaders)) {
       String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
+      String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
 
       FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
           new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
 
-      var systemUserParameters = securityManagerService.getSystemUserParameters(tenant);
+      var systemUserParameters = authService.loginSystemUser(tenant, url);
       if (StringUtils.isNotBlank(systemUserParameters.getOkapiToken())) {
         okapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserParameters.getOkapiToken()));
         FolioExecutionScopeExecutionContextManager.endFolioExecutionContext();
@@ -97,10 +98,6 @@ public class FolioExecutionContextHelper {
       }
     }
     return result;
-  }
-
-  public String getTenantId() {
-    return tenantId;
   }
 
 }
