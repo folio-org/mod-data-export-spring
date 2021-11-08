@@ -104,4 +104,27 @@
                 dataType="int"
                 cycle="true"/>
     </changeSet>
+
+  <changeSet id="MODEXPS-26@@create-system-user-table" author="viachaslaukhandramai">
+    <createTable tableName="system_user_parameters">
+      <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+        <constraints primaryKey="true" primaryKeyName="id" nullable="false"/>
+      </column>
+
+      <column name="username" type="varchar(50)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="password" type="varchar(50)">
+        <constraints nullable="false"/>
+      </column>
+
+      <column name="okapi_token" type="varchar(8000)"/>
+
+      <column name="okapi_url" type="varchar(100)"/>
+
+      <column name="tenant_id" type="varchar(100)"/>
+
+    </createTable>
+  </changeSet>
 </databaseChangeLog>

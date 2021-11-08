@@ -72,7 +72,7 @@ class SecurityManagerServiceTest extends BaseTest {
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBody(USER_PERMS_RESPONSE)));
 
-    securityManagerService.prepareSystemUser(wireMockServer.baseUrl(), TENANT);
+    securityManagerService.prepareOrUpdateSystemUser(wireMockServer.baseUrl(), TENANT);
 
     wireMockServer.verify(
         getRequestedFor(urlEqualTo("/users?query=username%3D%3Ddata-export-system-user")));

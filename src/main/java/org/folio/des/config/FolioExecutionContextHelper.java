@@ -24,7 +24,6 @@ public class FolioExecutionContextHelper {
 
   private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
-  private final AuthService authService;
   private final SecurityManagerService securityManagerService;
   private boolean registered = false;
 
@@ -39,7 +38,7 @@ public class FolioExecutionContextHelper {
 
   public void registerTenant() {
     storeOkapiHeaders();
-    securityManagerService.prepareSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
+    securityManagerService.prepareOrUpdateSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
     registered = true;
   }
 
@@ -50,12 +49,11 @@ public class FolioExecutionContextHelper {
   public void initScope() {
     if (MapUtils.isNotEmpty(okapiHeaders)) {
       String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
-      String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
 
       FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
           new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
 
-      var systemUserParameters = authService.loginSystemUser(tenant, url);
+      var systemUserParameters = securityManagerService.getSystemUserParameters(tenant);
       if (StringUtils.isNotBlank(systemUserParameters.getOkapiToken())) {
         okapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserParameters.getOkapiToken()));
         FolioExecutionScopeExecutionContextManager.endFolioExecutionContext();
@@ -98,6 +96,10 @@ public class FolioExecutionContextHelper {
       }
     }
     return result;
+  }
+
+  public String getTenantId() {
+    return folioExecutionContext.getTenantId();
   }
 
 }

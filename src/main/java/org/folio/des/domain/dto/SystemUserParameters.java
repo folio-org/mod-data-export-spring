@@ -1,18 +1,23 @@
 package org.folio.des.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.UUID;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class SystemUserParameters {
 
+  @Id
   @JsonIgnore
   private UUID id;
 
@@ -28,7 +33,4 @@ public class SystemUserParameters {
 
   @JsonIgnore
   private String tenantId;
-
-  @JsonIgnore
-  private String userId;
 }
