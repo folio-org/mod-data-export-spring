@@ -32,7 +32,7 @@ public class AuthService {
 
     log.info("Login with url={} tenant={} username={}.", url, tenant, username);
 
-    ResponseEntity<String> authResponse = authClient.getApiKey(userParameters);
+    ResponseEntity<String> authResponse = authClient.getApiKey(userParameters, tenant);
 
     var token = authResponse.getHeaders().get(XOkapiHeaders.TOKEN);
     if (isNotEmpty(token)) {
@@ -53,5 +53,7 @@ public class AuthService {
 
     log.info("Saved credentials for user {}.", systemUserParameters.getUsername());
   }
+
+
 
 }
