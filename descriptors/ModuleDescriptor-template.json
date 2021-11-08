@@ -3,10 +3,6 @@
   "name": "Data Export Spring Module",
   "requires": [
     {
-      "id": "authtoken",
-      "version": "2.0"
-    },
-    {
       "id": "login",
       "version": "7.0"
     },
