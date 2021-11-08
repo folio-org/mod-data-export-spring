@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.des.security.AuthService;
 import org.folio.des.security.JWTokenUtils;
 import org.folio.des.security.SecurityManagerService;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -26,6 +25,7 @@ public class FolioExecutionContextHelper {
   private final FolioExecutionContext folioExecutionContext;
   private final SecurityManagerService securityManagerService;
   private boolean registered = false;
+  private String tenantId;
 
   private final Map<String, Collection<String>> okapiHeaders = new ConcurrentHashMap<>();
 
@@ -40,6 +40,7 @@ public class FolioExecutionContextHelper {
     storeOkapiHeaders();
     securityManagerService.prepareOrUpdateSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
     registered = true;
+    tenantId = folioExecutionContext.getTenantId();
   }
 
   public boolean isModuleRegistered() {
@@ -99,7 +100,7 @@ public class FolioExecutionContextHelper {
   }
 
   public String getTenantId() {
-    return folioExecutionContext.getTenantId();
+    return tenantId;
   }
 
 }
