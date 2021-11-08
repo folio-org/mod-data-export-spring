@@ -35,6 +35,7 @@ public class ExportScheduler implements SchedulingConfigurer {
     registrar = taskRegistrar;
     taskRegistrar.setScheduler(Executors.newScheduledThreadPool(100));
     taskRegistrar.addTriggerTask(() -> {
+      log.info("configureTasks: is module registered: {} ", contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
         contextHelper.initScope();
         jobService.upsert(scheduledJob);
@@ -55,6 +56,7 @@ public class ExportScheduler implements SchedulingConfigurer {
 
   @Scheduled(fixedRateString = "P1D")
   public void deleteOldJobs() {
+    log.info("deleteOldJobs: is module registered: {} ", contextHelper.isModuleRegistered());
     if (contextHelper.isModuleRegistered()) {
       contextHelper.initScope();
       jobService.deleteOldJobs();
