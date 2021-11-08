@@ -59,8 +59,9 @@ public class SecurityManagerService {
       updateUser(folioUser.get());
       addPermissions(folioUser.get().getId());
     } else {
+      var createdUser = createFolioUser(username);
       authService.saveCredentials(systemUserParameters);
-      createPermissionUser(createFolioUser(username).getId());
+      createPermissionUser(createdUser.getId());
     }
 
     var backgroundUserApiKey = authService.loginSystemUser(systemUserParameters.getUsername(), systemUserParameters.getOkapiUrl());
