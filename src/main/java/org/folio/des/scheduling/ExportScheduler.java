@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
@@ -35,9 +36,12 @@ public class ExportScheduler implements SchedulingConfigurer {
     registrar = taskRegistrar;
     taskRegistrar.setScheduler(Executors.newScheduledThreadPool(100));
     taskRegistrar.addTriggerTask(() -> {
+      var current = new Date();
+      log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
         contextHelper.initScope();
         jobService.upsert(scheduledJob);
+        log.info("configureTasks executed for jobId: {} at: {}", scheduledJob.getId(), current);
       }
 
     }, trigger);
@@ -55,9 +59,13 @@ public class ExportScheduler implements SchedulingConfigurer {
 
   @Scheduled(fixedRateString = "P1D")
   public void deleteOldJobs() {
+    var current = new Date();
+    log.info("deleteOldJobs attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
     if (contextHelper.isModuleRegistered()) {
       contextHelper.initScope();
       jobService.deleteOldJobs();
+      log.info("deleteOldJobs executed for jobId: {} at: {}", scheduledJob.getId(), current);
+
     }
   }
 
