@@ -9,6 +9,7 @@ import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -21,6 +22,7 @@ import java.util.concurrent.Executors;
 @Lazy(false)
 @Component
 @Configuration
+@EnableScheduling
 @Log4j2
 @RequiredArgsConstructor
 public class ExportScheduler implements SchedulingConfigurer {
