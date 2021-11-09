@@ -7,6 +7,8 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.service.ExportConfigService;
 import org.folio.des.service.JobService;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -17,7 +19,9 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
+@Lazy(false)
 @Component
+@Configuration
 @EnableScheduling
 @Log4j2
 @RequiredArgsConstructor
