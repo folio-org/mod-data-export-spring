@@ -1,3 +1,6 @@
+## 2021-11-10 v1.2.0
+* [MODEXPS-26](https://issues.folio.org/browse/MODEXPS-26) Scheduling export job doesn't work anymore
+
 ## 2021-08-06 v1.1.3
 * [MODEXPS-24](https://issues.folio.org/browse/MODEXPS-24) Kafka topic created with incorrect ENV and tenantId combination
 
