@@ -5,5 +5,5 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
   <include file="changes/create-db.xml" relativeToChangelogFile="true"/>
   <include file="changes/change-input-job-parameters.xml" relativeToChangelogFile="true"/>
-  <include file="changes/db.changelog-4.1.0.xml" relativeToChangelogFile="true"/>
+  <include file="changes/db.changelog-1.3.0.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -9,6 +9,7 @@
       ALTER TYPE ExportType ADD VALUE 'BATCH_VOUCHER_EXPORT';
       ALTER TYPE ExportType ADD VALUE 'EDIFACT_ORDERS_EXPORT';
       ALTER TYPE ExportType ADD VALUE 'ORDERS_EXPORT';
+      ALTER TYPE ExportType ADD VALUE 'INVOICE_EXPORT';
     </sql>
   </changeSet>
 

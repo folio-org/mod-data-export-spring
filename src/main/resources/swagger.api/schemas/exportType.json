@@ -8,7 +8,8 @@
       "BURSAR_FEES_FINES",
       "BATCH_VOUCHER_EXPORT",
       "EDIFACT_ORDERS_EXPORT",
-      "ORDERS_EXPORT"
+      "ORDERS_EXPORT",
+      "INVOICE_EXPORT"
     ]
   }
 }
