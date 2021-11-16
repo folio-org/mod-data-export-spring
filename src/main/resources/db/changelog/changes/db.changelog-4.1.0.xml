@@ -4,58 +4,11 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-  <changeSet id="MODEXPS-37@@rename the enum type you want to change" author="d.butramyou">
+  <changeSet id="MODEXPS-37@@add new export types" author="d.butramyou">
     <sql dbms="postgresql">
-      ALTER TYPE ExportType rename TO _export_type;
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@create new type" author="d.butramyou">
-    <sql dbms="postgresql">
-      CREATE TYPE ExportType AS enum ('CIRCULATION_LOG', 'BURSAR_FEES_FINES',
-          'BATCH_VOUCHER_EXPORT', 'EDIFACT_ORDERS_EXPORT', 'ORDERS_EXPORT');
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@cast exportType to varying" author="d.butramyou">
-    <sql dbms="postgresql">
-      CREATE CAST (character varying as ExportType) WITH INOUT AS IMPLICIT;
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@rename column(s) which uses our enum type" author="d.butramyou">
-    <sql dbms="postgresql">
-      ALTER TABLE diku_mod_data_export_spring.job rename COLUMN type TO _type;
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@add new column of new type" author="d.butramyou">
-    <sql dbms="postgresql">
-      ALTER TABLE diku_mod_data_export_spring.job ADD type ExportType;
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@copy values to the new column" author="d.butramyou">
-    <sql dbms="postgresql">
-      UPDATE diku_mod_data_export_spring.job SET type = _type::text::ExportType WHERE 1 = 1;
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@remove old column and type" author="d.butramyou">
-    <sql dbms="postgresql">
-      ALTER TABLE diku_mod_data_export_spring.job DROP COLUMN _type;
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@delete old cast" author="d.butramyou">
-    <sql dbms="postgresql">
-      DROP CAST (character varying as _export_type);
-    </sql>
-  </changeSet>
-
-  <changeSet id="MODEXPS-37@@delete old _export_type" author="d.butramyou">
-    <sql dbms="postgresql">
-      DROP TYPE _export_type;
+      ALTER TYPE ExportType ADD VALUE 'BATCH_VOUCHER_EXPORT';
+      ALTER TYPE ExportType ADD VALUE 'EDIFACT_ORDERS_EXPORT';
+      ALTER TYPE ExportType ADD VALUE 'ORDERS_EXPORT';
     </sql>
   </changeSet>
 
