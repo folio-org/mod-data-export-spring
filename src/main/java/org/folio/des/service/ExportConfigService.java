@@ -1,5 +1,6 @@
 package org.folio.des.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
@@ -11,8 +12,10 @@ public interface ExportConfigService {
 
   ModelConfiguration postConfig(ExportConfig exportConfig);
 
-  ExportConfigCollection getConfigCollection();
+  ExportConfigCollection getConfigCollection(Integer offset, Integer limit, String query);
 
   Optional<ExportConfig> getConfig();
+
+  List<ExportConfig> getConfigs(String query);
 
 }

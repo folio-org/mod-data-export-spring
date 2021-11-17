@@ -1,6 +1,6 @@
 package org.folio.des.controller;
 
-import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.rest.resource.ConfigsApi;
@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/data-export-spring")
@@ -19,8 +20,8 @@ public class ConfigsController implements ConfigsApi {
   private final ExportConfigService service;
 
   @Override
-  public ResponseEntity<ExportConfigCollection> getExportConfigs() {
-    return ResponseEntity.ok(service.getConfigCollection());
+  public ResponseEntity<ExportConfigCollection> getExportConfigs(Integer offset, Integer limit, String query) {
+      return ResponseEntity.ok(service.getConfigCollection(offset, limit, query));
   }
 
   @Override

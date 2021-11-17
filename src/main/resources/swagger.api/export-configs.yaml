@@ -7,6 +7,10 @@ servers:
 paths:
   /configs:
     get:
+      parameters:
+        - $ref: "#/components/parameters/trait_pageable_offset"
+        - $ref: "#/components/parameters/trait_pageable_limit"
+        - $ref: "#/components/parameters/trait_queryable_query"
       description: Get a list of data export configurations
       operationId: getExportConfigs
       responses:
@@ -113,6 +117,32 @@ components:
       $ref: 'schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: 'schemas/common/errors.json#/Errors'
+  parameters:
+    trait_queryable_query:
+      name: query
+      in: query
+      description: A query string to filter rules based on matching criteria in fields.
+      schema:
+        type: string
+    trait_pageable_offset:
+      name: offset
+      in: query
+      description: Skip over a number of elements by specifying an offset value for
+        the query
+      schema:
+        default: 0
+        minimum: 0
+        maximum: 2147483647
+        type: integer
+    trait_pageable_limit:
+      name: limit
+      in: query
+      description: Limit the number of elements returned in the response
+      schema:
+        default: 10
+        minimum: 0
+        maximum: 2147483647
+        type: integer
   examples:
     errors:
       value:

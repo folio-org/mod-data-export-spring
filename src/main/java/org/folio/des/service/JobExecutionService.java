@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +16,20 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.JobParameterNames;
+import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCommand;
 import org.folio.des.domain.entity.Job;
 import org.folio.des.service.impl.ExportConfigServiceImpl;
+import org.folio.des.validator.ExportConfigValidatorResolver;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 @Service
 @Log4j2
@@ -30,16 +38,12 @@ public class  JobExecutionService {
 
   private final KafkaService kafka;
   private final ObjectMapper objectMapper;
+  private final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
   public JobCommand prepareStartJobCommand(Job job) {
-    ExportConfigServiceImpl.checkConfig(job.getType(), job.getExportTypeSpecificParameters());
+    validateIncomingExportConfig(job);
 
-    var result = new JobCommand();
-    result.setType(JobCommand.Type.START);
-    result.setId(job.getId());
-    result.setName(job.getName());
-    result.setDescription(job.getDescription());
-    result.setExportType(job.getType());
+    JobCommand jobCommand = buildBaseJobCommand(job);
 
     Map<String, JobParameter> params = new HashMap<>();
     if (job.getType() == ExportType.CIRCULATION_LOG) {
@@ -52,8 +56,18 @@ public class  JobExecutionService {
         throw new IllegalArgumentException(e);
       }
     }
-    result.setJobParameters(new JobParameters(params));
+    jobCommand.setJobParameters(new JobParameters(params));
 
+    return jobCommand;
+  }
+
+  @NotNull private JobCommand buildBaseJobCommand(Job job) {
+    var result = new JobCommand();
+    result.setType(JobCommand.Type.START);
+    result.setId(job.getId());
+    result.setName(job.getName());
+    result.setDescription(job.getDescription());
+    result.setExportType(job.getType());
     return result;
   }
 
@@ -79,4 +93,10 @@ public class  JobExecutionService {
     sendJobCommand(jobCommand);
   }
 
+  protected void validateIncomingExportConfig(Job job) {
+    exportConfigValidatorResolver.resolve(job.getType(), ExportTypeSpecificParameters.class).ifPresent(validator -> {
+      Errors errors = new BeanPropertyBindingResult(job.getExportTypeSpecificParameters(), "specificParameters");
+      validator.validate(job.getExportTypeSpecificParameters(), errors);
+    });
+  }
 }

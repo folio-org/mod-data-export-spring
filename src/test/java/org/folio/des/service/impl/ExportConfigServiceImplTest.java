@@ -1,16 +1,19 @@
 package org.folio.des.service.impl;
 
+import static org.folio.des.service.impl.ExportConfigServiceImpl.CONFIG_NAME;
+import static org.folio.des.service.impl.ExportConfigServiceImpl.CONFIG_QUERY;
+import static org.folio.des.service.impl.ExportConfigServiceImpl.MODULE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
+
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
+import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
@@ -26,7 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-@SpringBootTest(classes = {ExportConfigServiceImpl.class, JacksonConfiguration.class})
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@SpringBootTest(classes = {ExportConfigServiceImpl.class, JacksonConfiguration.class, ServiceConfiguration.class})
 class ExportConfigServiceImplTest {
 
   public static final String CONFIG_RESPONSE =
@@ -118,7 +124,8 @@ class ExportConfigServiceImplTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfiguration(any())).thenReturn(mockedResponse);
 
-    var config = service.getConfigCollection();
+    var query = String.format(CONFIG_QUERY, MODULE_NAME, CONFIG_NAME);
+    var config = service.getConfigCollection(0, Integer.MAX_VALUE, query);
 
     Assertions.assertAll(
         () -> assertEquals(0, config.getTotalRecords()),
@@ -131,7 +138,8 @@ class ExportConfigServiceImplTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfiguration(any())).thenReturn(mockedResponse);
 
-    var config = service.getConfigCollection();
+    var query = String.format(CONFIG_QUERY, MODULE_NAME, CONFIG_NAME);
+    var config = service.getConfigCollection(0, Integer.MAX_VALUE, query);
 
     Assertions.assertAll(
         () -> assertEquals(1, config.getTotalRecords()),
