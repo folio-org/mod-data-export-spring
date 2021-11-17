@@ -5,7 +5,7 @@ folio:
     validation:
       enabled: true
 server:
-  port: 8101
+  port: 8081
 logging:
   level:
     liquibase: debug
@@ -16,7 +16,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate.format_sql: true
     open-in-view: false
