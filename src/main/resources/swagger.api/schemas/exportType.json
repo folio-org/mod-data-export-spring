@@ -6,6 +6,7 @@
     "enum": [
       "CIRCULATION_LOG",
       "BURSAR_FEES_FINES"
-    ]
+    ],
+    "default": "BURSAR_FEES_FINES"
   }
 }

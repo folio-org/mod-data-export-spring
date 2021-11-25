@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-@Service
-public class BurSarFeesFinesExportSpecificParametersValidator implements Validator {
+public class BurSarFeesFinesExportParametersValidator implements Validator {
   @Override
   public boolean supports(Class<?> aClass) {
     return ExportTypeSpecificParameters.class.isAssignableFrom(aClass);
@@ -16,11 +15,17 @@ public class BurSarFeesFinesExportSpecificParametersValidator implements Validat
 
   @Override
   public void validate(Object target, Errors errors) {
+    if (target == null) {
+      String msg = String.format("%s type should contain %s parameters", ExportType.BURSAR_FEES_FINES.getValue(),
+        ExportTypeSpecificParameters.class.getSimpleName());
+        errors.rejectValue(ExportTypeSpecificParameters.class.getSimpleName(), msg);
+        throw new IllegalArgumentException(msg);
+    }
     ExportTypeSpecificParameters specificParameters = (ExportTypeSpecificParameters) target;
     if (specificParameters.getBursarFeeFines() == null) {
-      throw new IllegalArgumentException(
-        String.format("%s type should contain %s parameters", ExportType.BURSAR_FEES_FINES.getValue(),
-                                BursarFeeFines.class.getSimpleName()));
+      String msg = String.format("%s type should contain %s parameters", ExportType.BURSAR_FEES_FINES.getValue(),
+                                  BursarFeeFines.class.getSimpleName());
+      throw new IllegalArgumentException(msg);
     }
   }
 }

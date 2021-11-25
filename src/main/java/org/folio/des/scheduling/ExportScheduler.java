@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
-import org.folio.des.service.ExportConfigService;
+import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.JobService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -93,7 +93,7 @@ public class ExportScheduler implements SchedulingConfigurer {
   }
 
   private ExportConfig fetchConfiguration() {
-    Optional<ExportConfig> savedConfig = configService.getConfig();
+    Optional<ExportConfig> savedConfig = configService.getFirstConfig();
     if (savedConfig.isPresent()) {
       log.info("Got {}.", savedConfig.get());
       return savedConfig.get();

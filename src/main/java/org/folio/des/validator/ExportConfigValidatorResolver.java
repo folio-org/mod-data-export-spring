@@ -24,6 +24,7 @@ public class ExportConfigValidatorResolver {
   }
 
   public static String buildKey(ExportType exportType, Class<?> targetClass) {
-    return Optional.ofNullable(exportType).map(ExportType::getValue).orElse(StringUtils.EMPTY) + HYPHEN_SEPARATOR + targetClass.getName();
+    return Optional.ofNullable(exportType).map(ExportType::getValue).orElse(StringUtils.EMPTY) +
+                    HYPHEN_SEPARATOR + Optional.ofNullable(targetClass).map(Class::getName).orElse(StringUtils.EMPTY);
   }
 }

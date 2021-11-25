@@ -15,12 +15,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ConfigurationClient {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  ConfigurationCollection getConfiguration(@RequestParam("query") String query);
+  ConfigurationCollection getConfigurations(@RequestParam("query") String query);
 
   @PostMapping
   ModelConfiguration postConfiguration(@RequestBody ModelConfiguration config);
 
   @PutMapping(path = "/{entryId}")
   void putConfiguration(@RequestBody ModelConfiguration config, @PathVariable String entryId);
+
+  @GetMapping(path = "/{entryId}")
+  ModelConfiguration getConfigById(@PathVariable String entryId);
 
 }

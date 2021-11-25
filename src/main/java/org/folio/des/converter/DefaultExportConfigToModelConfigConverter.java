@@ -10,11 +10,12 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
+import static org.folio.des.service.config.ExportConfigConstants.MODULE_NAME;
+
 @AllArgsConstructor
 @Log4j2
-public final class BursarFeesFinesExportConfigConverter implements Converter<ExportConfig, ModelConfiguration> {
-  private static final String MODULE_NAME = "mod-data-export-spring";
-  private static final String CONFIG_NAME = "export_config_parameters";
+public final class DefaultExportConfigToModelConfigConverter implements Converter<ExportConfig, ModelConfiguration> {
   private static final String CONFIG_DESCRIPTION = "Data export configuration parameters";
 
   private final ObjectMapper objectMapper;
@@ -24,7 +25,7 @@ public final class BursarFeesFinesExportConfigConverter implements Converter<Exp
   public ModelConfiguration convert(ExportConfig source) {
     var config = new ModelConfiguration();
     config.setModule(MODULE_NAME);
-    config.setConfigName(CONFIG_NAME);
+    config.setConfigName(DEFAULT_CONFIG_NAME);
     config.setDescription(CONFIG_DESCRIPTION);
     config.setEnabled(true);
     config.setDefault(true);

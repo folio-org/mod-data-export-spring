@@ -74,7 +74,7 @@ class ConfigsControllerTest extends BaseTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders())
                 .content(UPDATE_CONFIG_REQUEST))
-        .andExpect(matchAll(status().isOk(), content().contentType("text/plain;charset=UTF-8")));
+        .andExpect(matchAll(status().isNoContent()));
 
     verify(configAspect).refreshAfterUpdate(any(ExportConfig.class));
   }
