@@ -64,6 +64,18 @@
         },
         {
           "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export-spring/configs/{id}",
+          "permissionsRequired": [
+            "data-export.config.item.get"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.get"
+          ]
+        },
+        {
+          "methods": [
             "POST"
           ],
           "pathPattern": "/data-export-spring/configs",
@@ -84,6 +96,18 @@
           ],
           "modulePermissions": [
             "configuration.entries.item.put"
+          ]
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/data-export-spring/configs/{id}",
+          "permissionsRequired": [
+            "data-export.config.item.delete"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.delete"
           ]
         }
       ]
@@ -135,22 +159,32 @@
   "permissionSets": [
     {
       "permissionName": "data-export.config.collection.get",
-      "displayName": "get data export configurations",
+      "displayName": "Get data export configurations",
       "description": "Get data export configurations"
     },
     {
+      "permissionName": "data-export.config.item.get",
+      "displayName": "Get data export configuration by id",
+      "description": "Get data export configuration by id"
+    },
+    {
       "permissionName": "data-export.config.item.post",
-      "displayName": "create a data export configuration",
+      "displayName": "Create a data export configuration",
       "description": "Create a data export configuration"
     },
     {
       "permissionName": "data-export.config.item.put",
-      "displayName": "change a data export configuration",
+      "displayName": "Change a data export configuration",
       "description": "Change a data export configuration"
     },
     {
+      "permissionName": "data-export.config.item.delete",
+      "displayName": "Delete data export configuration by id",
+      "description": "Delete data export configuration by id"
+    },
+    {
       "permissionName": "data-export.job.item.post",
-      "displayName": "create/update a data export job",
+      "displayName": "Create/update a data export job",
       "description": "Create/update a data export job"
     },
     {
@@ -169,8 +203,10 @@
       "description": "All permissions for data export configurations",
       "subPermissions": [
         "data-export.config.collection.get",
+        "data-export.config.item.get",
         "data-export.config.item.post",
-        "data-export.config.item.put"
+        "data-export.config.item.put",
+        "data-export.config.item.delete"
       ]
     },
     {

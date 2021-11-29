@@ -14,9 +14,11 @@ import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.impl.ExportConfigServiceImpl;
 import org.folio.des.service.config.impl.ExportConfigServiceResolver;
+import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.validation.Validator;
@@ -24,21 +26,14 @@ import org.springframework.validation.Validator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
+@ComponentScan("org.folio.des")
 public class ServiceConfiguration {
-  @Bean DefaultExportConfigToModelConfigConverter defaultConverter(ObjectMapper objectMapper) {
-    return new DefaultExportConfigToModelConfigConverter(objectMapper);
-  }
-
-  @Bean DefaultModelConfigToExportConfigConverter defaultModelConfigurationToExportConfigConverter(ObjectMapper objectMapper) {
-    return new DefaultModelConfigToExportConfigConverter(objectMapper);
-  }
-
   @Bean
-  ExportConfigConverterResolver exportConfigConverterResolver(DefaultExportConfigToModelConfigConverter defaultConverter) {
+  ExportConfigConverterResolver exportConfigConverterResolver(DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter) {
     Map<ExportType, Converter<ExportConfig, ModelConfiguration>> converters = new HashMap<>();
-    converters.put(ExportType.BURSAR_FEES_FINES, defaultConverter);
+    converters.put(ExportType.BURSAR_FEES_FINES, defaultExportConfigToModelConfigConverter);
 
-    return new ExportConfigConverterResolver(converters, defaultConverter);
+    return new ExportConfigConverterResolver(converters, defaultExportConfigToModelConfigConverter);
   }
 
   @Bean
@@ -55,18 +50,19 @@ public class ServiceConfiguration {
     return new ExportConfigValidatorResolver(validators);
   }
 
-//  @Bean
-//  ExportTypeBasedConfigManager exportTypeBasedConfigManager(ExportConfigServiceResolver exportConfigServiceResolver,
-//                    DefaultModelConfigurationToExportConfigConverter defaultModelConfigurationToExportConfigConverter,
-//                    ExportConfigService defaultExportConfigService, ConfigurationClient client) {
-//    return new ExportTypeBasedConfigManager(client, exportConfigServiceResolver,
-//                    defaultExportConfigService, defaultModelConfigurationToExportConfigConverter);
-//  }
-//
   @Bean
-  ExportConfigServiceImpl exportConfigService(ConfigurationClient configurationClient, ExportConfigValidatorResolver exportConfigValidatorResolver,
+  ExportTypeBasedConfigManager exportTypeBasedConfigManager(ConfigurationClient client,
+                      ExportConfigServiceResolver exportConfigServiceResolver,
+                      ExportConfigService defaultExportConfig,
+                      DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter) {
+    return new ExportTypeBasedConfigManager(client, exportConfigServiceResolver,
+                      defaultExportConfig, defaultModelConfigToExportConfigConverter);
+  }
+
+  @Bean
+  ExportConfigServiceImpl exportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter, ObjectMapper objectMapper) {
-    return new ExportConfigServiceImpl(configurationClient, defaultModelConfigToExportConfigConverter, exportConfigValidatorResolver, objectMapper);
+    return new ExportConfigServiceImpl(client, defaultModelConfigToExportConfigConverter, exportConfigValidatorResolver, objectMapper);
   }
 
   @Bean

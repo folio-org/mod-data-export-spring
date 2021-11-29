@@ -33,7 +33,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootTest(classes = { ExportTypeBasedConfigManager.class, JacksonConfiguration.class, ServiceConfiguration.class})
+@SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
 class ExportTypeBasedConfigManagerTest {
 
   public static final String CONFIG_RESPONSE =

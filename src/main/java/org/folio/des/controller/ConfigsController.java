@@ -17,27 +17,33 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ConfigsController implements ConfigsApi {
 
- // private final ExportTypeBasedConfigManager manager;
+  private final ExportTypeBasedConfigManager manager;
 
-//  @Override
-//  public ResponseEntity<ExportConfigCollection> getExportConfigs(ExportType exportType, String query) {
-//      return ResponseEntity.ok(manager.getConfigCollection(exportType, query));
-//  }
-//
-//  @Override
-//  public ResponseEntity<String> postExportConfig(ExportConfig exportConfig) {
-//    manager.postConfig(exportConfig);
-//    return new ResponseEntity<>("Export configuration added", HttpStatus.CREATED);
-//  }
-//
-//  @Override
-//  public ResponseEntity<Void> putExportConfig(String configId, ExportConfig exportConfig) {
-//    manager.updateConfig(configId, exportConfig);
-//    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//  }
-//
-//  @Override
-//  public ResponseEntity<ExportConfig> getConfigById(String id) {
-//    return ResponseEntity.ok(manager.getConfigById(id));
-//  }
+  @Override
+  public ResponseEntity<ExportConfigCollection> getExportConfigs(ExportType exportType, String query) {
+      return ResponseEntity.ok(manager.getConfigCollection(exportType, query));
+  }
+
+  @Override
+  public ResponseEntity<String> postExportConfig(ExportConfig exportConfig) {
+    manager.postConfig(exportConfig);
+    return new ResponseEntity<>("Export configuration added", HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<Void> putExportConfig(String configId, ExportConfig exportConfig) {
+    manager.updateConfig(configId, exportConfig);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<ExportConfig> getConfigById(String exportConfigId) {
+    return ResponseEntity.ok(manager.getConfigById(exportConfigId));
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteExportConfigById(String exportConfigId) {
+    manager.deleteConfigById(exportConfigId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 }

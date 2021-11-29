@@ -36,7 +36,7 @@ public class ExportTrigger implements Trigger {
     if (config == null) return null;
 
     SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
-    if (schedulePeriod == SchedulePeriodEnum.NONE) return null;
+    if (schedulePeriod == null || schedulePeriod == SchedulePeriodEnum.NONE) return null;
 
     Date nextExecutionTime;
     Integer scheduleFrequency = config.getScheduleFrequency();

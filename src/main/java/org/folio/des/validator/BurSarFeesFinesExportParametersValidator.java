@@ -3,7 +3,6 @@ package org.folio.des.validator;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

@@ -15,11 +15,10 @@ import java.util.UUID;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
-import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.junit.jupiter.api.Assertions;
@@ -33,7 +32,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class})
+@SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
+                  ServiceConfiguration.class})
 class ExportConfigServiceImplTest {
 
   public static final String CONFIG_RESPONSE =
@@ -66,6 +66,8 @@ class ExportConfigServiceImplTest {
 
   @Autowired
   private ExportConfigServiceImpl service;
+  @Autowired
+  private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
   private ObjectMapper objectMapper;
   @MockBean
@@ -174,10 +176,10 @@ class ExportConfigServiceImplTest {
     var exportConfig = config.getConfigs().get(0);
     Assertions.assertAll(
         () -> assertEquals("d855141f-aa62-40bb-a34b-da986b35d6d4", exportConfig.getId()),
-        () -> assertEquals(SchedulePeriodEnum.DAY, exportConfig.getSchedulePeriod()),
+        () -> assertEquals(ExportConfig.SchedulePeriodEnum.DAY, exportConfig.getSchedulePeriod()),
         () ->
             assertEquals(
-                List.of(WeekDaysEnum.FRIDAY, WeekDaysEnum.MONDAY), exportConfig.getWeekDays()));
+                List.of(ExportConfig.WeekDaysEnum.FRIDAY, ExportConfig.WeekDaysEnum.MONDAY), exportConfig.getWeekDays()));
   }
 
   @Test
@@ -194,9 +196,9 @@ class ExportConfigServiceImplTest {
 
     Assertions.assertAll(
         () -> assertEquals("d855141f-aa62-40bb-a34b-da986b35d6d4", exportConfig.getId()),
-        () -> assertEquals(SchedulePeriodEnum.DAY, exportConfig.getSchedulePeriod()),
+        () -> assertEquals(ExportConfig.SchedulePeriodEnum.DAY, exportConfig.getSchedulePeriod()),
         () ->
             assertEquals(
-                List.of(WeekDaysEnum.FRIDAY, WeekDaysEnum.MONDAY), exportConfig.getWeekDays()));
+                List.of(ExportConfig.WeekDaysEnum.FRIDAY, ExportConfig.WeekDaysEnum.MONDAY), exportConfig.getWeekDays()));
   }
 }

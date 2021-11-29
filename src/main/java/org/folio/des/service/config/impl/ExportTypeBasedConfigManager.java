@@ -13,11 +13,9 @@ import org.folio.spring.exception.NotFoundException;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Log4j2
-@Service
 public class ExportTypeBasedConfigManager {
   public static final String EXPORT_CONFIGURATION_NOT_FOUND = "Export configuration not found or parse error : %s";
 
@@ -55,6 +53,10 @@ public class ExportTypeBasedConfigManager {
       throw new NotFoundException(String.format(EXPORT_CONFIGURATION_NOT_FOUND, exportConfigId));
     }
     return defaultModelConfigToExportConfigConverter.convert(configuration);
+  }
+
+  public void deleteConfigById(String exportConfigId) {
+    client.deleteConfigById(exportConfigId);
   }
 
 }

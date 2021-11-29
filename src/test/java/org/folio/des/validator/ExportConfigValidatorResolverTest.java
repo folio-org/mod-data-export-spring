@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.domain.dto.ExportType;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.validation.Validator;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
@@ -20,7 +22,8 @@ public class ExportConfigValidatorResolverTest {
 
   @Autowired
   private ExportConfigValidatorResolver resolver;
-
+  @MockBean
+  private ConfigurationClient client;
 
   @Test
   @DisplayName("Should retrieve validator for specific configuration parameter if validator is registered in the resolver")

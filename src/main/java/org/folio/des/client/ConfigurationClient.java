@@ -4,6 +4,7 @@ import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,4 +27,6 @@ public interface ConfigurationClient {
   @GetMapping(path = "/{entryId}")
   ModelConfiguration getConfigById(@PathVariable String entryId);
 
+  @DeleteMapping(path = "/{entryId}")
+  void deleteConfigById(@PathVariable String entryId);
 }

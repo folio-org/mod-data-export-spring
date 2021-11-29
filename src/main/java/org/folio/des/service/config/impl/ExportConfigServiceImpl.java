@@ -27,7 +27,6 @@ import lombok.extern.log4j.Log4j2;
 
 @RequiredArgsConstructor
 @Log4j2
-//@Service
 public class ExportConfigServiceImpl implements ExportConfigService {
   private static final String CONFIG_DESCRIPTION = "Data export configuration parameters";
   private final ConfigurationClient client;
@@ -53,7 +52,8 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     return config;
   }
 
-  @Override public ExportConfigCollection getConfigCollection(String query) {
+  @Override
+  public ExportConfigCollection getConfigCollection(String query) {
     if (query == null) {
       return getFirstConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());
     }
@@ -68,6 +68,16 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     return new ExportConfigCollection().totalRecords(0);
   }
 
+  @Override
+  public Optional<ExportConfig> getFirstConfig() {
+    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, MODULE_NAME, DEFAULT_CONFIG_NAME));
+    if (configurationCollection.getTotalRecords() == 0) {
+      return Optional.empty();
+    }
+    var config = defaultModelConfigToExportConfigConverter.convert(configurationCollection.getConfigs().get(0));
+    return Optional.of(config);
+  }
+
   @SneakyThrows
   private ModelConfiguration createConfigModel(ExportConfig exportConfig) {
     var config = new ModelConfiguration();
@@ -78,16 +88,6 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     config.setDefault(true);
     config.setValue(objectMapper.writeValueAsString(exportConfig));
     return config;
-  }
-
-  @Override
-  public Optional<ExportConfig> getFirstConfig() {
-    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, MODULE_NAME, DEFAULT_CONFIG_NAME));
-    if (configurationCollection.getTotalRecords() == 0) {
-      return Optional.empty();
-    }
-    var config = defaultModelConfigToExportConfigConverter.convert(configurationCollection.getConfigs().get(0));
-    return Optional.of(config);
   }
 
   private ExportConfigCollection createExportConfigCollection(ExportConfig exportConfig) {

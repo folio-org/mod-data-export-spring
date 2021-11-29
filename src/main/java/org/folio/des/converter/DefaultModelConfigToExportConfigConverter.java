@@ -9,9 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Log4j2
+@Service
 public final class DefaultModelConfigToExportConfigConverter implements Converter<ModelConfiguration, ExportConfig> {
   private final ObjectMapper objectMapper;
 
