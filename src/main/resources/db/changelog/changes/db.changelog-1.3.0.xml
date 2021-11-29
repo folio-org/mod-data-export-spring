@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="MODEXPS-37@@add new export types" author="d.butramyou">
+    <sql dbms="postgresql">
+      ALTER TYPE ExportType ADD VALUE 'BATCH_VOUCHER_EXPORT';
+      ALTER TYPE ExportType ADD VALUE 'EDIFACT_ORDERS_EXPORT';
+      ALTER TYPE ExportType ADD VALUE 'ORDERS_EXPORT';
+      ALTER TYPE ExportType ADD VALUE 'INVOICE_EXPORT';
+    </sql>
+  </changeSet>
+
+  <changeSet id="MODBULKED-16@@extend job table" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      CREATE TYPE IdentifierType as ENUM ('ID', 'BARCODE');
+      CREATE CAST (character varying as IdentifierType) WITH INOUT AS IMPLICIT;
+      CREATE TYPE EntityType as ENUM ('USER');
+      CREATE CAST (character varying as EntityType) WITH INOUT AS IMPLICIT;
+      ALTER TABLE job ADD COLUMN identifier_type IdentifierType;
+      ALTER TABLE job ADD COLUMN entity_type EntityType;
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

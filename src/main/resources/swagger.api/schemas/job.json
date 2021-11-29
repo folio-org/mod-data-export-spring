@@ -67,6 +67,14 @@
       "errorDetails": {
         "description": "Job error details",
         "type": "string"
+      },
+      "identifierType": {
+        "description": "Identifier type",
+        "$ref": "identifierType.json#/IdentifierType"
+      },
+      "entityType": {
+        "description": "Entity type",
+        "$ref": "entityType.json#/EntityType"
       }
     },
     "additionalProperties": false,
