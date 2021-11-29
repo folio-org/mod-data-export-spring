@@ -13,4 +13,15 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODBULKED-16@@extend job table" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      CREATE TYPE IdentifierType as ENUM ('ID', 'BARCODE');
+      CREATE CAST (character varying as IdentifierType) WITH INOUT AS IMPLICIT;
+      CREATE TYPE EntityType as ENUM ('USER');
+      CREATE CAST (character varying as EntityType) WITH INOUT AS IMPLICIT;
+      ALTER TABLE job ADD COLUMN identifier_type IdentifierType;
+      ALTER TABLE job ADD COLUMN entity_type EntityType;
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>

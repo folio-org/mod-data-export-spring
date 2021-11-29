@@ -261,7 +261,7 @@
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
                             <modelsToGenerate>
-                                Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection
+                                Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection,IdentifierType,EntityType
                             </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
