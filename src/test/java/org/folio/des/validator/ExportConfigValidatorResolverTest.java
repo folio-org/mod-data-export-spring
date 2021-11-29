@@ -18,7 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.validation.Validator;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-public class ExportConfigValidatorResolverTest {
+class ExportConfigValidatorResolverTest {
 
   @Autowired
   private ExportConfigValidatorResolver resolver;

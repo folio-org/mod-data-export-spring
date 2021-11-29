@@ -60,9 +60,9 @@ public class ExportConfigServiceImpl implements ExportConfigService {
     ConfigurationCollection configurationCollection = client.getConfigurations(query);
     if (configurationCollection.getTotalRecords() > 0) {
       var exportConfigCollection = new ExportConfigCollection();
-      configurationCollection.getConfigs().forEach(modelConfig -> {
-        exportConfigCollection.addConfigsItem(defaultModelConfigToExportConfigConverter.convert(modelConfig));
-      });
+      configurationCollection.getConfigs().forEach(modelConfig -> exportConfigCollection
+        .addConfigsItem(defaultModelConfigToExportConfigConverter.convert(modelConfig))
+      );
       return exportConfigCollection.totalRecords(exportConfigCollection.getConfigs().size());
     }
     return new ExportConfigCollection().totalRecords(0);

@@ -16,7 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.convert.converter.Converter;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-public class ExportConfigConverterResolverTest {
+class ExportConfigConverterResolverTest {
 
   @Autowired
   private ExportConfigConverterResolver resolver;

@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Errors;
 
 @SpringBootTest(classes = { BurSarFeesFinesExportParametersValidator.class})
-public class BurSarFeesFinesExportParametersValidatorTest {
+class BurSarFeesFinesExportParametersValidatorTest {
   @Autowired
   private BurSarFeesFinesExportParametersValidator validator;
 
