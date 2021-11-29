@@ -40,6 +40,8 @@ public class  JobExecutionService {
     result.setName(job.getName());
     result.setDescription(job.getDescription());
     result.setExportType(job.getType());
+    result.setIdentifierType(job.getIdentifierType());
+    result.setEntityType(job.getEntityType());
 
     Map<String, JobParameter> params = new HashMap<>();
     if (job.getType() == ExportType.CIRCULATION_LOG) {

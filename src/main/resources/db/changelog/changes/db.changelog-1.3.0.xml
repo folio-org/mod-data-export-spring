@@ -13,4 +13,33 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODBULKED-16@@create-identifier-type-enum" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      CREATE TYPE IdentifierType as ENUM ('ID', 'BARCODE');
+    </sql>
+  </changeSet>
+  <changeSet id="MODBULKED-16@@create-identifier-type-enum-cast" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      CREATE CAST (character varying as IdentifierType) WITH INOUT AS IMPLICIT;
+    </sql>
+  </changeSet>
+
+  <changeSet id="MODBULKED-16@@create-entity-type-enum" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      CREATE TYPE EntityType as ENUM ('USER');
+    </sql>
+  </changeSet>
+  <changeSet id="MODBULKED-16@@create-entity-type-enum-cast" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      CREATE CAST (character varying as EntityType) WITH INOUT AS IMPLICIT;
+    </sql>
+  </changeSet>
+
+  <changeSet id="MODBULKED-16@@extend existing job table" author="bozhkooleksandr">
+    <sql dbms="postgresql">
+      ALTER TABLE job ADD COLUMN identifier_type IdentifierType;
+      ALTER TABLE job ADD COLUMN entity_type EntityType;
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>

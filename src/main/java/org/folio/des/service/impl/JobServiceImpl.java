@@ -166,6 +166,8 @@ public class JobServiceImpl implements JobService {
     result.setFiles(entity.getFiles());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
+    result.setIdentifierType(entity.getIdentifierType());
+    result.setEntityType(entity.getEntityType());
 
     var metadata = new Metadata();
     metadata.setCreatedDate(entity.getCreatedDate());
@@ -196,6 +198,8 @@ public class JobServiceImpl implements JobService {
     result.setFiles(dto.getFiles());
     result.setStartTime(dto.getStartTime());
     result.setEndTime(dto.getEndTime());
+    result.setIdentifierType(dto.getIdentifierType());
+    result.setEntityType(dto.getEntityType());
 
     if (dto.getMetadata() != null) {
       result.setCreatedDate(dto.getMetadata().getCreatedDate());
