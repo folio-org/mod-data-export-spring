@@ -5,19 +5,19 @@
     "type": "object",
     "properties": {
       "total": {
-        "type": "Integer",
+        "type": "integer",
         "minimum": 0,
         "default": 0,
         "description": "Total number of records being processed"
       },
       "processed": {
-        "type": "Integer",
+        "type": "integer",
         "minimum": 0,
         "default": 0,
         "description": "Current number of records already processed"
       },
       "progress": {
-        "type": "Integer",
+        "type": "integer",
         "minimum": 0,
         "maximum": 100,
         "default": 0,
