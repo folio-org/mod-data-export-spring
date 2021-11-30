@@ -19,10 +19,9 @@
       CREATE CAST (character varying as IdentifierType) WITH INOUT AS IMPLICIT;
       CREATE TYPE EntityType as ENUM ('USER');
       CREATE CAST (character varying as EntityType) WITH INOUT AS IMPLICIT;
-      CREATE TYPE Progress as jsonb;
       ALTER TABLE job ADD COLUMN identifier_type IdentifierType;
       ALTER TABLE job ADD COLUMN entity_type EntityType;
-      ALTER TABLE job ADD COLUMN progress Progress;
+      ALTER TABLE job ADD COLUMN progress Progress jsonb;
     </sql>
   </changeSet>
 
