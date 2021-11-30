@@ -142,6 +142,8 @@ components:
       $ref: 'schemas/identifierType.json#/IdentifierType'
     entityType:
       $ref: 'schemas/entityType.json#/EntityType'
+    progress:
+      $ref: 'schemas/progress.json#/Progress'
     UUID:
       type: string
       format: uuid
