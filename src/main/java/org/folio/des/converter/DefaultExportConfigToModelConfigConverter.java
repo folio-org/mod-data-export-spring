@@ -12,7 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
-import static org.folio.des.service.config.ExportConfigConstants.MODULE_NAME;
+import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 
 @AllArgsConstructor
 @Log4j2
@@ -26,7 +26,8 @@ public final class DefaultExportConfigToModelConfigConverter implements Converte
   @Override
   public ModelConfiguration convert(ExportConfig source) {
     var config = new ModelConfiguration();
-    config.setModule(MODULE_NAME);
+    config.setId(source.getId());
+    config.setModule(DEFAULT_MODULE_NAME);
     config.setConfigName(DEFAULT_CONFIG_NAME);
     config.setDescription(CONFIG_DESCRIPTION);
     config.setEnabled(true);

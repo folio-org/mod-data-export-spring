@@ -2,7 +2,7 @@ package org.folio.des.service.config.impl;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_QUERY;
-import static org.folio.des.service.config.ExportConfigConstants.MODULE_NAME;
+import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 
 import java.util.Optional;
 
@@ -70,7 +70,7 @@ public class ExportConfigServiceImpl implements ExportConfigService {
 
   @Override
   public Optional<ExportConfig> getFirstConfig() {
-    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, MODULE_NAME, DEFAULT_CONFIG_NAME));
+    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME));
     if (configurationCollection.getTotalRecords() == 0) {
       return Optional.empty();
     }
@@ -81,7 +81,7 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   @SneakyThrows
   private ModelConfiguration createConfigModel(ExportConfig exportConfig) {
     var config = new ModelConfiguration();
-    config.setModule(MODULE_NAME);
+    config.setModule(DEFAULT_MODULE_NAME);
     config.setConfigName(DEFAULT_CONFIG_NAME);
     config.setDescription(CONFIG_DESCRIPTION);
     config.setEnabled(true);

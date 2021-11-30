@@ -1,5 +1,6 @@
 package org.folio.des.client;
 
+import org.folio.des.config.feign.FeignClientConfiguration;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "configurations/entries")
+@FeignClient(name = "configurations/entries", configuration = FeignClientConfiguration.class)
 public interface ConfigurationClient {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

@@ -2,7 +2,7 @@ package org.folio.des.service.config.impl;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_QUERY;
-import static org.folio.des.service.config.ExportConfigConstants.MODULE_NAME;
+import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -152,7 +152,7 @@ class ExportConfigServiceImplTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var query = String.format(DEFAULT_CONFIG_QUERY, MODULE_NAME, DEFAULT_CONFIG_NAME);
+    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME);
     var config = service.getConfigCollection(query);
 
     Assertions.assertAll(
@@ -166,7 +166,7 @@ class ExportConfigServiceImplTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var query = String.format(DEFAULT_CONFIG_QUERY, MODULE_NAME, DEFAULT_CONFIG_NAME);
+    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME);
     var config = service.getConfigCollection(query);
 
     Assertions.assertAll(
