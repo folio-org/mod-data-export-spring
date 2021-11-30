@@ -21,7 +21,7 @@
       CREATE CAST (character varying as EntityType) WITH INOUT AS IMPLICIT;
       ALTER TABLE job ADD COLUMN identifier_type IdentifierType;
       ALTER TABLE job ADD COLUMN entity_type EntityType;
-      ALTER TABLE job ADD COLUMN progress Progress jsonb;
+      ALTER TABLE job ADD COLUMN progress jsonb;
     </sql>
   </changeSet>
 
