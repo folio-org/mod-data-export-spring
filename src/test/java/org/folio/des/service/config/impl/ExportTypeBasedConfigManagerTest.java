@@ -19,11 +19,14 @@ import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
 import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
+import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,36 +73,42 @@ class ExportTypeBasedConfigManagerTest {
   @MockBean
   private ConfigurationClient client;
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({
+    "BATCH_VOUCHER_EXPORT, BATCH_VOUCHER_EXPORT",
+    "BURSAR_FEES_FINES, export_config_parameters"
+  })
   @DisplayName("Set new configuration")
-  void addConfig() throws JsonProcessingException {
+  void addConfig(ExportType exportType, String exportName) throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
+    bursarExportConfig.setType(exportType);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     BursarFeeFines bursarFeeFines = new BursarFeeFines();
     bursarFeeFines.setDaysOutstanding(9);
     bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
     parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
-    ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
+    ModelConfiguration mockResponse = mockResponse(bursarExportConfig, exportName);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
 
     var response = service.postConfig(bursarExportConfig);
 
     Assertions.assertAll(
       () -> assertNotNull(response.getId()),
-      () -> assertEquals(mockResponse.getConfigName(), response.getConfigName()),
+      () -> assertEquals(mockResponse.getConfigName(), exportName),
       () -> assertEquals(mockResponse.getModule(), response.getModule()),
       () -> assertEquals(mockResponse.getDescription(), response.getDescription()),
       () -> assertEquals(mockResponse.getDefault(), response.getDefault()),
       () -> assertEquals(mockResponse.getEnabled(), response.getEnabled())
     );
+    Mockito.verify(client, Mockito.times(1)).postConfiguration(any());
   }
 
   @Test
   @DisplayName("Should not create new configuration without specific parameters")
   void shouldNorCreateConfigurationAndThroughExceptionIfSpecificParametersIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
-    ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
+    ModelConfiguration mockResponse = mockResponse(bursarExportConfig, "export_config_parameters");
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
 
     assertThrows(IllegalStateException.class, () ->  service.postConfig(bursarExportConfig));
@@ -112,19 +121,19 @@ class ExportTypeBasedConfigManagerTest {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);
-    ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
+    ModelConfiguration mockResponse = mockResponse(bursarExportConfig, "export_config_parameters");
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
 
     assertThrows(IllegalArgumentException.class, () -> service.postConfig(bursarExportConfig));
     Mockito.verify(client, Mockito.times(0)).postConfiguration(any());
   }
 
-  private ModelConfiguration mockResponse(ExportConfig bursarExportConfig)
+  private ModelConfiguration mockResponse(ExportConfig bursarExportConfig, String configName)
     throws JsonProcessingException {
     var mockResponse = new ModelConfiguration();
     mockResponse.setId(UUID.randomUUID().toString());
     mockResponse.setModule("test_module");
-    mockResponse.setConfigName("bursar_config");
+    mockResponse.setConfigName(configName);
     mockResponse.setDescription("test description");
     mockResponse.setEnabled(true);
     mockResponse.setDefault(true);
