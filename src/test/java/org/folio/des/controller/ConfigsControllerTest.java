@@ -18,8 +18,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static wiremock.org.apache.http.HttpHeaders.CONTENT_TYPE;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import io.vertx.core.json.JsonObject;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.RefreshConfigAspect;
@@ -30,6 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.github.tomakehurst.wiremock.client.WireMock;
+
+import io.vertx.core.json.JsonObject;
 
 class ConfigsControllerTest extends BaseTest {
 

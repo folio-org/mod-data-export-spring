@@ -12,13 +12,15 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Setter;
+
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
 import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.stereotype.Component;
+
+import lombok.Setter;
 
 @Component
 public class ExportTrigger implements Trigger {

@@ -1,12 +1,14 @@
 package org.folio.des.scheduling;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
-import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.JobService;
+import org.folio.des.service.config.ExportConfigService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -15,9 +17,8 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.concurrent.Executors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Lazy(false)
 @Component
@@ -29,7 +30,7 @@ public class ExportScheduler implements SchedulingConfigurer {
 
   private final ExportTrigger trigger;
   private final JobService jobService;
-  private final ExportConfigService configService;
+  private final ExportConfigService burSarExportConfigService;
   private final FolioExecutionContextHelper contextHelper;
 
   private ScheduledTaskRegistrar registrar;
@@ -93,7 +94,7 @@ public class ExportScheduler implements SchedulingConfigurer {
   }
 
   private ExportConfig fetchConfiguration() {
-    Optional<ExportConfig> savedConfig = configService.getFirstConfig();
+    Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
     if (savedConfig.isPresent()) {
       log.info("Got {}.", savedConfig.get());
       return savedConfig.get();

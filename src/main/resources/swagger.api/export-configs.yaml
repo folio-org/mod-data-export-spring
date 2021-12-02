@@ -8,7 +8,6 @@ paths:
   /configs:
     get:
       parameters:
-        - $ref: "#/components/parameters/export_type"
         - $ref: "#/components/parameters/trait_queryable_query"
       description: Get a list of data export configurations
       operationId: getExportConfigs
@@ -191,8 +190,6 @@ components:
       $ref: 'schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: 'schemas/common/errors.json#/Errors'
-    exportType:
-      $ref: 'schemas/exportType.json#/ExportType'
   parameters:
     trait_queryable_query:
       name: query
@@ -200,13 +197,6 @@ components:
       description: A query string to filter rules based on matching criteria in fields.
       schema:
         type: string
-    export_type:
-      name: exportType
-      in : query
-      description: Export type for which configuration should be retrieved.
-      schema:
-        type: stirng
-        $ref: "#/components/schemas/exportType"
   examples:
     errors:
       value:

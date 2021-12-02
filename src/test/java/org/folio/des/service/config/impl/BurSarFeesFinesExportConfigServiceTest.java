@@ -2,7 +2,6 @@ package org.folio.des.service.config.impl;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_QUERY;
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
                   ServiceConfiguration.class})
-class ExportConfigServiceImplTest {
+class BurSarFeesFinesExportConfigServiceTest {
 
   public static final String CONFIG_RESPONSE =
       "    {\n"
@@ -65,7 +64,7 @@ class ExportConfigServiceImplTest {
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
-  private ExportConfigServiceImpl service;
+  private BurSarFeesFinesExportConfigService service;
   @Autowired
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
@@ -152,7 +151,7 @@ class ExportConfigServiceImplTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME);
+    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
     var config = service.getConfigCollection(query);
 
     Assertions.assertAll(
@@ -166,7 +165,7 @@ class ExportConfigServiceImplTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME);
+    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
     var config = service.getConfigCollection(query);
 
     Assertions.assertAll(

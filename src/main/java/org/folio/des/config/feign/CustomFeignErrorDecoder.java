@@ -1,12 +1,12 @@
 package org.folio.des.config.feign;
 
-import feign.FeignException;
-import feign.Response;
-import feign.codec.ErrorDecoder;
+import static feign.FeignException.errorStatus;
+
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 
-import static feign.FeignException.errorStatus;
+import feign.Response;
+import feign.codec.ErrorDecoder;
 
 public class CustomFeignErrorDecoder implements ErrorDecoder {
 

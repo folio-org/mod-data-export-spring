@@ -1,12 +1,10 @@
 package org.folio.des.service.config.impl;
 
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_QUERY;
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
-
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
+import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
@@ -18,21 +16,17 @@ import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
-
 @RequiredArgsConstructor
 @Log4j2
-public class ExportConfigServiceImpl implements ExportConfigService {
-  private static final String CONFIG_DESCRIPTION = "Data export configuration parameters";
-  private final ConfigurationClient client;
-  private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
-  private final ExportConfigValidatorResolver exportConfigValidatorResolver;
-  private final ObjectMapper objectMapper;
+public class BaseExportConfigService implements ExportConfigService {
+  protected final ConfigurationClient client;
+  protected final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+  protected final DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter;
+  protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
@@ -47,16 +41,14 @@ public class ExportConfigServiceImpl implements ExportConfigService {
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
     log.info("Posting {}.", exportConfig);
     validateIncomingExportConfig(exportConfig);
-    ModelConfiguration config = client.postConfiguration(createConfigModel(exportConfig));
+    var preparedConfig = createConfigModel(exportConfig);
+    ModelConfiguration config = client.postConfiguration(preparedConfig);
     log.info("Posted {}.", config);
     return config;
   }
 
   @Override
   public ExportConfigCollection getConfigCollection(String query) {
-    if (query == null) {
-      return getFirstConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());
-    }
     ConfigurationCollection configurationCollection = client.getConfigurations(query);
     if (configurationCollection.getTotalRecords() > 0) {
       var exportConfigCollection = new ExportConfigCollection();
@@ -70,37 +62,16 @@ public class ExportConfigServiceImpl implements ExportConfigService {
 
   @Override
   public Optional<ExportConfig> getFirstConfig() {
-    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME));
+    var configurationCollection = getConfigCollection(StringUtils.EMPTY);
     if (configurationCollection.getTotalRecords() == 0) {
       return Optional.empty();
     }
-    var config = defaultModelConfigToExportConfigConverter.convert(configurationCollection.getConfigs().get(0));
-    return Optional.of(config);
+    return Optional.of(configurationCollection.getConfigs().get(0));
   }
 
   @SneakyThrows
-  private ModelConfiguration createConfigModel(ExportConfig exportConfig) {
-    var config = new ModelConfiguration();
-    config.setModule(DEFAULT_MODULE_NAME);
-    config.setConfigName(DEFAULT_CONFIG_NAME);
-    config.setDescription(CONFIG_DESCRIPTION);
-    config.setEnabled(true);
-    config.setDefault(true);
-    config.setValue(objectMapper.writeValueAsString(exportConfig));
-    return config;
-  }
-
-  private ExportConfigCollection createExportConfigCollection(ExportConfig exportConfig) {
-    var configCollection = new ExportConfigCollection();
-    configCollection.addConfigsItem(exportConfig);
-    configCollection.setTotalRecords(1);
-    return configCollection;
-  }
-
-  private ExportConfigCollection emptyExportConfigCollection() {
-    var configCollection = new ExportConfigCollection();
-    configCollection.setTotalRecords(0);
-    return configCollection;
+  protected ModelConfiguration createConfigModel(ExportConfig exportConfig) {
+    return defaultExportConfigToModelConfigConverter.convert(exportConfig);
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {

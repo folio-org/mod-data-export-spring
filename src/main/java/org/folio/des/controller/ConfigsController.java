@@ -2,7 +2,6 @@ package org.folio.des.controller;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.rest.resource.ConfigsApi;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.springframework.http.HttpStatus;
@@ -20,8 +19,8 @@ public class ConfigsController implements ConfigsApi {
   private final ExportTypeBasedConfigManager manager;
 
   @Override
-  public ResponseEntity<ExportConfigCollection> getExportConfigs(ExportType exportType, String query) {
-      return ResponseEntity.ok(manager.getConfigCollection(exportType, query));
+  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query) {
+      return ResponseEntity.ok(manager.getConfigCollection(query));
   }
 
   @Override

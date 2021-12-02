@@ -3,13 +3,13 @@ package org.folio.des.converter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Log4j2

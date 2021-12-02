@@ -2,7 +2,6 @@ package org.folio.des.service.config.impl;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_QUERY;
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -139,7 +138,7 @@ class ExportTypeBasedConfigManagerTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var configs = service.getConfigCollection(null, null);
+    var configs = service.getConfigCollection( null);
 
     assertTrue(configs.getConfigs().isEmpty());
   }
@@ -150,8 +149,8 @@ class ExportTypeBasedConfigManagerTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME);
-    var config = service.getConfigCollection(null, query);
+    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
+    var config = service.getConfigCollection(query);
 
     Assertions.assertAll(
         () -> assertEquals(0, config.getTotalRecords()),
@@ -164,8 +163,8 @@ class ExportTypeBasedConfigManagerTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_MODULE_NAME, DEFAULT_CONFIG_NAME);
-    var config = service.getConfigCollection(null, query);
+    var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
+    var config = service.getConfigCollection(query);
 
     Assertions.assertAll(
         () -> assertEquals(1, config.getTotalRecords()),
@@ -186,7 +185,7 @@ class ExportTypeBasedConfigManagerTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
 
-    var configs  = service.getConfigCollection(null, null);
+    var configs  = service.getConfigCollection(null);
 
     assertEquals(1, configs.getTotalRecords());
 

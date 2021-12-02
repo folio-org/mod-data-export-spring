@@ -3,9 +3,16 @@ package org.folio.des.validator;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+@AllArgsConstructor
+@Log4j2
+@Service
 public class BurSarFeesFinesExportParametersValidator implements Validator {
   @Override
   public boolean supports(Class<?> aClass) {

@@ -1,7 +1,8 @@
 package org.folio.des.config.feign;
 
-import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
+
+import feign.codec.ErrorDecoder;
 
 public class FeignClientConfiguration {
   @Bean
