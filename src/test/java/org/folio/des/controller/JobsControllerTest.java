@@ -44,15 +44,6 @@ class JobsControllerTest extends BaseTest {
   private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY =
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"identifierType\" : \"ID\"}";
 
-  private static final String BULK_EDIT_UPDATE_REQUEST_NO_IDENTIFIERS_NO_ENTITY =
-    "{ \"type\": \"BULK_EDIT_UPDATE\", \"exportTypeSpecificParameters\" : {}}";
-
-  private static final String BULK_EDIT_UPDATE_REQUEST_NO_IDENTIFIERS =
-    "{ \"type\": \"BULK_EDIT_UPDATE\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\"}";
-
-  private static final String BULK_EDIT_UPDATE_REQUEST_NO_ENTITY =
-    "{ \"type\": \"BULK_EDIT_UPDATE\", \"exportTypeSpecificParameters\" : {}, \"identifierType\" : \"ID\"}";
-
   @Test
   @DisplayName("Find all jobs")
   void getJobs() throws Exception {
@@ -298,48 +289,6 @@ class JobsControllerTest extends BaseTest {
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders())
           .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit update job without identifiers and entity types, should be 404")
-  void postBulkEditUpdateJobWithNoIdentifiersAndEntityType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_UPDATE_REQUEST_NO_IDENTIFIERS_NO_ENTITY))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit update job without only identifier type, should be 404")
-  void postBulkEditUpdateJobWithNoIdentifiersType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_UPDATE_REQUEST_NO_IDENTIFIERS))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit update job without only entity type, should be 404")
-  void postBulkEditUpdateJobWithNoEntityType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_UPDATE_REQUEST_NO_ENTITY))
       .andExpect(
         matchAll(
           status().isBadRequest()));

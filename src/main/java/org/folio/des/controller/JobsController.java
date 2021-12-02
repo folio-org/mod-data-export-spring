@@ -38,7 +38,7 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity<Job> upsertJob(@Valid Job job) {
-    if ((job.getType() == BULK_EDIT_IDENTIFIERS || job.getType() == BULK_EDIT_UPDATE) &&
+    if (job.getType() == BULK_EDIT_IDENTIFIERS &&
       (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
