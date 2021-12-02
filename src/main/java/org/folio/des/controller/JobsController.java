@@ -3,7 +3,6 @@ package org.folio.des.controller;
 import static java.util.Objects.isNull;
 import lombok.RequiredArgsConstructor;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.rest.resource.JobsApi;
