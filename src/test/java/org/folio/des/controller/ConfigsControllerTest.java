@@ -1,6 +1,7 @@
 package org.folio.des.controller;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.noContent;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
@@ -18,12 +19,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static wiremock.org.apache.http.HttpHeaders.CONTENT_TYPE;
 
+import org.folio.des.client.ConfigurationClient;
+import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.RefreshConfigAspect;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
@@ -42,15 +47,29 @@ class ConfigsControllerTest extends BaseTest {
   private static final String UPDATE_CONFIG_REQUEST_FAILED =
     "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
 
+
   @Autowired private MockMvc mockMvc;
   @SpyBean private RefreshConfigAspect configAspect;
+  @SpyBean private ConfigurationClient configurationClient;
 
-  @Test
-  @DisplayName("Fetch empty config")
-  void getConfigs() throws Exception {
+  @ParameterizedTest
+  @CsvSource({
+    "/data-export-spring/configs, module==mod-data-export-spring",
+    "/data-export-spring/configs?query=type==BURSAR_FEES_FINES, module==mod-data-export-spring and configName==export_config_parameters",
+    "/data-export-spring/configs?query=type==BATCH_VOUCHER_EXPORT, module==mod-data-export-spring and value==*BATCH_VOUCHER_EXPORT*"
+  })
+  @DisplayName("Fetch config by query")
+  void getConfigs(String exportConfigQuery, String modConfigQuery) throws Exception {
+    var config = new ConfigurationCollection();
+    config.setTotalRecords(0);
+    wireMockServer.stubFor(WireMock.get(anyUrl())
+      .willReturn(aResponse().withBody(JsonObject.mapFrom(config).encode())
+        .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withStatus(200)));
+
     mockMvc
         .perform(
-            get("/data-export-spring/configs")
+            get(exportConfigQuery)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
         .andExpect(
@@ -58,6 +77,8 @@ class ConfigsControllerTest extends BaseTest {
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.totalRecords", is(0))));
+
+    verify(configurationClient, times(1)).getConfigurations(modConfigQuery);
   }
 
   @Test
