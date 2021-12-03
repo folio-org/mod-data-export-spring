@@ -35,6 +35,18 @@ class JobsControllerTest extends BaseTest {
   private static final String JOB_CIRCULATION_REQUEST =
       "{ \"type\": \"CIRCULATION_LOG\", \"exportTypeSpecificParameters\" : {}}";
 
+  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS_NO_ENTITY =
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}}";
+
+  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS =
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\"}";
+
+  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY =
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"identifierType\" : \"ID\"}";
+
+  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY =
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"ID\"}";
+
   @Test
   @DisplayName("Find all jobs")
   void getJobs() throws Exception {
@@ -241,5 +253,61 @@ class JobsControllerTest extends BaseTest {
                 jsonPath("$.type", is("CIRCULATION_LOG")),
                 jsonPath("$.status", is("SCHEDULED")),
                 jsonPath("$.outputFormat", is("Comma-Separated Values (CSV)"))));
+  }
+
+  @Test
+  @DisplayName("Start new bulk edit identifiers job without identifiers and entity types, should be 404")
+  void postBulkEditIdentifiersJobWithNoIdentifiersAndEntityType() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS_NO_ENTITY))
+      .andExpect(
+        matchAll(
+          status().isBadRequest()));
+  }
+
+  @Test
+  @DisplayName("Start new bulk edit identifiers job without only identifier type, should be 404")
+  void postBulkEditIdentifiersJobWithNoIdentifiersType() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS))
+      .andExpect(
+        matchAll(
+          status().isBadRequest()));
+  }
+
+  @Test
+  @DisplayName("Start new bulk edit identifiers job without only entity type, should be 404")
+  void postBulkEditIdentifiersJobWithNoEntityType() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY))
+      .andExpect(
+        matchAll(
+          status().isBadRequest()));
+  }
+
+  @Test
+  @DisplayName("Start new bulk edit identifiers job with identifiers and entity type, should be 201")
+  void postBulkEditIdentifiersJobWithIdentifiersAndEntityType() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY))
+      .andExpect(
+        matchAll(
+          status().isCreated()));
   }
 }
