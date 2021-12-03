@@ -18,5 +18,6 @@ public class JobCommand {
   private JobParameters jobParameters;
   private IdentifierType identifierType;
   private EntityType entityType;
+  private Progress progress;
 
 }

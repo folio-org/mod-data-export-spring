@@ -1,6 +1,8 @@
 package org.folio.des.controller;
 
+import static java.util.Objects.isNull;
 import lombok.RequiredArgsConstructor;
+import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.rest.resource.JobsApi;
@@ -35,6 +37,10 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity<Job> upsertJob(@Valid Job job) {
+    if (job.getType() == BULK_EDIT_IDENTIFIERS &&
+      (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
     return new ResponseEntity<>(service.upsert(job), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
   }
 
