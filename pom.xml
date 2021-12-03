@@ -293,7 +293,7 @@
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
                             <modelsToGenerate>
-                                BursarFeeFinesTypeMapping,BursarFeeFines,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection
+                               BursarFeeFinesTypeMapping,BursarFeeFines,EdiConfig,Edi,EdiSchedule,ScheduleParameters,EdiEmail,EdiFtp,VendorEdiOrdersExportConfig,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection
                             </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
