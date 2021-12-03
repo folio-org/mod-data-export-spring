@@ -10,8 +10,8 @@
       "ediEmail": {
         "$ref": "ediEmail.json#/EdiEmail"
       },
-      "ediJob": {
-        "$ref": "ediJob.json#/EdiJob"
+      "ediSchedule": {
+        "$ref": "ediSchedule.json#/EdiSchedule"
       },
       "ediNamingConvention": {
         "description": "The naming convention for this EDI",
