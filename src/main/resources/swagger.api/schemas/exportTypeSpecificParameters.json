@@ -7,6 +7,9 @@
       "bursarFeeFines": {
         "$ref": "bursarFeeFines.json#/BursarFeeFines"
       },
+      "vendorEdiOrdersExportConfig": {
+        "$ref": "acquisitions/vendorEdiOrdersExportConfig.json#/VendorEdiOrdersExportConfig"
+      },
       "query": {
         "description": "CQL query to be passed to the module which data is being exported. Use it to filter data.",
         "type": "string",

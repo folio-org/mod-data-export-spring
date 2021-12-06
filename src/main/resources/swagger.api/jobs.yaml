@@ -138,6 +138,12 @@ components:
       $ref: 'schemas/configuration/configurationCollection.json#/ConfigurationCollection'
     errors:
       $ref: 'schemas/common/errors.json#/Errors'
+    identifierType:
+      $ref: 'schemas/identifierType.json#/IdentifierType'
+    entityType:
+      $ref: 'schemas/entityType.json#/EntityType'
+    progress:
+      $ref: 'schemas/progress.json#/Progress'
     UUID:
       type: string
       format: uuid

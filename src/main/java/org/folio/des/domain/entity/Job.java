@@ -14,6 +14,9 @@ import lombok.Data;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobStatus;
+import org.folio.des.domain.dto.IdentifierType;
+import org.folio.des.domain.dto.EntityType;
+import org.folio.des.domain.dto.Progress;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -79,5 +82,15 @@ public class Job {
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private ExitStatus exitStatus;
+
+  @Enumerated(EnumType.STRING)
+  private IdentifierType identifierType;
+
+  @Enumerated(EnumType.STRING)
+  private EntityType entityType;
+
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private Progress progress;
 
 }

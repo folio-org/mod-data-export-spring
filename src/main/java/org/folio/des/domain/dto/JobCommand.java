@@ -16,5 +16,8 @@ public class JobCommand {
   private String description;
   private ExportType exportType;
   private JobParameters jobParameters;
+  private IdentifierType identifierType;
+  private EntityType entityType;
+  private Progress progress;
 
 }
