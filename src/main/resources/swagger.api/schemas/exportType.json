@@ -9,7 +9,9 @@
       "BATCH_VOUCHER_EXPORT",
       "EDIFACT_ORDERS_EXPORT",
       "ORDERS_EXPORT",
-      "INVOICE_EXPORT"
+      "INVOICE_EXPORT",
+      "BULK_EDIT_IDENTIFIERS",
+      "BULK_EDIT_UPDATE"
     ],
     "default": "BURSAR_FEES_FINES"
   }

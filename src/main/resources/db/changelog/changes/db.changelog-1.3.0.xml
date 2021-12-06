@@ -22,6 +22,8 @@
       ALTER TABLE job ADD COLUMN identifier_type IdentifierType;
       ALTER TABLE job ADD COLUMN entity_type EntityType;
       ALTER TABLE job ADD COLUMN progress jsonb;
+      ALTER TYPE ExportType ADD VALUE 'BULK_EDIT_IDENTIFIERS';
+      ALTER TYPE ExportType ADD VALUE 'BULK_EDIT_UPDATE';
     </sql>
   </changeSet>
 
