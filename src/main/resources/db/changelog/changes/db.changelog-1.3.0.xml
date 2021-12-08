@@ -27,4 +27,10 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODEXPS-43@@add new export type" author="siarhei_charniak">
+    <sql dbms="postgresql">
+      ALTER TYPE ExportType ADD VALUE 'BULK_EDIT_QUERY';
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>

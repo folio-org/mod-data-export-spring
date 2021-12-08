@@ -11,6 +11,7 @@
       "ORDERS_EXPORT",
       "INVOICE_EXPORT",
       "BULK_EDIT_IDENTIFIERS",
+      "BULK_EDIT_QUERY",
       "BULK_EDIT_UPDATE"
     ]
   }
