@@ -47,6 +47,12 @@ class JobsControllerTest extends BaseTest {
   private static final String BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY =
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"ID\"}";
 
+  private static final String BULK_EDIT_QUERY_REQUEST_NO_ENTITY =
+    "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}}";
+
+  private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY =
+    "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\"}";
+
   @Test
   @DisplayName("Find all jobs")
   void getJobs() throws Exception {
@@ -306,6 +312,34 @@ class JobsControllerTest extends BaseTest {
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders())
           .content(BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY))
+      .andExpect(
+        matchAll(
+          status().isCreated()));
+  }
+
+  @Test
+  @DisplayName("Start new bulk edit query job without entity type, should be 404")
+  void postBulkEditQueryJobWithNoEntityType() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(BULK_EDIT_QUERY_REQUEST_NO_ENTITY))
+      .andExpect(
+        matchAll(
+          status().isBadRequest()));
+  }
+
+  @Test
+  @DisplayName("Start new bulk edit query job with entity type, should be 201")
+  void postBulkEditQueryJobWithEntityType() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(BULK_EDIT_QUERY_REQUEST_WITH_ENTITY))
       .andExpect(
         matchAll(
           status().isCreated()));

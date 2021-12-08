@@ -3,6 +3,8 @@ package org.folio.des.controller;
 import static java.util.Objects.isNull;
 import lombok.RequiredArgsConstructor;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
+import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
+
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.rest.resource.JobsApi;
@@ -37,11 +39,15 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity<Job> upsertJob(@Valid Job job) {
-    if (job.getType() == BULK_EDIT_IDENTIFIERS &&
-      (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) {
+    if (isMissingRequiredParameters(job)) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(service.upsert(job), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
+  }
+
+  private boolean isMissingRequiredParameters(Job job) {
+    return (BULK_EDIT_QUERY == job.getType() && isNull(job.getEntityType()) ||
+      (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))));
   }
 
 }
