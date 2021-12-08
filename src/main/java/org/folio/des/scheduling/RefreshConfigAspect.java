@@ -13,12 +13,12 @@ public class RefreshConfigAspect {
 
   private final ExportScheduler scheduler;
 
-  @After("(execution(* org.folio.des.service.ExportConfigService.updateConfig(..)) && args(..,config))")
+  @After("(execution(* org.folio.des.service.config.ExportConfigService.updateConfig(..)) && args(..,config))")
   public void refreshAfterUpdate(ExportConfig config) {
     scheduler.updateTasks(config);
   }
 
-  @After("(execution(* org.folio.des.service.ExportConfigService.postConfig(..)) && args(config))")
+  @After("(execution(* org.folio.des.service.config.ExportConfigService.postConfig(..)) && args(config))")
   public void refreshAfterPost(ExportConfig config) {
     scheduler.updateTasks(config);
   }

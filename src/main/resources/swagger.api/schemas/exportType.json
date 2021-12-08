@@ -13,6 +13,7 @@
       "BULK_EDIT_IDENTIFIERS",
       "BULK_EDIT_QUERY",
       "BULK_EDIT_UPDATE"
-    ]
+    ],
+    "default": "BURSAR_FEES_FINES"
   }
 }

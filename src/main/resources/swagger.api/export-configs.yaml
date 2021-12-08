@@ -7,6 +7,8 @@ servers:
 paths:
   /configs:
     get:
+      parameters:
+        - $ref: "#/components/parameters/trait_queryable_query"
       description: Get a list of data export configurations
       operationId: getExportConfigs
       responses:
@@ -58,6 +60,50 @@ paths:
               schema:
                 $ref: "#/components/schemas/errors"
   /configs/{id}:
+    get:
+      description: Get a export configuration by the export configuration ID
+      operationId: getConfigById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the export configuration
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Export configuration successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/exportConfig"
+        "400":
+          description:
+            Bad request, e.g. malformed request body or query parameter.
+            Details of the errors (e.g. name of the parameter or line/character number
+            with malformed data) provided in the response.
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        "404":
+          description: Export configuration with a given ID not found
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
     put:
       description: Change an export configuration
       operationId: putExportConfig
@@ -74,13 +120,44 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: ''
+        '204':
+          description: No Content
+        '400':
+          description: Bad request
           content:
-            text/plain:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
               schema:
-                type: string
-                example: Ok
+                $ref: "#/components/schemas/errors"
+        '404':
+          description: Export config not found
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+    delete:
+      description: Delete export configuration by UUID
+      operationId: deleteExportConfigById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
         '400':
           description: Bad request
           content:
@@ -113,6 +190,13 @@ components:
       $ref: 'schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: 'schemas/common/errors.json#/Errors'
+  parameters:
+    trait_queryable_query:
+      name: query
+      in: query
+      description: A query string to filter rules based on matching criteria in fields.
+      schema:
+        type: string
   examples:
     errors:
       value:
