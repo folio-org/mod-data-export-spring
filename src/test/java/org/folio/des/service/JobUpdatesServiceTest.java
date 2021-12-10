@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.JobStatus;
-import org.folio.des.domain.entity.Job;
+import org.folio.de.entity.Job;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.Assertions;
