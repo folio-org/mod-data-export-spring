@@ -1,4 +1,4 @@
-package org.folio.des.domain.entity;
+package org.folio.de.entity;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.util.Date;
