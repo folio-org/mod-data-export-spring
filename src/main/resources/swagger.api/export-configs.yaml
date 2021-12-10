@@ -185,11 +185,11 @@ paths:
 components:
   schemas:
     exportConfig:
-      $ref: 'schemas/exportConfig.json#/ExportConfig'
+      $ref: '../../../../folio-export-common/schemas/exportConfig.json#/ExportConfig'
     exportConfigCollection:
-      $ref: 'schemas/exportConfigCollection.json#/ExportConfigCollection'
+      $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
-      $ref: 'schemas/common/errors.json#/Errors'
+      $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
   parameters:
     trait_queryable_query:
       name: query
@@ -200,4 +200,4 @@ components:
   examples:
     errors:
       value:
-        $ref: 'examples/errors.sample'
+        $ref: '../../../../folio-export-common/examples/errors.sample'
