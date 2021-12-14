@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.entity.Job;
+import org.folio.de.entity.Job;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.service.impl.JobServiceImpl;
