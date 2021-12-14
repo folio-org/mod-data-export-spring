@@ -129,7 +129,8 @@
             "login.item.post",
             "perms.users.item.post",
             "perms.users.get",
-            "configuration.entries.collection.get"
+            "configuration.entries.collection.get",
+            "configuration.entries.item.post"
           ]
         },
         {
