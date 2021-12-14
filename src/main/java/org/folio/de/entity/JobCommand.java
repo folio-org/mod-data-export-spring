@@ -1,6 +1,10 @@
-package org.folio.des.domain.dto;
+package org.folio.de.entity;
 
 import lombok.Data;
+import org.folio.des.domain.dto.EntityType;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.IdentifierType;
+import org.folio.des.domain.dto.Progress;
 import org.springframework.batch.core.JobParameters;
 
 import java.util.UUID;

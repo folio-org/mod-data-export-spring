@@ -125,25 +125,25 @@ paths:
 components:
   schemas:
     jobStatus:
-      $ref: 'schemas/jobStatus.json#/JobStatus'
+      $ref: '../../../../folio-export-common/schemas/jobStatus.json#/JobStatus'
     exportType:
-      $ref: 'schemas/exportType.json#/ExportType'
+      $ref: '../../../../folio-export-common/schemas/exportType.json#/ExportType'
     job:
-      $ref: 'schemas/job.json#/Job'
+      $ref: '../../../../folio-export-common/schemas/job.json#/Job'
     jobCollection:
-      $ref: 'schemas/jobCollection.json#/JobCollection'
+      $ref: '../../../../folio-export-common/schemas/jobCollection.json#/JobCollection'
     userdataCollection:
-      $ref: 'schemas/user/userCollection.json#/UserCollection'
+      $ref: '../../../../folio-export-common/schemas/user/userCollection.json#/UserCollection'
     configurationdataCollection:
-      $ref: 'schemas/configuration/configurationCollection.json#/ConfigurationCollection'
+      $ref: '../../../../folio-export-common/schemas/configuration/configurationCollection.json#/ConfigurationCollection'
     errors:
-      $ref: 'schemas/common/errors.json#/Errors'
+      $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
     identifierType:
-      $ref: 'schemas/identifierType.json#/IdentifierType'
+      $ref: '../../../../folio-export-common/schemas/identifierType.json#/IdentifierType'
     entityType:
-      $ref: 'schemas/entityType.json#/EntityType'
+      $ref: '../../../../folio-export-common/schemas/entityType.json#/EntityType'
     progress:
-      $ref: 'schemas/progress.json#/Progress'
+      $ref: '../../../../folio-export-common/schemas/progress.json#/Progress'
     UUID:
       type: string
       format: uuid
@@ -176,4 +176,4 @@ components:
   examples:
     errors:
       value:
-        $ref: 'examples/errors.sample'
+        $ref: '../../../../folio-export-common/examples/errors.sample'
