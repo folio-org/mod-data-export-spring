@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.ExportScheduler;
+import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.controller.TenantController;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -20,13 +21,15 @@ public class FolioTenantController extends TenantController {
   private final FolioExecutionContextHelper contextHelper;
   private final ExportScheduler scheduler;
   private final KafkaService kafka;
+  private final BulkEditConfigService bulkEditConfigService;
 
   public FolioTenantController(TenantService baseTenantService, FolioExecutionContextHelper contextHelper,
-      ExportScheduler scheduler, KafkaService kafka) {
+      ExportScheduler scheduler, KafkaService kafka, BulkEditConfigService bulkEditConfigService) {
     super(baseTenantService);
     this.contextHelper = contextHelper;
     this.scheduler = scheduler;
     this.kafka = kafka;
+    this.bulkEditConfigService = bulkEditConfigService;
   }
 
   @Override
@@ -37,6 +40,7 @@ public class FolioTenantController extends TenantController {
       try {
         contextHelper.registerTenant();
         scheduler.initScheduleConfiguration();
+        bulkEditConfigService.checkBulkEditConfiguration();
         kafka.createKafkaTopics();
         kafka.restartEventListeners();
       } catch (Exception e) {

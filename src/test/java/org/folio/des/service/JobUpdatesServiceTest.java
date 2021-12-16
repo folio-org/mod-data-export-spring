@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.Progress;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.Assertions;
@@ -48,6 +49,7 @@ class JobUpdatesServiceTest extends BaseTest {
     job.setEndTime(new Date());
     job.setErrorDetails("No errors");
     job.setExitStatus(ExitStatus.COMPLETED);
+    job.setProgress(new Progress().progress(100).processed(1).total(1));
 
     updatesService.receiveJobExecutionUpdate(job);
 
