@@ -1,16 +1,22 @@
 package org.folio.des.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
+import org.folio.des.converter.scheduling.DefaultExportConfigToTaskTriggersConverter;
+import org.folio.des.converter.scheduling.TaskTriggerConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.scheduling.ExportTaskTrigger;
+import org.folio.des.scheduling.DefaultExportTriggerTaskRegistrar;
+import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
@@ -22,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.validation.Validator;
 
 @Configuration
@@ -69,7 +76,6 @@ public class ServiceConfiguration {
       defaultExportConfigToModelConfigConverter, exportConfigValidatorResolver);
   }
 
-
   @Bean
   ExportConfigServiceResolver exportConfigServiceResolver(BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService) {
     Map<ExportType, ExportConfigService> exportConfigServiceMap = new HashMap<>();
@@ -77,4 +83,15 @@ public class ServiceConfiguration {
     return new ExportConfigServiceResolver(exportConfigServiceMap);
   }
 
+  @Bean DefaultExportTriggerTaskRegistrar defaultExportTriggerTaskRegistrar(FolioExecutionContextHelper contextHelper,
+            JobService jobService, TaskTriggerConverterResolver taskTriggerConverterResolver) {
+    return new DefaultExportTriggerTaskRegistrar(contextHelper, new ThreadPoolTaskScheduler(), jobService, taskTriggerConverterResolver);
+  }
+
+  @Bean TaskTriggerConverterResolver taskTriggerConverterResolver(DefaultExportConfigToTaskTriggersConverter defaultExportConfigToTaskTriggersConverter) {
+    Map<ExportType, Converter<ExportConfig, List<ExportTaskTrigger>>> converters = new HashMap<>();
+    converters.put(ExportType.BATCH_VOUCHER_EXPORT, defaultExportConfigToTaskTriggersConverter);
+
+    return new TaskTriggerConverterResolver(converters, defaultExportConfigToTaskTriggersConverter);
+  }
 }
