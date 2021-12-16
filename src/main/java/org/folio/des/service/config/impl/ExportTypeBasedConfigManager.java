@@ -17,8 +17,8 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.exception.ErrorCodes;
-import org.folio.des.exception.RequestValidationException;
+import org.folio.des.domain.exception.ErrorCodes;
+import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.spring.exception.NotFoundException;
 

@@ -1,4 +1,4 @@
-package org.folio.des.exception;
+package org.folio.des.domain.exception;
 
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.Error;

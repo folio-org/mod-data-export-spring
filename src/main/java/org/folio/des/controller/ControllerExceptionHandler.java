@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.folio.des.domain.dto.Error;
 import org.folio.des.domain.dto.Errors;
-import org.folio.des.exception.RequestValidationException;
+import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.spring.exception.NotFoundException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;

@@ -1,6 +1,5 @@
 package org.folio.des.validator.acquisition;
 
-import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;

@@ -1,10 +1,8 @@
 package org.folio.des.converter.aqcuisition;
 
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 
 import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.springframework.core.convert.converter.Converter;
