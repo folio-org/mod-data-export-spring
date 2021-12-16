@@ -10,9 +10,9 @@ import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.converter.scheduling.TaskTriggerConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.scheduling.ExportTaskTrigger;
@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.support.CronTrigger;
 
 import lombok.Getter;
@@ -40,7 +39,7 @@ public class DefaultExportTriggerTaskRegistrar implements DisposableBean {
   @Getter
   private final ThreadPoolTaskScheduler taskScheduler;
   private final JobService jobService;
-  private final TaskTriggerConverterResolver taskTriggerConverterResolver;
+  private final Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter;
 
 
   @PostConstruct
@@ -77,29 +76,33 @@ public class DefaultExportTriggerTaskRegistrar implements DisposableBean {
 
   public void scheduleExportJob(ExportConfig exportConfig) {
     if (exportConfig != null) {
-      List<ExportTaskTrigger> triggers = convertToTriggers(exportConfig);
-      triggers.forEach(exportTaskTrigger -> {
-        if (this.scheduledTasks.containsKey(exportTaskTrigger)) {
-          removeTriggerTask(exportTaskTrigger);
-        }
-        Runnable task = buildTask(exportConfig);
-        ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
-        this.scheduledTasks.put(exportTaskTrigger, newScheduledTask);
-      });
+      List<ExportTaskTrigger> triggers = triggerConverter.convert(exportConfig);
+      if (CollectionUtils.isNotEmpty(triggers)) {
+        triggers.forEach(exportTaskTrigger -> {
+          if (scheduledTasks.containsKey(exportTaskTrigger)) {
+            removeTriggerTask(exportTaskTrigger);
+          }
+          Runnable task = buildTask(exportConfig);
+          ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
+          this.scheduledTasks.put(exportTaskTrigger, newScheduledTask);
+        });
+      }
     }
   }
 
   public void updateExportJobSchedule(ExportConfig exportConfig) {
     if (exportConfig != null) {
-      List<ExportTaskTrigger> triggers = convertToTriggers(exportConfig);
-      triggers.forEach(exportTaskTrigger -> {
-        if (this.scheduledTasks.containsKey(exportTaskTrigger)) {
-          removeTriggerTask(exportTaskTrigger);
-        }
-        Runnable task = buildTask(exportConfig);
-        ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
-        this.scheduledTasks.put(exportTaskTrigger, newScheduledTask);
-      });
+      List<ExportTaskTrigger> triggers = triggerConverter.convert(exportConfig);
+      if (CollectionUtils.isNotEmpty(triggers)) {
+        triggers.forEach(exportTaskTrigger -> {
+          if (scheduledTasks.containsKey(exportTaskTrigger)) {
+            removeTriggerTask(exportTaskTrigger);
+          }
+          Runnable task = buildTask(exportConfig);
+          ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
+          this.scheduledTasks.put(exportTaskTrigger, newScheduledTask);
+        });
+      }
     }
   }
 
@@ -109,13 +112,6 @@ public class DefaultExportTriggerTaskRegistrar implements DisposableBean {
       scheduledTask.cancel(true);
     }
   }
-
-  private List<ExportTaskTrigger> convertToTriggers(ExportConfig exportConfig) {
-    Converter<ExportConfig, List<ExportTaskTrigger>> converter = taskTriggerConverterResolver
-      .resolve(exportConfig.getType());
-    return converter.convert(exportConfig);
-  }
-
 
   protected Runnable buildTask(ExportConfig exportConfig) {
     return () -> {

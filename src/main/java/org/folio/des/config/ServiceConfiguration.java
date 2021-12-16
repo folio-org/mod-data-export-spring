@@ -9,7 +9,6 @@ import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.converter.scheduling.DefaultExportConfigToTaskTriggersConverter;
-import org.folio.des.converter.scheduling.TaskTriggerConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -84,14 +83,7 @@ public class ServiceConfiguration {
   }
 
   @Bean DefaultExportTriggerTaskRegistrar defaultExportTriggerTaskRegistrar(FolioExecutionContextHelper contextHelper,
-            JobService jobService, TaskTriggerConverterResolver taskTriggerConverterResolver) {
-    return new DefaultExportTriggerTaskRegistrar(contextHelper, new ThreadPoolTaskScheduler(), jobService, taskTriggerConverterResolver);
-  }
-
-  @Bean TaskTriggerConverterResolver taskTriggerConverterResolver(DefaultExportConfigToTaskTriggersConverter defaultExportConfigToTaskTriggersConverter) {
-    Map<ExportType, Converter<ExportConfig, List<ExportTaskTrigger>>> converters = new HashMap<>();
-    converters.put(ExportType.BATCH_VOUCHER_EXPORT, defaultExportConfigToTaskTriggersConverter);
-
-    return new TaskTriggerConverterResolver(converters, defaultExportConfigToTaskTriggersConverter);
+            JobService jobService, DefaultExportConfigToTaskTriggersConverter triggerConverter) {
+    return new DefaultExportTriggerTaskRegistrar(contextHelper, new ThreadPoolTaskScheduler(), jobService, triggerConverter);
   }
 }

@@ -1,5 +1,6 @@
 package org.folio.des.converter.scheduling;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -24,19 +25,21 @@ public class DefaultExportConfigToTaskTriggersConverter implements Converter<Exp
 
   @Override
   public List<ExportTaskTrigger> convert(ExportConfig source) {
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(source.getScheduleFrequency());
-    schedulePeriodEnumSet.stream()
-                    .filter(period -> period.equals(source.getSchedulePeriod().getValue()))
-                    .findAny()
-                    .ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
+    if (ExportConfig.SchedulePeriodEnum.NONE != source.getSchedulePeriod()) {
+      ScheduleParameters scheduleParameters = new ScheduleParameters();
+      scheduleParameters.setScheduleFrequency(source.getScheduleFrequency());
+      schedulePeriodEnumSet.stream().filter(period -> period.equals(source.getSchedulePeriod().getValue())).findAny().ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
 
-    Set<String> sourceWeekDays = source.getWeekDays().stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
-    List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream().filter(weekDaysEnumSet::contains)
-                                               .map(ScheduleParameters.WeekDaysEnum::valueOf).collect(Collectors.toList());
+      Set<String> sourceWeekDays = source.getWeekDays().stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
+      List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
+        .filter(weekDaysEnumSet::contains)
+        .map(ScheduleParameters.WeekDaysEnum::valueOf)
+        .collect(Collectors.toList());
 
-    scheduleParameters.setScheduleTime(source.getScheduleTime());
-    scheduleParameters.setWeekDays(weekDays);
-    return List.of(new ExportTaskTrigger(source.getId(), scheduleParameters));
+      scheduleParameters.setScheduleTime(source.getScheduleTime());
+      scheduleParameters.setWeekDays(weekDays);
+      return List.of(new ExportTaskTrigger(source.getId(), scheduleParameters));
+    }
+    return Collections.emptyList();
   }
 }

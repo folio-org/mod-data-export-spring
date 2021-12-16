@@ -15,12 +15,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.EqualsAndHashCode;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 
 import lombok.Getter;
 
+@EqualsAndHashCode
 public class ExportTaskTrigger implements Trigger {
 
   @Getter
@@ -44,22 +46,22 @@ public class ExportTaskTrigger implements Trigger {
     return getNextTime(lastActualExecutionTime);
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-    if (!(other instanceof ExportTaskTrigger)) {
-      return false;
-    }
-    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
-    return this.getId().equals(trigger.getId());
-  }
+//  @Override
+//  public int hashCode() {
+//    return Objects.hash(id);
+//  }
+//
+//  @Override
+//  public boolean equals(Object other) {
+//    if (other == this) {
+//      return true;
+//    }
+//    if (!(other instanceof ExportTaskTrigger)) {
+//      return false;
+//    }
+//    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
+//    return this.getId().equals(trigger.getId());
+//  }
 
   private Date getNextTime(Date lastActualExecutionTime) {
     if (scheduleParameters == null) return null;
