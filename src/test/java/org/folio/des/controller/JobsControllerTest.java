@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -47,11 +49,14 @@ class JobsControllerTest extends BaseTest {
   private static final String BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY =
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"ID\"}";
 
-  private static final String BULK_EDIT_QUERY_REQUEST_NO_ENTITY =
+  private static final String BULK_EDIT_QUERY_REQUEST_NO_ENTITY_NO_QUERY =
     "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}}";
 
-  private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY =
+  private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_NO_QUERY =
     "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\"}";
+
+  private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY =
+    "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {\"query\":\"barcode==123\"}, \"entityType\" : \"USER\"}";
 
   @Test
   @DisplayName("Find all jobs")
@@ -317,15 +322,16 @@ class JobsControllerTest extends BaseTest {
           status().isCreated()));
   }
 
-  @Test
-  @DisplayName("Start new bulk edit query job without entity type, should be 404")
-  void postBulkEditQueryJobWithNoEntityType() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {BULK_EDIT_QUERY_REQUEST_NO_ENTITY_NO_QUERY, BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_NO_QUERY})
+  @DisplayName("Start new bulk edit query job missing required parameters, should be 404")
+  void shouldReturnBadRequestWhenRequiredParametersAreMissing(String content) throws Exception {
     mockMvc
       .perform(
         post("/data-export-spring/jobs")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders())
-          .content(BULK_EDIT_QUERY_REQUEST_NO_ENTITY))
+          .content(content))
       .andExpect(
         matchAll(
           status().isBadRequest()));
@@ -339,7 +345,7 @@ class JobsControllerTest extends BaseTest {
         post("/data-export-spring/jobs")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders())
-          .content(BULK_EDIT_QUERY_REQUEST_WITH_ENTITY))
+          .content(BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY))
       .andExpect(
         matchAll(
           status().isCreated()));
