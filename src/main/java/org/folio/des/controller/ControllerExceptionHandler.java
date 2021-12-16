@@ -1,11 +1,11 @@
 package org.folio.des.controller;
 
-import feign.FeignException;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.extern.log4j.Log4j2;
+
 import org.folio.des.domain.dto.Error;
 import org.folio.des.domain.dto.Errors;
+import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.spring.exception.NotFoundException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import feign.FeignException;
+import lombok.extern.log4j.Log4j2;
 
 @RestControllerAdvice
 @Log4j2
@@ -32,6 +35,17 @@ public class ControllerExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public Errors handleIllegalArgumentException(Exception exception) {
     return buildError(exception, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(RequestValidationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public Errors handleExportRequestValidationException(RequestValidationException exception) {
+    List<Error> listOfErrors = new ArrayList<>();
+    listOfErrors.add(exception.getError());
+    var errors = new Errors();
+    errors.setErrors(listOfErrors);
+    errors.setTotalRecords(listOfErrors.size());
+    return errors;
   }
 
   @ExceptionHandler({DataIntegrityViolationException.class, ConstraintViolationException.class})

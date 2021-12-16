@@ -5,6 +5,7 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.exception.ErrorCodes;
+import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.spring.exception.NotFoundException;
 
@@ -37,12 +40,18 @@ public class ExportTypeBasedConfigManager {
                                                                     .collect(Collectors.joining("|")) + ")");
 
   public void updateConfig(String configId, ExportConfig exportConfig) {
+    if (exportConfig.getId() != null && !exportConfig.getId().equals(configId)) {
+      throw new RequestValidationException(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY);
+    }
     exportConfigServiceResolver.resolve(exportConfig.getType())
             .ifPresentOrElse(service -> service.updateConfig(configId, exportConfig),
               () -> defaultExportConfigService.updateConfig(configId, exportConfig));
   }
 
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
+    if (exportConfig.getId() == null) {
+      exportConfig.setId(UUID.randomUUID().toString());
+    }
     Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportConfig.getType());
     if (exportConfigService.isPresent()) {
       return exportConfigService.get().postConfig(exportConfig);

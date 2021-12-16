@@ -6,8 +6,8 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_
 import java.util.Optional;
 
 import org.folio.des.client.ConfigurationClient;
-import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
+import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.validator.ExportConfigValidatorResolver;
@@ -19,10 +19,9 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
 
   public BurSarFeesFinesExportConfigService(ConfigurationClient client,
                                   DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                  DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter,
+                                  ExportConfigConverterResolver exportConfigConverterResolver,
                                   ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    super(client, defaultModelConfigToExportConfigConverter, defaultExportConfigToModelConfigConverter,
-      exportConfigValidatorResolver);
+    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
   }
 
   @Override
