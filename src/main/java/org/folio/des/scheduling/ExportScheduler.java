@@ -1,5 +1,8 @@
 package org.folio.des.scheduling;
 
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -69,7 +72,7 @@ public class ExportScheduler implements SchedulingConfigurer {
     if (contextHelper.isModuleRegistered()) {
       contextHelper.initScope();
       jobService.deleteOldJobs();
-      log.info("deleteOldJobs executed for jobId: {} at: {}", scheduledJob.getId(), current);
+      log.info("deleteOldJobs executed for jobId: {} at: {}", isNull(scheduledJob) ? EMPTY : scheduledJob.getId(), current);
 
     }
   }

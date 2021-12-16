@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
+import static org.folio.des.domain.dto.ExportType.CIRCULATION_LOG;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -44,8 +48,11 @@ public class  JobExecutionService {
     JobCommand jobCommand = buildBaseJobCommand(job);
 
     Map<String, JobParameter> params = new HashMap<>();
-    if (job.getType() == ExportType.CIRCULATION_LOG) {
+    if (Set.of(CIRCULATION_LOG, BULK_EDIT_QUERY).contains(job.getType())) {
       params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
+      if (job.getType() == BULK_EDIT_QUERY) {
+        params.put("entityType", new JobParameter(job.getEntityType().getValue()));
+      }
     } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
       try {
         params.put("bursarFeeFines",
