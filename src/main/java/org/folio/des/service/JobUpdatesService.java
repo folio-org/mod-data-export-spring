@@ -16,6 +16,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -91,6 +93,9 @@ public class JobUpdatesService {
       if (jobStatus != null) {
         job.setStatus(jobStatus);
       }
+    }
+    if (nonNull(jobExecutionUpdate.getProgress())) {
+      job.setProgress(jobExecutionUpdate.getProgress());
     }
     if (jobExecutionUpdate.getExitStatus() != null && !jobExecutionUpdate.getExitStatus().equals(job.getExitStatus())) {
       job.setExitStatus(jobExecutionUpdate.getExitStatus());
