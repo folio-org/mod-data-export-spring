@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
+import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
@@ -25,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class BaseExportConfigService implements ExportConfigService {
   protected final ConfigurationClient client;
   protected final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
-  protected final DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter;
+  protected final ExportConfigConverterResolver exportConfigConverterResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
   @Override
@@ -71,7 +72,8 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @SneakyThrows
   protected ModelConfiguration createConfigModel(ExportConfig exportConfig) {
-    return defaultExportConfigToModelConfigConverter.convert(exportConfig);
+    var converter = exportConfigConverterResolver.resolve(exportConfig.getType());
+    return converter.convert(exportConfig);
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {

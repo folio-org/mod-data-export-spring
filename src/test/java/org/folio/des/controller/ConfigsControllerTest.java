@@ -101,9 +101,14 @@ class ConfigsControllerTest extends BaseTest {
   @Test
   @DisplayName("Update config")
   void putConfig() throws Exception {
+    wireMockServer.stubFor(WireMock.put(anyUrl())
+      .willReturn(aResponse().withBody(UPDATE_CONFIG_REQUEST)
+        .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withStatus(204)));
+
     mockMvc
         .perform(
-            put("/data-export-spring/configs/c8303ff3-7dec-49a1-acc8-7ce4f311fe21")
+            put("/data-export-spring/configs/0a3cba78-16e7-498e-b75b-98713000277b")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders())
                 .content(UPDATE_CONFIG_REQUEST))

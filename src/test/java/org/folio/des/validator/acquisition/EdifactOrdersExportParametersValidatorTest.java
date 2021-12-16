@@ -1,20 +1,20 @@
-package org.folio.des.validator;
+package org.folio.des.validator.acquisition;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Errors;
 
-@SpringBootTest(classes = { BurSarFeesFinesExportParametersValidator.class})
-class BurSarFeesFinesExportParametersValidatorTest {
+@SpringBootTest(classes = { EdifactOrdersExportParametersValidator.class})
+class EdifactOrdersExportParametersValidatorTest {
   @Autowired
-  private BurSarFeesFinesExportParametersValidator validator;
+  private EdifactOrdersExportParametersValidator validator;
 
   @Test
   @DisplayName("Should throw exception if specific parameters is Null")
@@ -24,7 +24,7 @@ class BurSarFeesFinesExportParametersValidatorTest {
   }
 
   @Test
-  @DisplayName("Should throw exception if bursar fines fines is Null")
+  @DisplayName("Should throw exception if edifact config is Null")
   void shouldThrowExceptionIfBursarFeeFinesIsNull() {
     Errors errors = mock(Errors.class);
     ExportTypeSpecificParameters specificParameters = new ExportTypeSpecificParameters();
@@ -32,11 +32,11 @@ class BurSarFeesFinesExportParametersValidatorTest {
   }
 
   @Test
-  @DisplayName("Should pass validation if bursar fines fines is not Null")
+  @DisplayName("Should pass validation if edifact is not Null")
   void shouldPassValidationIfBursarFeeFinesIsNotNull() {
     Errors errors = mock(Errors.class);
     ExportTypeSpecificParameters specificParameters = new ExportTypeSpecificParameters();
-    specificParameters.setBursarFeeFines(new BursarFeeFines());
+    specificParameters.setVendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig());
     validator.validate(specificParameters, errors);
   }
 }
