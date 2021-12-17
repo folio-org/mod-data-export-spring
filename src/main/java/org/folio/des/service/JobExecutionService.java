@@ -4,19 +4,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.de.entity.Job;
+import org.folio.de.entity.JobCommand;
+import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.JobParameterNames;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.de.entity.JobCommand;
-import org.folio.de.entity.Job;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -24,14 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
-import static org.folio.des.domain.dto.ExportType.CIRCULATION_LOG;
 
 @Service
 @Log4j2
@@ -39,30 +31,19 @@ import static org.folio.des.domain.dto.ExportType.CIRCULATION_LOG;
 public class  JobExecutionService {
 
   private final KafkaService kafka;
-  private final ObjectMapper objectMapper;
   private final ExportConfigValidatorResolver exportConfigValidatorResolver;
+  private final JobCommandBuilderResolver jobCommandBuilderResolver;
 
   public JobCommand prepareStartJobCommand(Job job) {
     validateIncomingExportConfig(job);
 
     JobCommand jobCommand = buildBaseJobCommand(job);
 
-    Map<String, JobParameter> params = new HashMap<>();
-    if (Set.of(CIRCULATION_LOG, BULK_EDIT_QUERY).contains(job.getType())) {
-      params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
-      if (job.getType() == BULK_EDIT_QUERY) {
-        params.put("entityType", new JobParameter(job.getEntityType().getValue()));
-      }
-    } else if (job.getType() == ExportType.BURSAR_FEES_FINES) {
-      try {
-        params.put("bursarFeeFines",
-            new JobParameter(objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getBursarFeeFines())));
-      } catch (JsonProcessingException e) {
-        throw new IllegalArgumentException(e);
-      }
-    }
-    jobCommand.setJobParameters(new JobParameters(params));
-
+    jobCommandBuilderResolver.resolve(job.getType()).ifPresentOrElse(builder -> {
+        JobParameters jobParameters = builder.buildJobCommand(job);
+        jobCommand.setJobParameters(jobParameters);
+      },
+      () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
     return jobCommand;
   }
 
