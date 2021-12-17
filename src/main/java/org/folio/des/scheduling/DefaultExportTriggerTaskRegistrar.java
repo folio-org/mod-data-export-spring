@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Stream;
@@ -12,9 +13,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
+import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.scheduling.ExportTaskTrigger;
 import org.folio.des.service.JobService;
 import org.springframework.beans.factory.DisposableBean;
@@ -33,7 +37,7 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 public class DefaultExportTriggerTaskRegistrar implements DisposableBean {
   String cronsExpressions = "0/3 * * * * *|0/15 * * * * *|0/5 * * * * *|0/8 * * * * *|0/7 * * * * *|0/5 * * * * *|0/5 * * * * *";
-  private final Map<ExportTaskTrigger, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>(20);
+  private final Map<ExportTaskTrigger, Pair<ExportTaskTrigger, ScheduledFuture<?>>> scheduledTasks = new ConcurrentHashMap<>(20);
   @Getter
   private final FolioExecutionContextHelper contextHelper;
   @Getter
@@ -79,37 +83,43 @@ public class DefaultExportTriggerTaskRegistrar implements DisposableBean {
       List<ExportTaskTrigger> triggers = triggerConverter.convert(exportConfig);
       if (CollectionUtils.isNotEmpty(triggers)) {
         triggers.forEach(exportTaskTrigger -> {
-          if (scheduledTasks.containsKey(exportTaskTrigger)) {
-            removeTriggerTask(exportTaskTrigger);
+          Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask = scheduledTasks.get(exportTaskTrigger);
+          if (triggerWithScheduleTask != null) {
+             if (triggerWithScheduleTask.getKey().getScheduleParameters().equals(exportTaskTrigger.getScheduleParameters())) {
+               String scheduleId = extractScheduleId(triggerWithScheduleTask);
+               log.info("Task for rescheduling was found : " + scheduleId);
+               removeTriggerTask(triggerWithScheduleTask);
+               scheduleTask(exportConfig, exportTaskTrigger);
+             }
+          } else {
+            scheduleTask(exportConfig, exportTaskTrigger);
           }
-          Runnable task = buildTask(exportConfig);
-          ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
-          this.scheduledTasks.put(exportTaskTrigger, newScheduledTask);
         });
       }
     }
   }
 
-  public void updateExportJobSchedule(ExportConfig exportConfig) {
-    if (exportConfig != null) {
-      List<ExportTaskTrigger> triggers = triggerConverter.convert(exportConfig);
-      if (CollectionUtils.isNotEmpty(triggers)) {
-        triggers.forEach(exportTaskTrigger -> {
-          if (scheduledTasks.containsKey(exportTaskTrigger)) {
-            removeTriggerTask(exportTaskTrigger);
-          }
-          Runnable task = buildTask(exportConfig);
-          ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
-          this.scheduledTasks.put(exportTaskTrigger, newScheduledTask);
-        });
-      }
-    }
+  private void scheduleTask(ExportConfig exportConfig, ExportTaskTrigger exportTaskTrigger) {
+    Runnable task = buildTask(exportConfig);
+    ScheduledFuture<?> newScheduledTask = this.taskScheduler.schedule(task, exportTaskTrigger);
+    this.scheduledTasks.put(exportTaskTrigger, ImmutablePair.of(exportTaskTrigger, newScheduledTask));
   }
 
-  private void removeTriggerTask(ExportTaskTrigger exportTaskTrigger) {
-    ScheduledFuture<?> scheduledTask = scheduledTasks.remove(exportTaskTrigger);
-    if (scheduledTask != null) {
-      scheduledTask.cancel(true);
+  private String extractScheduleId(Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask) {
+    return Optional.ofNullable(triggerWithScheduleTask.getKey())
+                   .map(ExportTaskTrigger::getScheduleParameters)
+                   .map(ScheduleParameters::getId)
+                   .map(UUID::toString)
+                   .orElse(triggerWithScheduleTask.toString());
+  }
+
+  private void removeTriggerTask(Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask) {
+    Pair<ExportTaskTrigger, ScheduledFuture<?>> scheduledTask = scheduledTasks.remove(triggerWithScheduleTask.getKey());
+    String scheduleId = extractScheduleId(triggerWithScheduleTask);;
+    log.info("Trigger removed : " + scheduleId);
+    if (scheduledTask != null && scheduledTask.getValue() != null) {
+      scheduledTask.getValue().cancel(true);
+      log.info("Future task canceled : " + scheduleId);
     }
   }
 

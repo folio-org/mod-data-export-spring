@@ -3,6 +3,11 @@ package org.folio.des.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
+import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
+import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
+import org.folio.des.builder.job.JobCommandBuilder;
+import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
@@ -91,5 +96,15 @@ public class ServiceConfiguration {
   @Bean DefaultExportTriggerTaskRegistrar defaultExportTriggerTaskRegistrar(FolioExecutionContextHelper contextHelper,
             JobService jobService, DefaultExportConfigToTaskTriggersConverter triggerConverter) {
     return new DefaultExportTriggerTaskRegistrar(contextHelper, new ThreadPoolTaskScheduler(), jobService, triggerConverter);
+  }
+
+  @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BulkEditQueryJobCommandBuilder bulkEditQueryJobCommandBuilder,
+                                                            BurSarFeeFinesJobCommandBuilder burSarFeeFinesJobCommandBuilder,
+                                                            CirculationLogJobCommandBuilder circulationLogJobCommandBuilder) {
+    Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
+    converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
+    converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
+    converters.put(ExportType.CIRCULATION_LOG, burSarFeeFinesJobCommandBuilder);
+    return new JobCommandBuilderResolver(converters);
   }
 }

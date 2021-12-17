@@ -1,4 +1,4 @@
-package org.folio.des.service.config.impl;
+package org.folio.des.scheduling;
 
 import java.util.Optional;
 
@@ -6,12 +6,13 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.scheduling.ExportScheduler;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.impl.ExportConfigServiceResolver;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-@Component
+//TODO Make it async because it must be invoice in the module register step from org.folio.des.controller.FolioTenantController
 @Log4j2
 @RequiredArgsConstructor
 public class ScheduledJobInitializer {

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
@@ -24,21 +25,22 @@ public class DefaultExportConfigToTaskTriggersConverter implements Converter<Exp
                                                   .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
   @Override
-  public List<ExportTaskTrigger> convert(ExportConfig source) {
-    if (ExportConfig.SchedulePeriodEnum.NONE != source.getSchedulePeriod()) {
+  public List<ExportTaskTrigger> convert(ExportConfig exportConfig) {
+    if (ExportConfig.SchedulePeriodEnum.NONE != exportConfig.getSchedulePeriod()) {
       ScheduleParameters scheduleParameters = new ScheduleParameters();
-      scheduleParameters.setScheduleFrequency(source.getScheduleFrequency());
-      schedulePeriodEnumSet.stream().filter(period -> period.equals(source.getSchedulePeriod().getValue())).findAny().ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
+      scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
+      scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
+      schedulePeriodEnumSet.stream().filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny().ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
 
-      Set<String> sourceWeekDays = source.getWeekDays().stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
+      Set<String> sourceWeekDays = exportConfig.getWeekDays().stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
       List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
         .filter(weekDaysEnumSet::contains)
         .map(ScheduleParameters.WeekDaysEnum::valueOf)
         .collect(Collectors.toList());
 
-      scheduleParameters.setScheduleTime(source.getScheduleTime());
+      scheduleParameters.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParameters.setWeekDays(weekDays);
-      return List.of(new ExportTaskTrigger(source.getId(), scheduleParameters));
+      return List.of(new ExportTaskTrigger(scheduleParameters));
     }
     return Collections.emptyList();
   }

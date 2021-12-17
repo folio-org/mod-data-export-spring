@@ -12,31 +12,19 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import lombok.EqualsAndHashCode;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 
 import lombok.Getter;
 
-@EqualsAndHashCode
 public class ExportTaskTrigger implements Trigger {
-
-  @Getter
-  private final String id;
   @Getter
   private final ScheduleParameters scheduleParameters;
 
   public ExportTaskTrigger(ScheduleParameters scheduleParameters) {
-    this.id = UUID.randomUUID().toString();
-    this.scheduleParameters = scheduleParameters;
-  }
-
-  public ExportTaskTrigger(String id, ScheduleParameters scheduleParameters) {
-    this.id = id;
     this.scheduleParameters = scheduleParameters;
   }
 
@@ -46,22 +34,22 @@ public class ExportTaskTrigger implements Trigger {
     return getNextTime(lastActualExecutionTime);
   }
 
-//  @Override
-//  public int hashCode() {
-//    return Objects.hash(id);
-//  }
-//
-//  @Override
-//  public boolean equals(Object other) {
-//    if (other == this) {
-//      return true;
-//    }
-//    if (!(other instanceof ExportTaskTrigger)) {
-//      return false;
-//    }
-//    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
-//    return this.getId().equals(trigger.getId());
-//  }
+  @Override
+  public int hashCode() {
+    return Objects.hash(scheduleParameters.getId());
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == this) {
+      return true;
+    }
+    if (!(other instanceof ExportTaskTrigger)) {
+      return false;
+    }
+    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
+    return this.scheduleParameters.getId().equals(trigger.scheduleParameters.getId());
+  }
 
   private Date getNextTime(Date lastActualExecutionTime) {
     if (scheduleParameters == null) return null;
