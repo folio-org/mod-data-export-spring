@@ -1,8 +1,9 @@
-package org.folio.des.converter.scheduling;
+package org.folio.des.converter;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -11,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
-import org.folio.des.domain.dto.scheduling.ExportTaskTrigger;
+import org.folio.des.domain.scheduling.ExportTaskTrigger;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,8 @@ public class DefaultExportConfigToTaskTriggersConverter implements Converter<Exp
       scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
       schedulePeriodEnumSet.stream().filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny().ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
 
-      Set<String> sourceWeekDays = exportConfig.getWeekDays().stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
+      List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
+      Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
       List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
         .filter(weekDaysEnumSet::contains)
         .map(ScheduleParameters.WeekDaysEnum::valueOf)

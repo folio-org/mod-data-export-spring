@@ -59,7 +59,7 @@ class EdifactExportConfigToModelConfigConverterTest {
   @CsvSource({
     "EDIFACT_ORDERS_EXPORT, EDIFACT_ORDERS_EXPORT"
   })
-  void testConverterIfExportConfigIsValidAndTypeIsProvided(ExportType exportType, String expConfigName) {
+  void testConverterIfExportConfigIsValidAndTypeIsProvided(ExportType exportType) {
     String expId = UUID.randomUUID().toString();
     UUID vendorId = UUID.randomUUID();
     ExportConfig ediConfig = new ExportConfig();

@@ -8,17 +8,21 @@ import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
 import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.builder.scheduling.EdifactScheduledTaskBuilder;
+import org.folio.des.builder.scheduling.ScheduledTaskBuilder;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
-import org.folio.des.converter.scheduling.DefaultExportConfigToTaskTriggersConverter;
+import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.scheduling.DefaultExportTriggerTaskRegistrar;
+import org.folio.des.scheduling.BaseExportJobScheduler;
+import org.folio.des.builder.scheduling.DefaultScheduledTaskBuilder;
+import org.folio.des.scheduling.acquisition.EdifactOrdersExportJobScheduler;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
@@ -28,6 +32,7 @@ import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -93,9 +98,15 @@ public class ServiceConfiguration {
     return new ExportConfigServiceResolver(exportConfigServiceMap);
   }
 
-  @Bean DefaultExportTriggerTaskRegistrar defaultExportTriggerTaskRegistrar(FolioExecutionContextHelper contextHelper,
-            JobService jobService, DefaultExportConfigToTaskTriggersConverter triggerConverter) {
-    return new DefaultExportTriggerTaskRegistrar(contextHelper, new ThreadPoolTaskScheduler(), jobService, triggerConverter);
+  @Bean ScheduledTaskBuilder edifactScheduledTaskBuilder(JobService jobService, FolioExecutionContextHelper contextHelper) {
+    return new EdifactScheduledTaskBuilder(jobService, contextHelper);
+  }
+
+  @Bean BaseExportJobScheduler edifactOrdersExportJobScheduler(ScheduledTaskBuilder edifactScheduledTaskBuilder,
+                EdifactOrdersExportConfigToTaskTriggerConverter triggerConverter,
+                @Value("${folio.schedule.acquisition.poolSize:100}") int poolSize) {
+    return new EdifactOrdersExportJobScheduler(new ThreadPoolTaskScheduler(), triggerConverter,
+                                                edifactScheduledTaskBuilder, poolSize);
   }
 
   @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BulkEditQueryJobCommandBuilder bulkEditQueryJobCommandBuilder,
@@ -104,7 +115,7 @@ public class ServiceConfiguration {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
     converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
-    converters.put(ExportType.CIRCULATION_LOG, burSarFeeFinesJobCommandBuilder);
+    converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
   }
 }

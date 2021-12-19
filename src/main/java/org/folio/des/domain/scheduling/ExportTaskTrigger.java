@@ -1,4 +1,4 @@
-package org.folio.des.domain.dto.scheduling;
+package org.folio.des.domain.scheduling;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -78,20 +78,28 @@ public class ExportTaskTrigger implements Trigger {
   }
 
   private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer scheduleFrequency) {
-    String scheduleTime = scheduleParameters.getScheduleTime();
-    var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
-
-    var offsetDateTime = LocalDate.now().atTime(time);
-
+//    String scheduleTime = scheduleParameters.getScheduleTime();
+//    var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
+//
+//    var offsetDateTime = LocalDate.now().atTime(time);
+//
+//    if (lastActualExecutionTime == null) {
+//      return Date.from(offsetDateTime.toInstant());
+//
+//    } else {
+//      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
+//        ZoneId.systemDefault());
+//      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
+//      return Date.from(instant);
+//    }
+    Calendar nextExecutionTime = new GregorianCalendar();
     if (lastActualExecutionTime == null) {
-      return Date.from(offsetDateTime.toInstant());
-
+      nextExecutionTime.setTime(new Date());
     } else {
-      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
-        ZoneId.systemDefault());
-      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
-      return Date.from(instant);
+      nextExecutionTime.setTime(lastActualExecutionTime);
+      nextExecutionTime.add(Calendar.SECOND, scheduleFrequency);
     }
+    return nextExecutionTime.getTime();
   }
 
   private OffsetDateTime findNextDayOfWeek(OffsetDateTime offsetDateTime, Integer weeks) {
