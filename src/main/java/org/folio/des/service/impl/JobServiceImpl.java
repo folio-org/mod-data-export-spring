@@ -52,6 +52,7 @@ public class JobServiceImpl implements JobService {
   static {
     OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Fees & Fines Bursar Report");
     OUTPUT_FORMATS.put(ExportType.CIRCULATION_LOG, "Comma-Separated Values (CSV)");
+    OUTPUT_FORMATS.put(ExportType.EDIFACT_ORDERS_EXPORT, "EDIFACT orders export (EDI)");
   }
 
   private final JobExecutionService jobExecutionService;
