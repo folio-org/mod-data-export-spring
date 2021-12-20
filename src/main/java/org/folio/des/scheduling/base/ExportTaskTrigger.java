@@ -1,4 +1,4 @@
-package org.folio.des.domain.scheduling;
+package org.folio.des.scheduling.base;
 
 import lombok.RequiredArgsConstructor;
 import org.folio.des.domain.dto.ScheduleParameters;

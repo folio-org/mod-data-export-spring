@@ -1,4 +1,4 @@
-package org.folio.des.domain.scheduling;
+package org.folio.des.scheduling.base;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -20,9 +20,9 @@ import org.springframework.scheduling.TriggerContext;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class DefaultExportTaskTrigger extends ExportTaskTrigger {
+public class BaseExportTaskTrigger extends ExportTaskTrigger {
 
-  public DefaultExportTaskTrigger(ScheduleParameters scheduleParameters) {
+  public BaseExportTaskTrigger(ScheduleParameters scheduleParameters) {
     super(scheduleParameters);
   }
 

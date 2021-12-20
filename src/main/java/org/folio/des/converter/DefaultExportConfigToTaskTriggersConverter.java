@@ -10,17 +10,15 @@ import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
-import org.folio.des.domain.scheduling.DefaultExportTaskTrigger;
-import org.folio.des.domain.scheduling.ExportTaskTrigger;
+import org.folio.des.scheduling.base.BaseExportTaskTrigger;
+import org.folio.des.scheduling.base.ExportTaskTrigger;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @AllArgsConstructor
 @Log4j2
-@Service
 public class DefaultExportConfigToTaskTriggersConverter implements Converter<ExportConfig, List<ExportTaskTrigger>>  {
   private final Set<String> schedulePeriodEnumSet = EnumSet.allOf(ScheduleParameters.SchedulePeriodEnum.class).stream()
                                                   .map(ScheduleParameters.SchedulePeriodEnum::getValue).collect(Collectors.toSet());
@@ -29,11 +27,14 @@ public class DefaultExportConfigToTaskTriggersConverter implements Converter<Exp
 
   @Override
   public List<ExportTaskTrigger> convert(ExportConfig exportConfig) {
-    if (ExportConfig.SchedulePeriodEnum.NONE != exportConfig.getSchedulePeriod()) {
+    if (exportConfig.getSchedulePeriod() != null &&
+                          ExportConfig.SchedulePeriodEnum.NONE != exportConfig.getSchedulePeriod()) {
       ScheduleParameters scheduleParameters = new ScheduleParameters();
       scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
       scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-      schedulePeriodEnumSet.stream().filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny().ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
+      schedulePeriodEnumSet.stream()
+        .filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny()
+        .ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
 
       List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
       Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
@@ -44,7 +45,7 @@ public class DefaultExportConfigToTaskTriggersConverter implements Converter<Exp
 
       scheduleParameters.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParameters.setWeekDays(weekDays);
-      return List.of(new DefaultExportTaskTrigger(scheduleParameters));
+      return List.of(new BaseExportTaskTrigger(scheduleParameters));
     }
     return Collections.emptyList();
   }
