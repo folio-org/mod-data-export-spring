@@ -17,7 +17,7 @@ import lombok.extern.log4j.Log4j2;
 public class DefaultExportConfigToTaskTriggersConverter implements Converter<ExportConfig, List<ExportTaskTrigger>>  {
   @Override
   public List<ExportTaskTrigger> convert(ExportConfig exportConfig) {
-    if (exportConfig.getSchedulePeriod() != null &&  ExportConfig.SchedulePeriodEnum.NONE != exportConfig.getSchedulePeriod()) {
+    if (ExportConfig.SchedulePeriodEnum.NONE != exportConfig.getSchedulePeriod()) {
       ExportTrigger exportTrigger = new ExportTrigger();
       exportTrigger.setConfig(exportConfig);
       BaseExportTaskTrigger baseExportTaskTrigger = new BaseExportTaskTrigger(exportTrigger);

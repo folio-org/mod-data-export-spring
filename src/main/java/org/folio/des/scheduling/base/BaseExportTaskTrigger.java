@@ -24,9 +24,8 @@ public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTr
   private final Set<String> weekDaysEnumSet = EnumSet.allOf(ScheduleParameters.WeekDaysEnum.class).stream()
     .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
-  private final ExportTrigger exportTrigger;
   public BaseExportTaskTrigger(ExportTrigger exportTrigger) {
-    this.exportTrigger = exportTrigger;
+    this.setConfig(Optional.ofNullable(exportTrigger).map(ExportTrigger::getConfig).orElse(null));
   }
 
   @Override
@@ -38,7 +37,7 @@ public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTr
   @Override
   public ScheduleParameters getScheduleParameters() {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    ExportConfig exportConfig = exportTrigger.getConfig();
+    ExportConfig exportConfig = getConfig();
     scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
     scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
     schedulePeriodEnumSet.stream()

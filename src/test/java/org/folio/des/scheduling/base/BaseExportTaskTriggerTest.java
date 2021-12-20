@@ -94,6 +94,7 @@ class BaseExportTaskTriggerTest {
   @DisplayName("Daily job scheduled")
   void dailySchedule() {
     ExportConfig exportConfig = new ExportConfig();
+
     exportConfig.setId(UUID.randomUUID().toString());
     exportConfig.setScheduleFrequency(1);
     exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
@@ -101,6 +102,7 @@ class BaseExportTaskTriggerTest {
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
+    trigger.nextExecutionTime(new SimpleTriggerContext());
 
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 

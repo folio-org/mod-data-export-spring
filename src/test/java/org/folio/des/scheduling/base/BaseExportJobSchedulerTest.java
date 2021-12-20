@@ -44,16 +44,17 @@ class BaseExportJobSchedulerTest {
   }
 
   @Test
-  void shouldScheduleJobIfExportConfigIsConvertedToEmptyListOfScheduledTask() {
+  void shouldNotScheduleJobIfExportConfigIsConvertedToEmptyListOfScheduledTask() {
     String expId = UUID.randomUUID().toString();
     ExportConfig ediConfig = new ExportConfig();
+    ediConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.WEEK);
     ediConfig.setId(expId);
 
     //Action
     List<Job> jobs = scheduler.scheduleExportJob(ediConfig);
     assertEquals(0, jobs.size());
     verify(taskScheduler, times(0)).schedule(any(), any(ExportTaskTrigger.class));
-    verify(scheduledTaskBuilder, times(0)).buildTask(ediConfig);
+    verify(scheduledTaskBuilder, times(1)).buildTask(ediConfig);
   }
   @Test
   void shouldScheduleJobIfExportConfigHasInformationAboutScheduling() {
