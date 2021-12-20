@@ -142,6 +142,7 @@ class BaseExportJobSchedulerTest {
   @Test
   void testDestroy() {
     scheduler.destroy();
+    assertTrue(scheduler.scheduledTasks.isEmpty());
   }
 
   @Test

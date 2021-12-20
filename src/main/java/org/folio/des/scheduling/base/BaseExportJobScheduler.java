@@ -30,14 +30,13 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
   protected final ThreadPoolTaskScheduler taskScheduler;
   protected final Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter;
   protected final ScheduledTaskBuilder scheduledTaskBuilder;
-  private final int poolSize;
 
   public BaseExportJobScheduler(ThreadPoolTaskScheduler taskScheduler,
     Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter, ScheduledTaskBuilder scheduledTaskBuilder, int poolSize) {
     this.taskScheduler = taskScheduler;
     this.triggerConverter = triggerConverter;
     this.scheduledTaskBuilder = scheduledTaskBuilder;
-    this.poolSize = poolSize;
+    this.taskScheduler.setPoolSize(poolSize);
     this.taskScheduler.initialize();
   }
 
