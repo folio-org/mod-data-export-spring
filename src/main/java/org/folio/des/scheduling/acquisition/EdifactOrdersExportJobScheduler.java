@@ -7,7 +7,6 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.scheduling.ExportTaskTrigger;
 import org.folio.des.scheduling.BaseExportJobScheduler;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 public class EdifactOrdersExportJobScheduler extends BaseExportJobScheduler {

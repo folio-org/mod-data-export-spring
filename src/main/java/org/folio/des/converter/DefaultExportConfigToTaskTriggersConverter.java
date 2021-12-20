@@ -8,13 +8,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.scheduling.DefaultExportTaskTrigger;
 import org.folio.des.domain.scheduling.ExportTaskTrigger;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @AllArgsConstructor
 @Log4j2
@@ -42,7 +44,7 @@ public class DefaultExportConfigToTaskTriggersConverter implements Converter<Exp
 
       scheduleParameters.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParameters.setWeekDays(weekDays);
-      return List.of(new ExportTaskTrigger(scheduleParameters));
+      return List.of(new DefaultExportTaskTrigger(scheduleParameters));
     }
     return Collections.emptyList();
   }
