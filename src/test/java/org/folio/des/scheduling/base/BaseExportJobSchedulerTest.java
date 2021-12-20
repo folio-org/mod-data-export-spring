@@ -2,6 +2,8 @@ package org.folio.des.scheduling.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -24,7 +26,7 @@ import org.mockito.Mockito;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-public class BaseExportJobSchedulerTest {
+class BaseExportJobSchedulerTest {
   private ThreadPoolTaskScheduler taskScheduler = mock(ThreadPoolTaskScheduler.class);
   private Converter<ExportConfig, List<ExportTaskTrigger>> converter = new DefaultExportConfigToTaskTriggersConverter();
   private ScheduledTaskBuilder scheduledTaskBuilder = mock(ScheduledTaskBuilder.class);
@@ -37,7 +39,8 @@ public class BaseExportJobSchedulerTest {
 
   @Test
   void shouldNotScheduleJobIfExportConfigIsEmpty() {
-    scheduler.scheduleExportJob(null);
+    List<Job> scheduledJobs = scheduler.scheduleExportJob(null);
+    assertTrue(scheduledJobs.isEmpty());
   }
 
   @Test
@@ -108,20 +111,40 @@ public class BaseExportJobSchedulerTest {
     exportConfig.setScheduleFrequency(7);
     exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.WEEK);
 
+    ExportConfig reScheduledExportConfig = new ExportConfig();
+    reScheduledExportConfig.setId(expId);
+    reScheduledExportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    reScheduledExportConfig.setScheduleTime("15:08:39.278+00:00");
+    reScheduledExportConfig.setScheduleFrequency(3);
+    reScheduledExportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.WEEK);
+
     Optional<ScheduledTask> scheduledTask = Optional.of(new ScheduledTask(() -> System.out.println("Job test"), new Job()));
     doReturn(scheduledTask).when(scheduledTaskBuilder).buildTask(exportConfig);
+    Optional<ScheduledTask> resScheduledTask = Optional.of(new ScheduledTask(() -> System.out.println("Job test"), new Job()));
+    doReturn(resScheduledTask).when(scheduledTaskBuilder).buildTask(reScheduledExportConfig);
+
     //Schedule
     List<Job> jobs = scheduler.scheduleExportJob(exportConfig);
     assertEquals(1, scheduler.getScheduledTasks().keySet().size());
     ExportTaskTrigger exportTaskTrigger = scheduler.getScheduledTasks().keySet().stream().findFirst().get();
     //Reschedule
-    exportConfig.setScheduleFrequency(3);
-    scheduler.scheduleExportJob(exportConfig);
+    scheduler.scheduleExportJob(reScheduledExportConfig);
     assertEquals(1, scheduler.getScheduledTasks().keySet().size());
     ExportTaskTrigger rescheduleExportTaskTrigger = scheduler.getScheduledTasks().keySet().stream().findFirst().get();
     assertNotEquals(exportTaskTrigger.getScheduleParameters(), rescheduleExportTaskTrigger.getScheduleParameters());
     assertEquals(3, rescheduleExportTaskTrigger.getScheduleParameters().getScheduleFrequency());
     verify(taskScheduler, times(2)).schedule(any(), any(ExportTaskTrigger.class));
-    verify(scheduledTaskBuilder, times(2)).buildTask(exportConfig);
+    verify(scheduledTaskBuilder, times(1)).buildTask(exportConfig);
+    verify(scheduledTaskBuilder, times(1)).buildTask(reScheduledExportConfig);
+  }
+
+  @Test
+  void testDestroy() {
+    scheduler.destroy();
+  }
+
+  @Test
+  void shouldThrowUnsupportedOperationExceptionIfInvokeInitAllScheduledJob() {
+    assertThrows(UnsupportedOperationException.class, () -> scheduler.initAllScheduledJob());
   }
 }

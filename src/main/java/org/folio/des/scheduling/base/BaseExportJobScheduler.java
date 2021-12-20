@@ -9,8 +9,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,11 +22,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-@RequiredArgsConstructor
 public class BaseExportJobScheduler implements DisposableBean, ExportJobScheduler {
   protected final Map<ExportTaskTrigger, Pair<ExportTaskTrigger, ScheduledFuture<?>>> scheduledTasks = new ConcurrentHashMap<>(20);
   protected final ThreadPoolTaskScheduler taskScheduler;
@@ -36,10 +32,13 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
   protected final ScheduledTaskBuilder scheduledTaskBuilder;
   private final int poolSize;
 
-  @PostConstruct
-  public void postConstruct() {
-    taskScheduler.setPoolSize(poolSize);
-    taskScheduler.initialize();
+  public BaseExportJobScheduler(ThreadPoolTaskScheduler taskScheduler,
+    Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter, ScheduledTaskBuilder scheduledTaskBuilder, int poolSize) {
+    this.taskScheduler = taskScheduler;
+    this.triggerConverter = triggerConverter;
+    this.scheduledTaskBuilder = scheduledTaskBuilder;
+    this.poolSize = poolSize;
+    this.taskScheduler.initialize();
   }
 
   @Override
@@ -79,8 +78,7 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
 
   @Override
   public void initAllScheduledJob() {
-    log.info("Init method is not implemented for Based scheduled service");
-    return;
+    throw new UnsupportedOperationException("Please implement it in the  child classes");
   }
 
   public Map<ExportTaskTrigger, Pair<ExportTaskTrigger, ScheduledFuture<?>>> getScheduledTasks() {
@@ -109,7 +107,7 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
 
   private void removeTriggerTask(Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask) {
     Pair<ExportTaskTrigger, ScheduledFuture<?>> scheduledTask = scheduledTasks.remove(triggerWithScheduleTask.getKey());
-    String scheduleId = extractScheduleId(triggerWithScheduleTask);;
+    String scheduleId = extractScheduleId(triggerWithScheduleTask);
     log.info("Trigger removed : " + scheduleId);
     if (scheduledTask != null && scheduledTask.getValue() != null) {
       scheduledTask.getValue().cancel(true);

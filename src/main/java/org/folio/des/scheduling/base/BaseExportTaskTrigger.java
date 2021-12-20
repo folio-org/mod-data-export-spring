@@ -1,29 +1,32 @@
 package org.folio.des.scheduling.base;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.scheduling.ExportTrigger;
 import org.springframework.scheduling.TriggerContext;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class BaseExportTaskTrigger extends ExportTaskTrigger {
+public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTrigger {
+  private final Set<String> schedulePeriodEnumSet = EnumSet.allOf(ScheduleParameters.SchedulePeriodEnum.class).stream()
+    .map(ScheduleParameters.SchedulePeriodEnum::getValue).collect(Collectors.toSet());
+  private final Set<String> weekDaysEnumSet = EnumSet.allOf(ScheduleParameters.WeekDaysEnum.class).stream()
+    .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
-  public BaseExportTaskTrigger(ScheduleParameters scheduleParameters) {
-    super(scheduleParameters);
+  private final ExportTrigger exportTrigger;
+  public BaseExportTaskTrigger(ExportTrigger exportTrigger) {
+    this.exportTrigger = exportTrigger;
   }
 
   @Override
@@ -33,8 +36,30 @@ public class BaseExportTaskTrigger extends ExportTaskTrigger {
   }
 
   @Override
+  public ScheduleParameters getScheduleParameters() {
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    ExportConfig exportConfig = exportTrigger.getConfig();
+    scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
+    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
+    schedulePeriodEnumSet.stream()
+      .filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny()
+      .ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
+
+    List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
+    Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
+    List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
+      .filter(weekDaysEnumSet::contains)
+      .map(ScheduleParameters.WeekDaysEnum::valueOf)
+      .collect(Collectors.toList());
+
+    scheduleParameters.setScheduleTime(exportConfig.getScheduleTime());
+    scheduleParameters.setWeekDays(weekDays);
+    return scheduleParameters;
+  }
+
+  @Override
   public int hashCode() {
-    return Objects.hash(scheduleParameters.getId());
+    return Objects.hash(getScheduleParameters().getId());
   }
 
   @Override
@@ -46,96 +71,6 @@ public class BaseExportTaskTrigger extends ExportTaskTrigger {
       return false;
     }
     ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
-    return this.scheduleParameters.getId().equals(trigger.scheduleParameters.getId());
-  }
-
-  private Date getNextTime(Date lastActualExecutionTime) {
-    if (scheduleParameters == null) return null;
-
-    ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
-    if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) return null;
-
-    Date nextExecutionTime;
-    Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
-
-    switch (schedulePeriod) {
-    case DAY:
-      nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-      break;
-    case WEEK:
-      nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-      break;
-    case HOUR:
-      nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-      break;
-    default:
-      return null;
-    }
-
-    return nextExecutionTime;
-  }
-
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer scheduleFrequency) {
-    String scheduleTime = scheduleParameters.getScheduleTime();
-    var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
-
-    var offsetDateTime = LocalDate.now().atTime(time);
-
-    if (lastActualExecutionTime == null) {
-      return Date.from(offsetDateTime.toInstant());
-
-    } else {
-      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
-        ZoneId.systemDefault());
-      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
-      return Date.from(instant);
-    }
-  }
-
-  private OffsetDateTime findNextDayOfWeek(OffsetDateTime offsetDateTime, Integer weeks) {
-    List<DayOfWeek> week = normalizeDayOfWeek();
-
-    var currentDayOfWeek = offsetDateTime.getDayOfWeek();
-    for (DayOfWeek ofWeek : week) {
-      int nextWeekDay = currentDayOfWeek.getValue() - ofWeek.getValue();
-      if (nextWeekDay >= 1) {
-        return offsetDateTime.plusDays(nextWeekDay);
-      }
-    }
-    int daysBefore = week.get(0).getValue() - currentDayOfWeek.getValue();
-
-    return offsetDateTime.minusDays(daysBefore).plusWeeks(weeks);
-  }
-
-  private List<DayOfWeek> normalizeDayOfWeek() {
-    List<ScheduleParameters.WeekDaysEnum> weekDays = scheduleParameters.getWeekDays();
-    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
-  }
-
-  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
-    Calendar nextExecutionTime = new GregorianCalendar();
-    if (lastActualExecutionTime == null) {
-      nextExecutionTime.setTime(new Date());
-    } else {
-      nextExecutionTime.setTime(lastActualExecutionTime);
-      nextExecutionTime.add(Calendar.HOUR, hours);
-    }
-    return nextExecutionTime.getTime();
-  }
-
-  private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
-    String scheduleTime = scheduleParameters.getScheduleTime();
-    var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
-
-    if (lastActualExecutionTime == null) {
-      var nextExecutionDateTime = LocalDateTime.of(LocalDate.now(), time.toLocalTime());
-      return Date.from(nextExecutionDateTime.toInstant(time.getOffset()));
-
-    } else {
-      var instant = lastActualExecutionTime.toInstant();
-      var localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-      var newScheduledDate = localDateTime.plusDays(days);
-      return Date.from(newScheduledDate.toInstant(time.getOffset()));
-    }
+    return this.getScheduleParameters().getId().equals(trigger.getScheduleParameters().getId());
   }
 }
