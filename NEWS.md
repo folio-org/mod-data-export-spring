@@ -1,3 +1,12 @@
+## 2021-12-20 v1.2.1
+The primary focus of this release is fixing log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.2.0...v1.2.1)
+
+### Bug fixes
+* [MODEXPS-52](https://issues.folio.org/browse/MODEXPS-52) - Kiwi R3 2021 - Log4j vulnerability verification and correction
+
+
 ## 2021-11-10 v1.2.0
 * [MODEXPS-26](https://issues.folio.org/browse/MODEXPS-26) Scheduling export job doesn't work anymore
 * [MODEXPS-29](https://issues.folio.org/browse/MODEXPS-29) mod-data-export-spring: folio-spring-base v2 update
