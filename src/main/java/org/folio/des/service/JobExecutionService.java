@@ -40,9 +40,10 @@ public class  JobExecutionService {
     JobCommand jobCommand = buildBaseJobCommand(job);
 
     jobCommandBuilderResolver.resolve(job.getType()).ifPresentOrElse(builder -> {
-      JobParameters jobParameters = builder.buildJobCommand(job);
-      jobCommand.setJobParameters(jobParameters);
-    }, () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
+        JobParameters jobParameters = builder.buildJobCommand(job);
+        jobCommand.setJobParameters(jobParameters);
+      },
+      () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
     return jobCommand;
   }
 

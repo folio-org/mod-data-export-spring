@@ -1,8 +1,6 @@
 package org.folio.des.converter.acquisition;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
