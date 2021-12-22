@@ -2,14 +2,13 @@ package org.folio.des.scheduling.acquisition;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.des.domain.dto.ExportConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.base.ExportTaskTrigger;
 import org.springframework.scheduling.TriggerContext;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
@@ -18,6 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -54,7 +54,7 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
       nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
       break;
     case HOUR:
-  //    nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+      nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
       break;
     default:
       return null;
@@ -99,17 +99,18 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
     List<ScheduleParameters.WeekDaysEnum> weekDays = scheduleParameters.getWeekDays();
     return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
   }
-//
-//  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
-//    Calendar nextExecutionTime = new GregorianCalendar();
-//    if (lastActualExecutionTime == null) {
-//      nextExecutionTime.setTime(new Date());
-//    } else {
-//      nextExecutionTime.setTime(lastActualExecutionTime);
-//      nextExecutionTime.add(Calendar.HOUR, hours);
-//    }
-//    return nextExecutionTime.getTime();
-//  }
+
+  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
+    Calendar nextExecutionTime = new GregorianCalendar();
+    if (lastActualExecutionTime == null) {
+      OffsetDateTime startTime = convertScheduleTime(scheduleParameters.getScheduleTime());
+      nextExecutionTime.setTime(Date.from(startTime.toInstant()));
+    } else {
+      nextExecutionTime.setTime(lastActualExecutionTime);
+      nextExecutionTime.add(Calendar.HOUR, hours);
+    }
+    return nextExecutionTime.getTime();
+  }
 
 //  private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
 //    String scheduleTime = config.getScheduleTime();
@@ -127,4 +128,11 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
 //    }
 //  }
 
+  private OffsetDateTime convertScheduleTime(String scheduleTime) {
+    if (StringUtils.isNotEmpty(scheduleTime)) {
+      var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
+      return LocalDate.now().atTime(time);
+    }
+    return OffsetDateTime.now();
+  }
 }

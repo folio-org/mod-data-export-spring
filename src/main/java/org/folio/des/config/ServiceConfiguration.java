@@ -28,11 +28,13 @@ import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidato
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.validation.Validator;
 
 @Configuration
 @ComponentScan("org.folio.des")
+@Import({ SchedulingConfiguration.class })
 public class ServiceConfiguration {
   @Bean
   ExportConfigConverterResolver exportConfigConverterResolver(DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter,
