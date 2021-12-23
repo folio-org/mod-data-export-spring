@@ -20,12 +20,14 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
 import lombok.Setter;
 
 @Component
 public class ExportTrigger implements Trigger {
 
   @Setter
+  @Getter
   private ExportConfig config;
 
   @Override
@@ -34,7 +36,7 @@ public class ExportTrigger implements Trigger {
     return getNextTime(lastActualExecutionTime);
   }
 
-  private Date getNextTime(Date lastActualExecutionTime) {
+  protected Date getNextTime(Date lastActualExecutionTime) {
     if (config == null) return null;
 
     SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
