@@ -4,6 +4,7 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,9 @@ public final class EdifactExportConfigToModelConfigConverter implements Converte
     var config = new ModelConfiguration();
     config.setId(exportConfig.getId());
     config.setModule(DEFAULT_MODULE_NAME);
-    UUID vendorId = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getVendorId();
-    config.setConfigName(exportConfig.getType().getValue() + "_" + vendorId.toString());
+    VendorEdiOrdersExportConfig ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
+    UUID vendorId = ediOrdersExportConfig.getVendorId();
+    config.setConfigName(exportConfig.getType().getValue() + "_" + vendorId.toString() + "_" + exportConfig.getId());
 
     config.setDescription(CONFIG_DESCRIPTION);
     config.setEnabled(true);
