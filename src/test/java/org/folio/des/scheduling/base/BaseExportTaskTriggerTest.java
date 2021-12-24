@@ -18,16 +18,6 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 
 class BaseExportTaskTriggerTest {
 
-
-  @Test
-  @DisplayName("No configuration for scheduling")
-  void noConfig() {
-    BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(null);
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
-
-    assertNull(date);
-  }
-
   @Test
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {

@@ -1,9 +1,11 @@
 package org.folio.des.scheduling.acquisition;
 
+import static org.folio.des.domain.dto.ScheduleParameters.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -49,7 +51,7 @@ class AcqBaseExportTaskTriggerTest {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
     scheduleParameters.setScheduleFrequency(1);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.NONE);
     scheduleParameters.setScheduleTime("12:00:00");
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
 
@@ -65,7 +67,7 @@ class AcqBaseExportTaskTriggerTest {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
     scheduleParameters.setScheduleFrequency(expDiffHours);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.HOUR);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
     scheduleParameters.setScheduleTime("11:12:13");
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
@@ -89,7 +91,7 @@ class AcqBaseExportTaskTriggerTest {
     Instant instant = Instant.ofEpochMilli(actDateHourLate.getTime());
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String lastDateStr = zonedDateTime.toString();
-    assertTrue(lastDateStr.contains("-"+dayOfMonth+"T18:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(lastDateStr.contains(dayOfMonth+"T18:12:13+08:00[Asia/Shanghai]"));
 
     triggerContext.update((Date) actDateHourLate.clone(), (Date) actDateHourLate.clone(), (Date) actDateHourLate.clone());
     final Date thirdDateHourLate = trigger.nextExecutionTime(triggerContext);
@@ -101,7 +103,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String thirdLastDateStr = thirdZonedDateTime.toString();
     dayOfMonth = dayOfMonth + 1;
-    assertTrue(thirdLastDateStr.contains("-"+dayOfMonth+"T01:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T01:12:13+08:00[Asia/Shanghai]"));
   }
 
   @Test
@@ -111,7 +113,7 @@ class AcqBaseExportTaskTriggerTest {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
     scheduleParameters.setScheduleFrequency(expDiffHours);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.HOUR);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
     //When
@@ -138,7 +140,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setId(UUID.randomUUID());
     scheduleParameters.setScheduleTime("11:12:13");
     scheduleParameters.setScheduleFrequency(expDiffDays);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.DAY);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.DAY);
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
     //When
@@ -149,7 +151,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String firstDateStr = firstZonedDateTime.toString();
     int dayOfMonth = firstZonedDateTime.getDayOfMonth();
-    assertTrue(firstDateStr.contains("-"+dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(firstDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
 
     //Second try
     triggerContext.update(actDate, actDate, actDate);
@@ -162,7 +164,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     dayOfMonth = dayOfMonth + expDiffDays;
     String lastDateStr = zonedDateTime.toString();
-    assertTrue(lastDateStr.contains("-"+dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
     //Third try
     triggerContext.update(actDateDayLate, actDateDayLate, actDateDayLate);
     final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
@@ -174,41 +176,58 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     dayOfMonth = zonedDateTime.getDayOfMonth() + expDiffDays;
     String thirdLastDateStr = thirdZonedDateTime.toString();
-    assertTrue(thirdLastDateStr.contains("-"+dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
   }
 
   @Test
-  @Disabled
   @DisplayName("Weekly job scheduled")
   void weeklySchedule() {
-    int expDiffHours = 3;
+    int expDiffWeeks = 0;
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
     scheduleParameters.setScheduleTime("11:12:13");
-    scheduleParameters.setScheduleFrequency(expDiffHours);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
-    scheduleParameters.setWeekDays(List.of(ScheduleParameters.WeekDaysEnum.MONDAY, ScheduleParameters.WeekDaysEnum.SATURDAY));
+    scheduleParameters.setScheduleFrequency(expDiffWeeks);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.WEEK);
+    scheduleParameters.setWeekDays(List.of(WeekDaysEnum.MONDAY, WeekDaysEnum.SATURDAY, WeekDaysEnum.SUNDAY));
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     final Date actDate = trigger.nextExecutionTime(triggerContext);
 
-    triggerContext.update(actDate, actDate, actDate);
-    final Date actDateHourLate = trigger.nextExecutionTime(triggerContext);
-    long diffInMilliseconds = Math.abs(actDateHourLate.getTime() - actDate.getTime());
-    long diff = TimeUnit.DAYS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
-    assertEquals(expDiffHours, diff);
+    Instant firstInstant = Instant.ofEpochMilli(actDate.getTime());
+    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    DayOfWeek firstDayOfWeek = firstZonedDateTime.getDayOfWeek();
+    assertEquals(WeekDaysEnum.MONDAY.getValue(), firstDayOfWeek.toString());
+    final String EXP_TIME = "T11:12:13+08:00[Asia/Shanghai]";
+    assertTrue(firstZonedDateTime.toString().contains(firstZonedDateTime.getDayOfMonth()+ EXP_TIME));
 
-    ZonedDateTime nowDateTime = Instant.now().atZone(ZoneId.of(ASIA_SHANGHAI_ZONE)).plusDays(expDiffHours).truncatedTo(ChronoUnit.DAYS);
-    Instant lastInstant = Instant.ofEpochMilli(actDateHourLate.getTime()).truncatedTo(ChronoUnit.SECONDS);
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(lastInstant, ZoneId.of(ASIA_SHANGHAI_ZONE)).truncatedTo(ChronoUnit.DAYS);
-    assertTrue(nowDateTime.isEqual(zonedDateTime));
-    //Time should not be changed
-    Instant firstInstant = Instant.ofEpochMilli(actDateHourLate.getTime()).truncatedTo(ChronoUnit.SECONDS);
-    ZonedDateTime firstDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE)).truncatedTo(ChronoUnit.SECONDS);
-    assertTrue(firstDateTime.toString().contains("11:12:13+08:00[Asia/Shanghai]"));
-    ZonedDateTime lastDateTime = ZonedDateTime.ofInstant(lastInstant, ZoneId.of(ASIA_SHANGHAI_ZONE)).truncatedTo(ChronoUnit.SECONDS);
-    assertTrue(lastDateTime.toString().contains("11:12:13+08:00[Asia/Shanghai]"));
+    //Second try
+    triggerContext.update(actDate, actDate, actDate);
+    final Date secondDateDayLate = trigger.nextExecutionTime(triggerContext);
+
+    Instant instant = Instant.ofEpochMilli(secondDateDayLate.getTime());
+    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    DayOfWeek secondDayOfWeek = secondZonedDateTime.getDayOfWeek();
+    assertEquals(WeekDaysEnum.SATURDAY.getValue(), secondDayOfWeek.toString());
+    assertTrue(secondZonedDateTime.toString().contains(secondZonedDateTime.getDayOfMonth()+ EXP_TIME));
+    //Third try
+    triggerContext.update(secondDateDayLate, secondDateDayLate, secondDateDayLate);
+    final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
+
+    Instant thirdInstant = Instant.ofEpochMilli(thirdDateDayLate.getTime());
+    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    DayOfWeek thirdDayOfWeek = thirdZonedDateTime.getDayOfWeek();
+    assertEquals(WeekDaysEnum.SUNDAY.getValue(), thirdDayOfWeek.toString());
+    assertTrue(thirdZonedDateTime.toString().contains(thirdZonedDateTime.getDayOfMonth()+ EXP_TIME));
+    //Forth try
+    triggerContext.update(thirdDateDayLate, thirdDateDayLate, thirdDateDayLate);
+    final Date forthDateDayLate = trigger.nextExecutionTime(triggerContext);
+
+    Instant forthInstant = Instant.ofEpochMilli(forthDateDayLate.getTime());
+    ZonedDateTime forthZonedDateTime = ZonedDateTime.ofInstant(forthInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    DayOfWeek forthDayOfWeek = forthZonedDateTime.getDayOfWeek();
+    assertEquals(WeekDaysEnum.MONDAY.getValue(), forthDayOfWeek.toString());
+    assertTrue(forthZonedDateTime.toString().contains(forthZonedDateTime.getDayOfMonth() + EXP_TIME));
   }
 }

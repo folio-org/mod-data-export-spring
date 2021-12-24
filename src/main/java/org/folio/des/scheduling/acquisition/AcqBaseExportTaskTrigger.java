@@ -10,16 +10,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ScheduleParameters;
-import org.folio.des.scheduling.base.ExportTaskTrigger;
+import org.folio.des.scheduling.base.AbstractExportTaskTrigger;
 import org.springframework.scheduling.TriggerContext;
 
 import lombok.Getter;
@@ -29,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RequiredArgsConstructor
-public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
+public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   private final ScheduleParameters scheduleParameters;
   @Getter
   private final boolean enableScheduler;
@@ -51,23 +52,6 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
                   .map(ScheduleParameters::getSchedulePeriod)
                   .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
                   .orElse(false) || enableScheduler;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getScheduleParameters().getId());
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-    if (!(other instanceof ExportTaskTrigger)) {
-      return false;
-    }
-    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
-    return this.getScheduleParameters().getId().equals(trigger.getScheduleParameters().getId());
   }
 
   protected Date getNextTime(Date lastActualExecutionTime) {
@@ -100,30 +84,39 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
   @SneakyThrows
   private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer everyWeek) {
     ZonedDateTime startTime = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
-    var instant = findNextDayOfWeek(startTime, everyWeek).toInstant();
-    if (lastActualExecutionTime != null) {
-     // startTime = findNextDayOfWeek(startTime, scheduleFrequency);
+    if (lastActualExecutionTime == null) {
+      everyWeek = 0;
     }
+    startTime = findNextDayOfWeek(startTime, everyWeek);
     return convertToOldDateFormat(startTime);
   }
 
-  private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTimeUTC, Integer everyWeek) {
-    List<DayOfWeek> weeks = normalizeDayOfWeek();
-
-    var currentDayOfWeek = initZoneDateTimeUTC.getDayOfWeek();
-    for (DayOfWeek ofWeek : weeks) {
-      int nextWeekDay = currentDayOfWeek.getValue() - ofWeek.getValue();
-      if (nextWeekDay >= 1) {
-        return initZoneDateTimeUTC.plusDays(nextWeekDay);
+  private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTime, Integer everyWeek) {
+    List<DayOfWeek> sortedDays = normalizeAndSortDayOfWeek();
+    DayOfWeek firstDayOnTheWeek = sortedDays.stream().findFirst().get();
+    Iterator<DayOfWeek> dayOfWeekIterator = sortedDays.iterator();
+    DayOfWeek nextDayOfWeek = firstDayOnTheWeek;
+    while (dayOfWeekIterator.hasNext()) {
+      DayOfWeek dayOfWeek = dayOfWeekIterator.next();
+      if (dayOfWeek.getValue() == initZoneDateTime.getDayOfWeek().getValue() && dayOfWeekIterator.hasNext()) {
+        nextDayOfWeek = dayOfWeekIterator.next();
       }
     }
-    int daysBefore = weeks.get(0).getValue() - currentDayOfWeek.getValue();
-    return initZoneDateTimeUTC.minusDays(daysBefore).plusWeeks(everyWeek);
+    int plusDays = 0;
+    int nextDayOfWeekVal = nextDayOfWeek.getValue();
+    if (nextDayOfWeekVal == firstDayOnTheWeek.getValue()) {
+      plusDays = DayOfWeek.SUNDAY.getValue() - initZoneDateTime.getDayOfWeek().getValue() + 1;
+      return initZoneDateTime.plusDays(plusDays).plusWeeks(everyWeek);
+    }
+    plusDays = nextDayOfWeekVal - initZoneDateTime.getDayOfWeek().getValue();
+    return initZoneDateTime.plusDays(plusDays);
   }
 
-  private List<DayOfWeek> normalizeDayOfWeek() {
+  private List<DayOfWeek> normalizeAndSortDayOfWeek() {
     List<ScheduleParameters.WeekDaysEnum> weekDays = scheduleParameters.getWeekDays();
-    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
+    return weekDays.stream()
+            .sorted(Comparator.comparing(ScheduleParameters.WeekDaysEnum::getValue))
+            .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
   }
 
   @SneakyThrows
