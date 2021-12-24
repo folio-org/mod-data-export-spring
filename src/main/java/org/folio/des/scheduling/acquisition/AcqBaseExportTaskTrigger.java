@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -50,6 +51,23 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
                   .map(ScheduleParameters::getSchedulePeriod)
                   .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
                   .orElse(false) || enableScheduler;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getScheduleParameters().getId());
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == this) {
+      return true;
+    }
+    if (!(other instanceof ExportTaskTrigger)) {
+      return false;
+    }
+    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
+    return this.getScheduleParameters().getId().equals(trigger.getScheduleParameters().getId());
   }
 
   protected Date getNextTime(Date lastActualExecutionTime) {

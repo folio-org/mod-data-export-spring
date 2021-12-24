@@ -46,7 +46,7 @@ class EdifactExportConfigToModelConfigConverterTest {
 
     Assertions.assertAll(
       () -> assertEquals(expId, actConfig.getId()),
-      () -> assertEquals(ExportType.EDIFACT_ORDERS_EXPORT + "_" + vendorId.toString(), actConfig.getConfigName()),
+      () -> assertEquals(ExportType.EDIFACT_ORDERS_EXPORT + "_" + vendorId + "_" + expId, actConfig.getConfigName()),
       () -> assertEquals(DEFAULT_MODULE_NAME, actConfig.getModule()),
       () -> assertEquals(true, actConfig.getDefault()),
       () -> assertEquals(true, actConfig.getEnabled())
@@ -76,7 +76,7 @@ class EdifactExportConfigToModelConfigConverterTest {
 
     Assertions.assertAll(
       () -> assertEquals(expId, actConfig.getId()),
-      () -> assertEquals(ExportType.EDIFACT_ORDERS_EXPORT + "_" + vendorId.toString(), actConfig.getConfigName()),
+      () -> assertEquals(ExportType.EDIFACT_ORDERS_EXPORT + "_" + vendorId + "_" + expId, actConfig.getConfigName()),
       () -> assertEquals(DEFAULT_MODULE_NAME, actConfig.getModule()),
       () -> assertEquals(true, actConfig.getDefault()),
       () -> assertEquals(true, actConfig.getEnabled())
