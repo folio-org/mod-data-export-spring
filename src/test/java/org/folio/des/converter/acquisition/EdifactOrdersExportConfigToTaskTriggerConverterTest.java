@@ -26,7 +26,7 @@ import io.vertx.core.json.JsonObject;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class,
                             EdifactOrdersExportConfigToTaskTriggerConverter.class})
-public class EdifactOrdersExportConfigToTaskTriggerConverterTest {
+class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   @Autowired EdifactOrdersExportConfigToTaskTriggerConverter converter;
 
   @Test

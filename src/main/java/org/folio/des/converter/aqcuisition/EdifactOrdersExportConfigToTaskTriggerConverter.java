@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
@@ -26,7 +25,6 @@ import org.springframework.validation.Errors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -35,13 +33,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converter<ExportConfig, List<ExportTaskTrigger>>  {
   private static final String CONFIG_QUERY = "module==ORG and configName==localeSettings";
-  public static final String LOCALE_SETTINGS = "localeSettings";
-
-  public static final String SYSTEM_CONFIG_MODULE_NAME = "ORG";
-  public static final String CURRENCY_CONFIG = "currency";
-  public static final String DEFAULT_CURRENCY = "USD";
-
-  public static final String TZ_CONFIG = "timezone";
   public static final String TZ_UTC = "UTC";
 
   private EdifactOrdersExportParametersValidator validator;
@@ -63,6 +54,8 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
                   if (scheduleParameters.getId() == null) {
                     scheduleParameters.setId(UUID.randomUUID());
                   }
+                  String timeZone = getSystemTimeZone();
+                  scheduleParameters.setTimeZone(timeZone);
                   exportTaskTriggers.add(new AcqBaseExportTaskTrigger(scheduleParameters, ediSchedule.getEnableScheduledExport()));
                 }
               });
@@ -79,23 +72,11 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
       ModelConfiguration config = optConfig.get();
       try {
         var orgConfig = objectMapper.readValue(config.getValue(), OrgConfig.class);
-        return orgConfig.getTimezone();
+        return Optional.ofNullable(orgConfig.getTimezone()).orElse(TZ_UTC);
       } catch (JsonProcessingException e) {
         return TZ_UTC;
       }
     }
     return TZ_UTC;
   }
-
-  private String extractLocalSettingConfigValueByName(JsonObject config, String name, String defaultValue) {
-    String localeSettings = config.getString(LOCALE_SETTINGS);
-    String confValue;
-    if (StringUtils.isEmpty(localeSettings)) {
-      confValue = defaultValue;
-    } else {
-      confValue = new JsonObject(config.getString(LOCALE_SETTINGS)).getString(name, defaultValue);
-    }
-    return confValue;
-  }
-
 }

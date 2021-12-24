@@ -34,7 +34,7 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
 
   private ScheduleParameters buildScheduleParameters(ExportConfig exportConfig) {
     ScheduleParameters scheduleParam = null;
-    if (exportConfig != null && exportConfig.getSchedulePeriod() != null) {
+    if (exportConfig != null) {
       scheduleParam = new ScheduleParameters();
       scheduleParam.setId(UUID.fromString(exportConfig.getId()));
       scheduleParam.setScheduleFrequency(exportConfig.getScheduleFrequency());

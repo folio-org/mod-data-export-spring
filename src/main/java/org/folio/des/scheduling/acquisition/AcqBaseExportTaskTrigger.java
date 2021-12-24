@@ -60,30 +60,24 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
     if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) return null;
 
-    Date nextExecutionTime = new Date();
-//    nextExecutionTime.toInstant().plusSeconds(scheduleParameters.getScheduleFrequency());
-    Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
+     Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
 
     switch (schedulePeriod) {
     case DAY:
-      nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-      break;
+      return scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
     case HOUR:
-      nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-      break;
+      return scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
     case WEEK:
-      nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-      break;
+      return scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
     default:
       return null;
     }
 
-    return nextExecutionTime;
   }
 
   @SneakyThrows
   private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer everyWeek) {
-    ZonedDateTime startTime = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTime = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
     if (lastActualExecutionTime == null) {
       everyWeek = 0;
     }
@@ -93,23 +87,26 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTime, Integer everyWeek) {
     List<DayOfWeek> sortedDays = normalizeAndSortDayOfWeek();
-    DayOfWeek firstDayOnTheWeek = sortedDays.stream().findFirst().get();
-    Iterator<DayOfWeek> dayOfWeekIterator = sortedDays.iterator();
-    DayOfWeek nextDayOfWeek = firstDayOnTheWeek;
-    while (dayOfWeekIterator.hasNext()) {
-      DayOfWeek dayOfWeek = dayOfWeekIterator.next();
-      if (dayOfWeek.getValue() == initZoneDateTime.getDayOfWeek().getValue() && dayOfWeekIterator.hasNext()) {
-        nextDayOfWeek = dayOfWeekIterator.next();
+    if (!sortedDays.isEmpty()) {
+      DayOfWeek firstDayOnTheWeek = sortedDays.stream().findFirst().get();
+      Iterator<DayOfWeek> dayOfWeekIterator = sortedDays.iterator();
+      DayOfWeek nextDayOfWeek = firstDayOnTheWeek;
+      while (dayOfWeekIterator.hasNext()) {
+        DayOfWeek dayOfWeek = dayOfWeekIterator.next();
+        if (dayOfWeek.getValue() == initZoneDateTime.getDayOfWeek().getValue() && dayOfWeekIterator.hasNext()) {
+          nextDayOfWeek = dayOfWeekIterator.next();
+        }
       }
+      int plusDays = 0;
+      int nextDayOfWeekVal = nextDayOfWeek.getValue();
+      if (nextDayOfWeekVal == firstDayOnTheWeek.getValue()) {
+        plusDays = DayOfWeek.SUNDAY.getValue() - initZoneDateTime.getDayOfWeek().getValue() + 1;
+        return initZoneDateTime.plusDays(plusDays).plusWeeks(everyWeek);
+      }
+      plusDays = nextDayOfWeekVal - initZoneDateTime.getDayOfWeek().getValue();
+      return initZoneDateTime.plusDays(plusDays);
     }
-    int plusDays = 0;
-    int nextDayOfWeekVal = nextDayOfWeek.getValue();
-    if (nextDayOfWeekVal == firstDayOnTheWeek.getValue()) {
-      plusDays = DayOfWeek.SUNDAY.getValue() - initZoneDateTime.getDayOfWeek().getValue() + 1;
-      return initZoneDateTime.plusDays(plusDays).plusWeeks(everyWeek);
-    }
-    plusDays = nextDayOfWeekVal - initZoneDateTime.getDayOfWeek().getValue();
-    return initZoneDateTime.plusDays(plusDays);
+    return null;
   }
 
   private List<DayOfWeek> normalizeAndSortDayOfWeek() {
@@ -121,7 +118,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   @SneakyThrows
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
-    ZonedDateTime startTimeUTC = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTimeUTC = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
     if (lastActualExecutionTime != null) {
       startTimeUTC = startTimeUTC.plusHours(hours);
     }
@@ -130,7 +127,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   @SneakyThrows
   private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
-    ZonedDateTime startTimeUTC = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTimeUTC = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
     if (lastActualExecutionTime != null) {
       startTimeUTC = startTimeUTC.plusDays(days);
     }
@@ -143,7 +140,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString());
   }
 
-  private ZonedDateTime convertScheduleTimeToUTC(Date lastActualExecutionTime, String scheduleTime) {
+  private ZonedDateTime convertScheduleTime(Date lastActualExecutionTime, String scheduleTime) {
     ZoneId zoneId = ZoneId.of("UTC");
     ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
     if (lastActualExecutionTime != null) {
