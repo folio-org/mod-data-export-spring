@@ -1,33 +1,37 @@
 package org.folio.des.scheduling.acquisition;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.folio.des.domain.dto.ScheduleParameters;
-import org.folio.des.scheduling.base.ExportTaskTrigger;
-import org.springframework.scheduling.TriggerContext;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.scheduling.base.ExportTaskTrigger;
+import org.springframework.scheduling.TriggerContext;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RequiredArgsConstructor
 public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
   private final ScheduleParameters scheduleParameters;
+  @Getter
+  private final boolean enableScheduler;
 
   @Override
   public ScheduleParameters getScheduleParameters() {
@@ -38,6 +42,14 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
   public Date nextExecutionTime(TriggerContext triggerContext) {
     Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
     return getNextTime(lastActualExecutionTime);
+  }
+
+  @Override
+  public boolean isDisabledSchedule() {
+    return Optional.ofNullable(scheduleParameters)
+                  .map(ScheduleParameters::getSchedulePeriod)
+                  .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
+                  .orElse(false) || enableScheduler;
   }
 
   protected Date getNextTime(Date lastActualExecutionTime) {
@@ -68,37 +80,28 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer scheduleFrequency) {
+  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer everyWeek) {
     ZonedDateTime startTime = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    var instant = findNextDayOfWeek(startTime, everyWeek).toInstant();
     if (lastActualExecutionTime != null) {
      // startTime = findNextDayOfWeek(startTime, scheduleFrequency);
     }
     return convertToOldDateFormat(startTime);
-//    if (lastActualExecutionTime == null) {
-//      return Date.from(startTime.toInstant());
-//
-//    } else {
-//      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
-//        ZoneId.systemDefault());
-//      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
-//      return Date.from(instant);
-//    }
   }
 
-//  private OffsetDateTime findNextDayOfWeek(ZonedDateTime zonedDateTime, Integer everyWeek) {
-//    List<DayOfWeek> weeks = normalizeDayOfWeek();
-//
-//    var currentDayOfWeek = zonedDateTime.getDayOfWeek();
-//    for (DayOfWeek ofWeek : weeks) {
-//      int nextWeekDay = currentDayOfWeek.getValue() - ofWeek.getValue();
-//      if (nextWeekDay >= 1) {
-//        return zonedDateTime.plusDays(nextWeekDay);
-//      }
-//    }
-//    int daysBefore = weeks.get(0).getValue() - currentDayOfWeek.getValue();
-//
-//    return zonedDateTime.minusDays(daysBefore).plusWeeks(everyWeek);
-//  }
+  private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTimeUTC, Integer everyWeek) {
+    List<DayOfWeek> weeks = normalizeDayOfWeek();
+
+    var currentDayOfWeek = initZoneDateTimeUTC.getDayOfWeek();
+    for (DayOfWeek ofWeek : weeks) {
+      int nextWeekDay = currentDayOfWeek.getValue() - ofWeek.getValue();
+      if (nextWeekDay >= 1) {
+        return initZoneDateTimeUTC.plusDays(nextWeekDay);
+      }
+    }
+    int daysBefore = weeks.get(0).getValue() - currentDayOfWeek.getValue();
+    return initZoneDateTimeUTC.minusDays(daysBefore).plusWeeks(everyWeek);
+  }
 
   private List<DayOfWeek> normalizeDayOfWeek() {
     List<ScheduleParameters.WeekDaysEnum> weekDays = scheduleParameters.getWeekDays();
@@ -107,24 +110,24 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
 
   @SneakyThrows
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
-    ZonedDateTime startTime = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTimeUTC = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
     if (lastActualExecutionTime != null) {
-      startTime = startTime.plusHours(hours);
+      startTimeUTC = startTimeUTC.plusHours(hours);
     }
-    return convertToOldDateFormat(startTime);
+    return convertToOldDateFormat(startTimeUTC);
   }
 
   @SneakyThrows
   private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
-    ZonedDateTime startTime = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTimeUTC = convertScheduleTimeToUTC(lastActualExecutionTime, scheduleParameters.getScheduleTime());
     if (lastActualExecutionTime != null) {
-      startTime = startTime.plusDays(days);
+      startTimeUTC = startTimeUTC.plusDays(days);
     }
-    return convertToOldDateFormat(startTime);
+    return convertToOldDateFormat(startTimeUTC);
   }
 
   private Date convertToOldDateFormat(ZonedDateTime startTime) throws ParseException {
-    SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z[UTC]'");
+    SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
     isoFormat.setTimeZone(TimeZone.getTimeZone(scheduleParameters.getTimeZone()));
     return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString());
   }
@@ -135,11 +138,13 @@ public class AcqBaseExportTaskTrigger implements ExportTaskTrigger {
     if (lastActualExecutionTime != null) {
       Instant instant = Instant.ofEpochMilli(lastActualExecutionTime.getTime());
       startZoneDate = ZonedDateTime.ofInstant(instant, zoneId);
-    }
-    if (StringUtils.isNotEmpty(scheduleTime)) {
-      LocalDate nowDate = startZoneDate.toLocalDate();
-      LocalTime localTime = LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
-      return nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS);
+    } else {
+      if (StringUtils.isNotEmpty(scheduleTime)) {
+        LocalDate nowDate = startZoneDate.toLocalDate();
+        LocalTime localTime = LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
+        zoneId =  ZoneId.of(scheduleParameters.getTimeZone());
+        return nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS);
+      }
     }
     return startZoneDate.truncatedTo(ChronoUnit.SECONDS);
   }

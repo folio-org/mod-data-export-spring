@@ -9,10 +9,10 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.domain.dto.ConfigurationCollection;
-import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.domain.dto.acquisition.OrgConfig;
 import org.folio.des.scheduling.acquisition.AcqBaseExportTaskTrigger;
@@ -57,13 +57,14 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
       List<ExportTaskTrigger> exportTaskTriggers = new ArrayList<>();
       Optional.ofNullable(specificParameters.getVendorEdiOrdersExportConfig())
               .map(VendorEdiOrdersExportConfig::getEdiSchedule)
-              .filter(EdiSchedule::getEnableScheduledExport)
-              .map(EdiSchedule::getScheduleParameters)
-              .ifPresent(scheduleParameters -> {
-                if (scheduleParameters.getId() == null) {
-                  scheduleParameters.setId(UUID.randomUUID());
+              .ifPresent(ediSchedule -> {
+                ScheduleParameters scheduleParameters = ediSchedule.getScheduleParameters();
+                if (ediSchedule.getScheduleParameters() != null ) {
+                  if (scheduleParameters.getId() == null) {
+                    scheduleParameters.setId(UUID.randomUUID());
+                  }
+                  exportTaskTriggers.add(new AcqBaseExportTaskTrigger(scheduleParameters, ediSchedule.getEnableScheduledExport()));
                 }
-                exportTaskTriggers.add(new AcqBaseExportTaskTrigger(scheduleParameters));
               });
       return exportTaskTriggers;
     }

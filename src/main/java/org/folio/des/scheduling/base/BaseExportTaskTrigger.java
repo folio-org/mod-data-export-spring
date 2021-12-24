@@ -24,8 +24,39 @@ public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTr
   private final Set<String> weekDaysEnumSet = EnumSet.allOf(ScheduleParameters.WeekDaysEnum.class).stream()
     .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
+  private final ScheduleParameters scheduleParameters;
+
   public BaseExportTaskTrigger(ExportTrigger exportTrigger) {
     this.setConfig(Optional.ofNullable(exportTrigger).map(ExportTrigger::getConfig).orElse(null));
+    ExportConfig exportConfig = getConfig();
+    scheduleParameters = buildScheduleParameters(exportConfig);
+  }
+
+  private ScheduleParameters buildScheduleParameters(ExportConfig exportConfig) {
+    ScheduleParameters scheduleParam = null;
+    if (exportConfig != null && exportConfig.getSchedulePeriod() != null) {
+      scheduleParam = new ScheduleParameters();
+      scheduleParam.setId(UUID.fromString(exportConfig.getId()));
+      scheduleParam.setScheduleFrequency(exportConfig.getScheduleFrequency());
+      Optional<String> schedulePeriod = schedulePeriodEnumSet.stream()
+                        .filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny();
+      if (schedulePeriod.isPresent()) {
+        ScheduleParameters.SchedulePeriodEnum period = ScheduleParameters.SchedulePeriodEnum.valueOf(schedulePeriod.get());
+        scheduleParam.setSchedulePeriod(period);
+      } else {
+        scheduleParam.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+      }
+      List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
+      Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
+      List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
+        .filter(weekDaysEnumSet::contains)
+        .map(ScheduleParameters.WeekDaysEnum::valueOf)
+        .collect(Collectors.toList());
+
+      scheduleParam.setScheduleTime(exportConfig.getScheduleTime());
+      scheduleParam.setWeekDays(weekDays);
+    }
+    return scheduleParam;
   }
 
   @Override
@@ -36,24 +67,15 @@ public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTr
 
   @Override
   public ScheduleParameters getScheduleParameters() {
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
-    ExportConfig exportConfig = getConfig();
-    scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    schedulePeriodEnumSet.stream()
-      .filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny()
-      .ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
-
-    List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
-    Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
-    List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
-      .filter(weekDaysEnumSet::contains)
-      .map(ScheduleParameters.WeekDaysEnum::valueOf)
-      .collect(Collectors.toList());
-
-    scheduleParameters.setScheduleTime(exportConfig.getScheduleTime());
-    scheduleParameters.setWeekDays(weekDays);
     return scheduleParameters;
+  }
+
+  @Override
+  public boolean isDisabledSchedule() {
+    return Optional.ofNullable(scheduleParameters)
+                   .map(ScheduleParameters::getSchedulePeriod)
+                   .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
+                   .orElse(false);
   }
 
   @Override

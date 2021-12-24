@@ -32,6 +32,7 @@ class BaseExportTaskTriggerTest {
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
     ExportConfig exportConfig = new ExportConfig();
+    exportConfig.setId(UUID.randomUUID().toString());
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);

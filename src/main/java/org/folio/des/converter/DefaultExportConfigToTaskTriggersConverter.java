@@ -11,7 +11,6 @@ import org.springframework.core.convert.converter.Converter;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.scheduling.support.SimpleTriggerContext;
 
 @AllArgsConstructor
 @Log4j2

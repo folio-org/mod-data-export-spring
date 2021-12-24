@@ -60,12 +60,14 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
           Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask = scheduledTasks.get(exportTaskTrigger);
           if (triggerWithScheduleTask != null) {
              String scheduleId = extractScheduleId(triggerWithScheduleTask);
-             if (!triggerWithScheduleTask.getKey().getScheduleParameters().equals(exportTaskTrigger.getScheduleParameters())) {
+             if (exportTaskTrigger.isDisabledSchedule()) {
+               removeTriggerTask(triggerWithScheduleTask);
+             } else if (!triggerWithScheduleTask.getKey().getScheduleParameters().equals(exportTaskTrigger.getScheduleParameters())) {
                removeTriggerTask(triggerWithScheduleTask);
                scheduleTask(exportConfig, exportTaskTrigger).ifPresent(scheduledJobs::add);
                log.info("Task for rescheduling was found : " + scheduleId);
              }
-          } else {
+          } else if (!exportTaskTrigger.isDisabledSchedule()) {
             scheduleTask(exportConfig, exportTaskTrigger).ifPresent(scheduledJobs::add);
             log.info("New Task scheduled");
           }
