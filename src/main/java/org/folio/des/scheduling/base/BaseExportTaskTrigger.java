@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -45,13 +44,13 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
         scheduleParam.setSchedulePeriod(period);
       } else {
         scheduleParam.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
-  }
-    List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
-    Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
-    List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
-      .filter(weekDaysEnumSet::contains)
-      .map(ScheduleParameters.WeekDaysEnum::valueOf)
-      .collect(Collectors.toList());
+      }
+      List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
+      Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
+      List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
+                        .filter(weekDaysEnumSet::contains)
+                        .map(ScheduleParameters.WeekDaysEnum::valueOf)
+                        .collect(Collectors.toList());
 
       scheduleParam.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParam.setWeekDays(weekDays);

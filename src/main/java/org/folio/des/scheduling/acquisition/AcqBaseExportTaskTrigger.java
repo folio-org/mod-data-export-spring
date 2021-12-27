@@ -62,9 +62,11 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     if (scheduleParameters == null) return null;
 
     ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
-    if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) return null;
+    if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) {
+      return null;
+    }
 
-     Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
+    Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
 
     switch (schedulePeriod) {
     case DAY:
@@ -91,8 +93,8 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTime, Integer everyWeek) {
     List<DayOfWeek> sortedDays = normalizeAndSortDayOfWeek();
-    if (!sortedDays.isEmpty()) {
-      DayOfWeek firstDayOnTheWeek = sortedDays.stream().findFirst().get();
+    if (!sortedDays.isEmpty() && sortedDays.get(0) != null) {
+      DayOfWeek firstDayOnTheWeek = sortedDays.get(0);
       Iterator<DayOfWeek> dayOfWeekIterator = sortedDays.iterator();
       DayOfWeek nextDayOfWeek = firstDayOnTheWeek;
       while (dayOfWeekIterator.hasNext()) {
