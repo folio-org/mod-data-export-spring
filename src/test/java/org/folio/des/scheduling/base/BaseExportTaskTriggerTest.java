@@ -18,20 +18,12 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 
 class BaseExportTaskTriggerTest {
 
-
-  @Test
-  @DisplayName("No configuration for scheduling")
-  void noConfig() {
-    BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(null);
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
-
-    assertNull(date);
-  }
-
   @Test
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
     ExportConfig exportConfig = new ExportConfig();
+    exportConfig.setId(UUID.randomUUID().toString());
+    exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.WEEK);
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
@@ -64,6 +56,7 @@ class BaseExportTaskTriggerTest {
     exportConfig.setId(UUID.randomUUID().toString());
     exportConfig.setScheduleFrequency(1);
     exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.HOUR);
+    exportConfig.scheduleTime("15:06:00.000Z");
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
@@ -80,6 +73,7 @@ class BaseExportTaskTriggerTest {
     exportConfig.setId(UUID.randomUUID().toString());
     exportConfig.setScheduleFrequency(1);
     exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.HOUR);
+    exportConfig.scheduleTime("15:06:00.000Z");
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
