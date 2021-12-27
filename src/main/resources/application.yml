@@ -4,6 +4,10 @@ folio:
   tenant:
     validation:
       enabled: true
+  schedule:
+    acquisition:
+      poolSize: 10
+      runOnlyIfModuleRegistered: true
 server:
   port: 8081
 logging:

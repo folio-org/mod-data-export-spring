@@ -1,6 +1,7 @@
 package org.folio.des.scheduling.acquisition;
 
-import static org.folio.des.domain.dto.ScheduleParameters.*;
+import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
+import static org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,7 +17,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.folio.des.domain.dto.ScheduleParameters;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -26,7 +26,7 @@ class AcqBaseExportTaskTriggerTest {
   public static final String ASIA_SHANGHAI_ZONE = "Asia/Shanghai";
 
   @Test
-  @DisplayName("No configuratio`n for scheduling")
+  @DisplayName("No configuration for scheduling")
   void noConfig() {
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(null, true);
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
