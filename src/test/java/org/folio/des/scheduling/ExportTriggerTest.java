@@ -64,6 +64,7 @@ class ExportTriggerTest {
     ExportConfig config = new ExportConfig();
     config.setScheduleFrequency(1);
     config.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    config.setScheduleTime("15:06:00.000Z");
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 
@@ -80,6 +81,7 @@ class ExportTriggerTest {
     final int scheduleFrequency = 1;
     config.setScheduleFrequency(scheduleFrequency);
     config.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    config.setScheduleTime("15:06:00.000Z");
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 

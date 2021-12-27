@@ -7,5 +7,5 @@ import org.springframework.scheduling.Trigger;
 public interface ExportTaskTrigger extends Trigger {
 
   ScheduleParameters getScheduleParameters();
-
+  boolean isDisabledSchedule();
 }
