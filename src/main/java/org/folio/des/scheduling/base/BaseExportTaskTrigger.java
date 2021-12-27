@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -24,7 +25,6 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
     .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
   private final ExportTrigger exportTrigger;
-  private final ScheduleParameters scheduleParameters;
 
   public BaseExportTaskTrigger(ExportTrigger exportTrigger) {
     ExportConfig exportConfig = exportTrigger.getConfig();
@@ -75,5 +75,15 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
                    .map(ScheduleParameters::getSchedulePeriod)
                    .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
                    .orElse(false);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return super.equals(other);
   }
 }

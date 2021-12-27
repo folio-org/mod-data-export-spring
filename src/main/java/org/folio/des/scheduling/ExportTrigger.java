@@ -13,7 +13,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
 import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
@@ -41,8 +40,7 @@ public class ExportTrigger implements Trigger {
     if (config == null) return null;
 
     SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
-    if (schedulePeriod == null || schedulePeriod == SchedulePeriodEnum.NONE ||
-              StringUtils.isEmpty(config.getScheduleTime())) return null;
+    if (schedulePeriod == null || schedulePeriod == SchedulePeriodEnum.NONE) return null;
 
     Date nextExecutionTime;
     Integer scheduleFrequency = config.getScheduleFrequency();

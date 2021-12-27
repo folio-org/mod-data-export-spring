@@ -23,7 +23,7 @@ class BaseExportTaskTriggerTest {
   void emptyConfig() {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(UUID.randomUUID().toString());
-    exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.WEEK);
+    exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.NONE);
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);

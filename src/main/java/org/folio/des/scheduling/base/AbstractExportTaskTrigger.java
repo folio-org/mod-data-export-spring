@@ -1,8 +1,12 @@
 package org.folio.des.scheduling.base;
 
+import org.folio.des.domain.dto.ScheduleParameters;
+
 import java.util.Objects;
 
 public abstract class AbstractExportTaskTrigger implements ExportTaskTrigger {
+  protected ScheduleParameters scheduleParameters;
+
   @Override
   public int hashCode() {
     return Objects.hash(getScheduleParameters().getId());
@@ -17,6 +21,6 @@ public abstract class AbstractExportTaskTrigger implements ExportTaskTrigger {
       return false;
     }
     ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
-    return this.getScheduleParameters().getId().equals(trigger.getScheduleParameters().getId());
+    return this.scheduleParameters.getId().equals(trigger.getScheduleParameters().getId());
   }
 }
