@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -18,32 +17,35 @@ import org.springframework.scheduling.TriggerContext;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTrigger {
+public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements ExportTaskTrigger {
   private final Set<String> schedulePeriodEnumSet = EnumSet.allOf(ScheduleParameters.SchedulePeriodEnum.class).stream()
     .map(ScheduleParameters.SchedulePeriodEnum::getValue).collect(Collectors.toSet());
   private final Set<String> weekDaysEnumSet = EnumSet.allOf(ScheduleParameters.WeekDaysEnum.class).stream()
     .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
+  private final ExportTrigger exportTrigger;
+  private final ScheduleParameters scheduleParameters;
+
   public BaseExportTaskTrigger(ExportTrigger exportTrigger) {
-    this.setConfig(Optional.ofNullable(exportTrigger).map(ExportTrigger::getConfig).orElse(null));
+    ExportConfig exportConfig = exportTrigger.getConfig();
+    scheduleParameters = buildScheduleParameters(exportConfig);
+    this.exportTrigger = exportTrigger;
   }
 
-  @Override
-  public Date nextExecutionTime(TriggerContext triggerContext) {
-    Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
-    return getNextTime(lastActualExecutionTime);
+  private ScheduleParameters buildScheduleParameters(ExportConfig exportConfig) {
+    ScheduleParameters scheduleParam = null;
+    if (exportConfig != null) {
+      scheduleParam = new ScheduleParameters();
+      scheduleParam.setId(UUID.fromString(exportConfig.getId()));
+      scheduleParam.setScheduleFrequency(exportConfig.getScheduleFrequency());
+      Optional<String> schedulePeriod = schedulePeriodEnumSet.stream()
+                        .filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny();
+      if (schedulePeriod.isPresent()) {
+        ScheduleParameters.SchedulePeriodEnum period = ScheduleParameters.SchedulePeriodEnum.valueOf(schedulePeriod.get());
+        scheduleParam.setSchedulePeriod(period);
+      } else {
+        scheduleParam.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
   }
-
-  @Override
-  public ScheduleParameters getScheduleParameters() {
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
-    ExportConfig exportConfig = getConfig();
-    scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    schedulePeriodEnumSet.stream()
-      .filter(period -> period.equals(exportConfig.getSchedulePeriod().getValue())).findAny()
-      .ifPresent(period -> scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(period)));
-
     List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
     Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
     List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
@@ -51,25 +53,27 @@ public class BaseExportTaskTrigger extends ExportTrigger implements ExportTaskTr
       .map(ScheduleParameters.WeekDaysEnum::valueOf)
       .collect(Collectors.toList());
 
-    scheduleParameters.setScheduleTime(exportConfig.getScheduleTime());
-    scheduleParameters.setWeekDays(weekDays);
+      scheduleParam.setScheduleTime(exportConfig.getScheduleTime());
+      scheduleParam.setWeekDays(weekDays);
+    }
+    return scheduleParam;
+  }
+
+  @Override
+  public Date nextExecutionTime(TriggerContext triggerContext) {
+    return exportTrigger.nextExecutionTime(triggerContext);
+  }
+
+  @Override
+  public ScheduleParameters getScheduleParameters() {
     return scheduleParameters;
-  }
+    }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(getScheduleParameters().getId());
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == this) {
-      return true;
-    }
-    if (!(other instanceof ExportTaskTrigger)) {
-      return false;
-    }
-    ExportTaskTrigger trigger = ((ExportTaskTrigger) other);
-    return this.getScheduleParameters().getId().equals(trigger.getScheduleParameters().getId());
+  public boolean isDisabledSchedule() {
+    return Optional.ofNullable(scheduleParameters)
+                   .map(ScheduleParameters::getSchedulePeriod)
+                   .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
+                   .orElse(false);
   }
 }
