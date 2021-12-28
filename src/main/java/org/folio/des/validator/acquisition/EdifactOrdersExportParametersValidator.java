@@ -14,6 +14,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Service
 public class EdifactOrdersExportParametersValidator implements Validator {
+  private EdifactOrdersScheduledParamsValidator edifactOrdersScheduledParamsValidator;
+
   @Override
   public boolean supports(Class<?> aClass) {
     return ExportTypeSpecificParameters.class.isAssignableFrom(aClass);
@@ -28,10 +30,16 @@ public class EdifactOrdersExportParametersValidator implements Validator {
         throw new IllegalArgumentException(msg);
     }
     ExportTypeSpecificParameters specificParameters = (ExportTypeSpecificParameters) target;
-    if (specificParameters.getVendorEdiOrdersExportConfig() == null) {
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = specificParameters.getVendorEdiOrdersExportConfig();
+    if (vendorEdiOrdersExportConfig == null) {
       String msg = String.format("%s type should contain %s parameters", ExportType.EDIFACT_ORDERS_EXPORT.getValue(),
                             VendorEdiOrdersExportConfig.class.getSimpleName());
       throw new IllegalArgumentException(msg);
+    }
+
+    if (vendorEdiOrdersExportConfig.getEdiSchedule() != null &&
+              vendorEdiOrdersExportConfig.getEdiSchedule().getScheduleParameters() != null) {
+      edifactOrdersScheduledParamsValidator.validate(vendorEdiOrdersExportConfig.getEdiSchedule(), errors);
     }
   }
 }

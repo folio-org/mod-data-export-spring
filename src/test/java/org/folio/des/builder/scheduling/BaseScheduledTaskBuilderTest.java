@@ -29,11 +29,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-@SpringBootTest(classes = { DefaultScheduledTaskBuilderTest.MockSpringContext.class})
-class DefaultScheduledTaskBuilderTest {
+@SpringBootTest(classes = { BaseScheduledTaskBuilderTest.MockSpringContext.class})
+class BaseScheduledTaskBuilderTest {
 
   @Autowired
-  private DefaultScheduledTaskBuilder builder;
+  private BaseScheduledTaskBuilder builder;
   @Autowired
   private FolioExecutionContextHelper contextHelperMock;
   @Autowired
@@ -107,9 +107,8 @@ class DefaultScheduledTaskBuilderTest {
       return mock(JobService.class);
     }
 
-    @Bean
-    DefaultScheduledTaskBuilder builder(JobService jobServiceMock, FolioExecutionContextHelper contextHelperMock) {
-      return new DefaultScheduledTaskBuilder(jobServiceMock, contextHelperMock);
+    @Bean BaseScheduledTaskBuilder builder(JobService jobServiceMock, FolioExecutionContextHelper contextHelperMock) {
+      return new BaseScheduledTaskBuilder(jobServiceMock, contextHelperMock);
     }
   }
 }
