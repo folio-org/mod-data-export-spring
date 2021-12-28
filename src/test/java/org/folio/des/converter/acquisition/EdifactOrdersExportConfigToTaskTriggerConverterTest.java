@@ -54,7 +54,7 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
     EdiConfig accountEdiConfig =new EdiConfig();
     EdiSchedule accountEdiSchedule = new EdiSchedule();
     accountEdiSchedule.enableScheduledExport(true);
-    String accTime = "17:08:39.278+00:00";
+    String accTime = "17:08:39";
     ScheduleParameters accScheduledParameters = new ScheduleParameters();
     accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
     accScheduledParameters.setScheduleFrequency(7);

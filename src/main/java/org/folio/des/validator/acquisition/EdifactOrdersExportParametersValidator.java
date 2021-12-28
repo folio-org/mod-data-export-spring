@@ -1,5 +1,6 @@
 package org.folio.des.validator.acquisition;
 
+import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -36,10 +37,10 @@ public class EdifactOrdersExportParametersValidator implements Validator {
                             VendorEdiOrdersExportConfig.class.getSimpleName());
       throw new IllegalArgumentException(msg);
     }
-
+    EdiSchedule ediSchedule = vendorEdiOrdersExportConfig.getEdiSchedule();
     if (vendorEdiOrdersExportConfig.getEdiSchedule() != null &&
-              vendorEdiOrdersExportConfig.getEdiSchedule().getScheduleParameters() != null) {
-      edifactOrdersScheduledParamsValidator.validate(vendorEdiOrdersExportConfig.getEdiSchedule(), errors);
+                  ediSchedule.getScheduleParameters() != null) {
+      edifactOrdersScheduledParamsValidator.validate(ediSchedule.getScheduleParameters(), errors);
     }
   }
 }

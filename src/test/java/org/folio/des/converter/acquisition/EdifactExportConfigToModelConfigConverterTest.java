@@ -16,6 +16,7 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.folio.des.validator.acquisition.EdifactOrdersScheduledParamsValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, EdifactExportConfigToModelConfigConverter.class,
-                            EdifactOrdersExportParametersValidator.class})
+                            EdifactOrdersExportParametersValidator.class, EdifactOrdersScheduledParamsValidator.class})
 class EdifactExportConfigToModelConfigConverterTest {
   @Autowired
   EdifactExportConfigToModelConfigConverter converter;
@@ -85,9 +86,9 @@ class EdifactExportConfigToModelConfigConverterTest {
 
   @ParameterizedTest
   @CsvSource({
-    "EDIFACT_ORDERS_EXPORT, EDIFACT_ORDERS_EXPORT"
+    "EDIFACT_ORDERS_EXPORT"
   })
-  void shouldThrowExceptionIfExportConfigIsNotValidAndTypeIsProvided(ExportType exportType, String expConfigName) {
+  void shouldThrowExceptionIfExportConfigIsNotValidAndTypeIsProvided(ExportType exportType) {
     String expId = UUID.randomUUID().toString();
     ExportConfig ediConfig = new ExportConfig();
     ediConfig.setType(exportType);
