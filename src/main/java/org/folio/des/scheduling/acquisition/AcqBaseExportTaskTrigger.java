@@ -99,8 +99,9 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
       DayOfWeek nextDayOfWeek = firstDayOnTheWeek;
       while (dayOfWeekIterator.hasNext()) {
         DayOfWeek dayOfWeek = dayOfWeekIterator.next();
-        if (dayOfWeek.getValue() == initZoneDateTime.getDayOfWeek().getValue() && dayOfWeekIterator.hasNext()) {
-          nextDayOfWeek = dayOfWeekIterator.next();
+        if (dayOfWeek.getValue() > initZoneDateTime.getDayOfWeek().getValue()) {
+          nextDayOfWeek = dayOfWeek;
+          break;
         }
       }
       int plusDays = 0;

@@ -15,9 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 @Log4j2
 @RequiredArgsConstructor
-public class DefaultScheduledTaskBuilder implements ScheduledTaskBuilder {
-  private final JobService jobService;
-  private final FolioExecutionContextHelper contextHelper;
+public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
+  protected final JobService jobService;
+  protected final FolioExecutionContextHelper contextHelper;
 
   @Override
   public Optional<ScheduledTask> buildTask(ExportConfig exportConfig) {
@@ -25,7 +25,7 @@ public class DefaultScheduledTaskBuilder implements ScheduledTaskBuilder {
   }
 
   @NotNull
-  private Runnable buildRunnableTask(Job job) {
+  protected Runnable buildRunnableTask(Job job) {
     return () -> {
       var current = new Date();
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
@@ -37,7 +37,7 @@ public class DefaultScheduledTaskBuilder implements ScheduledTaskBuilder {
     };
   }
 
-  private Optional<Job> createScheduledJob(ExportConfig exportConfig) {
+  protected Optional<Job> createScheduledJob(ExportConfig exportConfig) {
     Job scheduledJob;
     if (exportConfig == null) {
       return Optional.empty();

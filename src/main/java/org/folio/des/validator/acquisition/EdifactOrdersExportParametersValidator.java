@@ -1,5 +1,6 @@
 package org.folio.des.validator.acquisition;
 
+import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -14,6 +15,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Service
 public class EdifactOrdersExportParametersValidator implements Validator {
+  private EdifactOrdersScheduledParamsValidator edifactOrdersScheduledParamsValidator;
+
   @Override
   public boolean supports(Class<?> aClass) {
     return ExportTypeSpecificParameters.class.isAssignableFrom(aClass);
@@ -28,10 +31,16 @@ public class EdifactOrdersExportParametersValidator implements Validator {
         throw new IllegalArgumentException(msg);
     }
     ExportTypeSpecificParameters specificParameters = (ExportTypeSpecificParameters) target;
-    if (specificParameters.getVendorEdiOrdersExportConfig() == null) {
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = specificParameters.getVendorEdiOrdersExportConfig();
+    if (vendorEdiOrdersExportConfig == null) {
       String msg = String.format("%s type should contain %s parameters", ExportType.EDIFACT_ORDERS_EXPORT.getValue(),
                             VendorEdiOrdersExportConfig.class.getSimpleName());
       throw new IllegalArgumentException(msg);
+    }
+    EdiSchedule ediSchedule = vendorEdiOrdersExportConfig.getEdiSchedule();
+    if (vendorEdiOrdersExportConfig.getEdiSchedule() != null &&
+                  ediSchedule.getScheduleParameters() != null) {
+      edifactOrdersScheduledParamsValidator.validate(ediSchedule.getScheduleParameters(), errors);
     }
   }
 }

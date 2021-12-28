@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Errors;
 
-@SpringBootTest(classes = { EdifactOrdersExportParametersValidator.class})
+@SpringBootTest(classes = { EdifactOrdersExportParametersValidator.class, EdifactOrdersScheduledParamsValidator.class})
 class EdifactOrdersExportParametersValidatorTest {
   @Autowired
   private EdifactOrdersExportParametersValidator validator;

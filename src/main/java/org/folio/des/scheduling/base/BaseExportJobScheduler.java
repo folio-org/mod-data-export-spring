@@ -41,6 +41,26 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
   }
 
   @Override
+  public List<Job> scheduleExportJob(ExportConfig exportConfig) {
+    List<Job> scheduledJobs = new ArrayList<>();
+    if (exportConfig != null) {
+      List<ExportTaskTrigger> triggers = triggerConverter.convert(exportConfig);
+      if (CollectionUtils.isNotEmpty(triggers)) {
+        triggers.forEach(incomeTaskTrigger -> {
+          Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask = scheduledTasks.get(incomeTaskTrigger);
+          if (triggerWithScheduleTask != null) {
+            reScheduleJob(exportConfig, incomeTaskTrigger, triggerWithScheduleTask).ifPresent(scheduledJobs::add);
+          } else if (!incomeTaskTrigger.isDisabledSchedule()) {
+            scheduleTask(exportConfig, incomeTaskTrigger).ifPresent(scheduledJobs::add);
+            log.info("New Task scheduled");
+          }
+        });
+      }
+    }
+    return scheduledJobs;
+  }
+
+  @Override
   public void destroy() {
     if (taskScheduler != null) {
       log.debug("Shutdown configuration scheduler");
@@ -48,33 +68,6 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
     }
     log.debug("Clear scheduled tasks");
     this.scheduledTasks.clear();
-  }
-
-  @Override
-  public List<Job> scheduleExportJob(ExportConfig exportConfig) {
-    List<Job> scheduledJobs = new ArrayList<>();
-    if (exportConfig != null) {
-      List<ExportTaskTrigger> triggers = triggerConverter.convert(exportConfig);
-      if (CollectionUtils.isNotEmpty(triggers)) {
-        triggers.forEach(exportTaskTrigger -> {
-          Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask = scheduledTasks.get(exportTaskTrigger);
-          if (triggerWithScheduleTask != null) {
-             String scheduleId = extractScheduleId(triggerWithScheduleTask);
-             if (exportTaskTrigger.isDisabledSchedule()) {
-               removeTriggerTask(triggerWithScheduleTask);
-             } else if (!triggerWithScheduleTask.getKey().getScheduleParameters().equals(exportTaskTrigger.getScheduleParameters())) {
-               removeTriggerTask(triggerWithScheduleTask);
-               scheduleTask(exportConfig, exportTaskTrigger).ifPresent(scheduledJobs::add);
-               log.info("Task for rescheduling was found : " + scheduleId);
-             }
-          } else if (!exportTaskTrigger.isDisabledSchedule()) {
-            scheduleTask(exportConfig, exportTaskTrigger).ifPresent(scheduledJobs::add);
-            log.info("New Task scheduled");
-          }
-        });
-      }
-    }
-    return scheduledJobs;
   }
 
   @Override
@@ -100,10 +93,10 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
 
   private String extractScheduleId(Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask) {
     return Optional.ofNullable(triggerWithScheduleTask.getKey())
-                   .map(ExportTaskTrigger::getScheduleParameters)
-                   .map(ScheduleParameters::getId)
-                   .map(UUID::toString)
-                   .orElse(triggerWithScheduleTask.toString());
+      .map(ExportTaskTrigger::getScheduleParameters)
+      .map(ScheduleParameters::getId)
+      .map(UUID::toString)
+      .orElse(triggerWithScheduleTask.toString());
   }
 
   private void removeTriggerTask(Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask) {
@@ -114,5 +107,18 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
       scheduledTask.getValue().cancel(true);
       log.info("Future task canceled : " + scheduleId);
     }
+  }
+
+  private Optional<Job> reScheduleJob(ExportConfig exportConfig, ExportTaskTrigger exportTaskTrigger,
+                                      Pair<ExportTaskTrigger, ScheduledFuture<?>> triggerWithScheduleTask) {
+    String scheduleId = extractScheduleId(triggerWithScheduleTask);
+    if (exportTaskTrigger.isDisabledSchedule()) {
+      removeTriggerTask(triggerWithScheduleTask);
+    } else if (!triggerWithScheduleTask.getKey().getScheduleParameters().equals(exportTaskTrigger.getScheduleParameters())) {
+      removeTriggerTask(triggerWithScheduleTask);
+      log.info("Task for rescheduling was found : " + scheduleId);
+      return scheduleTask(exportConfig, exportTaskTrigger);
+    }
+    return Optional.empty();
   }
 }
