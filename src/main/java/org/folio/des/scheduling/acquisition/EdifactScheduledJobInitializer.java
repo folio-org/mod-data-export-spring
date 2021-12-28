@@ -16,7 +16,7 @@ import static org.folio.des.scheduling.acquisition.ScheduleUtil.isJobScheduleAll
 
 @Log4j2
 @RequiredArgsConstructor
-public class EdifactScheduledJobInitializer {
+class EdifactScheduledJobInitializer {
   private final static String ALL_EDIFACT_ORDERS_CONFIG_QUERY = "query=type==EDIFACT_ORDERS_EXPORT";
   private final BaseExportConfigService baseExportConfigService;
   private final FolioExecutionContextHelper contextHelper;

@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Errors;
 
 @SpringBootTest(classes = { EdifactOrdersScheduledParamsValidator.class})
-public class EdifactOrdersScheduledParamsValidatorTest {
+class EdifactOrdersScheduledParamsValidatorTest {
   @Autowired
   private EdifactOrdersScheduledParamsValidator validator;
 

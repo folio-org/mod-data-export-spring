@@ -17,7 +17,7 @@ import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class EdifactScheduledJobInitializerTest {
+class EdifactScheduledJobInitializerTest {
   private BaseExportConfigService baseExportConfigService = mock(BaseExportConfigService.class);
   private FolioExecutionContextHelper contextHelper = mock(FolioExecutionContextHelper.class);
   private AcqSchedulingProperties acqSchedulingProperties = mock(AcqSchedulingProperties.class);

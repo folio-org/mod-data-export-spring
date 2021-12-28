@@ -15,7 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class})
-public class EdifactOrdersExportJobSchedulerTest {
+class EdifactOrdersExportJobSchedulerTest {
   @Autowired
   private EdifactOrdersExportJobScheduler scheduler;
   @MockBean
