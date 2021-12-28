@@ -24,7 +24,6 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
     .map(ScheduleParameters.WeekDaysEnum::getValue).collect(Collectors.toSet());
 
   private final ExportTrigger exportTrigger;
-  private final ScheduleParameters scheduleParameters;
 
   public BaseExportTaskTrigger(ExportTrigger exportTrigger) {
     ExportConfig exportConfig = exportTrigger.getConfig();
@@ -49,9 +48,9 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
       List<ExportConfig.WeekDaysEnum> weekDaysEnums = Optional.ofNullable(exportConfig.getWeekDays()).orElse(Collections.emptyList());
       Set<String> sourceWeekDays = weekDaysEnums.stream().map(ExportConfig.WeekDaysEnum::getValue).collect(Collectors.toSet());
       List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
-        .filter(weekDaysEnumSet::contains)
-        .map(ScheduleParameters.WeekDaysEnum::valueOf)
-        .collect(Collectors.toList());
+                        .filter(weekDaysEnumSet::contains)
+                        .map(ScheduleParameters.WeekDaysEnum::valueOf)
+                        .collect(Collectors.toList());
 
       scheduleParam.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParam.setWeekDays(weekDays);
@@ -67,7 +66,7 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
   @Override
   public ScheduleParameters getScheduleParameters() {
     return scheduleParameters;
-  }
+    }
 
   @Override
   public boolean isDisabledSchedule() {
@@ -75,5 +74,15 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
                    .map(ScheduleParameters::getSchedulePeriod)
                    .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
                    .orElse(false);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return super.equals(other);
   }
 }

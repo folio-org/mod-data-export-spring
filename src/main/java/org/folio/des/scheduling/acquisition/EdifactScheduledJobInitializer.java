@@ -12,6 +12,8 @@ import org.folio.des.service.config.impl.BaseExportConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import static org.folio.des.scheduling.acquisition.ScheduleUtil.isJobScheduleAllowed;
+
 @Log4j2
 @RequiredArgsConstructor
 public class EdifactScheduledJobInitializer {
@@ -25,8 +27,8 @@ public class EdifactScheduledJobInitializer {
     contextHelper.initScope();
     List<ExportConfig> exportConfigs = new ArrayList<>();
     try {
-      boolean isJobScheduleAllowed = ScheduleUtil.isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
-                                                  contextHelper.isModuleRegistered());
+      boolean isJobScheduleAllowed = isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
+                                                          contextHelper.isModuleRegistered());
       if (isJobScheduleAllowed) {
         contextHelper.initScope();
         ExportConfigCollection exportConfigCol = baseExportConfigService.getConfigCollection(ALL_EDIFACT_ORDERS_CONFIG_QUERY);

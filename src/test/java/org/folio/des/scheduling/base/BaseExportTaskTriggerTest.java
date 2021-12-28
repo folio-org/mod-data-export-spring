@@ -23,6 +23,7 @@ class BaseExportTaskTriggerTest {
   void emptyConfig() {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(UUID.randomUUID().toString());
+    exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.NONE);
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
@@ -55,6 +56,7 @@ class BaseExportTaskTriggerTest {
     exportConfig.setId(UUID.randomUUID().toString());
     exportConfig.setScheduleFrequency(1);
     exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.HOUR);
+    exportConfig.scheduleTime("15:06:00.000Z");
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
@@ -71,6 +73,7 @@ class BaseExportTaskTriggerTest {
     exportConfig.setId(UUID.randomUUID().toString());
     exportConfig.setScheduleFrequency(1);
     exportConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.HOUR);
+    exportConfig.scheduleTime("15:06:00.000Z");
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);

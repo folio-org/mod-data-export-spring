@@ -31,9 +31,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RequiredArgsConstructor
 public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
-  private final ScheduleParameters scheduleParameters;
   @Getter
   private final boolean enableScheduler;
+
+  public AcqBaseExportTaskTrigger(ScheduleParameters scheduleParameters, boolean enableScheduler) {
+    this.scheduleParameters = scheduleParameters;
+    this.enableScheduler = enableScheduler;
+  }
 
   @Override
   public ScheduleParameters getScheduleParameters() {
@@ -54,13 +58,15 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
                   .orElse(false) || enableScheduler;
   }
 
-  protected Date getNextTime(Date lastActualExecutionTime) {
+  private Date getNextTime(Date lastActualExecutionTime) {
     if (scheduleParameters == null) return null;
 
     ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
-    if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) return null;
+    if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) {
+      return null;
+    }
 
-     Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
+    Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
 
     switch (schedulePeriod) {
     case DAY:
@@ -87,14 +93,15 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTime, Integer everyWeek) {
     List<DayOfWeek> sortedDays = normalizeAndSortDayOfWeek();
-    if (!sortedDays.isEmpty()) {
-      DayOfWeek firstDayOnTheWeek = sortedDays.stream().findFirst().get();
+    if (!sortedDays.isEmpty() && sortedDays.get(0) != null) {
+      DayOfWeek firstDayOnTheWeek = sortedDays.get(0);
       Iterator<DayOfWeek> dayOfWeekIterator = sortedDays.iterator();
       DayOfWeek nextDayOfWeek = firstDayOnTheWeek;
       while (dayOfWeekIterator.hasNext()) {
         DayOfWeek dayOfWeek = dayOfWeekIterator.next();
-        if (dayOfWeek.getValue() == initZoneDateTime.getDayOfWeek().getValue() && dayOfWeekIterator.hasNext()) {
-          nextDayOfWeek = dayOfWeekIterator.next();
+        if (dayOfWeek.getValue() > initZoneDateTime.getDayOfWeek().getValue()) {
+          nextDayOfWeek = dayOfWeek;
+          break;
         }
       }
       int plusDays = 0;
@@ -135,6 +142,9 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   private Date convertToOldDateFormat(ZonedDateTime startTime) throws ParseException {
+    if (startTime == null) {
+      throw new ParseException("Start time can not be empty", 0);
+    }
     SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
     isoFormat.setTimeZone(TimeZone.getTimeZone(scheduleParameters.getTimeZone()));
     return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString());
@@ -155,5 +165,15 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
       }
     }
     return startZoneDate.truncatedTo(ChronoUnit.SECONDS);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return super.equals(other);
   }
 }

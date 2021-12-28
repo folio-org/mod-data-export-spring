@@ -8,15 +8,22 @@ import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
 import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.builder.scheduling.EdifactScheduledTaskBuilder;
+import org.folio.des.builder.scheduling.ScheduledTaskBuilder;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
+import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
+import org.folio.des.scheduling.acquisition.EdifactOrdersExportJobScheduler;
+import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
+import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
@@ -25,16 +32,16 @@ import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.validation.Validator;
 
 @Configuration
 @ComponentScan("org.folio.des")
-@Import({ SchedulingConfiguration.class })
 public class ServiceConfiguration {
   @Bean
   ExportConfigConverterResolver exportConfigConverterResolver(DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter,
@@ -101,4 +108,28 @@ public class ServiceConfiguration {
     return new JobCommandBuilderResolver(converters);
   }
 
+  @Bean ScheduledTaskBuilder edifactScheduledTaskBuilder(JobService jobService, FolioExecutionContextHelper contextHelper,
+    AcqSchedulingProperties acqSchedulingProperties) {
+    return new EdifactScheduledTaskBuilder(jobService, contextHelper, acqSchedulingProperties);
+  }
+
+  @Bean EdifactOrdersExportJobScheduler edifactOrdersExportJobScheduler(ScheduledTaskBuilder edifactScheduledTaskBuilder,
+                    EdifactOrdersExportConfigToTaskTriggerConverter triggerConverter,
+                    EdifactScheduledJobInitializer edifactScheduledJobInitializer,
+                    @Value("${folio.schedule.acquisition.poolSize:10}") int poolSize) {
+    return new EdifactOrdersExportJobScheduler(new ThreadPoolTaskScheduler(), triggerConverter,
+      edifactScheduledTaskBuilder, poolSize, edifactScheduledJobInitializer);
+  }
+
+  @Bean
+  AcqSchedulingProperties acqSchedulingProperties(
+                    @Value("${folio.schedule.acquisition.runOnlyIfModuleRegistered:true}") String runOnlyIfModuleRegistered) {
+    return new AcqSchedulingProperties(runOnlyIfModuleRegistered);
+  }
+
+  @Bean
+  EdifactScheduledJobInitializer edifactScheduledJobInitializer(BaseExportConfigService baseExportConfigService,
+                    FolioExecutionContextHelper contextHelper, AcqSchedulingProperties acqSchedulingProperties) {
+    return new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper, acqSchedulingProperties);
+  }
 }

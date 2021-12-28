@@ -12,7 +12,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +26,7 @@ import org.springframework.scheduling.support.SimpleTriggerContext;
 class AcqBaseExportTaskTriggerTest {
 
   public static final String ASIA_SHANGHAI_ZONE = "Asia/Shanghai";
+  public static final String EUROPE_MONACO = "Europe/Monaco";
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -109,12 +112,12 @@ class AcqBaseExportTaskTriggerTest {
   @Test
   @DisplayName("Hourly job scheduled if ScheduleTime is not set")
   void hourlyScheduleIfScheduledTimeIsNotSet() {
-    int expDiffHours = 3;
+    int expDiffHours = 1;
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
     scheduleParameters.setScheduleFrequency(expDiffHours);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
-    scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
+    scheduleParameters.setTimeZone("UTC");
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
@@ -126,9 +129,9 @@ class AcqBaseExportTaskTriggerTest {
     long diff = TimeUnit.HOURS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffHours, diff);
 
-    ZonedDateTime nowDateTime = Instant.now().atZone(ZoneId.of(ASIA_SHANGHAI_ZONE)).truncatedTo(ChronoUnit.DAYS);
+    ZonedDateTime nowDateTime = Instant.now().atZone(ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS);
     Instant lastInstant = Instant.ofEpochMilli(actDateHourLate.getTime()).truncatedTo(ChronoUnit.DAYS);
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(lastInstant, ZoneId.of(ASIA_SHANGHAI_ZONE)).truncatedTo(ChronoUnit.DAYS);
+    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(lastInstant, ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS);
     assertTrue(nowDateTime.isEqual(zonedDateTime));
   }
 
@@ -161,9 +164,9 @@ class AcqBaseExportTaskTriggerTest {
     assertEquals(expDiffDays, diff);
 
     Instant instant = Instant.ofEpochMilli(actDateDayLate.getTime());
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
-    dayOfMonth = dayOfMonth + expDiffDays;
-    String lastDateStr = zonedDateTime.toString();
+    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    dayOfMonth = firstZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
+    String lastDateStr = secondZonedDateTime.toString();
     assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
     //Third try
     triggerContext.update(actDateDayLate, actDateDayLate, actDateDayLate);
@@ -174,7 +177,7 @@ class AcqBaseExportTaskTriggerTest {
 
     Instant thirdInstant = Instant.ofEpochMilli(thirdDateDayLate.getTime());
     ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
-    dayOfMonth = zonedDateTime.getDayOfMonth() + expDiffDays;
+    dayOfMonth = secondZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
     String thirdLastDateStr = thirdZonedDateTime.toString();
     assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
   }
@@ -183,51 +186,66 @@ class AcqBaseExportTaskTriggerTest {
   @DisplayName("Weekly job scheduled")
   void weeklySchedule() {
     int expDiffWeeks = 0;
+    String expTime = "06:12:13";
+    Map<DayOfWeek, DayOfWeek> expMap = new HashMap<>();
+    expMap.put(DayOfWeek.MONDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.TUESDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.WEDNESDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.THURSDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+    expMap.put(DayOfWeek.SUNDAY, DayOfWeek.MONDAY);
+    ZonedDateTime currZoneDate = Instant.now().atZone(ZoneId.of(EUROPE_MONACO));
+
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
-    scheduleParameters.setScheduleTime("11:12:13");
+    scheduleParameters.setScheduleTime(expTime);
     scheduleParameters.setScheduleFrequency(expDiffWeeks);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.WEEK);
     scheduleParameters.setWeekDays(List.of(WeekDaysEnum.MONDAY, WeekDaysEnum.SATURDAY, WeekDaysEnum.SUNDAY));
-    scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
+    scheduleParameters.setTimeZone(EUROPE_MONACO);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     final Date actDate = trigger.nextExecutionTime(triggerContext);
 
     Instant firstInstant = Instant.ofEpochMilli(actDate.getTime());
-    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(EUROPE_MONACO));
     DayOfWeek firstDayOfWeek = firstZonedDateTime.getDayOfWeek();
-    assertEquals(WeekDaysEnum.MONDAY.getValue(), firstDayOfWeek.toString());
-    final String EXP_TIME = "T11:12:13+08:00[Asia/Shanghai]";
-    assertTrue(firstZonedDateTime.toString().contains(firstZonedDateTime.getDayOfMonth()+ EXP_TIME));
+    DayOfWeek expDay =  expMap.get(currZoneDate.getDayOfWeek());
+    assertEquals(expDay, firstDayOfWeek);
+    final String EXP_TIME = "T"+expTime+"+01:00["+ EUROPE_MONACO +"]";
+    assertTrue(firstZonedDateTime.toString().contains(firstZonedDateTime.getDayOfMonth() + EXP_TIME));
 
     //Second try
     triggerContext.update(actDate, actDate, actDate);
     final Date secondDateDayLate = trigger.nextExecutionTime(triggerContext);
 
     Instant instant = Instant.ofEpochMilli(secondDateDayLate.getTime());
-    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(EUROPE_MONACO));
     DayOfWeek secondDayOfWeek = secondZonedDateTime.getDayOfWeek();
-    assertEquals(WeekDaysEnum.SATURDAY.getValue(), secondDayOfWeek.toString());
+    DayOfWeek secondExpDay =  expMap.get(firstZonedDateTime.getDayOfWeek());
+    assertEquals(secondExpDay, secondDayOfWeek);
     assertTrue(secondZonedDateTime.toString().contains(secondZonedDateTime.getDayOfMonth()+ EXP_TIME));
     //Third try
     triggerContext.update(secondDateDayLate, secondDateDayLate, secondDateDayLate);
     final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
 
     Instant thirdInstant = Instant.ofEpochMilli(thirdDateDayLate.getTime());
-    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(EUROPE_MONACO));
     DayOfWeek thirdDayOfWeek = thirdZonedDateTime.getDayOfWeek();
-    assertEquals(WeekDaysEnum.SUNDAY.getValue(), thirdDayOfWeek.toString());
+    DayOfWeek thirdExpDay =  expMap.get(secondZonedDateTime.getDayOfWeek());
+    assertEquals(thirdExpDay, thirdDayOfWeek);
     assertTrue(thirdZonedDateTime.toString().contains(thirdZonedDateTime.getDayOfMonth()+ EXP_TIME));
     //Forth try
     triggerContext.update(thirdDateDayLate, thirdDateDayLate, thirdDateDayLate);
     final Date forthDateDayLate = trigger.nextExecutionTime(triggerContext);
 
     Instant forthInstant = Instant.ofEpochMilli(forthDateDayLate.getTime());
-    ZonedDateTime forthZonedDateTime = ZonedDateTime.ofInstant(forthInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime forthZonedDateTime = ZonedDateTime.ofInstant(forthInstant, ZoneId.of(EUROPE_MONACO));
     DayOfWeek forthDayOfWeek = forthZonedDateTime.getDayOfWeek();
-    assertEquals(WeekDaysEnum.MONDAY.getValue(), forthDayOfWeek.toString());
+    DayOfWeek forthExpDay =  expMap.get(thirdZonedDateTime.getDayOfWeek());
+    assertEquals(forthExpDay, forthDayOfWeek);
     assertTrue(forthZonedDateTime.toString().contains(forthZonedDateTime.getDayOfMonth() + EXP_TIME));
   }
 }
