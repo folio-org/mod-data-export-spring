@@ -130,7 +130,8 @@
             "perms.users.item.post",
             "perms.users.get",
             "configuration.entries.collection.get",
-            "configuration.entries.item.post"
+            "configuration.entries.item.post",
+            "perms.users.assign.immutable"
           ]
         },
         {
