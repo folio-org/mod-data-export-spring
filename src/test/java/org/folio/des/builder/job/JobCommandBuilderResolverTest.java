@@ -30,7 +30,8 @@ class JobCommandBuilderResolverTest {
   @CsvSource({
     "BURSAR_FEES_FINES, BurSarFeeFinesJobCommandBuilder",
     "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
-    "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder"
+    "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
+    "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder"
   })
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver(ExportType exportType,
               String expBuilderClass) {
@@ -42,6 +43,6 @@ class JobCommandBuilderResolverTest {
   @DisplayName("Should not retrieve builder for specific export type if builder is not registered in the resolver")
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver() {
     Optional<JobCommandBuilder> builder = resolver.resolve(ExportType.EDIFACT_ORDERS_EXPORT);
-    assertTrue(builder.isEmpty());
+    assertTrue(builder.isPresent());
   }
 }

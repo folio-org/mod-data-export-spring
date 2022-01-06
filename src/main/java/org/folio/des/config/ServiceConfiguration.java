@@ -3,11 +3,7 @@ package org.folio.des.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
-import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
-import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
-import org.folio.des.builder.job.JobCommandBuilder;
-import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.builder.job.*;
 import org.folio.des.builder.scheduling.EdifactScheduledTaskBuilder;
 import org.folio.des.builder.scheduling.ScheduledTaskBuilder;
 import org.folio.des.client.ConfigurationClient;
@@ -25,6 +21,7 @@ import org.folio.des.scheduling.acquisition.EdifactOrdersExportJobScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
 import org.folio.des.service.config.impl.ExportConfigServiceResolver;
@@ -81,6 +78,15 @@ public class ServiceConfiguration {
   }
 
   @Bean
+  EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
+           DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+           ExportConfigConverterResolver  exportConfigConverterResolver,
+           EdifactOrdersExportJobScheduler exportJobScheduler) {
+    return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
+      exportConfigConverterResolver, exportConfigValidatorResolver, exportJobScheduler);
+  }
+
+  @Bean
   BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
                         DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                         ExportConfigConverterResolver exportConfigConverterResolver) {
@@ -91,20 +97,22 @@ public class ServiceConfiguration {
 
   @Bean
   ExportConfigServiceResolver exportConfigServiceResolver(BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService,
-                                  BaseExportConfigService baseExportConfigService) {
+                          EdifactOrdersExportService edifactOrdersExportService) {
     Map<ExportType, ExportConfigService> exportConfigServiceMap = new HashMap<>();
     exportConfigServiceMap.put(ExportType.BURSAR_FEES_FINES, burSarFeesFinesExportConfigService);
-    exportConfigServiceMap.put(ExportType.EDIFACT_ORDERS_EXPORT, baseExportConfigService);
+    exportConfigServiceMap.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersExportService);
     return new ExportConfigServiceResolver(exportConfigServiceMap);
   }
 
   @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BulkEditQueryJobCommandBuilder bulkEditQueryJobCommandBuilder,
-    BurSarFeeFinesJobCommandBuilder burSarFeeFinesJobCommandBuilder,
-    CirculationLogJobCommandBuilder circulationLogJobCommandBuilder) {
+                          BurSarFeeFinesJobCommandBuilder burSarFeeFinesJobCommandBuilder,
+                          CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
+                          EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder) {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
     converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
+    converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
   }
 

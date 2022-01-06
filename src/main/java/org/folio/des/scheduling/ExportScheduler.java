@@ -48,8 +48,8 @@ public class ExportScheduler implements SchedulingConfigurer {
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
         contextHelper.initScope();
-        jobService.upsert(scheduledJob);
-        log.info("configureTasks executed for jobId: {} at: {}", scheduledJob.getId(), current);
+        Job resultJob = jobService.upsert(scheduledJob);
+        log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
       }
 
     }, trigger);

@@ -1,6 +1,7 @@
 package org.folio.des.builder.scheduling;
 
 import org.folio.des.config.FolioExecutionContextHelper;
+import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
 import org.folio.des.scheduling.acquisition.ScheduleUtil;
@@ -8,6 +9,8 @@ import org.folio.des.service.JobService;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.extern.log4j.Log4j2;
+
+import java.util.Optional;
 
 @Log4j2
 public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
@@ -27,9 +30,25 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
       boolean isJobScheduleAllowed = ScheduleUtil.isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
                                                                        contextHelper.isModuleRegistered());
       if (isJobScheduleAllowed) {
-        jobService.upsert(job);
-        log.info("Configured task executed for jobId: {}", job.getId());
+        Job resultJob = jobService.upsert(job);
+        log.info("Configured task executed for jobId: {}", resultJob.getId());
       }
     };
+  }
+
+  @Override
+  protected Optional<Job> createScheduledJob(ExportConfig exportConfig) {
+    Job scheduledJob;
+    if (exportConfig == null) {
+      return Optional.empty();
+    } else {
+      scheduledJob = new Job();
+      scheduledJob.setType(exportConfig.getType());
+      scheduledJob.setIsSystemSource(true);
+      scheduledJob.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
+      scheduledJob = jobService.upsert(scheduledJob);
+      log.info("Scheduled job assigned {}.", scheduledJob);
+      return Optional.of(scheduledJob);
+    }
   }
 }
