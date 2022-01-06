@@ -1,6 +1,7 @@
 package org.folio.des.builder.scheduling;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -102,6 +103,12 @@ class EdifactScheduledTaskBuilderTest {
     service.shutdown();
     verify(jobServiceMock, times(2)).upsert(any());
     verify(contextHelperMock, never()).initScope();
+  }
+
+  @Test
+  void shouldBeEmpty() {
+    Optional<Job> jobs = builder.createScheduledJob(null);
+    assertTrue(jobs.isEmpty());
   }
 
   public static class MockSpringContext {
