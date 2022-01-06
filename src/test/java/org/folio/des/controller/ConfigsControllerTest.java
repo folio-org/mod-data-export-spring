@@ -58,8 +58,7 @@ class ConfigsControllerTest extends BaseTest {
   @CsvSource({
     "/data-export-spring/configs, module==mod-data-export-spring",
     "/data-export-spring/configs?query=type==BURSAR_FEES_FINES, module==mod-data-export-spring and configName==export_config_parameters",
-    "/data-export-spring/configs?query=type==BATCH_VOUCHER_EXPORT, module==mod-data-export-spring and value==*BATCH_VOUCHER_EXPORT*",
-    "/data-export-spring/configs?query=type==EDIFACT_ORDERS_EXPORT, module==mod-data-export-spring and configName==edi_config",
+    "/data-export-spring/configs?query=type==BATCH_VOUCHER_EXPORT, module==mod-data-export-spring and value==*BATCH_VOUCHER_EXPORT*"
   })
   @DisplayName("Fetch config by query")
   void getConfigs(String exportConfigQuery, String modConfigQuery) throws Exception {
