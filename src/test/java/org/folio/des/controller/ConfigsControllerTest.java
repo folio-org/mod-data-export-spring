@@ -46,6 +46,8 @@ class ConfigsControllerTest extends BaseTest {
       "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"exportTypeSpecificParameters\":{\"bursarFeeFines\":{\"daysOutstanding\":10,\"patronGroups\":[\"3684a786-6671-4268-8ed0-9db82ebca60b\"]}},\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
   private static final String UPDATE_CONFIG_REQUEST_FAILED =
     "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
+  private static final String EDIFACT_CONFIG_REQUEST =
+    "{\"id\":\"5a3cba28-16e7-498e-b73b-98713000298e\", \"type\": \"EDIFACT_ORDERS_EXPORT\", \"exportTypeSpecificParameters\": { \"vendorEdiOrdersExportConfig\": {\"vendorId\": \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"configName\": \"edi_config\", \"ediSchedule\": {\"enableScheduledExport\": true, \"scheduleParameters\": {\"scheduleFrequency\": 1, \"schedulePeriod\": \"HOUR\", \"scheduleTime\": \"15:30:00\"}}}}, \"schedulePeriod\": \"HOUR\"}";
 
 
   @Autowired private MockMvc mockMvc;
@@ -94,6 +96,23 @@ class ConfigsControllerTest extends BaseTest {
             matchAll(
                 status().isCreated(),
                 content().contentType("text/plain;charset=UTF-8")));
+
+    verify(configAspect).refreshAfterPost(any(ExportConfig.class));
+  }
+
+  @Test
+  @DisplayName("Success posted edifact config")
+  void postEdifactConfig() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/configs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(EDIFACT_CONFIG_REQUEST))
+      .andExpect(
+        matchAll(
+          status().isCreated(),
+          content().contentType("text/plain;charset=UTF-8")));
 
     verify(configAspect).refreshAfterPost(any(ExportConfig.class));
   }

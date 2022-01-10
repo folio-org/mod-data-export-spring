@@ -31,8 +31,8 @@ public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
         contextHelper.initScope();
-        jobService.upsert(job);
-        log.info("configureTasks executed for jobId: {} at: {}", job.getId(), current);
+        Job resultJob = jobService.upsert(job);
+        log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
       }
     };
   }

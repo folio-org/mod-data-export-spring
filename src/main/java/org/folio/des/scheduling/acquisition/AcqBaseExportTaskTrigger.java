@@ -55,7 +55,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     return Optional.ofNullable(scheduleParameters)
                   .map(ScheduleParameters::getSchedulePeriod)
                   .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
-                  .orElse(false) || enableScheduler;
+                  .orElse(false) || !enableScheduler;
   }
 
   private Date getNextTime(Date lastActualExecutionTime) {
@@ -145,7 +145,13 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     if (startTime == null) {
       throw new ParseException("Start time can not be empty", 0);
     }
-    SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+    String format = "yyyy-MM-dd'T'HH:mm:ssX";
+
+    if (startTime.getSecond() == 0) {
+      format = "yyyy-MM-dd'T'HH:mmX";
+    }
+
+    SimpleDateFormat isoFormat = new SimpleDateFormat(format);
     isoFormat.setTimeZone(TimeZone.getTimeZone(scheduleParameters.getTimeZone()));
     return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString());
   }

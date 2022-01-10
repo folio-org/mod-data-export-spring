@@ -24,7 +24,6 @@ public class EdifactScheduledJobInitializer {
 
   public void initAllScheduledJob(EdifactOrdersExportJobScheduler exportJobScheduler) {
     log.info("Initialize EDIFACT scheduled job: is module registered: {} ", contextHelper.isModuleRegistered());
-    contextHelper.initScope();
     List<ExportConfig> exportConfigs = new ArrayList<>();
     try {
       boolean isJobScheduleAllowed = isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),

@@ -64,6 +64,19 @@ class AcqBaseExportTaskTriggerTest {
   }
 
   @Test
+  @DisplayName("Is disabled schedule")
+  void isDisabledSchedule() {
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    scheduleParameters.setId(UUID.randomUUID());
+    scheduleParameters.setScheduleFrequency(1);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.NONE);
+    scheduleParameters.setScheduleTime("12:00:00");
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, false);
+
+    assertTrue(trigger.isDisabledSchedule());
+  }
+
+  @Test
   @DisplayName("Hourly job scheduled if ScheduleTime is set")
   void hourlyScheduleIfScheduledTimeIsSet() {
     int expDiffHours = 7;

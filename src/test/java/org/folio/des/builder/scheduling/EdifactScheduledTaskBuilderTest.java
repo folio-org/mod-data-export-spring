@@ -1,12 +1,9 @@
 package org.folio.des.builder.scheduling;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,10 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.domain.dto.*;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
 import org.folio.des.service.JobService;
@@ -58,6 +52,12 @@ class EdifactScheduledTaskBuilderTest {
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
+    Job scheduledJob = new Job();
+    scheduledJob.setType(ediConfig.getType());
+    scheduledJob.setIsSystemSource(true);
+
+    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
 
     assertNotNull(scheduledTask.get().getJob());
@@ -67,7 +67,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any());
-    verify(contextHelperMock, times(0)).initScope();
+    verify(contextHelperMock, never()).initScope();
   }
 
   @Test
@@ -87,6 +87,12 @@ class EdifactScheduledTaskBuilderTest {
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
+    Job scheduledJob = new Job();
+    scheduledJob.setType(ediConfig.getType());
+    scheduledJob.setIsSystemSource(true);
+
+    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
     assertNotNull(scheduledTask.get().getJob());
 
@@ -96,7 +102,13 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any());
-    verify(contextHelperMock, times(0)).initScope();
+    verify(contextHelperMock, never()).initScope();
+  }
+
+  @Test
+  void shouldBeEmpty() {
+    Optional<Job> jobs = builder.createScheduledJob(null);
+    assertTrue(jobs.isEmpty());
   }
 
   public static class MockSpringContext {

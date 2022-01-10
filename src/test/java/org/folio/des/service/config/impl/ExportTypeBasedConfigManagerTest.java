@@ -22,6 +22,7 @@ import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.exception.RequestValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -113,6 +114,20 @@ class ExportTypeBasedConfigManagerTest {
 
     assertThrows(IllegalStateException.class, () ->  service.postConfig(bursarExportConfig));
     Mockito.verify(client, Mockito.times(0)).postConfiguration(any());
+  }
+
+  @Test
+  @DisplayName("Should throw RequestValidationException")
+  void shouldThrowRequestValidationException() {
+    ExportConfig exportConfig = new ExportConfig();
+    Exception exception = assertThrows(RequestValidationException.class, () -> {
+      service.updateConfig(null, exportConfig);
+    });
+
+    String expectedMessage = "Mismatch between id in path and request body";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test
