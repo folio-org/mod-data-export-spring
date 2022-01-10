@@ -4,15 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
-import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.*;
+import org.folio.de.entity.Job;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -44,5 +47,37 @@ class JobCommandBuilderResolverTest {
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver() {
     Optional<JobCommandBuilder> builder = resolver.resolve(ExportType.EDIFACT_ORDERS_EXPORT);
     assertTrue(builder.isPresent());
+  }
+
+  @ParameterizedTest
+  @DisplayName("Should be create jobParameters")
+  @CsvSource({
+    "BURSAR_FEES_FINES, bursarFeeFines",
+    "CIRCULATION_LOG, query",
+    "BULK_EDIT_QUERY, query",
+    "EDIFACT_ORDERS_EXPORT, edifactOrdersExport"
+  })
+  void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
+    Optional<JobCommandBuilder> builder = resolver.resolve(exportType);
+    Job job = new Job();
+    ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
+    BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
+
+    bursarFeeFines.setDaysOutstanding(1);
+    bursarFeeFines.addPatronGroupsItem("Test");
+
+    vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
+    vendorEdiOrdersExportConfig.setConfigName("TestConfig");
+
+    exportTypeSpecificParameters.setQuery("TestQuery");
+    exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
+
+    job.setEntityType(EntityType.USER);
+    job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+
+    JobParameters jobParameters = builder.get().buildJobCommand(job);
+
+    assertTrue(jobParameters.getParameters().containsKey(paramsKey));
   }
 }
