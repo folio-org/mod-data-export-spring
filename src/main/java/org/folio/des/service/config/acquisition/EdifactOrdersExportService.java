@@ -31,15 +31,14 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
   public void updateConfig(String configId, ExportConfig exportConfig) {
     super.updateConfig(configId, exportConfig);
     List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);
-    scheduledJobs.forEach(scheduledJob -> log.info("InitialJob scheduled: {}", scheduledJob.getId()));
+    scheduledJobs.forEach(scheduledJob -> log.info("Job re-scheduled: {}", scheduledJob.getId()));
   }
 
   @Override
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
     ModelConfiguration result = super.postConfig(exportConfig);
     List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);
-    scheduledJobs.forEach(scheduledJob -> log.info("InitialJob scheduled: {}", scheduledJob.getId()));
-
+    scheduledJobs.forEach(scheduledJob -> log.info("InitialJob prepared: {}", scheduledJob));
     return result;
   }
 }

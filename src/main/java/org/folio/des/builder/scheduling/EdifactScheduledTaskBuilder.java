@@ -35,20 +35,4 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
       }
     };
   }
-
-  @Override
-  protected Optional<Job> createScheduledJob(ExportConfig exportConfig) {
-    Job scheduledJob;
-    if (exportConfig == null) {
-      return Optional.empty();
-    } else {
-      scheduledJob = new Job();
-      scheduledJob.setType(exportConfig.getType());
-      scheduledJob.setIsSystemSource(true);
-      scheduledJob.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
-      scheduledJob = jobService.upsert(scheduledJob);
-      log.info("Scheduled job assigned {}.", scheduledJob);
-      return Optional.of(scheduledJob);
-    }
-  }
 }

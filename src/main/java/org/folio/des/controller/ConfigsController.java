@@ -34,7 +34,7 @@ public class ConfigsController implements ConfigsApi {
       String config = exportConfig.toString();
       return new ResponseEntity<>(config.substring(config.indexOf("{")), HttpStatus.CREATED);
     }
-    return new ResponseEntity<>("Export configuration added: " + exportConfig, HttpStatus.CREATED);
+    return new ResponseEntity<>("Export configuration added", HttpStatus.CREATED);
   }
 
   @Override
