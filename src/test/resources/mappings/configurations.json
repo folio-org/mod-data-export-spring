@@ -51,6 +51,19 @@
           "Content-Type": "application/json"
         }
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/configurations/entries?query=module%3D%3DORG%20and%20configName%3D%3DlocaleSettings"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"configs\":[], \"totalRecords\": 0, \"resultInfo\": { \"totalRecords\": 0, \"facets\": [], \"diagnostics\": [] }}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     }
   ]
 }

@@ -15,10 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.domain.dto.*;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.service.JobService;
 import org.junit.jupiter.api.AfterEach;
@@ -55,6 +52,12 @@ class BaseScheduledTaskBuilderTest {
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doNothing().when(contextHelperMock).initScope();
 
+    Job scheduledJob = new Job();
+    scheduledJob.setType(ediConfig.getType());
+    scheduledJob.setIsSystemSource(true);
+
+    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
 
     assertNotNull(scheduledTask.get().getJob());
@@ -83,6 +86,12 @@ class BaseScheduledTaskBuilderTest {
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doNothing().when(contextHelperMock).initScope();
+
+    Job scheduledJob = new Job();
+    scheduledJob.setType(ediConfig.getType());
+    scheduledJob.setIsSystemSource(true);
+
+    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
     assertNotNull(scheduledTask.get().getJob());

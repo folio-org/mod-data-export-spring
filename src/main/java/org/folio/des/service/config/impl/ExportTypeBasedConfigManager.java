@@ -40,7 +40,7 @@ public class ExportTypeBasedConfigManager {
                                                                     .collect(Collectors.joining("|")) + ")");
 
   public void updateConfig(String configId, ExportConfig exportConfig) {
-    if (exportConfig.getId() != null && !exportConfig.getId().equals(configId)) {
+    if (exportConfig.getId() == null || !exportConfig.getId().equals(configId)) {
       throw new RequestValidationException(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY);
     }
     exportConfigServiceResolver.resolve(exportConfig.getType())
