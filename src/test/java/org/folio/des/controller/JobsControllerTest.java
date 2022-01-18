@@ -13,6 +13,7 @@ import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
@@ -70,8 +71,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(5)),
-                jsonPath("$.jobRecords", hasSize(5))));
+                jsonPath("$.totalRecords", is(6)),
+                jsonPath("$.jobRecords", hasSize(6))));
   }
 
   @Test
@@ -86,7 +87,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(5)),
+                jsonPath("$.totalRecords", is(6)),
                 jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -132,8 +133,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(4)),
-              jsonPath("$.jobRecords", hasSize(4))));
+              jsonPath("$.totalRecords", is(5)),
+              jsonPath("$.jobRecords", hasSize(5))));
   }
 
   @Test
@@ -148,8 +149,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(4)),
-              jsonPath("$.jobRecords", hasSize(4))));
+              jsonPath("$.totalRecords", is(5)),
+              jsonPath("$.jobRecords", hasSize(5))));
   }
 
   @Test
@@ -349,5 +350,40 @@ class JobsControllerTest extends BaseTest {
       .andExpect(
         matchAll(
           status().isCreated()));
+  }
+
+  @ParameterizedTest
+  @DisplayName("Test JSONB criteria")
+  @CsvSource({
+    "jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.exportConfigId==\"f18d8154-a02f-4414-9c52-c4f9083f1c32\"",
+    "jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.ediFtp.ftpConnMode==\"Active\"",
+    "status==\"SCHEDULED\" and type==\"EDIFACT_ORDERS_EXPORT\" and jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.exportConfigId==\"f18d8154-a02f-4414-9c52-c4f9083f1c32\" and jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.vendorId==\"11fb627a-cdf1-11e8-a8d5-f2801f1b9fd1\""
+  })
+  void findJobsByJSONBQuery(String query) throws Exception {
+    mockMvc
+      .perform(
+        get("/data-export-spring/jobs?limit=30&offset=0&query=" + query)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpect(
+        matchAll(
+          status().isOk(),
+          content().contentType(MediaType.APPLICATION_JSON_VALUE),
+          jsonPath("$.totalRecords", is(1)),
+          jsonPath("$.jobRecords", hasSize(1))));
+  }
+
+  @Test
+  @DisplayName("Test should Throw Exception If JSONBQuery Is Empty")
+  void shouldThrowExceptionIfJSONBQueryIsEmpty() throws Exception {
+    mockMvc
+      .perform(
+        get("/data-export-spring/jobs?limit=30&offset=0&query=jsonb==1 and type==\"EDIFACT_ORDERS_EXPORT\"")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpect(
+        matchAll(
+          status().isBadRequest(),
+          content().contentType(MediaType.APPLICATION_JSON_VALUE)));
   }
 }
