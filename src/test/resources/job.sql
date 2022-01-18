@@ -105,3 +105,41 @@ VALUES ('e4feb2f6-d3b6-4a05-977c-45f312c7247e', '000116', null, 'diku_admin', fa
     "running": true,
     "exitCode": "UNKNOWN"
   }');
+
+INSERT INTO diku_mod_data_export_spring.job (id, name, description, source, is_system_source, type,
+                                             export_type_specific_parameters, status, files,
+                                             start_time, end_time, created_date, created_by_user_id,
+                                             created_by_username, updated_date, updated_by_user_id,
+                                             updated_by_username, output_format, error_details,
+                                             batch_status, exit_status)
+VALUES ('e4feb2f6-d3b6-4a05-977c-45f312c7248e', '000117', null, 'diku_admin', false,
+        'EDIFACT_ORDERS_EXPORT', '{
+        "vendorEdiOrdersExportConfig": {
+                                          "exportConfigId": "f18d8154-a02f-4414-9c52-c4f9083f1c32",
+                                          "vendorId": "11fb627a-cdf1-11e8-a8d5-f2801f1b9fd1",
+                                          "configName": "test1",
+                                          "ediConfig": {
+                                              "accountNoList": [
+                                                  "1234"
+                                              ],
+                                              "libEdiType": "31B/US-SAN",
+                                              "vendorEdiType": "31B/US-SAN",
+                                              "sendAccountNumber": false,
+                                              "supportOrder": false,
+                                              "supportInvoice": false
+                                          },
+                                          "ediFtp": {
+                                              "ftpConnMode": "Active",
+                                              "ftpFormat": "SFTP",
+                                              "ftpMode": "ASCII"
+                                          },
+                                          "isDefaultConfig": false
+                                        }
+         }',
+        'SCHEDULED', null, null, null, '2021-03-17 01:58:48.323000',
+        '1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f', 'diku_admin', '2021-03-17 01:58:48.323000',
+        '1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f', 'diku_admin', 'EDIFACT orders export (EDI)', null,
+        'UNKNOWN', '{
+    "running": true,
+    "exitCode": "UNKNOWN"
+  }');
