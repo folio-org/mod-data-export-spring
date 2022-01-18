@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -17,7 +18,8 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import lombok.extern.log4j.Log4j2;
+
+import org.apache.commons.lang3.StringUtils;
 import org.folio.cql2pgjson.exception.CQLFeatureUnsupportedException;
 import org.folio.cql2pgjson.exception.QueryValidationException;
 import org.folio.cql2pgjson.model.CqlModifiers;
@@ -35,18 +37,23 @@ import org.z3950.zing.cql.CQLSortNode;
 import org.z3950.zing.cql.CQLTermNode;
 import org.z3950.zing.cql.ModifierSet;
 
+import lombok.extern.log4j.Log4j2;
+
 @Log4j2
 public class CQL2JPACriteria<E> {
 
   private final CriteriaBuilder builder;
+  private final JsonbNodeToPredicateConverter jsonbNodeToPredicateConverter;
 
   public final Root<E> root;
   public static final String NOT_EQUALS_OPERATOR = "<>";
   public final CriteriaQuery<E> criteria;
   private static final String ASTERISKS_SIGN = "*";
+  public static final String CRITERIA_JSONB_START = "jsonb";
 
   public CQL2JPACriteria(Class<E> entityCls, EntityManager entityManager) {
     this.builder = entityManager.getCriteriaBuilder();
+    this.jsonbNodeToPredicateConverter = new JsonbNodeToPredicateConverter();
     criteria = builder.createQuery(entityCls);
     root = criteria.from(entityCls);
   }
@@ -134,6 +141,8 @@ public class CQL2JPACriteria<E> {
     String fieldName = node.getIndex();
     if ("cql.allRecords".equalsIgnoreCase(fieldName)) {
       return builder.and();
+    } else if (StringUtils.startsWithIgnoreCase(fieldName, CRITERIA_JSONB_START)) {
+      return jsonbNodeToPredicateConverter.convert(node, builder, root);
     }
 
     var field = getPath(fieldName);
