@@ -80,7 +80,7 @@ public abstract class BaseTest {
   protected static void setUpTenant(MockMvc mockMvc) {
     mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-data-export-spring")))
         .headers(defaultHeaders())
-        .contentType(APPLICATION_JSON)).andExpect(status().isOk());
+        .contentType(APPLICATION_JSON)).andExpect(status().isNoContent());
   }
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)

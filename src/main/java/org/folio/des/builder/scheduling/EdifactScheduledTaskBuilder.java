@@ -1,16 +1,14 @@
 package org.folio.des.builder.scheduling;
 
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
 import org.folio.des.scheduling.acquisition.ScheduleUtil;
 import org.folio.des.service.JobService;
-import org.jetbrains.annotations.NotNull;
 
 import lombok.extern.log4j.Log4j2;
 
-import java.util.Optional;
+import javax.validation.constraints.NotNull;
 
 @Log4j2
 public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {

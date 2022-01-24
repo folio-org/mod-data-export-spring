@@ -11,7 +11,8 @@ import org.folio.des.service.JobService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.jetbrains.annotations.NotNull;
+
+import javax.validation.constraints.NotNull;
 
 @Log4j2
 @RequiredArgsConstructor
