@@ -3,6 +3,7 @@ package org.folio.des.service.impl;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -39,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 @Service
 @EnableScheduling
@@ -141,7 +143,14 @@ public class JobServiceImpl implements JobService {
     log.info("Upserted {}.", result);
 
     jobCommand.setId(result.getId());
-    jobExecutionService.sendJobCommand(jobCommand);
+
+    // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
+    // may not find the job by id.
+    registerSynchronization(new TransactionSynchronization() {
+      public void afterCommit() {
+        jobExecutionService.sendJobCommand(jobCommand);
+      }
+    });
 
     return entityToDto(result);
   }
