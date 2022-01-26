@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.2</version>
+        <version>2.6.2</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -30,7 +30,7 @@
         <jobs.yaml.file>${project.basedir}/src/main/resources/swagger.api/jobs.yaml</jobs.yaml.file>
         <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
 
-        <folio-spring-base.version>2.0.0</folio-spring-base.version>
+        <folio-spring-base.version>3.0.1</folio-spring-base.version>
         <hibernate-types-52.version>2.10.3</hibernate-types-52.version>
         <spring-security-core.version>5.4.5</spring-security-core.version>
         <cql2pgjson.version>32.2.0</cql2pgjson.version>
