@@ -1,5 +1,10 @@
 package org.folio.des.service.impl;
 
+import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
+import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
+import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -7,8 +12,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,11 +25,12 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
-import org.folio.des.domain.entity.Job;
+import org.folio.de.entity.Job;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
+import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
@@ -32,24 +40,30 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 @Service
 @EnableScheduling
 @Log4j2
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
+  private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
     OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Fees & Fines Bursar Report");
     OUTPUT_FORMATS.put(ExportType.CIRCULATION_LOG, "Comma-Separated Values (CSV)");
+    OUTPUT_FORMATS.put(ExportType.EDIFACT_ORDERS_EXPORT, "EDIFACT orders export (EDI)");
   }
 
   private final JobExecutionService jobExecutionService;
   private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
   private final CQLService cqlService;
+  private final BulkEditConfigService bulkEditConfigService;
+
+  private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
   @Transactional(readOnly = true)
   @Override
@@ -129,7 +143,14 @@ public class JobServiceImpl implements JobService {
     log.info("Upserted {}.", result);
 
     jobCommand.setId(result.getId());
-    jobExecutionService.sendJobCommand(jobCommand);
+
+    // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
+    // may not find the job by id.
+    registerSynchronization(new TransactionSynchronization() {
+      public void afterCommit() {
+        jobExecutionService.sendJobCommand(jobCommand);
+      }
+    });
 
     return entityToDto(result);
   }
@@ -137,16 +158,40 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void deleteOldJobs() {
-    var toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-    log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
+    var expirationDate = createExpirationDate(DEFAULT_JOB_EXPIRATION_PERIOD);
+    log.info("Collecting old jobs with 'updatedDate' less than {}.", expirationDate);
+    var jobsToDelete = filterJobsNotMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), bulkEditTypes);
 
-    List<Job> jobs = repository.findByUpdatedDateBefore(toDelete);
+    expirationDate = createExpirationDate(bulkEditConfigService.getBulkEditJobExpirationPeriod());
+    log.info("Collecting old bulk-edit jobs with 'updatedDate' less than {}.", expirationDate);
+    jobsToDelete.addAll(filterJobsMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), bulkEditTypes));
+
+    deleteJobs(jobsToDelete);
+  }
+
+  private Date createExpirationDate(int days) {
+    return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+  }
+
+  private List<Job> filterJobsNotMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
+    return jobs.stream()
+      .filter(j -> !exportTypes.contains(j.getType()))
+      .collect(Collectors.toList());
+  }
+
+  private List<Job> filterJobsMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
+    return jobs.stream()
+      .filter(j -> exportTypes.contains(j.getType()))
+      .collect(Collectors.toList());
+  }
+
+  public void deleteJobs(List<Job> jobs) {
     if (CollectionUtils.isEmpty(jobs)) {
-      log.info("Deleted no old jobs.");
+      log.info("No old jobs were found.");
       return;
     }
 
-    repository.deleteInBatch(jobs);
+    repository.deleteAllInBatch(jobs);
     log.info("Deleted old jobs [{}].", StringUtils.join(jobs, ','));
 
     jobExecutionService.deleteJobs(jobs);
@@ -166,6 +211,9 @@ public class JobServiceImpl implements JobService {
     result.setFiles(entity.getFiles());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
+    result.setIdentifierType(entity.getIdentifierType());
+    result.setEntityType(entity.getEntityType());
+    result.setProgress(entity.getProgress());
 
     var metadata = new Metadata();
     metadata.setCreatedDate(entity.getCreatedDate());
@@ -196,6 +244,9 @@ public class JobServiceImpl implements JobService {
     result.setFiles(dto.getFiles());
     result.setStartTime(dto.getStartTime());
     result.setEndTime(dto.getEndTime());
+    result.setIdentifierType(dto.getIdentifierType());
+    result.setEntityType(dto.getEntityType());
+    result.setProgress(dto.getProgress());
 
     if (dto.getMetadata() != null) {
       result.setCreatedDate(dto.getMetadata().getCreatedDate());
