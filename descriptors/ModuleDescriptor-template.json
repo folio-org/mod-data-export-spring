@@ -118,13 +118,11 @@
     },
     {
       "id": "_tenant",
-      "version": "1.2",
+      "version": "2.0",
       "interfaceType": "system",
       "handlers": [
         {
-          "methods": [
-            "POST"
-          ],
+          "methods": [ "POST" ],
           "pathPattern": "/_/tenant",
           "modulePermissions": [
             "users.collection.get",
@@ -139,10 +137,8 @@
           ]
         },
         {
-          "methods": [
-            "DELETE"
-          ],
-          "pathPattern": "/_/tenant",
+          "methods": [ "GET", "DELETE" ],
+          "pathPattern": "/_/tenant/{id}",
           "modulePermissions": []
         }
       ]
