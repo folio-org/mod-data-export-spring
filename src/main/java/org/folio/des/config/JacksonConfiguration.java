@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vladmihalcea.hibernate.type.util.ObjectMapperSupplier;
@@ -32,6 +33,7 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
                     .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
                     .addDeserializer(JobParameter.class, new JobParameterDeserializer()))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
   }
 
