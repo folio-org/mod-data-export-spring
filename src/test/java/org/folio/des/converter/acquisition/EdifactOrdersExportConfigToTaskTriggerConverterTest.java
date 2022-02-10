@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import io.vertx.core.json.JsonObject;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class,
@@ -59,6 +57,7 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
     accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
     accScheduledParameters.setScheduleFrequency(7);
     accScheduledParameters.setScheduleTime(accTime);
+    accScheduledParameters.setTimeZone("Pacific/Midway");
     accountEdiSchedule.scheduleParameters(accScheduledParameters);
     vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
     accountEdiConfig.addAccountNoListItem("account-22222");

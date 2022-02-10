@@ -63,7 +63,6 @@ class EdifactOrdersExportServiceTest {
     edifactOrdersExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(edifactOrdersExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
-    Mockito.when(converter.getSystemTimeZone()).thenReturn("Europe/Minsk");
 
     var response = service.postConfig(edifactOrdersExportConfig);
 
