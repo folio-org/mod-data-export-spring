@@ -56,14 +56,12 @@ class EdifactExportConfigToModelConfigConverterTest {
     accScheduledParameters.setScheduleFrequency(7);
     accScheduledParameters.setScheduleTime(accTime);
     accScheduledParameters.setTimeZone("Pacific/Midway");
-    accountEdiSchedule.scheduleParameters(accScheduledParameters);
+    accountEdiSchedule.setScheduleParameters(accScheduledParameters);
     vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
 
     parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     ediConfig.exportTypeSpecificParameters(parameters);
 
-
-    vendorEdiOrdersExportConfig.setEdiSchedule(new EdiSchedule());
     ModelConfiguration actConfig = converter.convert(ediConfig);
     var actExportConfig = objectMapper.readValue(actConfig.getValue(), ExportConfig.class);
     Assertions.assertAll(
@@ -102,8 +100,6 @@ class EdifactExportConfigToModelConfigConverterTest {
     parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     ediConfig.exportTypeSpecificParameters(parameters);
 
-
-    vendorEdiOrdersExportConfig.setEdiSchedule(new EdiSchedule());
     ModelConfiguration actConfig = converter.convert(ediConfig);
     var actExportConfig = objectMapper.readValue(actConfig.getValue(), ExportConfig.class);
     Assertions.assertAll(
