@@ -132,7 +132,7 @@ public class ServiceConfiguration {
   @Bean
   AcqSchedulingProperties acqSchedulingProperties(
                     @Value("${folio.schedule.acquisition.runOnlyIfModuleRegistered:true}") String runOnlyIfModuleRegistered) {
-    return new AcqSchedulingProperties(runOnlyIfModuleRegistered);
+    return new AcqSchedulingProperties(false);
   }
 
   @Bean

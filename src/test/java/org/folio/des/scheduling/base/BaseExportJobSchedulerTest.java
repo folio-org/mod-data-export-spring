@@ -98,6 +98,8 @@ class BaseExportJobSchedulerTest {
     ExportTaskTrigger rescheduleExportTaskTrigger = scheduler.getScheduledTasks().keySet().stream().findFirst().get();
     assertEquals(exportTaskTrigger.getScheduleParameters(), rescheduleExportTaskTrigger.getScheduleParameters());
     assertEquals(exportTaskTrigger.getScheduleParameters().getScheduleFrequency(), rescheduleExportTaskTrigger.getScheduleParameters().getScheduleFrequency());
+    assertEquals(expId, rescheduleExportTaskTrigger.getScheduleParameters().getId().toString());
+
     verify(taskScheduler, times(1)).schedule(any(), any(ExportTaskTrigger.class));
     verify(scheduledTaskBuilder, times(1)).buildTask(exportConfig);
   }

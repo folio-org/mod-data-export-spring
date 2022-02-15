@@ -41,7 +41,7 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
               ScheduleParameters scheduleParameters = ediSchedule.getScheduleParameters();
               if (scheduleParameters != null && !NONE.equals(scheduleParameters.getSchedulePeriod())) {
                 if (scheduleParameters.getId() == null) {
-                  scheduleParameters.setId(UUID.randomUUID());
+                  scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
                 }
                 scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
                 var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, ediSchedule.getEnableScheduledExport());

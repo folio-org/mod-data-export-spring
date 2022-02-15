@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
 import org.folio.des.domain.dto.BursarFeeFines;
@@ -28,10 +30,13 @@ import org.springframework.boot.test.context.SpringBootTest;
                             EdifactOrdersExportParametersValidator.class, EdifactOrdersScheduledParamsValidator.class})
 class EdifactExportConfigToModelConfigConverterTest {
   @Autowired
-  EdifactExportConfigToModelConfigConverter converter;
+  private EdifactExportConfigToModelConfigConverter converter;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Test
-  void testConverterIfExportConfigIsValid() {
+  void testConverterIfExportConfigIsValid() throws JsonProcessingException {
     String expId = UUID.randomUUID().toString();
     UUID vendorId = UUID.randomUUID();
     ExportConfig ediConfig = new ExportConfig();
@@ -44,13 +49,14 @@ class EdifactExportConfigToModelConfigConverterTest {
     ediConfig.exportTypeSpecificParameters(parameters);
 
     ModelConfiguration actConfig = converter.convert(ediConfig);
-
+    var actExportConfig = objectMapper.readValue(actConfig.getValue(), ExportConfig.class);
     Assertions.assertAll(
       () -> assertEquals(expId, actConfig.getId()),
       () -> assertEquals(ExportType.EDIFACT_ORDERS_EXPORT + "_" + vendorId + "_" + expId, actConfig.getConfigName()),
       () -> assertEquals(DEFAULT_MODULE_NAME, actConfig.getModule()),
       () -> assertEquals(true, actConfig.getDefault()),
-      () -> assertEquals(true, actConfig.getEnabled())
+      () -> assertEquals(true, actConfig.getEnabled()),
+      () -> assertEquals(expId, actExportConfig.getId())
     );
   }
 
