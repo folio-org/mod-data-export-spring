@@ -41,6 +41,7 @@ class EdifactOrdersExportServiceTest {
   @DisplayName("Set new configuration")
   void addConfig() throws JsonProcessingException {
     ExportConfig edifactOrdersExportConfig = new ExportConfig();
+    edifactOrdersExportConfig.setId(UUID.randomUUID().toString());
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     EdiSchedule ediSchedule = new EdiSchedule();
