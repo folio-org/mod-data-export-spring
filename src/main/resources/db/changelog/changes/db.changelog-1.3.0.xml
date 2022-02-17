@@ -33,4 +33,10 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODEXPW-42@@extend job table" author="s.hrabko">
+    <sql dbms="postgresql">
+      ALTER TABLE job ADD COLUMN file_names jsonb;
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
