@@ -73,6 +73,11 @@ public class JobUpdatesService {
       job.setFiles(jobExecutionUpdate.getFiles());
       result = true;
     }
+    if (jobExecutionUpdate.getFileNames() != null && (job.getFileNames() == null || !CollectionUtils.isEqualCollection(
+      jobExecutionUpdate.getFileNames(), job.getFileNames()))) {
+      job.setFileNames(jobExecutionUpdate.getFileNames());
+      result = true;
+    }
     if (jobExecutionUpdate.getStartTime() != null && !jobExecutionUpdate.getStartTime().equals(job.getStartTime())) {
       job.setStartTime(jobExecutionUpdate.getStartTime());
       result = true;
