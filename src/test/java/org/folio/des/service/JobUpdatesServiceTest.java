@@ -45,6 +45,7 @@ class JobUpdatesServiceTest extends BaseTest {
     job.setStatus(JobStatus.SUCCESSFUL);
     job.setDescription("Test job updated");
     job.setFiles(List.of("new test files"));
+    job.setFileNames(List.of("new_file.json"));
     job.setStartTime(new Date());
     job.setEndTime(new Date());
     job.setErrorDetails("No errors");
