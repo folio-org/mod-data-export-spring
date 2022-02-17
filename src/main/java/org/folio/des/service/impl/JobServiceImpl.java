@@ -210,6 +210,7 @@ public class JobServiceImpl implements JobService {
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
     result.setFiles(entity.getFiles());
+    result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
     result.setIdentifierType(entity.getIdentifierType());
