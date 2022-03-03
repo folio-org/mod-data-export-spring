@@ -1,3 +1,25 @@
+## 2022-03-03 v1.3.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.2.1...v1.3.0)
+
+### Technical tasks
+* [MODEXPS-66](https://issues.folio.org/browse/MODEXPS-66) mod-data-export-spring: folio-spring-base v3 update
+
+### Stories
+* [MODEXPS-37](https://issues.folio.org/browse/MODEXPS-37) Add a new export type
+* [MODEXPS-40](https://issues.folio.org/browse/MODEXPS-40) Create schema to support EDI order export functionality
+* [MODEXPS-41](https://issues.folio.org/browse/MODEXPS-41) Refactor existing approach to store configuration for Schedulers based on "export type"
+* [MODEXPS-43](https://issues.folio.org/browse/MODEXPS-43) Add new export type
+* [MODEXPS-47](https://issues.folio.org/browse/MODEXPS-47) Reuse common schemas
+* [MODEXPS-48](https://issues.folio.org/browse/MODEXPS-48) Remove expired files
+* [MODEXPS-54](https://issues.folio.org/browse/MODEXPS-54) Implement scheduling of the EDIFACT orders export
+* [MODEXPS-61](https://issues.folio.org/browse/MODEXPS-61) User creation fails due to lack of permissions
+
+### Bug fixes
+* [MODEXPS-59](https://issues.folio.org/browse/MODEXPS-59) Fix several tenants usage errors for data export process
+* [MODEXPS-68](https://issues.folio.org/browse/MODEXPS-68) Schedule date not saving correctly
+* [MODEXPS-67](https://issues.folio.org/browse/MODEXPS-67) Missing require on circulation-logs
+
 ## 2021-11-10 v1.2.0
 * [MODEXPS-26](https://issues.folio.org/browse/MODEXPS-26) Scheduling export job doesn't work anymore
 * [MODEXPS-29](https://issues.folio.org/browse/MODEXPS-29) mod-data-export-spring: folio-spring-base v2 update
