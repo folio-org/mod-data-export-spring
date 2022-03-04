@@ -1,5 +1,7 @@
 package org.folio.des.service.impl;
 
+import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,12 +35,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 @Service
 @EnableScheduling
 @Log4j2
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
+  private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
@@ -50,6 +55,7 @@ public class JobServiceImpl implements JobService {
   private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
   private final CQLService cqlService;
+
 
   @Transactional(readOnly = true)
   @Override
@@ -129,7 +135,15 @@ public class JobServiceImpl implements JobService {
     log.info("Upserted {}.", result);
 
     jobCommand.setId(result.getId());
-    jobExecutionService.sendJobCommand(jobCommand);
+
+    // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
+    // may not find the job by id.
+    registerSynchronization(new TransactionSynchronization() {
+      @Override
+      public void afterCommit() {
+        jobExecutionService.sendJobCommand(jobCommand);
+      }
+    });
 
     return entityToDto(result);
   }
@@ -137,16 +151,25 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void deleteOldJobs() {
-    var toDelete = Date.from(LocalDate.now().minusDays(7).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-    log.info("Deleting old jobs with 'updatedDate' less than {}.", toDelete);
+    var expirationDate = createExpirationDate(DEFAULT_JOB_EXPIRATION_PERIOD);
+    log.info("Collecting old jobs with 'updatedDate' less than {}.", expirationDate);
+    var jobsToDelete = repository.findByUpdatedDateBefore(expirationDate);
 
-    List<Job> jobs = repository.findByUpdatedDateBefore(toDelete);
+    deleteJobs(jobsToDelete);
+  }
+
+  private Date createExpirationDate(int days) {
+    return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+  }
+
+
+  public void deleteJobs(List<Job> jobs) {
     if (CollectionUtils.isEmpty(jobs)) {
-      log.info("Deleted no old jobs.");
+      log.info("No old jobs were found.");
       return;
     }
 
-    repository.deleteInBatch(jobs);
+    repository.deleteAllInBatch(jobs);
     log.info("Deleted old jobs [{}].", StringUtils.join(jobs, ','));
 
     jobExecutionService.deleteJobs(jobs);

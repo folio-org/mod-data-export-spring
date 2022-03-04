@@ -98,6 +98,6 @@ public class KafkaService {
       throw new IllegalStateException("Can't send to Kafka because tenant is blank");
     }
     kafkaTemplate.send(getTenantTopicName(topic.getTopicName(), tenant), key, data);
-    log.info("Sent {}.", data);
+    log.info("Sent {} with tenant {}.", data, tenant);
   }
 }
