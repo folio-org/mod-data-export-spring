@@ -163,17 +163,6 @@ public class JobServiceImpl implements JobService {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
   }
 
-  private List<Job> filterJobsNotMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
-    return jobs.stream()
-      .filter(j -> !exportTypes.contains(j.getType()))
-      .collect(Collectors.toList());
-  }
-
-  private List<Job> filterJobsMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
-    return jobs.stream()
-      .filter(j -> exportTypes.contains(j.getType()))
-      .collect(Collectors.toList());
-  }
 
   public void deleteJobs(List<Job> jobs) {
     if (CollectionUtils.isEmpty(jobs)) {
