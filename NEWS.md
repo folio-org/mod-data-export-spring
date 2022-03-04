@@ -1,3 +1,11 @@
+## 2022-03-04 v1.2.2
+The primary focus of this release is fixing several tenants usage errors for data export process
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.2.1...v1.2.2)
+
+### Bug fixes
+* [MODEXPS-76](https://issues.folio.org/browse/MODEXPS-76) - Backport to Kiwi HF #2 - Fix several tenants usage errors for data export process
+
 ## 2021-12-20 v1.2.1
 The primary focus of this release is fixing log4j vulnerability
 
