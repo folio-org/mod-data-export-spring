@@ -17,12 +17,13 @@ import static org.folio.des.scheduling.acquisition.ScheduleUtil.isJobScheduleAll
 @Log4j2
 @RequiredArgsConstructor
 public class EdifactScheduledJobInitializer {
-  private final static String ALL_EDIFACT_ORDERS_CONFIG_QUERY = "query=type==EDIFACT_ORDERS_EXPORT";
+  private final static String ALL_EDIFACT_ORDERS_CONFIG_QUERY = "type==EDIFACT_ORDERS_EXPORT";
   private final BaseExportConfigService baseExportConfigService;
   private final FolioExecutionContextHelper contextHelper;
   private final AcqSchedulingProperties acqSchedulingProperties;
+  private final EdifactOrdersExportJobScheduler exportJobScheduler;
 
-  public void initAllScheduledJob(EdifactOrdersExportJobScheduler exportJobScheduler) {
+  public void initAllScheduledJob() {
     log.info("Initialize EDIFACT scheduled job: is module registered: {} ", contextHelper.isModuleRegistered());
     List<ExportConfig> exportConfigs = new ArrayList<>();
     try {

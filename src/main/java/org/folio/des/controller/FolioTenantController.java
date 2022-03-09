@@ -1,10 +1,9 @@
 package org.folio.des.controller;
 
-import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.ExportScheduler;
-import org.folio.des.scheduling.acquisition.EdifactOrdersExportJobScheduler;
+import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.controller.TenantController;
 import org.folio.spring.service.TenantService;
@@ -13,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.log4j.Log4j2;
 
 @RestController("folioTenantController")
 @RequestMapping
@@ -23,17 +24,17 @@ public class FolioTenantController extends TenantController {
   private final ExportScheduler scheduler;
   private final KafkaService kafka;
   private final BulkEditConfigService bulkEditConfigService;
-  private final EdifactOrdersExportJobScheduler exportJobScheduler;
+  private final EdifactScheduledJobInitializer edifactScheduledJobInitializer;
 
   public FolioTenantController(TenantService baseTenantService, FolioExecutionContextHelper contextHelper,
          ExportScheduler scheduler, KafkaService kafka, BulkEditConfigService bulkEditConfigService,
-         EdifactOrdersExportJobScheduler exportJobScheduler) {
+    EdifactScheduledJobInitializer edifactScheduledJobInitializer) {
     super(baseTenantService);
     this.contextHelper = contextHelper;
     this.scheduler = scheduler;
     this.kafka = kafka;
     this.bulkEditConfigService = bulkEditConfigService;
-    this.exportJobScheduler = exportJobScheduler;
+    this.edifactScheduledJobInitializer = edifactScheduledJobInitializer;
   }
 
 
@@ -45,9 +46,9 @@ public class FolioTenantController extends TenantController {
     if (tenantInit.getStatusCode() == HttpStatus.NO_CONTENT) {
       try {
         contextHelper.registerTenant();
-        scheduler.initScheduleConfiguration();
+      //  scheduler.initScheduleConfiguration();
         bulkEditConfigService.checkBulkEditConfiguration();
-        exportJobScheduler.initAllScheduledJob();
+        edifactScheduledJobInitializer.initAllScheduledJob();
         kafka.createKafkaTopics();
         kafka.restartEventListeners();
       } catch (Exception e) {

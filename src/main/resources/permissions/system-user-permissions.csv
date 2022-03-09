@@ -12,3 +12,4 @@ configuration.entries.item.put
 configuration.entries.item.delete
 transfers.collection.get
 inventory-storage.service-points.collection.get
+data-export.job.collection.get

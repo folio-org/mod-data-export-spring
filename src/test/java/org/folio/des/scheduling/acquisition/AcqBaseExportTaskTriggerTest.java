@@ -31,7 +31,7 @@ class AcqBaseExportTaskTriggerTest {
   @Test
   @DisplayName("No configuration for scheduling")
   void noConfig() {
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(null, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(null, null, true);
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
     assertNull(date);
@@ -41,7 +41,7 @@ class AcqBaseExportTaskTriggerTest {
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
@@ -56,7 +56,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setScheduleFrequency(1);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.NONE);
     scheduleParameters.setScheduleTime("12:00:00");
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
@@ -71,7 +71,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setScheduleFrequency(1);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.NONE);
     scheduleParameters.setScheduleTime("12:00:00");
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, false);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, false);
 
     assertTrue(trigger.isDisabledSchedule());
   }
@@ -86,7 +86,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
     scheduleParameters.setScheduleTime("11:12:13");
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
 
@@ -131,7 +131,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setScheduleFrequency(expDiffHours);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
     scheduleParameters.setTimeZone("UTC");
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     final Date actDate = trigger.nextExecutionTime(triggerContext);
@@ -158,7 +158,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setScheduleFrequency(expDiffDays);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.DAY);
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     final Date actDate = trigger.nextExecutionTime(triggerContext);
@@ -217,7 +217,7 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.WEEK);
     scheduleParameters.setWeekDays(List.of(WeekDaysEnum.MONDAY, WeekDaysEnum.SATURDAY, WeekDaysEnum.SUNDAY));
     scheduleParameters.setTimeZone(EUROPE_MONACO);
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, true);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     final Date actDate = trigger.nextExecutionTime(triggerContext);

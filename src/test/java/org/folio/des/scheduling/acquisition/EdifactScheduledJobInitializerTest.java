@@ -27,7 +27,7 @@ class EdifactScheduledJobInitializerTest {
 
   @BeforeEach
   void before() {
-    initializer = spy(new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper, acqSchedulingProperties));
+    initializer = spy(new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper, acqSchedulingProperties, exportJobScheduler));
   }
 
   @Test
@@ -35,7 +35,7 @@ class EdifactScheduledJobInitializerTest {
     doReturn(false).when(contextHelper).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
     //When
-    initializer.initAllScheduledJob(exportJobScheduler);
+    initializer.initAllScheduledJob();
     //Then
     verify(baseExportConfigService, times(0)).getConfigCollection(anyString());
     verify(exportJobScheduler, times(0)).scheduleExportJob(any(ExportConfig.class));
@@ -51,7 +51,7 @@ class EdifactScheduledJobInitializerTest {
     configCollection.addConfigsItem(exportConfig);
     doReturn(configCollection).when(baseExportConfigService).getConfigCollection(anyString());
     //When
-    initializer.initAllScheduledJob(exportJobScheduler);
+    initializer.initAllScheduledJob();
     //Then
     verify(baseExportConfigService, times(1)).getConfigCollection(anyString());
     verify(exportJobScheduler, times(1)).scheduleExportJob(any(ExportConfig.class));
@@ -63,7 +63,7 @@ class EdifactScheduledJobInitializerTest {
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
     doReturn(new ExportConfigCollection()).when(baseExportConfigService).getConfigCollection(anyString());
     //When
-    initializer.initAllScheduledJob(exportJobScheduler);
+    initializer.initAllScheduledJob();
     //Then
     verify(exportJobScheduler, times(0)).scheduleExportJob(any(ExportConfig.class));
   }

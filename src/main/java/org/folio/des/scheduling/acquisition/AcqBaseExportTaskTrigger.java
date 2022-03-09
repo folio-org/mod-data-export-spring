@@ -33,9 +33,12 @@ import lombok.extern.log4j.Log4j2;
 public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   @Getter
   private final boolean enableScheduler;
+  @Getter
+  private final Date lastJobStartDate;
 
-  public AcqBaseExportTaskTrigger(ScheduleParameters scheduleParameters, boolean enableScheduler) {
+  public AcqBaseExportTaskTrigger(ScheduleParameters scheduleParameters, Date lastJobStartDate, boolean enableScheduler) {
     this.scheduleParameters = scheduleParameters;
+    this.lastJobStartDate = lastJobStartDate;
     this.enableScheduler = enableScheduler;
   }
 
@@ -47,6 +50,9 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   @Override
   public Date nextExecutionTime(TriggerContext triggerContext) {
     Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+    if (lastActualExecutionTime == null && lastJobStartDate != null)  {
+      lastActualExecutionTime = lastJobStartDate;
+    }
     return getNextTime(lastActualExecutionTime);
   }
 

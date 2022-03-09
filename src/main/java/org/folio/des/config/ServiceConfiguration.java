@@ -12,6 +12,7 @@ import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
 import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
+import org.folio.des.converter.aqcuisition.InitEdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -29,6 +30,7 @@ import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -81,9 +83,9 @@ public class ServiceConfiguration {
   EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
            ExportConfigConverterResolver  exportConfigConverterResolver,
-           EdifactOrdersExportJobScheduler exportJobScheduler) {
+          @Qualifier("edifactOrdersExportJobScheduler") EdifactOrdersExportJobScheduler edifactOrdersExportJobScheduler) {
     return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, exportJobScheduler);
+      exportConfigConverterResolver, exportConfigValidatorResolver, edifactOrdersExportJobScheduler);
   }
 
   @Bean
@@ -121,23 +123,35 @@ public class ServiceConfiguration {
     return new EdifactScheduledTaskBuilder(jobService, contextHelper, acqSchedulingProperties);
   }
 
-  @Bean EdifactOrdersExportJobScheduler edifactOrdersExportJobScheduler(ScheduledTaskBuilder edifactScheduledTaskBuilder,
+  @Bean(name = "edifactOrdersExportJobScheduler")
+  @Qualifier("edifactOrdersExportJobScheduler")
+  EdifactOrdersExportJobScheduler edifactOrdersExportJobScheduler(ScheduledTaskBuilder edifactScheduledTaskBuilder,
                     EdifactOrdersExportConfigToTaskTriggerConverter triggerConverter,
-                    EdifactScheduledJobInitializer edifactScheduledJobInitializer,
                     @Value("${folio.schedule.acquisition.poolSize:10}") int poolSize) {
     return new EdifactOrdersExportJobScheduler(new ThreadPoolTaskScheduler(), triggerConverter,
-      edifactScheduledTaskBuilder, poolSize, edifactScheduledJobInitializer);
+      edifactScheduledTaskBuilder, poolSize);
   }
 
   @Bean
   AcqSchedulingProperties acqSchedulingProperties(
-                    @Value("${folio.schedule.acquisition.runOnlyIfModuleRegistered:true}") String runOnlyIfModuleRegistered) {
+                    @Value("${folio.schedule.acquisition.runOnlyIfModuleRegistered:false}") String runOnlyIfModuleRegistered) {
     return new AcqSchedulingProperties(runOnlyIfModuleRegistered);
+  }
+
+  @Bean(name = "initEdifactOrdersExportJobScheduler")
+  @Qualifier("initEdifactOrdersExportJobScheduler")
+  EdifactOrdersExportJobScheduler initEdifactOrdersExportJobScheduler(ScheduledTaskBuilder edifactScheduledTaskBuilder,
+                  InitEdifactOrdersExportConfigToTaskTriggerConverter initTriggerConverter,
+                  @Value("${folio.schedule.acquisition.poolSize:10}") int poolSize) {
+    return new EdifactOrdersExportJobScheduler(new ThreadPoolTaskScheduler(), initTriggerConverter,
+      edifactScheduledTaskBuilder, poolSize);
   }
 
   @Bean
   EdifactScheduledJobInitializer edifactScheduledJobInitializer(BaseExportConfigService baseExportConfigService,
-                    FolioExecutionContextHelper contextHelper, AcqSchedulingProperties acqSchedulingProperties) {
-    return new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper, acqSchedulingProperties);
+                    FolioExecutionContextHelper contextHelper, AcqSchedulingProperties acqSchedulingProperties,
+                   @Qualifier("initEdifactOrdersExportJobScheduler") EdifactOrdersExportJobScheduler initEdifactOrdersExportJobScheduler) {
+    return new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper,
+                    acqSchedulingProperties, initEdifactOrdersExportJobScheduler);
   }
 }
