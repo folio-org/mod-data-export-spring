@@ -133,7 +133,9 @@
             "perms.users.get",
             "configuration.entries.collection.get",
             "configuration.entries.item.post",
-            "perms.users.assign.immutable"
+            "perms.users.assign.immutable",
+            "data-export.job.collection.get",
+            "data-export.config.collection.get"
           ]
         },
         {

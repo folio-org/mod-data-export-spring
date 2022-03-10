@@ -50,7 +50,7 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
            scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
          }
          scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
-         var lasJobExecutionDate = getLastJobExecutionDate(exportConfig.getId(), scheduleParameters);
+         var lasJobExecutionDate = getLastJobExecutionDate(scheduleParameters);
          var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, lasJobExecutionDate, ediSchedule.getEnableScheduledExport());
          exportTaskTriggers.add(trigger);
        }
@@ -58,8 +58,8 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
     return exportTaskTriggers;
   }
 
-  private Date getLastJobExecutionDate(String exportConfigId, ScheduleParameters scheduleParameters) {
-    String query = String.format(QUERY_LAST_JOB_CREATE_DATE, exportConfigId);
+  private Date getLastJobExecutionDate(ScheduleParameters scheduleParameters) {
+    String query = String.format(QUERY_LAST_JOB_CREATE_DATE, scheduleParameters.getId());
     JobCollection jobCol = jobService.get(0, Integer.MAX_VALUE, query);
     Date lastExecutionDate = null;
     if (CollectionUtils.isNotEmpty(jobCol.getJobRecords()) &&
@@ -74,15 +74,6 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
       }
     }
     return lastExecutionDate;
-  }
-
-  private boolean isScheduledParametersChange(ScheduleParameters scheduleParameters, ScheduleParameters jobScheduleParameters) {
-    return !scheduleParameters.getSchedulePeriod().equals(jobScheduleParameters.getSchedulePeriod()) ||
-           !scheduleParameters.getScheduleTime().equals(jobScheduleParameters.getScheduleTime()) ||
-           !scheduleParameters.getScheduleFrequency().equals(jobScheduleParameters.getScheduleFrequency()) ||
-           !scheduleParameters.getTimeZone().equals(jobScheduleParameters.getTimeZone()) ||
-           scheduleParameters.getSchedulingDate().compareTo(jobScheduleParameters.getSchedulingDate()) != 0 ||
-           !CollectionUtils.isEqualCollection(scheduleParameters.getWeekDays(), jobScheduleParameters.getWeekDays());
   }
 
   private Optional<EdiSchedule> getScheduledParameters(ExportTypeSpecificParameters specificParameters) {

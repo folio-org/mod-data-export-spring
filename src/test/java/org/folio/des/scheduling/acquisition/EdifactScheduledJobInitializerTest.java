@@ -13,12 +13,12 @@ import java.util.UUID;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
-import org.folio.des.service.config.impl.BaseExportConfigService;
+import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class EdifactScheduledJobInitializerTest {
-  private BaseExportConfigService baseExportConfigService = mock(BaseExportConfigService.class);
+  private ExportTypeBasedConfigManager exportTypeBasedConfigManager = mock(ExportTypeBasedConfigManager.class);
   private FolioExecutionContextHelper contextHelper = mock(FolioExecutionContextHelper.class);
   private AcqSchedulingProperties acqSchedulingProperties = mock(AcqSchedulingProperties.class);
   private EdifactOrdersExportJobScheduler exportJobScheduler = mock(EdifactOrdersExportJobScheduler.class);
@@ -27,7 +27,7 @@ class EdifactScheduledJobInitializerTest {
 
   @BeforeEach
   void before() {
-    initializer = spy(new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper, acqSchedulingProperties, exportJobScheduler));
+    initializer = spy(new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper, acqSchedulingProperties, exportJobScheduler));
   }
 
   @Test
@@ -37,7 +37,7 @@ class EdifactScheduledJobInitializerTest {
     //When
     initializer.initAllScheduledJob();
     //Then
-    verify(baseExportConfigService, times(0)).getConfigCollection(anyString());
+    verify(exportTypeBasedConfigManager, times(0)).getConfigCollection(anyString());
     verify(exportJobScheduler, times(0)).scheduleExportJob(any(ExportConfig.class));
   }
 
@@ -49,11 +49,11 @@ class EdifactScheduledJobInitializerTest {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(UUID.randomUUID().toString());
     configCollection.addConfigsItem(exportConfig);
-    doReturn(configCollection).when(baseExportConfigService).getConfigCollection(anyString());
+    doReturn(configCollection).when(exportTypeBasedConfigManager).getConfigCollection(anyString());
     //When
     initializer.initAllScheduledJob();
     //Then
-    verify(baseExportConfigService, times(1)).getConfigCollection(anyString());
+    verify(exportTypeBasedConfigManager, times(1)).getConfigCollection(anyString());
     verify(exportJobScheduler, times(1)).scheduleExportJob(any(ExportConfig.class));
   }
 
@@ -61,7 +61,7 @@ class EdifactScheduledJobInitializerTest {
   void shouldSkipScheduleJobsIfNoExportConfigs() {
     doReturn(false).when(contextHelper).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
-    doReturn(new ExportConfigCollection()).when(baseExportConfigService).getConfigCollection(anyString());
+    doReturn(new ExportConfigCollection()).when(exportTypeBasedConfigManager).getConfigCollection(anyString());
     //When
     initializer.initAllScheduledJob();
     //Then

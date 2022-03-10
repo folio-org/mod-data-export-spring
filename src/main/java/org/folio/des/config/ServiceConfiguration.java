@@ -148,10 +148,10 @@ public class ServiceConfiguration {
   }
 
   @Bean
-  EdifactScheduledJobInitializer edifactScheduledJobInitializer(BaseExportConfigService baseExportConfigService,
+  EdifactScheduledJobInitializer edifactScheduledJobInitializer(ExportTypeBasedConfigManager exportTypeBasedConfigManager,
                     FolioExecutionContextHelper contextHelper, AcqSchedulingProperties acqSchedulingProperties,
                    @Qualifier("initEdifactOrdersExportJobScheduler") EdifactOrdersExportJobScheduler initEdifactOrdersExportJobScheduler) {
-    return new EdifactScheduledJobInitializer(baseExportConfigService, contextHelper,
+    return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper,
                     acqSchedulingProperties, initEdifactOrdersExportJobScheduler);
   }
 }

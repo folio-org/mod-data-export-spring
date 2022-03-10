@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ExportConfig;
@@ -101,11 +102,18 @@ public class ExportTrigger implements Trigger {
 
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
     Calendar nextExecutionTime = new GregorianCalendar();
+    Date nowDate = new Date();
     if (lastActualExecutionTime == null) {
-      nextExecutionTime.setTime(new Date());
+      nextExecutionTime.setTime(nowDate);
     } else {
       nextExecutionTime.setTime(lastActualExecutionTime);
-      nextExecutionTime.add(Calendar.HOUR, hours);
+      long diffHours = (nowDate.getTime() - nextExecutionTime.getTime().getTime())/(60 * 60 * 1000);
+      if (diffHours > 0 && hours !=0 && diffHours > hours) {
+        int hoursToIncrease = Math.round(diffHours/hours) + 1;
+        nextExecutionTime.add(Calendar.HOUR, hoursToIncrease * hours);
+      } else {
+        nextExecutionTime.add(Calendar.HOUR, hours);
+      }
     }
     return nextExecutionTime.getTime();
   }
