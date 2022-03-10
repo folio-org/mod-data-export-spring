@@ -70,11 +70,6 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
     this.scheduledTasks.clear();
   }
 
-//  @Override
-//  public void initAllScheduledJob() {
-//    throw new UnsupportedOperationException("Please implement it in the  child classes");
-//  }
-
   public Map<ExportTaskTrigger, Pair<ExportTaskTrigger, ScheduledFuture<?>>> getScheduledTasks() {
     return Collections.unmodifiableMap(scheduledTasks);
   }

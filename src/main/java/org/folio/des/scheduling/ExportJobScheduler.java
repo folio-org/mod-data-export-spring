@@ -7,5 +7,4 @@ import org.folio.des.domain.dto.Job;
 
 public interface ExportJobScheduler {
   List<Job> scheduleExportJob(ExportConfig exportConfig);
- // void initAllScheduledJob();
 }

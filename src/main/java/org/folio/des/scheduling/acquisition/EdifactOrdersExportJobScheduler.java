@@ -13,19 +13,10 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class EdifactOrdersExportJobScheduler extends BaseExportJobScheduler {
- // private final EdifactScheduledJobInitializer edifactScheduledJobInitializer;
   public EdifactOrdersExportJobScheduler(ThreadPoolTaskScheduler taskScheduler,
                                          Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter,
                                          ScheduledTaskBuilder scheduledTaskBuilder, int poolSize)
   {
     super(taskScheduler, triggerConverter, scheduledTaskBuilder, poolSize);
-  //  this.edifactScheduledJobInitializer = edifactScheduledJobInitializer;
   }
-
-//  @Override
-//  public void initAllScheduledJob() {
-//    edifactScheduledJobInitializer.initAllScheduledJob(this);
-//  }
-
-
 }

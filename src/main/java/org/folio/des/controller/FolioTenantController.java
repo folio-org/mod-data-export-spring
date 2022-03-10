@@ -46,7 +46,7 @@ public class FolioTenantController extends TenantController {
     if (tenantInit.getStatusCode() == HttpStatus.NO_CONTENT) {
       try {
         contextHelper.registerTenant();
-      //  scheduler.initScheduleConfiguration();
+        scheduler.initScheduleConfiguration();
         bulkEditConfigService.checkBulkEditConfiguration();
         edifactScheduledJobInitializer.initAllScheduledJob();
         kafka.createKafkaTopics();

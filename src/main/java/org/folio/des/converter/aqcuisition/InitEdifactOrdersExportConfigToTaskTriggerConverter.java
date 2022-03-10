@@ -62,13 +62,13 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
     String query = String.format(QUERY_LAST_JOB_CREATE_DATE, scheduleParameters.getId());
     JobCollection jobCol = jobService.get(0, Integer.MAX_VALUE, query);
     Date lastExecutionDate = null;
-    if (CollectionUtils.isNotEmpty(jobCol.getJobRecords()) &&
-                  jobCol.getJobRecords().stream().findFirst().isPresent()) {
-      Job job = jobCol.getJobRecords().stream().findFirst().get();
+    Optional<Job> jobOptional = jobCol.getJobRecords().stream().findFirst();
+    if (jobOptional.isPresent()) {
+      Job job = jobOptional.get();
       var ediSchedule = getScheduledParameters(job.getExportTypeSpecificParameters());
       if (ediSchedule.isPresent() ) {
         ScheduleParameters jobScheduleParameters = ediSchedule.get().getScheduleParameters();
-        if (jobScheduleParameters != null) {
+        if (jobScheduleParameters != null && job.getMetadata() != null) {
           lastExecutionDate = job.getMetadata().getCreatedDate();
         }
       }
