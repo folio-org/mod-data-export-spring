@@ -38,7 +38,7 @@ public class SecurityManagerService {
 
   public void prepareSystemUser(String okapiUrl, String tenantId) {
     Optional<User> userOptional = getUser(username);
-    okapiUrl = "http://localhost:9130";
+
     User user;
     if (userOptional.isPresent()) {
       user = userOptional.get();

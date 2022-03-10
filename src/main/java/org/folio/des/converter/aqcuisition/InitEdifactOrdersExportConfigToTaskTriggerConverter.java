@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
