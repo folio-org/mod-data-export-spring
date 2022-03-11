@@ -1,5 +1,7 @@
 package org.folio.des.scheduling;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -108,8 +110,10 @@ public class ExportTrigger implements Trigger {
       nextExecutionTime.setTime(lastActualExecutionTime);
       long diffHours = (nowDate.getTime() - nextExecutionTime.getTime().getTime())/(60 * 60 * 1000);
       if (diffHours > 0 && hours !=0 && diffHours > hours) {
-        int hoursToIncrease = (int)(Math.round((double) diffHours/hours) + 1);
-        nextExecutionTime.add(Calendar.HOUR, hoursToIncrease * hours);
+        BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
+                                               .divide(BigDecimal.valueOf(hours), RoundingMode.FLOOR)
+                                               .add(BigDecimal.ONE);
+        nextExecutionTime.add(Calendar.HOUR, hoursToIncrease.intValue() * hours);
       } else {
         nextExecutionTime.add(Calendar.HOUR, hours);
       }

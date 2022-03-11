@@ -185,7 +185,7 @@ class ExportTriggerTest {
     Calendar actCal = Calendar.getInstance();
     actCal.setTime(date);
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
-    assertEquals(currHour + addHours + 1, actLastHour);
+     assertEquals(currHour + addHours + 1, actLastHour);
   }
 
   @DisplayName("Job scheduled for specific hour, when last time plus frequency equal to current time")
