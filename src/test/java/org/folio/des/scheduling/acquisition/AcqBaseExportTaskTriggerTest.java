@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 
 class AcqBaseExportTaskTriggerTest {
@@ -260,5 +265,81 @@ class AcqBaseExportTaskTriggerTest {
     DayOfWeek forthExpDay =  expMap.get(thirdZonedDateTime.getDayOfWeek());
     assertEquals(forthExpDay, forthDayOfWeek);
     assertTrue(forthZonedDateTime.toString().contains(forthZonedDateTime.getDayOfMonth() + EXP_TIME));
+  }
+
+  @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
+  @ParameterizedTest
+  @CsvSource({
+   "1, 3, 1",
+   "2, 3, 1",
+   "4, 3, 1",
+   "5, 3, 2",
+   "6, 3, 3",
+   "7, 3, 4",
+   "3, 0, 3",
+   "3, 3, 0"
+  })
+  void hourlyScheduleWithHours(int frequency, int addHours, int expDiffHours) {
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    scheduleParameters.setId(UUID.randomUUID());
+    scheduleParameters.setScheduleFrequency(frequency);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    scheduleParameters.setTimeZone("UTC");
+
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
+    //When
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, -addHours);
+    Date now = cal.getTime();
+    Instant nowInstant = Instant.ofEpochMilli(now.getTime());
+    ZonedDateTime nowZonedDateTime = ZonedDateTime.ofInstant(nowInstant, ZoneId.of("UTC"));
+    int nowHour = nowZonedDateTime.getHour();
+
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    triggerContext.update(now, now, now);
+    Date actDate = trigger.nextExecutionTime(triggerContext);
+
+    Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
+    ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
+    int actHour = actZonedDateTime.getHour();
+    assertEquals(actHour, nowHour + expDiffHours + addHours);
+  }
+
+  @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
+  @ParameterizedTest
+  @CsvSource({
+    "1, 3, 1",
+    "2, 3, 1",
+    "4, 3, 1",
+    "5, 3, 2",
+    "6, 3, 3",
+    "7, 3, 4",
+    "3, 0, 3",
+    "3, 3, 0"
+  })
+  void hourlyScheduleWithHoursAndLastJobStartItCanHappenAfterModuleRestart(int frequency, int addHours, int expDiffHours) {
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    scheduleParameters.setId(UUID.randomUUID());
+    scheduleParameters.setScheduleFrequency(frequency);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    scheduleParameters.setTimeZone("UTC");
+
+    Calendar calLastJob = Calendar.getInstance();
+    calLastJob.add(Calendar.HOUR, -addHours);
+    Date lastJobTime = calLastJob.getTime();
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, lastJobTime, true);
+    //When
+    Instant nowInstant = Instant.ofEpochMilli(lastJobTime.getTime());
+    ZonedDateTime lastJobZonedDateTime = ZonedDateTime.ofInstant(nowInstant, ZoneId.of("UTC"));
+    int nowHour = lastJobZonedDateTime.getHour();
+
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    triggerContext.update(null, null, null);
+    Date actDate = trigger.nextExecutionTime(triggerContext);
+
+    Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
+    ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
+    int actHour = actZonedDateTime.getHour();
+    assertEquals(actHour, nowHour + expDiffHours + addHours);
   }
 }

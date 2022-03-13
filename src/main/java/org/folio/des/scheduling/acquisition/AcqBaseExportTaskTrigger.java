@@ -1,5 +1,7 @@
 package org.folio.des.scheduling.acquisition;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -10,6 +12,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
@@ -132,7 +135,19 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   @SneakyThrows
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
     ZonedDateTime startTimeUTC = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZoneId zoneId = ZoneId.of("UTC");
+    ZonedDateTime nowDate = Instant.now().atZone(zoneId);
     if (lastActualExecutionTime != null) {
+      long diffHours = (nowDate.toInstant().toEpochMilli() - startTimeUTC.toInstant().toEpochMilli())/(60 * 60 * 1000);
+      if (diffHours > 0 && hours !=0 && diffHours > hours) {
+        BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
+          .divide(BigDecimal.valueOf(hours), RoundingMode.FLOOR)
+          .add(BigDecimal.ONE);
+        startTimeUTC = startTimeUTC.plusHours(hoursToIncrease.longValue() * hours);
+      } else {
+        startTimeUTC = startTimeUTC.plusHours(hours);
+      }
+    } else {
       startTimeUTC = startTimeUTC.plusHours(hours);
     }
     return convertToOldDateFormat(startTimeUTC);
