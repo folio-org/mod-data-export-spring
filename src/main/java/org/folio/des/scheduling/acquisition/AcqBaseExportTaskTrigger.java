@@ -12,7 +12,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
@@ -147,8 +146,6 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
       } else {
         startTimeUTC = startTimeUTC.plusHours(hours);
       }
-    } else {
-      startTimeUTC = startTimeUTC.plusHours(hours);
     }
     return convertToOldDateFormat(startTimeUTC);
   }
