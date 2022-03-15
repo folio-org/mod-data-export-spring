@@ -3,7 +3,12 @@ package org.folio.des.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.folio.des.builder.job.*;
+import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
+import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
+import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
+import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
+import org.folio.des.builder.job.JobCommandBuilder;
+import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.builder.scheduling.EdifactScheduledTaskBuilder;
 import org.folio.des.builder.scheduling.ScheduledTaskBuilder;
 import org.folio.des.client.ConfigurationClient;
@@ -134,7 +139,7 @@ public class ServiceConfiguration {
 
   @Bean
   AcqSchedulingProperties acqSchedulingProperties(
-                    @Value("${folio.schedule.acquisition.runOnlyIfModuleRegistered:false}") String runOnlyIfModuleRegistered) {
+                    @Value("${folio.schedule.acquisition.runOnlyIfModuleRegistered:true}") String runOnlyIfModuleRegistered) {
     return new AcqSchedulingProperties(runOnlyIfModuleRegistered);
   }
 

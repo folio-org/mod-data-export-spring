@@ -50,8 +50,8 @@ public class FolioExecutionContextHelper {
   public void initScope() {
     if (MapUtils.isNotEmpty(okapiHeaders)) {
       String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
-     // String url = getHeader(okapiHeaders, "http://localhost:9130");
-      String url = "http://localhost:9130";
+      String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
+
       FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
           new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
 

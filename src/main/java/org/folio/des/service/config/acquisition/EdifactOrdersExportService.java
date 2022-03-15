@@ -54,8 +54,6 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
   private void setExportConfigId(ExportConfig exportConfig) {
     Optional.ofNullable(exportConfig.getExportTypeSpecificParameters())
       .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-      .ifPresent(vendorEdiOrdersExportConfig -> {
-        vendorEdiOrdersExportConfig.setExportConfigId(UUID.fromString(exportConfig.getId()));
-      });
+      .ifPresent(ediOrdersExportConfig -> ediOrdersExportConfig.setExportConfigId(UUID.fromString(exportConfig.getId())));
   }
 }
