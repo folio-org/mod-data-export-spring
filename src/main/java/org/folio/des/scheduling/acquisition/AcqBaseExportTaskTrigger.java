@@ -1,5 +1,7 @@
 package org.folio.des.scheduling.acquisition;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -33,9 +35,12 @@ import lombok.extern.log4j.Log4j2;
 public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   @Getter
   private final boolean enableScheduler;
+  @Getter
+  private final Date lastJobStartDate;
 
-  public AcqBaseExportTaskTrigger(ScheduleParameters scheduleParameters, boolean enableScheduler) {
+  public AcqBaseExportTaskTrigger(ScheduleParameters scheduleParameters, Date lastJobStartDate, boolean enableScheduler) {
     this.scheduleParameters = scheduleParameters;
+    this.lastJobStartDate = lastJobStartDate;
     this.enableScheduler = enableScheduler;
   }
 
@@ -47,6 +52,9 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   @Override
   public Date nextExecutionTime(TriggerContext triggerContext) {
     Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+    if (lastActualExecutionTime == null && lastJobStartDate != null)  {
+      lastActualExecutionTime = lastJobStartDate;
+    }
     return getNextTime(lastActualExecutionTime);
   }
 
@@ -126,8 +134,18 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   @SneakyThrows
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
     ZonedDateTime startTimeUTC = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZoneId zoneId = ZoneId.of("UTC");
+    ZonedDateTime nowDate = Instant.now().atZone(zoneId);
     if (lastActualExecutionTime != null) {
-      startTimeUTC = startTimeUTC.plusHours(hours);
+      long diffHours = (nowDate.toInstant().toEpochMilli() - startTimeUTC.toInstant().toEpochMilli())/(60 * 60 * 1000);
+      if (diffHours > 0 && hours !=0 && diffHours > hours) {
+        BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
+          .divide(BigDecimal.valueOf(hours), RoundingMode.FLOOR)
+          .add(BigDecimal.ONE);
+        startTimeUTC = startTimeUTC.plusHours(hoursToIncrease.longValue() * hours);
+      } else {
+        startTimeUTC = startTimeUTC.plusHours(hours);
+      }
     }
     return convertToOldDateFormat(startTimeUTC);
   }

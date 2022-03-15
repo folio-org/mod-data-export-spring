@@ -146,9 +146,4 @@ class BaseExportJobSchedulerTest {
     scheduler.destroy();
     assertTrue(scheduler.scheduledTasks.isEmpty());
   }
-
-  @Test
-  void shouldThrowUnsupportedOperationExceptionIfInvokeInitAllScheduledJob() {
-    assertThrows(UnsupportedOperationException.class, () -> scheduler.initAllScheduledJob());
-  }
 }

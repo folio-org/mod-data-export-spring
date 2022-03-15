@@ -1,5 +1,6 @@
 package org.folio.des.scheduling;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -14,6 +16,8 @@ import org.folio.des.domain.dto.ExportConfig.WeekDaysEnum;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -85,7 +89,7 @@ class ExportTriggerTest {
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 
-    final Date now =  DateUtils.addHours(new Date(), scheduleFrequency);
+      final Date now =  DateUtils.addHours(new Date(), scheduleFrequency);
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
 
     assertNotNull(date);
@@ -137,7 +141,6 @@ class ExportTriggerTest {
     assertNotNull(date);
   }
 
-  @Test
   @DisplayName("Weekly job scheduled for specific days")
   void weeklyScheduleWithWeekDays() {
     ExportConfig config = new ExportConfig();
@@ -153,5 +156,91 @@ class ExportTriggerTest {
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
 
     assertNotNull(date);
+  }
+
+  @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
+  @ParameterizedTest
+  @CsvSource({
+    "1, 3",
+    "2, 3",
+    "4, 3"
+  })
+  void hourlyScheduleWithHours(int frequency, int addHours) {
+    ExportConfig config = new ExportConfig();
+    config.setScheduleFrequency(1);
+    config.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    config.setScheduleTime("12:00:00.000Z");
+    config.setScheduleFrequency(frequency);
+    trigger.setConfig(config);
+
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, -addHours);
+    int currHour = cal.get(Calendar.HOUR_OF_DAY);
+
+    Date now = cal.getTime();
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext(now, now, now);
+    Date date = trigger.nextExecutionTime(triggerContext);
+
+    Calendar actCal = Calendar.getInstance();
+    actCal.setTime(date);
+    int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
+     assertEquals(currHour + addHours + 1, actLastHour);
+  }
+
+  @DisplayName("Job scheduled for specific hour, when last time plus frequency equal to current time")
+  @ParameterizedTest
+  @CsvSource({
+    "3, 3"
+  })
+  void hourlyScheduleWithHoursWhenLatTimePlusFrequencyEqualToCurrentTime(int frequency, int addHours) {
+    ExportConfig config = new ExportConfig();
+    config.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    config.setScheduleTime("12:00:00.000Z");
+    config.setScheduleFrequency(frequency);
+    trigger.setConfig(config);
+
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, -addHours);
+    int currHour = cal.get(Calendar.HOUR_OF_DAY);
+
+    Date now = cal.getTime();
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext(now, now, now);
+    Date date = trigger.nextExecutionTime(triggerContext);
+
+    Calendar actCal = Calendar.getInstance();
+    actCal.setTime(date);
+    int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
+    assertEquals(currHour + addHours, actLastHour);
+  }
+
+  @DisplayName("Job scheduled for specific hour, When Frequency Higher Then Last Time More Then 2 Hours")
+  @ParameterizedTest
+  @CsvSource({
+    "5, 3",
+    "6, 3",
+    "7, 3"
+  })
+  void hourlyScheduleWithHoursWhenFrequencyHigherThenLastTimeMoreThen2Hours(int frequency, int addHours) {
+    ExportConfig config = new ExportConfig();
+    config.setSchedulePeriod(SchedulePeriodEnum.HOUR);
+    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    config.setScheduleTime("12:00:00.000Z");
+    config.setScheduleFrequency(frequency);
+    trigger.setConfig(config);
+
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.HOUR, -addHours);
+    int currHour = cal.get(Calendar.HOUR_OF_DAY);
+
+    Date now = cal.getTime();
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext(now, now, now);
+    Date date = trigger.nextExecutionTime(triggerContext);
+
+    Calendar actCal = Calendar.getInstance();
+    actCal.setTime(date);
+    int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
+    assertEquals(currHour + frequency, actLastHour);
   }
 }
