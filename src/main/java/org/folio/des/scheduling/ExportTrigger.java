@@ -1,5 +1,7 @@
 package org.folio.des.scheduling;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -101,11 +103,20 @@ public class ExportTrigger implements Trigger {
 
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
     Calendar nextExecutionTime = new GregorianCalendar();
+    Date nowDate = new Date();
     if (lastActualExecutionTime == null) {
-      nextExecutionTime.setTime(new Date());
+      nextExecutionTime.setTime(nowDate);
     } else {
       nextExecutionTime.setTime(lastActualExecutionTime);
-      nextExecutionTime.add(Calendar.HOUR, hours);
+      long diffHours = (nowDate.getTime() - nextExecutionTime.getTime().getTime())/(60 * 60 * 1000);
+      if (diffHours > 0 && hours !=0 && diffHours > hours) {
+        BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
+                                               .divide(BigDecimal.valueOf(hours), RoundingMode.FLOOR)
+                                               .add(BigDecimal.ONE);
+        nextExecutionTime.add(Calendar.HOUR, hoursToIncrease.intValue() * hours);
+      } else {
+        nextExecutionTime.add(Calendar.HOUR, hours);
+      }
     }
     return nextExecutionTime.getTime();
   }

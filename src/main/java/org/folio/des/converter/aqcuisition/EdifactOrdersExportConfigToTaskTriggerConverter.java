@@ -38,16 +38,16 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
     Optional.ofNullable(specificParameters.getVendorEdiOrdersExportConfig())
             .map(VendorEdiOrdersExportConfig::getEdiSchedule)
             .ifPresent(ediSchedule -> {
-              ScheduleParameters scheduleParameters = ediSchedule.getScheduleParameters();
-              if (scheduleParameters != null && !NONE.equals(scheduleParameters.getSchedulePeriod())) {
-                if (scheduleParameters.getId() == null) {
-                  scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
-                }
-                scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
-                var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, ediSchedule.getEnableScheduledExport());
-                exportTaskTriggers.add(trigger);
-              }
-            });
+        ScheduleParameters scheduleParameters = ediSchedule.getScheduleParameters();
+        if (scheduleParameters != null && !NONE.equals(scheduleParameters.getSchedulePeriod())) {
+         if (scheduleParameters.getId() == null) {
+           scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
+         }
+         scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
+                var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, ediSchedule.getEnableScheduledExport());
+         exportTaskTriggers.add(trigger);
+       }
+    });
     return exportTaskTriggers;
   }
 }
