@@ -47,9 +47,6 @@ class JobsControllerTest extends BaseTest {
   private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY =
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"identifierType\" : \"ID\"}";
 
-  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY =
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"ID\"}";
-
   private static final String BULK_EDIT_QUERY_REQUEST_NO_ENTITY_NO_QUERY =
     "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}}";
 
@@ -309,15 +306,24 @@ class JobsControllerTest extends BaseTest {
           status().isBadRequest()));
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"BARCODE\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"ID\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"BARCODE\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HRID\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"FORMER_IDS\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"ACCESSION_NUMBER\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HOLDINGS_RECORD_ID\"}"
+  })
   @DisplayName("Start new bulk edit identifiers job with identifiers and entity type, should be 201")
-  void postBulkEditIdentifiersJobWithIdentifiersAndEntityType() throws Exception {
+  void postBulkEditIdentifiersJobWithIdentifiersAndEntityType(String contentString) throws Exception {
     mockMvc
       .perform(
         post("/data-export-spring/jobs")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders())
-          .content(BULK_EDIT_IDENTIFIERS_REQUEST_WITH_IDENTIFIERS_WITH_ENTITY))
+          .content(contentString))
       .andExpect(
         matchAll(
           status().isCreated()));
