@@ -139,9 +139,9 @@ components:
     errors:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
     identifierType:
-      $ref: '../../../../folio-export-common/schemas/identifierType.json#/IdentifierType'
+      $ref: '../../../../folio-export-common/schemas/bulk-edit/identifierType.json#/IdentifierType'
     entityType:
-      $ref: '../../../../folio-export-common/schemas/entityType.json#/EntityType'
+      $ref: '../../../../folio-export-common/schemas/bulk-edit/entityType.json#/EntityType'
     progress:
       $ref: '../../../../folio-export-common/schemas/progress.json#/Progress'
     UUID:
