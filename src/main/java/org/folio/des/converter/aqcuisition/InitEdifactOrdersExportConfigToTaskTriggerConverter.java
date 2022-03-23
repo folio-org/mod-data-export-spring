@@ -2,12 +2,16 @@ package org.folio.des.converter.aqcuisition;
 
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum.NONE;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -67,8 +71,12 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
       var ediSchedule = getScheduledParameters(job.getExportTypeSpecificParameters());
       if (ediSchedule.isPresent() ) {
         ScheduleParameters jobScheduleParameters = ediSchedule.get().getScheduleParameters();
-        if (jobScheduleParameters != null && job.getMetadata() != null) {
-          lastExecutionDate = job.getMetadata().getCreatedDate();
+        if (jobScheduleParameters != null && job.getMetadata() != null && job.getMetadata().getCreatedDate() != null) {
+          String scheduleTime = jobScheduleParameters.getScheduleTime();
+          Date jobCreatedDate = job.getMetadata().getCreatedDate();
+          if (StringUtils.isNotEmpty(scheduleTime)) {
+            lastExecutionDate = normalizeJobDate(scheduleTime, jobCreatedDate);
+          }
         }
       }
     }
@@ -78,5 +86,22 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
   private Optional<EdiSchedule> getScheduledParameters(ExportTypeSpecificParameters specificParameters) {
     return Optional.ofNullable(specificParameters.getVendorEdiOrdersExportConfig())
       .map(VendorEdiOrdersExportConfig::getEdiSchedule);
+  }
+
+  private Date normalizeJobDate(String scheduleTime, Date jobCreatedDate) {
+    Date lastExecutionDate;
+    Calendar jobCal = Calendar.getInstance();
+    jobCal.setTime(jobCreatedDate);
+    int jobHour = jobCal.get(Calendar.HOUR_OF_DAY);;
+    LocalTime localTime = LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
+    int scheduledTimeMinute = localTime.getMinute();
+    int scheduledTimeSec = localTime.getSecond();
+    Calendar now = Calendar.getInstance();
+    now.setTime(new Date());
+    now.set(Calendar.HOUR_OF_DAY, jobHour);
+    now.set(Calendar.MINUTE, scheduledTimeMinute);
+    now.set(Calendar.SECOND, scheduledTimeSec);
+    lastExecutionDate = now.getTime();
+    return lastExecutionDate;
   }
 }
