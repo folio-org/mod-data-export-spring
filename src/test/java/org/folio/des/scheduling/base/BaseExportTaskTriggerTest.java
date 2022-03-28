@@ -62,8 +62,11 @@ class BaseExportTaskTriggerTest {
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
     final Date now = new Date();
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    Calendar nowPlusOneHour = Calendar.getInstance();
+    nowPlusOneHour.setTime(now);
+    nowPlusOneHour.add(Calendar.HOUR, 1);
 
-    assertTrue(DateUtils.truncatedEquals(now, date, Calendar.SECOND));
+    assertTrue(DateUtils.truncatedEquals(nowPlusOneHour.getTime(), date, Calendar.HOUR));
   }
 
   @Test

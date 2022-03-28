@@ -1,11 +1,15 @@
 package org.folio.des.scheduling;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
@@ -36,6 +40,9 @@ public class ExportScheduler implements SchedulingConfigurer {
   private final ExportConfigService burSarExportConfigService;
   private final FolioExecutionContextHelper contextHelper;
 
+  private final Queue<ExportConfig> exportConfigQueue = new ConcurrentLinkedQueue<>();
+  private final AtomicBoolean nextJobAllowed = new AtomicBoolean(true);
+
   private ScheduledTaskRegistrar registrar;
   private Job scheduledJob;
 
@@ -60,9 +67,26 @@ public class ExportScheduler implements SchedulingConfigurer {
   }
 
   public void updateTasks(ExportConfig exportConfig) {
-    trigger.setConfig(exportConfig);
-    createScheduledJob(exportConfig);
-    reconfigureSchedule();
+    log.info("updateTasks queue size {}", exportConfigQueue.size());
+    if (nonNull(exportConfig)) {
+      exportConfigQueue.add(exportConfig);
+      if (nextJobAllowed.get()) {
+        nextJob();
+      }
+    }
+  }
+
+  public void nextJob() {
+    if (!exportConfigQueue.isEmpty()) {
+      log.info("nextJob current task id {}, scheduled period {}, scheduled time {}",
+        exportConfigQueue.peek().getSchedulePeriod(), exportConfigQueue.peek().getSchedulePeriod(), exportConfigQueue.peek().getScheduleTime());
+      trigger.setConfig(exportConfigQueue.peek());
+      createScheduledJob(exportConfigQueue.poll());
+      reconfigureSchedule();
+      nextJobAllowed.set(false);
+    } else {
+      nextJobAllowed.set(true);
+    }
   }
 
   @Scheduled(fixedRateString = "P1D")

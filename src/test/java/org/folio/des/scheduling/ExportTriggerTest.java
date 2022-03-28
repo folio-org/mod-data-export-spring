@@ -74,8 +74,10 @@ class ExportTriggerTest {
 
     final Date now = new Date();
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
-
-    assertTrue(DateUtils.truncatedEquals(now, date, Calendar.SECOND));
+    Calendar nowPlusOneHour = Calendar.getInstance();
+    nowPlusOneHour.setTime(now);
+    nowPlusOneHour.add(Calendar.HOUR, 1);
+    assertTrue(DateUtils.truncatedEquals(nowPlusOneHour.getTime(), date, Calendar.HOUR));
   }
 
   @Test
@@ -185,7 +187,7 @@ class ExportTriggerTest {
     Calendar actCal = Calendar.getInstance();
     actCal.setTime(date);
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
-     assertEquals(currHour + addHours + 1, actLastHour);
+     assertEquals(adjustExpected(currHour + addHours + 1), actLastHour);
   }
 
   @DisplayName("Job scheduled for specific hour, when last time plus frequency equal to current time")
@@ -212,7 +214,7 @@ class ExportTriggerTest {
     Calendar actCal = Calendar.getInstance();
     actCal.setTime(date);
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
-    assertEquals(currHour + addHours, actLastHour);
+    assertEquals(adjustExpected(currHour + addHours), actLastHour);
   }
 
   @DisplayName("Job scheduled for specific hour, When Frequency Higher Then Last Time More Then 2 Hours")
@@ -241,6 +243,13 @@ class ExportTriggerTest {
     Calendar actCal = Calendar.getInstance();
     actCal.setTime(date);
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
-    assertEquals(currHour + frequency, actLastHour);
+    assertEquals(adjustExpected(currHour + frequency), actLastHour);
+  }
+
+  private int adjustExpected(int expected) {
+    if (expected >= 24) {
+      expected -= 24;
+    }
+    return expected;
   }
 }
