@@ -11,6 +11,7 @@ import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.de.entity.Job;
 import org.folio.des.repository.JobDataExportRepository;
+import org.folio.des.scheduling.ExportScheduler;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class JobUpdatesService {
   }
 
   private final JobDataExportRepository repository;
+  private final ExportScheduler exportScheduler;
 
   @Transactional
   @KafkaListener(
@@ -97,6 +99,11 @@ public class JobUpdatesService {
       var jobStatus = JOB_STATUSES.get(jobExecutionUpdate.getBatchStatus());
       if (jobStatus != null) {
         job.setStatus(jobStatus);
+
+        // Execute next job only after the previous one is completed.
+        if (jobStatus == JobStatus.SUCCESSFUL || jobStatus == JobStatus.FAILED) {
+          exportScheduler.nextJob();
+        }
       }
     }
     if (nonNull(jobExecutionUpdate.getProgress())) {
