@@ -174,7 +174,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String firstDateStr = firstZonedDateTime.toString();
     int dayOfMonth = firstZonedDateTime.getDayOfMonth();
-    assertTrue(firstDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(firstDateStr.contains(dayOfMonth+"T11:12:13"+firstZonedDateTime.getOffset()+"[Asia/Shanghai]"));
 
     //Second try
     triggerContext.update(actDate, actDate, actDate);
@@ -187,7 +187,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     dayOfMonth = firstZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
     String lastDateStr = secondZonedDateTime.toString();
-    assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13"+firstZonedDateTime.getOffset()+"[Asia/Shanghai]"));
     //Third try
     triggerContext.update(actDateDayLate, actDateDayLate, actDateDayLate);
     final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
@@ -199,7 +199,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     dayOfMonth = secondZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
     String thirdLastDateStr = thirdZonedDateTime.toString();
-    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13"+firstZonedDateTime.getOffset()+"[Asia/Shanghai]"));
   }
 
   @Test
@@ -234,7 +234,7 @@ class AcqBaseExportTaskTriggerTest {
     DayOfWeek firstDayOfWeek = firstZonedDateTime.getDayOfWeek();
     DayOfWeek expDay =  expMap.get(currZoneDate.getDayOfWeek());
     assertEquals(expDay, firstDayOfWeek);
-    final String EXP_TIME = "T"+expTime+"+01:00["+ EUROPE_MONACO +"]";
+    final String EXP_TIME = "T"+expTime+firstZonedDateTime.getOffset()+"["+ EUROPE_MONACO +"]";
     assertTrue(firstZonedDateTime.toString().contains(firstZonedDateTime.getDayOfMonth() + EXP_TIME));
 
     //Second try

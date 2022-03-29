@@ -65,17 +65,17 @@ public class ExportScheduler implements SchedulingConfigurer {
     reconfigureSchedule();
   }
 
-//  @Scheduled(fixedRateString = "P1D")
-//  public void deleteOldJobs() {
-//    var current = new Date();
-//    log.info("deleteOldJobs attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
-//    if (contextHelper.isModuleRegistered()) {
-//      contextHelper.initScope();
-//      jobService.deleteOldJobs();
-//      log.info("deleteOldJobs executed for jobId: {} at: {}", isNull(scheduledJob) ? EMPTY : scheduledJob.getId(), current);
-//
-//    }
-//  }
+  @Scheduled(fixedRateString = "P1D")
+  public void deleteOldJobs() {
+    var current = new Date();
+    log.info("deleteOldJobs attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
+    if (contextHelper.isModuleRegistered()) {
+      contextHelper.initScope();
+      jobService.deleteOldJobs();
+      log.info("deleteOldJobs executed for jobId: {} at: {}", isNull(scheduledJob) ? EMPTY : scheduledJob.getId(), current);
+
+    }
+  }
 
   private void reconfigureSchedule() {
     if (registrar.hasTasks()) {
