@@ -2,12 +2,19 @@ package org.folio.des.converter.aqcuisition;
 
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum.NONE;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +28,7 @@ import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.scheduling.acquisition.AcqBaseExportTaskTrigger;
 import org.folio.des.scheduling.base.ExportTaskTrigger;
+import org.folio.des.scheduling.base.ScheduleDateTimeUtil;
 import org.folio.des.service.JobService;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.springframework.core.convert.converter.Converter;
@@ -53,8 +61,8 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
            scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
          }
          scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
-         var lasJobExecutionDate = getLastJobExecutionDate(scheduleParameters);
-         var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, lasJobExecutionDate, ediSchedule.getEnableScheduledExport());
+         var lastJobExecutionDate = getLastJobExecutionDate(scheduleParameters);
+         var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, lastJobExecutionDate, ediSchedule.getEnableScheduledExport());
          exportTaskTriggers.add(trigger);
        }
     });
@@ -69,16 +77,34 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
     if (jobOptional.isPresent()) {
       Job job = jobOptional.get();
       var ediSchedule = getScheduledParameters(job.getExportTypeSpecificParameters());
-      if (ediSchedule.isPresent() ) {
+      if (ediSchedule.isPresent()) {
         ScheduleParameters jobScheduleParameters = ediSchedule.get().getScheduleParameters();
         if (jobScheduleParameters != null && job.getMetadata() != null && job.getMetadata().getCreatedDate() != null) {
           String scheduleTime = jobScheduleParameters.getScheduleTime();
           Date jobCreatedDate = job.getMetadata().getCreatedDate();
-          if (StringUtils.isNotEmpty(scheduleTime)) {
-            lastExecutionDate = normalizeJobDate(scheduleTime, jobCreatedDate);
+          if (StringUtils.isNotEmpty(scheduleTime) && Objects.nonNull(jobCreatedDate)) {
+            lastExecutionDate = getConfigScheduledDateConsiderLastJobCreatedDate(jobCreatedDate, scheduleParameters);
+          } else {
+            lastExecutionDate = getConfigScheduledDate(null, scheduleParameters);
           }
         }
       }
+    }
+    return lastExecutionDate;
+  }
+
+  private Date getConfigScheduledDate(Date lastActualExecutionTime, ScheduleParameters scheduleParameters) {
+    ZonedDateTime configStartTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
+    return convertToOldDateFormat(configStartTime, scheduleParameters);
+  }
+
+  private Date convertToOldDateFormat(ZonedDateTime configStartTime, ScheduleParameters scheduleParameters) {
+    Date lastExecutionDate;
+    try {
+      lastExecutionDate = ScheduleDateTimeUtil.convertToOldDateFormat(configStartTime, scheduleParameters);
+    } catch (ParseException e) {
+      log.warn("Configuration start time is not provided for config : " + scheduleParameters.getId());
+      return null;
     }
     return lastExecutionDate;
   }
@@ -88,20 +114,33 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
       .map(VendorEdiOrdersExportConfig::getEdiSchedule);
   }
 
-  private Date normalizeJobDate(String scheduleTime, Date jobCreatedDate) {
-    Date lastExecutionDate;
+  private Date getConfigScheduledDateConsiderLastJobCreatedDate(Date jobCreatedDate, ScheduleParameters scheduleParameters) {
     Calendar jobCal = Calendar.getInstance();
     jobCal.setTime(jobCreatedDate);
-    int jobHour = jobCal.get(Calendar.HOUR_OF_DAY);;
-    LocalTime localTime = LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
-    int scheduledTimeMinute = localTime.getMinute();
-    int scheduledTimeSec = localTime.getSecond();
-    Calendar now = Calendar.getInstance();
-    now.setTime(new Date());
-    now.set(Calendar.HOUR_OF_DAY, jobHour);
-    now.set(Calendar.MINUTE, scheduledTimeMinute);
-    now.set(Calendar.SECOND, scheduledTimeSec);
-    lastExecutionDate = now.getTime();
-    return lastExecutionDate;
+    int jobDay = jobCal.get(Calendar.DAY_OF_MONTH);
+    int jobHour = jobCal.get(Calendar.HOUR_OF_DAY);
+
+    ZonedDateTime localZoneScheduledDateTime = getScheduledTimeAtLocalTimeZone(scheduleParameters);
+    int offsetSeconds = localZoneScheduledDateTime.getOffset().getTotalSeconds();
+    int scheduledTimeHour = localZoneScheduledDateTime.plusSeconds(offsetSeconds).getHour();
+    Calendar lastExecutionDate = Calendar.getInstance();
+    lastExecutionDate.setTime(new Date());
+    int currentDayOfMonth = localZoneScheduledDateTime.getDayOfMonth();
+    if (jobDay < currentDayOfMonth && jobHour > scheduledTimeHour) {
+      lastExecutionDate.set(Calendar.HOUR_OF_DAY, scheduledTimeHour);
+    } else {
+      lastExecutionDate.set(Calendar.HOUR_OF_DAY, jobHour);
+    }
+    lastExecutionDate.set(Calendar.MINUTE, localZoneScheduledDateTime.getMinute());
+    lastExecutionDate.set(Calendar.SECOND, localZoneScheduledDateTime.getSecond());
+    return getConfigScheduledDate(lastExecutionDate.getTime(), scheduleParameters);
   }
+
+  private ZonedDateTime getScheduledTimeAtLocalTimeZone(ScheduleParameters scheduleParameters) {
+    LocalTime localScheduledTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
+    LocalDate localDate = LocalDate.now();
+    LocalDateTime localScheduledDateTime = localDate.atTime(localScheduledTime);
+    return ZonedDateTime.of(localScheduledDateTime, ZoneId.systemDefault());
+  }
+
 }
