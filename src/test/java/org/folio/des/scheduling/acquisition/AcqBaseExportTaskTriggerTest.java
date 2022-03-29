@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +175,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String firstDateStr = firstZonedDateTime.toString();
     int dayOfMonth = firstZonedDateTime.getDayOfMonth();
-    assertTrue(firstDateStr.contains(dayOfMonth+"T11:12:13"+firstZonedDateTime.getOffset()+"[Asia/Shanghai]"));
+    assertTrue(firstDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
 
     //Second try
     triggerContext.update(actDate, actDate, actDate);
@@ -187,7 +188,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     dayOfMonth = firstZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
     String lastDateStr = secondZonedDateTime.toString();
-    assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13"+firstZonedDateTime.getOffset()+"[Asia/Shanghai]"));
+    assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
     //Third try
     triggerContext.update(actDateDayLate, actDateDayLate, actDateDayLate);
     final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
@@ -199,7 +200,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     dayOfMonth = secondZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
     String thirdLastDateStr = thirdZonedDateTime.toString();
-    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13"+firstZonedDateTime.getOffset()+"[Asia/Shanghai]"));
+    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
   }
 
   @Test

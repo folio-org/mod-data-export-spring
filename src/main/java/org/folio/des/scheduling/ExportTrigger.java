@@ -106,6 +106,7 @@ public class ExportTrigger implements Trigger {
     Date nowDate = new Date();
     if (lastActualExecutionTime == null) {
       nextExecutionTime.setTime(nowDate);
+      nextExecutionTime.add(Calendar.HOUR, 1);
     } else {
       nextExecutionTime.setTime(lastActualExecutionTime);
       long diffHours = (nowDate.getTime() - nextExecutionTime.getTime().getTime())/(60 * 60 * 1000);
