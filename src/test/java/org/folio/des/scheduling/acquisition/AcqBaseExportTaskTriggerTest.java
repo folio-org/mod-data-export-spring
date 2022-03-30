@@ -235,7 +235,7 @@ class AcqBaseExportTaskTriggerTest {
     DayOfWeek firstDayOfWeek = firstZonedDateTime.getDayOfWeek();
     DayOfWeek expDay =  expMap.get(currZoneDate.getDayOfWeek());
     assertEquals(expDay, firstDayOfWeek);
-    final String EXP_TIME = "T" + expTime + (TimeZone.getTimeZone(EUROPE_MONACO).inDaylightTime(new Date()) ? "+02:00[" : "+01:00[") + EUROPE_MONACO + "]";
+    final String EXP_TIME = "T"+expTime+firstZonedDateTime.getOffset()+"["+ EUROPE_MONACO +"]";
     assertTrue(firstZonedDateTime.toString().contains(firstZonedDateTime.getDayOfMonth() + EXP_TIME));
 
     //Second try

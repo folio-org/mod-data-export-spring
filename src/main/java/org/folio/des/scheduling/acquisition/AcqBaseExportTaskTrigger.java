@@ -2,27 +2,20 @@ package org.folio.des.scheduling.acquisition;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.base.AbstractExportTaskTrigger;
+import org.folio.des.scheduling.base.ScheduleDateTimeUtil;
 import org.springframework.scheduling.TriggerContext;
 
 import lombok.Getter;
@@ -86,17 +79,16 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     default:
       return null;
     }
-
   }
 
   @SneakyThrows
   private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer everyWeek) {
-    ZonedDateTime startTime = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     if (lastActualExecutionTime == null) {
       everyWeek = 0;
     }
     startTime = findNextDayOfWeek(startTime, everyWeek);
-    return convertToOldDateFormat(startTime);
+    return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
   private ZonedDateTime findNextDayOfWeek(ZonedDateTime initZoneDateTime, Integer everyWeek) {
@@ -133,7 +125,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   @SneakyThrows
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
-    ZonedDateTime startTimeUTC = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTimeUTC = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     ZoneId zoneId = ZoneId.of("UTC");
     ZonedDateTime nowDate = Instant.now().atZone(zoneId);
     if (lastActualExecutionTime != null) {
@@ -143,53 +135,24 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
           .divide(BigDecimal.valueOf(hours), RoundingMode.FLOOR)
           .add(BigDecimal.ONE);
         startTimeUTC = startTimeUTC.plusHours(hoursToIncrease.longValue() * hours);
-      } else {
+      } else
+      {
         startTimeUTC = startTimeUTC.plusHours(hours);
       }
     }
-    return convertToOldDateFormat(startTimeUTC);
+    return ScheduleDateTimeUtil.convertToOldDateFormat(startTimeUTC, scheduleParameters);
   }
 
   @SneakyThrows
   private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
-    ZonedDateTime startTimeUTC = convertScheduleTime(lastActualExecutionTime, scheduleParameters.getScheduleTime());
+    ZonedDateTime startTimeUTC = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     if (lastActualExecutionTime != null) {
       startTimeUTC = startTimeUTC.plusDays(days);
     }
-    return convertToOldDateFormat(startTimeUTC);
+    return ScheduleDateTimeUtil.convertToOldDateFormat(startTimeUTC, scheduleParameters);
   }
 
-  private Date convertToOldDateFormat(ZonedDateTime startTime) throws ParseException {
-    if (startTime == null) {
-      throw new ParseException("Start time can not be empty", 0);
-    }
-    String format = "yyyy-MM-dd'T'HH:mm:ssX";
 
-    if (startTime.getSecond() == 0) {
-      format = "yyyy-MM-dd'T'HH:mmX";
-    }
-
-    SimpleDateFormat isoFormat = new SimpleDateFormat(format);
-    isoFormat.setTimeZone(TimeZone.getTimeZone(scheduleParameters.getTimeZone()));
-    return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString());
-  }
-
-  private ZonedDateTime convertScheduleTime(Date lastActualExecutionTime, String scheduleTime) {
-    ZoneId zoneId = ZoneId.of("UTC");
-    ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
-    if (lastActualExecutionTime != null) {
-      Instant instant = Instant.ofEpochMilli(lastActualExecutionTime.getTime());
-      startZoneDate = ZonedDateTime.ofInstant(instant, zoneId);
-    } else {
-      if (StringUtils.isNotEmpty(scheduleTime)) {
-        LocalDate nowDate = startZoneDate.toLocalDate();
-        LocalTime localTime = LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
-        zoneId =  ZoneId.of(scheduleParameters.getTimeZone());
-        return nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS);
-      }
-    }
-    return startZoneDate.truncatedTo(ChronoUnit.SECONDS);
-  }
 
   @Override
   public int hashCode() {
