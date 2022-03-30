@@ -88,6 +88,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
       everyWeek = 0;
     }
     startTime = findNextDayOfWeek(startTime, everyWeek);
+    log.info("Weekly next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTime);
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
@@ -140,6 +141,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
         startTimeUTC = startTimeUTC.plusHours(hours);
       }
     }
+    log.info("Hourly next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTimeUTC);
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTimeUTC, scheduleParameters);
   }
 
@@ -149,6 +151,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     if (lastActualExecutionTime != null) {
       startTimeUTC = startTimeUTC.plusDays(days);
     }
+    log.info("Day next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTimeUTC);
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTimeUTC, scheduleParameters);
   }
 
