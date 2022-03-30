@@ -3,7 +3,6 @@ package org.folio.des.converter.aqcuisition;
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum.NONE;
 
 import java.text.ParseException;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -62,6 +61,7 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
          }
          scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
          var lastJobExecutionDate = getLastJobExecutionDate(scheduleParameters);
+         log.info("Last job execution time for config {} is : {}", scheduleParameters.getId(), lastJobExecutionDate);
          var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, lastJobExecutionDate, ediSchedule.getEnableScheduledExport());
          exportTaskTriggers.add(trigger);
        }
