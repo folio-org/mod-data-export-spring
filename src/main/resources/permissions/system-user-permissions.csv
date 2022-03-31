@@ -3,7 +3,6 @@ feefineactions.collection.get
 accounts.transfer.post
 accounts.collection.get
 users.collection.get
-orders.item.get
 users.item.post
 users.item.put
 configuration.entries.collection.get
@@ -15,4 +14,5 @@ transfers.collection.get
 inventory-storage.service-points.collection.get
 data-export.job.collection.get
 data-export.config.collection.get
+orders.item.get
 orders-storage.purchase-orders.collection.get
