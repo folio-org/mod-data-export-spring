@@ -41,6 +41,29 @@ Institutional users should be granted the following permissions in order to use 
 - data-export.config.all
 - data-export.job.all
 
+### Deployment information
+![](https://img.shields.io/static/v1?label=&message=!WARNING&color=orange)
+ Only ONE instance should be running until the issues described below are fixed: 
+
+1. If more than one instance of the module is running, then the same export tasks will be launched by all instances.
+As a result, information will be duplicated.
+
+More details:
+[Prevents execution of the same scheduled export task from another node](https://issues.folio.org/browse/MODEXPS-75)
+
+2. If instance of the module will be restarted by Kubernetes or manually and no need to register modules again,
+because version is not changed. As a result, mandatory information for scheduling (Okapi headers, system user, tenant information)
+will not be stored in memory in a FolioExecutionContext.
+
+More details:
+[Export scheduling doesn't support work in the cluster and after restarting docker container](https://issues.folio.org/browse/MODEXPS-81)
+
+#### Short overview
+Before running scheduled task(job) there is check, that module is registered for the Okapi tenant.
+Tenant information need to define DB schema for storing information about Job and etc.
+In the post tenant API controller specific user (data-export-system-user) is created for running scheduled export tasks.
+Also Okapi headers, system user, tenant information are stored in memory in a FolioExecutionContext.
+
 ### Issue tracker
 See project [MODEXPS](https://issues.folio.org/browse/MODEXPS)
 at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker).
