@@ -28,6 +28,7 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
       boolean isJobScheduleAllowed = ScheduleUtil.isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
                                                                        contextHelper.isModuleRegistered());
       if (isJobScheduleAllowed) {
+        contextHelper.initScope();
         Job resultJob = jobService.upsert(job);
         log.info("Configured task executed for jobId: {}", resultJob.getId());
       }

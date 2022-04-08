@@ -67,7 +67,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any());
-    verify(contextHelperMock, never()).initScope();
+    verify(contextHelperMock, times(1)).initScope();
   }
 
   @Test
@@ -102,7 +102,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any());
-    verify(contextHelperMock, never()).initScope();
+    verify(contextHelperMock, times(1)).initScope();
   }
 
   @Test
