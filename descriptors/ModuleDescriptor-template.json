@@ -21,6 +21,42 @@
     {
       "id": "orders",
       "version": "12.0"
+    },
+    {
+      "id": "configuration",
+      "version": "2.0"
+    },
+    {
+      "id": "orders-storage.purchase-orders",
+      "version": "8.0"
+    },
+    {
+      "id": "finance.expense-classes",
+      "version": "2.0"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "4.4 5.0"
+    },
+    {
+      "id": "identifier-types",
+      "version": "1.2"
+    },
+    {
+      "id": "locations",
+      "version": "3.0"
+    },
+    {
+      "id": "material-types",
+      "version": "2.2"
+    },
+    {
+      "id": "service-points",
+      "version": "3.2"
+    },
+    {
+      "id": "organizations-storage.organizations",
+      "version": "3.2"
     }
   ],
   "provides": [
