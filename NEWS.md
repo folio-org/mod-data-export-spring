@@ -1,3 +1,10 @@
+## 2022-04-10 v1.3.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.1...v1.3.2)
+
+### Bug fixes
+* [MODEXPS-90](https://issues.folio.org/browse/MODEXPS-90) Fix issue with permissions for EDIFACT manual orders export
+
 ## 2022-04-10 v1.3.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.0...v1.3.1)
