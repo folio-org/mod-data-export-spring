@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.2</version>
+        <version>2.5.12</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -34,7 +34,7 @@
         <hibernate-types-52.version>2.10.3</hibernate-types-52.version>
         <spring-security-core.version>5.4.5</spring-security-core.version>
         <cql2pgjson.version>32.2.0</cql2pgjson.version>
-        <log4j2.version>2.16.0</log4j2.version> <!-- if less then vulnerable to CVE-2021-44228 and CVE-2021-45046-->
+        <log4j2.version>2.17.2</log4j2.version>
         <lombok.version>1.18.18</lombok.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <json.version>20200518</json.version>
@@ -53,6 +53,20 @@
         <testcontainers.version>1.15.1</testcontainers.version>
         <wiremock.version>2.27.2</wiremock.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-bom</artifactId>
+                <version>${log4j2.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -132,7 +146,6 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-web</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
 
         <dependency>
