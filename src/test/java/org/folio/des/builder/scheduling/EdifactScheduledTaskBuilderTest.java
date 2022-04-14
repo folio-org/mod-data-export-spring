@@ -2,7 +2,6 @@ package org.folio.des.builder.scheduling;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
@@ -56,7 +55,7 @@ class EdifactScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsert(any(), true)).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
 
@@ -66,7 +65,7 @@ class EdifactScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any());
+    verify(jobServiceMock).upsert(any(), true);
     verify(contextHelperMock, times(1)).initScope();
   }
 
@@ -91,7 +90,7 @@ class EdifactScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsert(any(), true)).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
     assertNotNull(scheduledTask.get().getJob());
@@ -101,7 +100,7 @@ class EdifactScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any());
+    verify(jobServiceMock).upsert(any(), true);
     verify(contextHelperMock, times(1)).initScope();
   }
 

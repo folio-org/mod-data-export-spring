@@ -95,13 +95,36 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
-  public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto) {
+  public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
     if (StringUtils.isBlank(result.getName())) {
       result.setName(String.format("%06d", repository.getNextJobNumber()));
     }
+    updateJobWithMandatoryFields(result);
+
+    var jobCommand = jobExecutionService.prepareStartJobCommand(result);
+
+    log.info("Upserting {}.", result);
+    result = repository.save(result);
+    log.info("Upserted {}.", result);
+
+    jobCommand.setId(result.getId());
+
+    if (withJobCommandSend) {
+      // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
+      // may not find the job by id.
+      registerSynchronization(new TransactionSynchronization() {
+        @Override public void afterCommit() {
+          jobExecutionService.sendJobCommand(jobCommand);
+        }
+      });
+    }
+    return entityToDto(result);
+  }
+
+  private void updateJobWithMandatoryFields(Job result) {
     String userName = FolioExecutionContextHelper.getUserName(context);
     if (StringUtils.isBlank(result.getSource())) {
       result.setSource(userName);
@@ -135,25 +158,6 @@ public class JobServiceImpl implements JobService {
     if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
-
-    var jobCommand = jobExecutionService.prepareStartJobCommand(result);
-
-    log.info("Upserting {}.", result);
-    result = repository.save(result);
-    log.info("Upserted {}.", result);
-
-    jobCommand.setId(result.getId());
-
-    // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
-    // may not find the job by id.
-    registerSynchronization(new TransactionSynchronization() {
-      @Override
-      public void afterCommit() {
-        jobExecutionService.sendJobCommand(jobCommand);
-      }
-    });
-
-    return entityToDto(result);
   }
 
   @Transactional

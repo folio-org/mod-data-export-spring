@@ -56,7 +56,7 @@ class BaseScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsert(any(), true)).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
 
@@ -66,7 +66,7 @@ class BaseScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any());
+    verify(jobServiceMock).upsert(any(), true);
     verify(contextHelperMock).initScope();
   }
 
@@ -91,7 +91,7 @@ class BaseScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any())).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsert(any(), true)).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
     assertNotNull(scheduledTask.get().getJob());
@@ -101,7 +101,7 @@ class BaseScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any());
+    verify(jobServiceMock).upsert(any(), true);
     verify(contextHelperMock).initScope();
   }
 
