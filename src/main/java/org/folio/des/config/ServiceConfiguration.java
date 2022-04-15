@@ -7,7 +7,6 @@ import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
 import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
 import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
 import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
-import org.folio.des.builder.job.EdifactOrdersJobCommandSchedulerBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.builder.scheduling.EdifactScheduledTaskBuilder;
@@ -26,7 +25,6 @@ import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
 import org.folio.des.scheduling.acquisition.EdifactOrdersExportJobScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
-import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
@@ -126,10 +124,8 @@ public class ServiceConfiguration {
   }
 
   @Bean ScheduledTaskBuilder edifactScheduledTaskBuilder(JobService jobService, FolioExecutionContextHelper contextHelper,
-                                  AcqSchedulingProperties acqSchedulingProperties, JobExecutionService jobExecutionService,
-                                  EdifactOrdersJobCommandSchedulerBuilder jobSchedulerCommandBuilder) {
-    return new EdifactScheduledTaskBuilder(jobService, contextHelper, acqSchedulingProperties,
-                                  jobExecutionService, jobSchedulerCommandBuilder);
+    AcqSchedulingProperties acqSchedulingProperties) {
+    return new EdifactScheduledTaskBuilder(jobService, contextHelper, acqSchedulingProperties);
   }
 
   @Bean(name = "edifactOrdersExportJobScheduler")
