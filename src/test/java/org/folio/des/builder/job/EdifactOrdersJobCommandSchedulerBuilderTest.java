@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @SpringBootTest(classes = { EdifactOrdersJobCommandSchedulerBuilderTest.MockSpringContext.class})
-public class EdifactOrdersJobCommandSchedulerBuilderTest {
+class EdifactOrdersJobCommandSchedulerBuilderTest {
   @Autowired
   private EdifactOrdersJobCommandSchedulerBuilder builder;
   @Autowired

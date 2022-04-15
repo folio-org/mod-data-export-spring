@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.EdifactOrdersJobCommandSchedulerBuilder;
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
 import org.folio.des.config.FolioExecutionContextHelper;
@@ -64,6 +65,10 @@ class EdifactScheduledTaskBuilderTest {
   private AcqSchedulingProperties acqSchedulingProperties;
   @Autowired
   private ObjectMapper objectMapper;
+  @Autowired
+  private EdifactOrdersJobCommandSchedulerBuilder edifactOrdersJobCommandSchedulerBuilder;
+  @Autowired
+  private JobExecutionService jobExecutionService;
 
   @AfterEach
   void afterEach() {
@@ -100,7 +105,7 @@ class EdifactScheduledTaskBuilderTest {
   }
 
   @Test
-  void shouldCreateTaskIfExportConfigIsProvidedWithSpecificParametersAndModuleRegistered()
+  void shouldCreateTaskIfExportConfigIsProvidedWithSpecificParametersAndModuleRegisteredAndJobIdNull()
     throws ExecutionException, InterruptedException {
     String expId = UUID.randomUUID().toString();
     UUID vendorId = UUID.randomUUID();
@@ -132,6 +137,50 @@ class EdifactScheduledTaskBuilderTest {
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
     verify(contextHelperMock, times(1)).initScope();
+    verify(edifactOrdersJobCommandSchedulerBuilder, times(0)).buildJobCommand(scheduledJob);
+    verify(jobExecutionService, times(0)).sendJobCommand(any());
+  }
+
+  @Test
+  void shouldCreateTaskIfExportConfigIsProvidedWithSpecificParametersAndModuleRegisteredAndJobIdExist()
+    throws ExecutionException, InterruptedException {
+    String expId = UUID.randomUUID().toString();
+    UUID vendorId = UUID.randomUUID();
+    ExportConfig ediConfig = new ExportConfig();
+    ediConfig.setId(expId);
+    ediConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
+    vendorEdiOrdersExportConfig.setVendorId(vendorId);
+    parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
+    ediConfig.exportTypeSpecificParameters(parameters);
+
+    doReturn(true).when(contextHelperMock).isModuleRegistered();
+    doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
+
+    Job scheduledJob = new Job();
+    scheduledJob.setId(UUID.randomUUID());
+    scheduledJob.setType(ediConfig.getType());
+    scheduledJob.setIsSystemSource(true);
+
+    JobCommand jobCommand = new JobCommand();
+    jobCommand.setId(UUID.randomUUID());
+    Mockito.when(jobServiceMock.upsert(any(), eq(false))).thenReturn(scheduledJob);
+    Mockito.when(edifactOrdersJobCommandSchedulerBuilder.buildJobCommand(scheduledJob)).thenReturn(jobCommand);
+    Mockito.doNothing().when(jobExecutionService).sendJobCommand(any());
+
+    Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
+    assertNotNull(scheduledTask.get().getJob());
+
+    ExecutorService service = Executors.newSingleThreadExecutor();
+    Future<?> actJobFuture = service.submit(scheduledTask.get().getTask());
+
+    Object actJob = actJobFuture.get();
+    service.shutdown();
+    verify(jobServiceMock).upsert(any(), eq(false));
+    verify(contextHelperMock, times(1)).initScope();
+    verify(edifactOrdersJobCommandSchedulerBuilder, times(1)).buildJobCommand(any(Job.class));
+    verify(jobExecutionService, times(1)).sendJobCommand(any());
   }
 
   @Test
