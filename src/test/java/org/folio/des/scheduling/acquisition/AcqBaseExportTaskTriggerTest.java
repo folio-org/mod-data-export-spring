@@ -20,8 +20,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;

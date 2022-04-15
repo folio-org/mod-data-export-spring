@@ -95,7 +95,7 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
-  public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto) {
+  public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
@@ -146,12 +146,13 @@ public class JobServiceImpl implements JobService {
 
     // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
     // may not find the job by id.
-    registerSynchronization(new TransactionSynchronization() {
-      @Override
-      public void afterCommit() {
-        jobExecutionService.sendJobCommand(jobCommand);
-      }
-    });
+    if (withJobCommandSend) {
+      registerSynchronization(new TransactionSynchronization() {
+        @Override public void afterCommit() {
+          jobExecutionService.sendJobCommand(jobCommand);
+        }
+      });
+    }
 
     return entityToDto(result);
   }

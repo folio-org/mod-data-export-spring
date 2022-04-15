@@ -11,7 +11,7 @@ public interface JobService {
 
   JobCollection get(Integer offset, Integer limit, String query);
 
-  Job upsert(Job job);
+  Job upsert(Job job, boolean withJobCommandSend);
 
   void deleteOldJobs();
 
