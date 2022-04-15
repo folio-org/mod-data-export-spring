@@ -1,3 +1,10 @@
+## 2022-04-15 v1.3.3
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.2...v1.3.3)
+
+### Bug fixes
+* [MODEXPS-91](https://issues.folio.org/browse/MODEXPS-91) Scheduled Job is not saved in the Lotus Bugfest Database
+
 ## 2022-04-10 v1.3.2
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.1...v1.3.2)
