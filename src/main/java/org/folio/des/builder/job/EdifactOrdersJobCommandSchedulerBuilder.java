@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.folio.de.entity.JobCommand;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,10 @@ public class EdifactOrdersJobCommandSchedulerBuilder implements JobCommandSchedu
     JobCommand jobCommand = buildBaseJobCommand(job);
     Map<String, JobParameter> params = new HashMap<>();
     try {
-      params.put("edifactOrdersExport",
-        new JobParameter(objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig())));
+      ExportTypeSpecificParameters exportTypeSpecificParameters = job.getExportTypeSpecificParameters();
+      if (exportTypeSpecificParameters != null) {
+        params.put("edifactOrdersExport", new JobParameter(objectMapper.writeValueAsString(exportTypeSpecificParameters.getVendorEdiOrdersExportConfig())));
+      }
       JobParameters jobParameters = new JobParameters(params);
       jobCommand.setJobParameters(jobParameters);
       return jobCommand;
