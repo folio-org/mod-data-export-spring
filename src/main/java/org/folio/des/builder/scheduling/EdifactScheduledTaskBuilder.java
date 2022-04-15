@@ -40,7 +40,7 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
           Job resultJob = jobService.upsert(job, false);
           log.info("Configured task saved in DB jobId: {}", resultJob.getId());
           if (resultJob.getId() != null) {
-            var jobCommand = jobSchedulerCommandBuilder.buildJobCommand(job);
+            var jobCommand = jobSchedulerCommandBuilder.buildJobCommand(resultJob);
             jobExecutionService.sendJobCommand(jobCommand);
             log.info("Configured task scheduled and KafkaTopic sent for jobId: {}", resultJob.getId());
           }
