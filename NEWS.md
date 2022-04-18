@@ -1,3 +1,10 @@
+## 2022-04-18 v1.3.4
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.3...v1.3.4)
+
+### Bug fixes
+* [MODEXPS-95](https://issues.folio.org/browse/MODEXPS-95) Authtoken required
+
 ## 2022-04-15 v1.3.3
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.2...v1.3.3)
