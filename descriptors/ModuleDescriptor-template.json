@@ -13,6 +13,10 @@
     {
       "id": "users",
       "version": "15.3"
+    },
+    {
+      "id": "circulation-logs",
+      "version": "1.2"
     }
   ],
   "provides": [
@@ -105,7 +109,9 @@
             "login.item.post",
             "perms.users.item.post",
             "perms.users.get",
-            "configuration.entries.collection.get"
+            "configuration.entries.collection.get",
+            "configuration.entries.item.post",
+            "perms.users.assign.immutable"
           ]
         },
         {

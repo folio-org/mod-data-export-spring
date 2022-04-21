@@ -1,3 +1,13 @@
+## 2022-04-14 v1.2.3
+The primary focus of this release to improve security level of application by updating used libraries versions
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.2.2...v1.2.3)
+
+* [MODEXPS-61](https://issues.folio.org/browse/MODEXPS-61) Adding perms.users.assign.immutable
+* [MODEXPS-67](https://issues.folio.org/browse/MODEXPS-67) Require circulation-logs
+* spring-boot-starter-parent 2.5.12, log4j 2.17.2: fixing CVE-2022-22965, CVE-2022-21724, CVE-2022-26520,
+  CVE-2020-36518, CVE-2022-23181, CVE-2022-22950, CVE-2021-45105, CVE-2021-44832
+
 ## 2022-03-04 v1.2.2
 The primary focus of this release is fixing several tenants usage errors for data export process
 
