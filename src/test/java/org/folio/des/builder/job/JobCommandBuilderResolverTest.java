@@ -3,6 +3,8 @@ package org.folio.des.builder.job;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,7 +36,8 @@ class JobCommandBuilderResolverTest {
     "BURSAR_FEES_FINES, BurSarFeeFinesJobCommandBuilder",
     "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
     "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
-    "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder"
+    "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",
+    "EHOLDINGS, EHoldingsJobCommandBuilder"
   })
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver(ExportType exportType,
               String expBuilderClass) {
@@ -55,14 +58,16 @@ class JobCommandBuilderResolverTest {
     "BURSAR_FEES_FINES, bursarFeeFines",
     "CIRCULATION_LOG, query",
     "BULK_EDIT_QUERY, query",
-    "EDIFACT_ORDERS_EXPORT, edifactOrdersExport"
+    "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
+    "EHOLDINGS, packageSearchQuery"
   })
   void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);
     Job job = new Job();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
+    EHoldingsExportConfig eHoldingsExportConfig = new EHoldingsExportConfig();
+    BursarFeeFines bursarFeeFines = new BursarFeeFines();
 
     bursarFeeFines.setDaysOutstanding(1);
     bursarFeeFines.addPatronGroupsItem("Test");
@@ -70,8 +75,14 @@ class JobCommandBuilderResolverTest {
     vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
     vendorEdiOrdersExportConfig.setConfigName("TestConfig");
 
+    eHoldingsExportConfig.setPackageSearchQuery("package");
+    eHoldingsExportConfig.setPackageFields(List.of("packageField"));
+    eHoldingsExportConfig.setTitleSearchQuery("title");
+    eHoldingsExportConfig.setTitleFields(List.of("titleField"));
+
     exportTypeSpecificParameters.setQuery("TestQuery");
     exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
+    exportTypeSpecificParameters.seteHoldingsExportConfig(eHoldingsExportConfig);
 
     job.setEntityType(EntityType.USER);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
