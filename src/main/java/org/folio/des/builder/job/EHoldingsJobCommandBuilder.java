@@ -27,10 +27,8 @@ public class EHoldingsJobCommandBuilder implements JobCommandBuilder {
     try {
       params.put("packageSearchQuery", new JobParameter(eHoldingsExportConfig.getPackageSearchQuery()));
       params.put("titleSearchQuery", new JobParameter(eHoldingsExportConfig.getTitleSearchQuery()));
-      params.put("packageFields",
-        new JobParameter(objectMapper.writeValueAsString(eHoldingsExportConfig.getPackageFields())));
-      params.put("titleFields",
-        new JobParameter(objectMapper.writeValueAsString(eHoldingsExportConfig.getTitleFields())));
+      params.put("packageFields", new JobParameter(objectMapper.writeValueAsString(eHoldingsExportConfig.getPackageFields())));
+      params.put("titleFields", new JobParameter(objectMapper.writeValueAsString(eHoldingsExportConfig.getTitleFields())));
       return new JobParameters(params);
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException(e);

@@ -37,7 +37,7 @@ class JobCommandBuilderResolverTest {
     "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
     "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
     "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",
-    "EHOLDINGS, EHoldingsJobCommandBuilder"
+    "E_HOLDINGS, EHoldingsJobCommandBuilder"
   })
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver(ExportType exportType,
               String expBuilderClass) {
@@ -59,7 +59,7 @@ class JobCommandBuilderResolverTest {
     "CIRCULATION_LOG, query",
     "BULK_EDIT_QUERY, query",
     "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
-    "EHOLDINGS, packageSearchQuery"
+    "E_HOLDINGS, packageSearchQuery"
   })
   void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);

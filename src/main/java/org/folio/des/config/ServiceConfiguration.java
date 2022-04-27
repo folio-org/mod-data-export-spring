@@ -124,7 +124,7 @@ public class ServiceConfiguration {
     converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
-    converters.put(ExportType.EHOLDINGS, eHoldingsJobCommandBuilder);
+    converters.put(ExportType.E_HOLDINGS, eHoldingsJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
   }
 
