@@ -6,6 +6,7 @@ import java.util.Map;
 import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
 import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
 import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
+import org.folio.des.builder.job.EHoldingsJobCommandBuilder;
 import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
 import org.folio.des.builder.job.EdifactOrdersJobCommandSchedulerBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
@@ -116,12 +117,14 @@ public class ServiceConfiguration {
   @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BulkEditQueryJobCommandBuilder bulkEditQueryJobCommandBuilder,
                           BurSarFeeFinesJobCommandBuilder burSarFeeFinesJobCommandBuilder,
                           CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
-                          EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder) {
+                          EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
+                          EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder) {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
     converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
+    converters.put(ExportType.E_HOLDINGS, eHoldingsJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
   }
 

@@ -1,8 +1,5 @@
 package org.folio.des.service;
 
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -19,11 +16,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SpringBootTest
@@ -58,22 +54,35 @@ class JobServiceTest {
   }
 
   private List<Job> createExpiredJobs() {
-    return Stream.of(ExportType.values())
-      .map(this::createJob)
-      .collect(Collectors.toList());
+    var bulkEditExportTypes = new ArrayList<Job>();
+    var exportTypes = new ArrayList<Job>();
+
+    Stream.of(ExportType.values())
+      .forEach(exportType -> {
+        if (isBulkEdit(exportType)) {
+          bulkEditExportTypes.add(createJob(exportType, DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD));
+        } else {
+          exportTypes.add(createJob(exportType, DEFAULT_JOB_EXPIRATION_PERIOD));
+        }
+      });
+
+    exportTypes.addAll(bulkEditExportTypes);
+    return exportTypes;
   }
 
-  private Job createJob(ExportType exportType) {
+  private Job createJob(ExportType exportType, int expirationPeriod) {
     var job = new Job();
-    var days = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE)
-      .contains(exportType) ? DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD : DEFAULT_JOB_EXPIRATION_PERIOD;
     job.setId(UUID.randomUUID());
     job.setType(exportType);
-    job.setUpdatedDate(getExpiredDate(days));
+    job.setUpdatedDate(getExpiredDate(expirationPeriod));
     return job;
   }
 
   private Date getExpiredDate(int days) {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+  }
+
+  private boolean isBulkEdit(ExportType exportType) {
+    return exportType.getValue().startsWith("BULK_EDIT");
   }
 }
