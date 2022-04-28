@@ -76,7 +76,7 @@ class JobCommandBuilderResolverTest {
     vendorEdiOrdersExportConfig.setConfigName("TestConfig");
 
     eHoldingsExportConfig.setRecordId("packageId");
-    eHoldingsExportConfig.setRecordType(EHoldingsExportConfig.RecordTypeEnum.valueOf("PACKAGE"));
+    eHoldingsExportConfig.setRecordType(EHoldingsExportConfig.RecordTypeEnum.PACKAGE);
     eHoldingsExportConfig.setTitleSearchFilters("titleFilters");
     eHoldingsExportConfig.setPackageFields(List.of("packageField"));
     eHoldingsExportConfig.setTitleFields(List.of("titleField"));
