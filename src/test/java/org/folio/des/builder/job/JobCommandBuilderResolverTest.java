@@ -59,7 +59,7 @@ class JobCommandBuilderResolverTest {
     "CIRCULATION_LOG, query",
     "BULK_EDIT_QUERY, query",
     "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
-    "E_HOLDINGS, packageSearchQuery"
+    "E_HOLDINGS, packageId"
   })
   void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);
@@ -75,9 +75,10 @@ class JobCommandBuilderResolverTest {
     vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
     vendorEdiOrdersExportConfig.setConfigName("TestConfig");
 
-    eHoldingsExportConfig.setPackageSearchQuery("package");
+    eHoldingsExportConfig.setPackageId("packageId");
+    eHoldingsExportConfig.setPackageSearchFilters("packageFilters");
     eHoldingsExportConfig.setPackageFields(List.of("packageField"));
-    eHoldingsExportConfig.setTitleSearchQuery("title");
+    eHoldingsExportConfig.setTitleSearchFilters("titleFilters");
     eHoldingsExportConfig.setTitleFields(List.of("titleField"));
 
     exportTypeSpecificParameters.setQuery("TestQuery");
