@@ -4,6 +4,8 @@ import static java.util.Objects.isNull;
 import lombok.RequiredArgsConstructor;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
+import static org.folio.des.domain.dto.ExportType.E_HOLDINGS;
+
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
 import org.folio.des.domain.dto.Job;
@@ -47,8 +49,11 @@ public class JobsController implements JobsApi {
   }
 
   private boolean isMissingRequiredParameters(Job job) {
-    return (BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(job.getExportTypeSpecificParameters().getQuery()))) ||
-      (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType())));
+    var exportTypeParameters = job.getExportTypeSpecificParameters();
+    var eHoldingsExportConfig = exportTypeParameters.geteHoldingsExportConfig();
+    return (BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(exportTypeParameters.getQuery()))) ||
+      (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) ||
+      (E_HOLDINGS == job.getType() && (isNull(eHoldingsExportConfig.getRecordId()) || isNull(eHoldingsExportConfig.getRecordType())));
   }
 
 }
