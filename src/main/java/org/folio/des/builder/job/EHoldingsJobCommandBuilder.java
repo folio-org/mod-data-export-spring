@@ -26,6 +26,8 @@ public class EHoldingsJobCommandBuilder implements JobCommandBuilder {
     EHoldingsExportConfig eHoldingsExportConfig = job.getExportTypeSpecificParameters().geteHoldingsExportConfig();
     try {
       params.put("packageId", new JobParameter(eHoldingsExportConfig.getPackageId()));
+      params.put("packageSearchFilters", new JobParameter(eHoldingsExportConfig.getPackageSearchFilters()));
+      params.put("titleSearchFilters", new JobParameter(eHoldingsExportConfig.getTitleSearchFilters()));
       params.put("packageFields", new JobParameter(objectMapper.writeValueAsString(eHoldingsExportConfig.getPackageFields())));
       params.put("titleFields", new JobParameter(objectMapper.writeValueAsString(eHoldingsExportConfig.getTitleFields())));
       return new JobParameters(params);
