@@ -16,7 +16,7 @@
 
   <changeSet id="MODEXPS-21@drop pgcrypto" author="Arghya_Mitra">
     <sql dbms="postgresql">
-      DROP EXTENSION pgcrypto CASCADE;
+      DROP EXTENSION IF EXISTS pgcrypto CASCADE;
     </sql>
   </changeSet>
 
