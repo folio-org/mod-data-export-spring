@@ -14,4 +14,14 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODEXPS-21@drop pgcrypto" author="Arghya_Mitra">
+    <sql dbms="postgresql">
+      DROP EXTENSION IF EXISTS pgcrypto CASCADE;
+    </sql>
+  </changeSet>
+
+  <changeSet id="MODEXPS-21@drop default value" author="Arghya_Mitra">
+    <dropDefaultValue tableName="JOB" columnName="id" />
+  </changeSet>
+
 </databaseChangeLog>
