@@ -4,12 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="MODEXPS-1@@create-pgcrypto-extension" author="prokhorovalexey">
-        <sql dbms="postgresql">
-            CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA public;
-        </sql>
-    </changeSet>
-
     <changeSet id="MODEXPS-1@@create-export-type-enum" author="prokhorovalexey">
         <sql dbms="postgresql">
             CREATE TYPE ExportType as ENUM ('CIRCULATION_LOG', 'BURSAR_FEES_FINES');
