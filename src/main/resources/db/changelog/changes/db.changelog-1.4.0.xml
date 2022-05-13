@@ -14,8 +14,4 @@
     </sql>
   </changeSet>
 
-  <changeSet id="MODEXPS-21@drop default value" author="Arghya_Mitra">
-    <dropDefaultValue tableName="JOB" columnName="id" />
-  </changeSet>
-
 </databaseChangeLog>
