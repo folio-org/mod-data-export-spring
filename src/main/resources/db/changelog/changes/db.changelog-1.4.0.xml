@@ -18,4 +18,11 @@
     <dropDefaultValue tableName="JOB" columnName="id" />
   </changeSet>
 
+  <changeSet id="MODEXPS-106@@update schemas" author="siarhei_charniak">
+    <sql dbms="postgresql">
+      ALTER TYPE IdentifierType ADD VALUE 'USER_NAME';
+      ALTER TYPE IdentifierType ADD VALUE 'EXTERNAL_SYSTEM_ID';
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
