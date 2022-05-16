@@ -32,10 +32,7 @@
 
         <folio-spring-base.version>3.0.1</folio-spring-base.version>
         <hibernate-types-52.version>2.10.3</hibernate-types-52.version>
-        <spring-security-core.version>5.4.5</spring-security-core.version>
         <cql2pgjson.version>32.2.0</cql2pgjson.version>
-        <log4j2.version>2.16.0</log4j2.version> <!-- if less then vulnerable to CVE-2021-44228 and CVE-2021-45046-->
-        <lombok.version>1.18.18</lombok.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <json.version>20200518</json.version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
@@ -48,11 +45,23 @@
         </sonar.exclusions>
 
         <!-- Test properties-->
-        <mockito.version>3.7.7</mockito.version>
         <junit-extensions.version>2.4.0</junit-extensions.version>
-        <testcontainers.version>1.15.1</testcontainers.version>
         <wiremock.version>2.27.2</wiremock.version>
     </properties>
+
+    <dependencyManagement>
+      <dependencies>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-bom</artifactId>
+            <version>1.17.1</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+
+      </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -96,7 +105,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>${spring-security-core.version}</version>
         </dependency>
 
         <dependency>
@@ -125,14 +133,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-web</artifactId>
-            <version>${log4j2.version}</version>
         </dependency>
 
         <dependency>
@@ -144,7 +150,6 @@
       <dependency>
         <groupId>com.fasterxml.jackson.datatype</groupId>
         <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>2.13.1</version>
       </dependency>
 
         <!-- Test dependencies -->
@@ -166,7 +171,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -178,17 +182,34 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>mockserver</artifactId>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-client-java</artifactId>
+            <version>5.13.2</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-standalone</artifactId>
@@ -201,6 +222,13 @@
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -221,7 +249,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.8.1</version>
                 <configuration>
                     <generateBackupPoms>false</generateBackupPoms>
                 </configuration>
@@ -255,7 +282,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -398,6 +424,19 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
+            </plugin>
+
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-failsafe-plugin</artifactId>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>integration-test</goal>
+                    <goal>verify</goal>
+                  </goals>
+                </execution>
+              </executions>
             </plugin>
 
             <plugin>
