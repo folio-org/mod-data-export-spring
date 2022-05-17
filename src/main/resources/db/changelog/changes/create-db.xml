@@ -39,6 +39,7 @@
     </changeSet>
 
     <changeSet id="MODEXPS-1@@create-job-table" author="prokhorovalexey">
+      <validCheckSum>8:391da81abf067f0194a61ff7e09e5ed7</validCheckSum>
         <createTable tableName="job">
             <column name="id" type="uuid">
                 <constraints primaryKey="true" primaryKeyName="pk_job" nullable="false"/>
