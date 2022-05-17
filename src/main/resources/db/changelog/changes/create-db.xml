@@ -40,7 +40,7 @@
 
     <changeSet id="MODEXPS-1@@create-job-table" author="prokhorovalexey">
         <createTable tableName="job">
-            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+            <column name="id" type="uuid">
                 <constraints primaryKey="true" primaryKeyName="pk_job" nullable="false"/>
             </column>
 

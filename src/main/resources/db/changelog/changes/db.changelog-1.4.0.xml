@@ -14,10 +14,6 @@
     </sql>
   </changeSet>
 
-  <changeSet id="MODEXPS-21@drop default value" author="Arghya_Mitra">
-    <dropDefaultValue tableName="JOB" columnName="id" />
-  </changeSet>
-
   <changeSet id="MODEXPS-106@@update schemas" author="siarhei_charniak">
     <sql dbms="postgresql">
       ALTER TYPE IdentifierType ADD VALUE 'USER_NAME';
