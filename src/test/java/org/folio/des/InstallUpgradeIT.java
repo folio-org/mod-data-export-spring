@@ -88,7 +88,7 @@ public class InstallUpgradeIT {
   }
 
   @BeforeAll
-  public static void beforeClass() {
+  static void beforeClass() {
     RestAssured.reset();
     RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     RestAssured.baseURI = "http://" + MOD_DES.getHost() + ":" + MOD_DES.getFirstMappedPort();
@@ -105,7 +105,7 @@ public class InstallUpgradeIT {
   }
 
   @BeforeEach
-  public void beforeEach() {
+  void beforeEach() {
     RestAssured.requestSpecification = null;
   }
 
@@ -118,7 +118,7 @@ public class InstallUpgradeIT {
   }
 
   @Test
-  public void health() {
+  void health() {
     when().
       get("/admin/health").
     then().
@@ -144,7 +144,7 @@ public class InstallUpgradeIT {
   }
 
   @Test
-  public void installAndUpgrade() {
+  void installAndUpgrade() {
     setTenant("latest");
     postTenant(new JsonObject().put("module_to", "999999.0.0"));
     // migrate from 0.0.0, migration should be idempotent
@@ -154,7 +154,7 @@ public class InstallUpgradeIT {
   }
 
   @Test
-  public void upgradeFromKiwi() {
+  void upgradeFromKiwi() {
     // load database dump of Kiwi R2 2021 version of mod-data-export-spring
     postgresExec("psql", "-U", POSTGRES.getUsername(), "-d", POSTGRES.getDatabaseName(),
         "-f", "v1.2.3.sql");
