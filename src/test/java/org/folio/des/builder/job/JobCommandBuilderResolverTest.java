@@ -59,7 +59,7 @@ class JobCommandBuilderResolverTest {
     "CIRCULATION_LOG, query",
     "BULK_EDIT_QUERY, query",
     "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
-    "E_HOLDINGS, recordId"
+    "E_HOLDINGS, eHoldingsExportConfig"
   })
   void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);

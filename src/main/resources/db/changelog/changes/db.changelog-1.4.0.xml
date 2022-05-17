@@ -25,4 +25,10 @@
     <dropDefaultValue tableName="JOB" columnName="id" />
   </changeSet>
 
+  <changeSet id="MODEXPS-94@@export e-holdings" author="shans-kaluhin">
+    <sql dbms="postgresql">
+      ALTER TYPE ExportType ADD VALUE 'E_HOLDINGS';
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
