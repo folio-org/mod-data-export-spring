@@ -1,5 +1,7 @@
 package org.folio.des.validator.acquisition;
 
+import org.apache.commons.lang3.StringUtils;
+import org.folio.des.domain.dto.EdiConfig;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -36,6 +38,14 @@ public class EdifactOrdersExportParametersValidator implements Validator {
       String msg = String.format("%s type should contain %s parameters", ExportType.EDIFACT_ORDERS_EXPORT.getValue(),
                             VendorEdiOrdersExportConfig.class.getSimpleName());
       throw new IllegalArgumentException(msg);
+    }
+    EdiConfig ediConfig = vendorEdiOrdersExportConfig.getEdiConfig();
+    if (ediConfig != null &&
+      (StringUtils.isEmpty(ediConfig.getLibEdiCode()) || ediConfig.getLibEdiType() == null || StringUtils.isEmpty(ediConfig.getVendorEdiCode()) || ediConfig.getVendorEdiType() == null)) {
+      throw new IllegalArgumentException("Export configuration is incomplete, missing library EDI code/Vendor EDI code");
+    }
+    if (vendorEdiOrdersExportConfig.getEdiFtp() != null && vendorEdiOrdersExportConfig.getEdiFtp().getFtpPort() == null) {
+      throw new IllegalArgumentException("Export configuration is incomplete, missing FTP/SFTP Port");
     }
     EdiSchedule ediSchedule = vendorEdiOrdersExportConfig.getEdiSchedule();
     if (vendorEdiOrdersExportConfig.getEdiSchedule() != null &&

@@ -14,8 +14,21 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODEXPS-106@@update schemas" author="siarhei_charniak">
+    <sql dbms="postgresql">
+      ALTER TYPE IdentifierType ADD VALUE 'USER_NAME';
+      ALTER TYPE IdentifierType ADD VALUE 'EXTERNAL_SYSTEM_ID';
+    </sql>
+  </changeSet>
+
   <changeSet id="MODEXPS-21@drop default value" author="Arghya_Mitra">
     <dropDefaultValue tableName="JOB" columnName="id" />
+  </changeSet>
+
+  <changeSet id="MODEXPS-94@@export e-holdings" author="shans-kaluhin">
+    <sql dbms="postgresql">
+      ALTER TYPE ExportType ADD VALUE 'E_HOLDINGS';
+    </sql>
   </changeSet>
 
 </databaseChangeLog>
