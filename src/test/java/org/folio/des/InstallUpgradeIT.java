@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.MediaType;
@@ -30,6 +31,7 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
 
 /**
  * Test that shaded fat uber jar and Dockerfile work.
@@ -67,7 +69,7 @@ public class InstallUpgradeIT {
     .withExposedPorts(1080);
 
   @Container
-  public static GenericContainer<?> MOD_DES =
+  public static final GenericContainer<?> MOD_DES =
     new GenericContainer<>(
       new ImageFromDockerfile("mod-data-export-spring").withFileFromPath(".", Path.of(".")))
     .withNetwork(NETWORK)
@@ -102,6 +104,19 @@ public class InstallUpgradeIT {
             .withBody("{\"totalRecords\": 0}"));
   }
 
+  @BeforeEach
+  public void beforeEach() {
+    RestAssured.requestSpecification = null;
+  }
+
+  private void setTenant(String tenant) {
+    RestAssured.requestSpecification = new RequestSpecBuilder()
+        .addHeader("X-Okapi-Url", "http://okapi:1080")
+        .addHeader("X-Okapi-Tenant", tenant)
+        .setContentType(ContentType.JSON)
+        .build();
+  }
+
   @Test
   public void health() {
     when().
@@ -109,14 +124,6 @@ public class InstallUpgradeIT {
     then().
       statusCode(200).
       body("status", is("UP"));
-  }
-
-  private void tenant(String tenant) {
-    RestAssured.requestSpecification = new RequestSpecBuilder()
-        .addHeader("X-Okapi-Url", "http://okapi:1080")
-        .addHeader("X-Okapi-Tenant", tenant)
-      .setContentType(ContentType.JSON)
-      .build();
   }
 
   private void postTenant(JsonObject body) {
@@ -138,7 +145,7 @@ public class InstallUpgradeIT {
 
   @Test
   public void installAndUpgrade() {
-    tenant("latest");
+    setTenant("latest");
     postTenant(new JsonObject().put("module_to", "999999.0.0"));
     // migrate from 0.0.0, migration should be idempotent
     postTenant(new JsonObject().put("module_to", "999999.0.0").put("module_from", "0.0.0"));
@@ -152,7 +159,7 @@ public class InstallUpgradeIT {
     postgresExec("psql", "-U", POSTGRES.getUsername(), "-d", POSTGRES.getDatabaseName(),
         "-f", "v1.2.3.sql");
 
-    tenant("kiwi");
+    setTenant("kiwi");
 
     // migrate
     postTenant(new JsonObject().put("module_to", "999999.0.0").put("module_from", "1.2.3"));
