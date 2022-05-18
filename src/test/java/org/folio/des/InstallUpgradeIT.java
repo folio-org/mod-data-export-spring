@@ -39,7 +39,7 @@ import org.testcontainers.utility.DockerImageName;
  * <p>Smoke tests: /admin/health and migration.
  */
 @Testcontainers
-public class InstallUpgradeIT {
+class InstallUpgradeIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(InstallUpgradeIT.class);
   private static final Network NETWORK = Network.newNetwork();
