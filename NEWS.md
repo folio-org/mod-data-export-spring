@@ -1,3 +1,12 @@
+## 2022-06-08 v1.3.5
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.4...v1.3.5)
+
+### Bug fixes
+* [MODEXPS-116](https://issues.folio.org/browse/MODEXPS-116) Release 1.3.5 fixing ZipException on 64-bit systems (Lotus HF#1)
+
+No module code changes. The base Docker container has been fixed.
+
 ## 2022-04-18 v1.3.4
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.3...v1.3.4)
