@@ -1,3 +1,11 @@
+## 2022-06-08 v1.2.4
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.2.3...v1.2.4)
+
+### Bug fixes
+* [MODEXPS-117](https://issues.folio.org/browse/MODEXPS-117) Release 1.2.4 fixing ZipException on 64-bit systems (Kiwi HF#4)
+
+No module code changes. The base Docker container has been fixed.
+
 ## 2022-04-14 v1.2.3
 The primary focus of this release to improve security level of application by updating used libraries versions
 
