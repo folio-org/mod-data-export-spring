@@ -36,8 +36,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 
-import io.vertx.core.json.JsonObject;
-
 class ConfigsControllerTest extends BaseTest {
 
   private static final String NEW_CONFIG_REQUEST =
@@ -65,7 +63,7 @@ class ConfigsControllerTest extends BaseTest {
     var config = new ConfigurationCollection();
     config.setTotalRecords(0);
     wireMockServer.stubFor(WireMock.get(anyUrl())
-      .willReturn(aResponse().withBody(JsonObject.mapFrom(config).encode())
+      .willReturn(aResponse().withBody(asJsonString(config))
         .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .withStatus(200)));
 
@@ -181,7 +179,7 @@ class ConfigsControllerTest extends BaseTest {
     modelConfiguration.setModule(DEFAULT_MODULE_NAME);
     modelConfiguration.setValue(UPDATE_CONFIG_REQUEST);
     wireMockServer.stubFor(WireMock.get(urlEqualTo(urlById))
-      .willReturn(aResponse().withBody(JsonObject.mapFrom(modelConfiguration).encode())
+      .willReturn(aResponse().withBody(asJsonString(modelConfiguration))
         .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .withStatus(200)));
 

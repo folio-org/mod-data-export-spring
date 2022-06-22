@@ -6,10 +6,11 @@ import static org.hamcrest.Matchers.is;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.vertx.core.json.JsonObject;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,6 +43,7 @@ import org.testcontainers.utility.DockerImageName;
 class InstallUpgradeIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(InstallUpgradeIT.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final Network NETWORK = Network.newNetwork();
 
   @Container
@@ -126,9 +128,9 @@ class InstallUpgradeIT {
       body("status", is("UP"));
   }
 
-  private void postTenant(JsonObject body) {
+  private void postTenant(ObjectNode body) {
     given().
-      body(body.encodePrettily()).
+      body(body.toPrettyString()).
     when().
       post("/_/tenant").
     then().
@@ -146,9 +148,9 @@ class InstallUpgradeIT {
   @Test
   void installAndUpgrade() {
     setTenant("latest");
-    postTenant(new JsonObject().put("module_to", "999999.0.0"));
+    postTenant(createObjectNode().put("module_to", "999999.0.0"));
     // migrate from 0.0.0, migration should be idempotent
-    postTenant(new JsonObject().put("module_to", "999999.0.0").put("module_from", "0.0.0"));
+    postTenant(createObjectNode().put("module_to", "999999.0.0").put("module_from", "0.0.0"));
 
     smokeTest();
   }
@@ -162,9 +164,13 @@ class InstallUpgradeIT {
     setTenant("kiwi");
 
     // migrate
-    postTenant(new JsonObject().put("module_to", "999999.0.0").put("module_from", "1.2.3"));
+    postTenant(createObjectNode().put("module_to", "999999.0.0").put("module_from", "1.2.3"));
 
     smokeTest();
+  }
+
+  static ObjectNode createObjectNode() {
+    return OBJECT_MAPPER.createObjectNode();
   }
 
   static void postgresExec(String... command) {
