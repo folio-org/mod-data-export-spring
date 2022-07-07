@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.AuthClient;
+import org.folio.des.client.UsersClient;
 import org.folio.des.domain.dto.SystemUserParameters;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
   private final AuthClient authClient;
-  private final SecurityManagerService securityManagerService;
+  private final UsersClient usersClient;
 
   @Value("${folio.system.username}")
   private String username;
@@ -38,8 +39,8 @@ public class AuthService {
     var token = authResponse.getHeaders().get(XOkapiHeaders.TOKEN);
     if (isNotEmpty(token)) {
       userParameters.setOkapiToken(token.get(0));
-      securityManagerService.getUser(username).ifPresentOrElse(user -> userParameters.setUserId(user.getId()),
-        () -> log.error("Can't find user id by username {}.", username));
+      usersClient.getUsersByQuery("username==" + username).getUsers().stream().findFirst().ifPresentOrElse(user ->
+        userParameters.setUserId(user.getId()), () -> log.error("Can't find user id by username {}.", username));
       log.info("Logged in as {}.", username);
     } else {
       log.error("Can't get token logging in as {}.", username);
