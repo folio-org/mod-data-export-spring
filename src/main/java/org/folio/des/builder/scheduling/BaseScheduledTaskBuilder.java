@@ -47,6 +47,7 @@ public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
       scheduledJob.setType(exportConfig.getType());
       scheduledJob.setIsSystemSource(true);
       scheduledJob.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
+      scheduledJob.setTenant(exportConfig.getTenant());
       log.info("Scheduled job assigned {}.", scheduledJob);
       return Optional.of(scheduledJob);
     }

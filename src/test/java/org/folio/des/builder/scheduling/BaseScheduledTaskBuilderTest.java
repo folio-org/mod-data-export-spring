@@ -50,6 +50,7 @@ class BaseScheduledTaskBuilderTest {
     ExportConfig ediConfig = new ExportConfig();
     ediConfig.setId(expId);
     ediConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    ediConfig.setTenant(TENANT);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doNothing().when(contextHelperMock).initScope(TENANT);
@@ -80,6 +81,7 @@ class BaseScheduledTaskBuilderTest {
     ExportConfig ediConfig = new ExportConfig();
     ediConfig.setId(expId);
     ediConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    ediConfig.setTenant(TENANT);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
