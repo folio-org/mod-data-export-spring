@@ -16,6 +16,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -39,6 +40,7 @@ public class ExportScheduler implements SchedulingConfigurer {
   private final JobService jobService;
   private final ExportConfigService burSarExportConfigService;
   private final FolioExecutionContextHelper contextHelper;
+  private final FolioExecutionContext folioExecutionContext;
 
   private final Queue<ExportConfig> exportConfigQueue = new ConcurrentLinkedQueue<>();
   private final AtomicBoolean nextJobAllowed = new AtomicBoolean(true);
@@ -54,9 +56,10 @@ public class ExportScheduler implements SchedulingConfigurer {
       var current = new Date();
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
-        contextHelper.initScope();
+        contextHelper.initScope(scheduledJob.getTenant());
         Job resultJob = jobService.upsert(scheduledJob, true);
         log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
+        contextHelper.finishContext();
       }
 
     }, trigger);
@@ -94,10 +97,10 @@ public class ExportScheduler implements SchedulingConfigurer {
     var current = new Date();
     log.info("deleteOldJobs attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
     if (contextHelper.isModuleRegistered()) {
-      contextHelper.initScope();
+      contextHelper.initScope(scheduledJob.getTenant());
       jobService.deleteOldJobs();
+      contextHelper.finishContext();
       log.info("deleteOldJobs executed for jobId: {} at: {}", isNull(scheduledJob) ? EMPTY : scheduledJob.getId(), current);
-
     }
   }
 
@@ -116,6 +119,7 @@ public class ExportScheduler implements SchedulingConfigurer {
       scheduledJob.setType(exportConfig.getType());
       scheduledJob.setIsSystemSource(true);
       scheduledJob.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
+      scheduledJob.setTenant(exportConfig.getTenant());
     }
     log.info("Scheduled job assigned {}.", scheduledJob);
   }
@@ -124,7 +128,9 @@ public class ExportScheduler implements SchedulingConfigurer {
     Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
     if (savedConfig.isPresent()) {
       log.info("Got {}.", savedConfig.get());
-      return savedConfig.get();
+      var exportConfig = savedConfig.get();
+      exportConfig.setTenant(folioExecutionContext.getTenantId());
+      return exportConfig;
     } else {
       log.info("No export schedules found.");
       return null;

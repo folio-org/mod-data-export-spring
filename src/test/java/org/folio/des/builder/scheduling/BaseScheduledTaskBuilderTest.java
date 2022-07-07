@@ -1,5 +1,6 @@
 package org.folio.des.builder.scheduling;
 
+import static org.folio.des.support.BaseTest.TENANT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +52,7 @@ class BaseScheduledTaskBuilderTest {
     ediConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
-    doNothing().when(contextHelperMock).initScope();
+    doNothing().when(contextHelperMock).initScope(TENANT);
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -68,7 +69,7 @@ class BaseScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(true));
-    verify(contextHelperMock).initScope();
+    verify(contextHelperMock).initScope(TENANT);
   }
 
   @Test
@@ -86,7 +87,7 @@ class BaseScheduledTaskBuilderTest {
     ediConfig.exportTypeSpecificParameters(parameters);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
-    doNothing().when(contextHelperMock).initScope();
+    doNothing().when(contextHelperMock).initScope(TENANT);
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -103,7 +104,7 @@ class BaseScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(true));
-    verify(contextHelperMock).initScope();
+    verify(contextHelperMock).initScope(TENANT);
   }
 
   public static class MockSpringContext {

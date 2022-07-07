@@ -43,7 +43,7 @@ public abstract class BaseTest {
 
   public static final int WIRE_MOCK_PORT = SocketUtils.findAvailableTcpPort();
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
-  protected static final String TENANT = "diku";
+  public static final String TENANT = "diku";
 
   public static WireMockServer wireMockServer;
   public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:13");

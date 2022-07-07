@@ -65,7 +65,7 @@ public class SecurityManagerService {
     }
   }
 
-  private Optional<User> getUser(String username) {
+  public Optional<User> getUser(String username) {
     return usersClient.getUsersByQuery("username==" + username).getUsers().stream().findFirst();
   }
 

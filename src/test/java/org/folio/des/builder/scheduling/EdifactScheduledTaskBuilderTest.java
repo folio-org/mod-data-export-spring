@@ -1,5 +1,6 @@
 package org.folio.des.builder.scheduling;
 
+import static org.folio.des.support.BaseTest.TENANT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -101,7 +102,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
-    verify(contextHelperMock, times(1)).initScope();
+    verify(contextHelperMock, times(1)).initScope(TENANT);
   }
 
   @Test
@@ -136,7 +137,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
-    verify(contextHelperMock, times(1)).initScope();
+    verify(contextHelperMock, times(1)).initScope(TENANT);
     verify(edifactOrdersJobCommandSchedulerBuilder, times(0)).buildJobCommand(scheduledJob);
     verify(jobExecutionService, times(0)).sendJobCommand(any());
   }
@@ -178,7 +179,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
-    verify(contextHelperMock, times(1)).initScope();
+    verify(contextHelperMock, times(1)).initScope(TENANT);
     verify(edifactOrdersJobCommandSchedulerBuilder, times(1)).buildJobCommand(any(Job.class));
     verify(jobExecutionService, times(1)).sendJobCommand(any());
   }
