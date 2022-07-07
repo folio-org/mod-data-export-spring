@@ -57,7 +57,9 @@ public class FolioExecutionContextHelper {
         var systemUserParameters = authService.loginSystemUser(tenantId, url);
         if (StringUtils.isNotBlank(systemUserParameters.getOkapiToken())) {
           okapiHeaders.get(tenantId).put(XOkapiHeaders.TOKEN, List.of(systemUserParameters.getOkapiToken()));
-          okapiHeaders.get(tenantId).put(XOkapiHeaders.USER_ID, List.of(systemUserParameters.getUserId()));
+          if (nonNull(systemUserParameters.getUserId())) {
+            okapiHeaders.get(tenantId).put(XOkapiHeaders.USER_ID, List.of(systemUserParameters.getUserId()));
+          }
         } else {
           throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
         }
