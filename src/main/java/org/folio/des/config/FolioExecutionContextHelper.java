@@ -1,5 +1,6 @@
 package org.folio.des.config;
 
+import static java.util.Objects.nonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
@@ -87,11 +88,11 @@ public class FolioExecutionContextHelper {
   }
 
   public static UUID getUserId(FolioExecutionContext context) {
-    String userIdStr = context.getUserId().toString();
+    var userIdStr = context.getUserId();
     UUID result = null;
-    if (StringUtils.isNotBlank(userIdStr)) {
+    if (nonNull(userIdStr)) {
       try {
-        result = UUID.fromString(userIdStr);
+        result = userIdStr;
       } catch (Exception ignore) {
         // Nothing to do
       }
