@@ -31,7 +31,7 @@ public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
       var current = new Date();
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
-        contextHelper.initScope();
+        contextHelper.initScope(job.getTenant());
         Job resultJob = jobService.upsert(job, true);
         log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
       }
@@ -47,6 +47,7 @@ public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
       scheduledJob.setType(exportConfig.getType());
       scheduledJob.setIsSystemSource(true);
       scheduledJob.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
+      scheduledJob.setTenant(exportConfig.getTenant());
       log.info("Scheduled job assigned {}.", scheduledJob);
       return Optional.of(scheduledJob);
     }

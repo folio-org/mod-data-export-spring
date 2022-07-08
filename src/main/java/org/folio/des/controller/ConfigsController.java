@@ -8,6 +8,7 @@ import org.folio.des.rest.resource.ConfigsApi;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +29,8 @@ public class ConfigsController implements ConfigsApi {
   }
 
   @Override
-  public ResponseEntity<String> postExportConfig(ExportConfig exportConfig) {
+  public ResponseEntity<String> postExportConfig(@RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
+    exportConfig.setTenant(tenantId);
     manager.postConfig(exportConfig);
     if (applyAspectExportTypes.contains(exportConfig.getType())) {
       String config = exportConfig.toString();
@@ -38,7 +40,8 @@ public class ConfigsController implements ConfigsApi {
   }
 
   @Override
-  public ResponseEntity<Void> putExportConfig(String configId, ExportConfig exportConfig) {
+  public ResponseEntity<Void> putExportConfig(String configId, @RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
+    exportConfig.setTenant(tenantId);
     manager.updateConfig(configId, exportConfig);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }

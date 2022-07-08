@@ -35,6 +35,12 @@ paths:
             schema:
               $ref: "#/components/schemas/exportConfig"
         required: true
+      parameters:
+        - name: X-Okapi-Tenant
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         '201':
           description: ''
@@ -116,6 +122,11 @@ paths:
       parameters:
         - name: id
           in: path
+          required: true
+          schema:
+            type: string
+        - name: X-Okapi-Tenant
+          in: header
           required: true
           schema:
             type: string

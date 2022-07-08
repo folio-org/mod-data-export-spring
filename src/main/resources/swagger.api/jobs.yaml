@@ -42,6 +42,12 @@ paths:
     post:
       description: Create or update a job
       operationId: upsertJob
+      parameters:
+        - name: X-Okapi-Tenant
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Job updated

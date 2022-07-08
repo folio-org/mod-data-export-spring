@@ -1,5 +1,6 @@
 package org.folio.des.builder.scheduling;
 
+import static org.folio.des.support.BaseTest.TENANT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,9 +50,10 @@ class BaseScheduledTaskBuilderTest {
     ExportConfig ediConfig = new ExportConfig();
     ediConfig.setId(expId);
     ediConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    ediConfig.setTenant(TENANT);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
-    doNothing().when(contextHelperMock).initScope();
+    doNothing().when(contextHelperMock).initScope(TENANT);
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -68,7 +70,7 @@ class BaseScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(true));
-    verify(contextHelperMock).initScope();
+    verify(contextHelperMock).initScope(TENANT);
   }
 
   @Test
@@ -79,6 +81,7 @@ class BaseScheduledTaskBuilderTest {
     ExportConfig ediConfig = new ExportConfig();
     ediConfig.setId(expId);
     ediConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    ediConfig.setTenant(TENANT);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
@@ -86,7 +89,7 @@ class BaseScheduledTaskBuilderTest {
     ediConfig.exportTypeSpecificParameters(parameters);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
-    doNothing().when(contextHelperMock).initScope();
+    doNothing().when(contextHelperMock).initScope(TENANT);
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -103,7 +106,7 @@ class BaseScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(true));
-    verify(contextHelperMock).initScope();
+    verify(contextHelperMock).initScope(TENANT);
   }
 
   public static class MockSpringContext {

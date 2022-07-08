@@ -14,6 +14,7 @@ import org.folio.des.rest.resource.JobsApi;
 import org.folio.des.service.JobService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +42,8 @@ public class JobsController implements JobsApi {
   }
 
   @Override
-  public ResponseEntity<Job> upsertJob(@Valid Job job) {
+  public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, @Valid Job job) {
+    job.setTenant(tenantId);
     if (isMissingRequiredParameters(job)) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }

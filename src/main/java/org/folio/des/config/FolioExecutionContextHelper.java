@@ -1,5 +1,6 @@
 package org.folio.des.config;
 
+import static java.util.Objects.nonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
@@ -28,12 +29,12 @@ public class FolioExecutionContextHelper {
   private final SecurityManagerService securityManagerService;
   private boolean registered = false;
 
-  private final Map<String, Collection<String>> okapiHeaders = new ConcurrentHashMap<>();
+  private final Map<String, Map<String, Collection<String>>> okapiHeaders = new ConcurrentHashMap<>();
 
   public void storeOkapiHeaders() {
     if (MapUtils.isNotEmpty(folioExecutionContext.getOkapiHeaders())) {
       log.info("Got OKAPI headers.");
-      okapiHeaders.putAll(folioExecutionContext.getOkapiHeaders());
+      okapiHeaders.put(folioExecutionContext.getTenantId(), folioExecutionContext.getOkapiHeaders());
     }
   }
 
@@ -47,57 +48,57 @@ public class FolioExecutionContextHelper {
     return registered;
   }
 
-  public void initScope() {
-    if (MapUtils.isNotEmpty(okapiHeaders)) {
-      String tenant = getHeader(okapiHeaders, XOkapiHeaders.TENANT);
-      String url = getHeader(okapiHeaders, XOkapiHeaders.URL);
-
+  public void initScope(String tenantId) {
+    if (okapiHeaders.containsKey(tenantId) && MapUtils.isNotEmpty(okapiHeaders.get(tenantId))) {
+      String url = getHeader(tenantId, XOkapiHeaders.URL);
       FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
-          new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
-
-      var systemUserParameters = authService.loginSystemUser(tenant, url);
-      if (StringUtils.isNotBlank(systemUserParameters.getOkapiToken())) {
-        okapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserParameters.getOkapiToken()));
-        FolioExecutionScopeExecutionContextManager.endFolioExecutionContext();
-        FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
-            new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders));
-
-        log.info("FOLIO context initialized with tenant {}, user {}.", folioExecutionContext.getTenantId(),
-            folioExecutionContext.getUserId());
-      } else {
-        log.info("FOLIO context initialized with tenant {}, no logged user.", folioExecutionContext.getTenantId());
+        new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders.get(tenantId)));
+      if (okapiHeaders.get(tenantId).containsKey(XOkapiHeaders.TOKEN)) {
+        var systemUserParameters = authService.loginSystemUser(tenantId, url);
+        if (StringUtils.isNotBlank(systemUserParameters.getOkapiToken())) {
+          okapiHeaders.get(tenantId).put(XOkapiHeaders.TOKEN, List.of(systemUserParameters.getOkapiToken()));
+          if (nonNull(systemUserParameters.getUserId())) {
+            okapiHeaders.get(tenantId).put(XOkapiHeaders.USER_ID, List.of(systemUserParameters.getUserId()));
+          }
+        } else {
+          throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
+        }
       }
+      FolioExecutionScopeExecutionContextManager.beginFolioExecutionContext(
+        new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders.get(tenantId)));
+
+      log.info("FOLIO context initialized with tenant {}, user {}.", folioExecutionContext.getTenantId(),
+        folioExecutionContext.getUserId());
     } else {
-      throw new IllegalStateException("Can't log in and initialize FOLIO context because of absent OKAPI headers");
+      log.info("FOLIO context initialized with tenant {}, no logged user.", folioExecutionContext.getTenantId());
     }
   }
 
-  public static String getHeader(Map<String, Collection<String>> headers, String headerName) {
-    Collection<String> headerColl = headers == null ? null : headers.get(headerName);
+  public void finishContext() {
+    FolioExecutionScopeExecutionContextManager.endFolioExecutionContext();
+  }
+
+  private String getHeader(String tenantId, String headerName) {
+    Collection<String> headerColl = !okapiHeaders.containsKey(tenantId) ? null : okapiHeaders.get(tenantId).get(headerName);
     return headerColl == null ? null : headerColl.stream().findFirst().filter(StringUtils::isNotBlank).orElse(null);
   }
 
-  public static String getHeader(FolioExecutionContext context, String headerName) {
-    return getHeader(context.getAllHeaders(), headerName);
-  }
-
   public static String getUserName(FolioExecutionContext context) {
-    String jwt = getHeader(context, XOkapiHeaders.TOKEN);
+    String jwt = context.getToken();
     Optional<JWTokenUtils.UserInfo> userInfo = StringUtils.isBlank(jwt) ? Optional.empty() : JWTokenUtils.parseToken(jwt);
     return StringUtils.substring(userInfo.map(JWTokenUtils.UserInfo::getUserName).orElse(null), 0, 50);
   }
 
   public static UUID getUserId(FolioExecutionContext context) {
-    String userIdStr = getHeader(context, XOkapiHeaders.USER_ID);
+    var userIdStr = context.getUserId();
     UUID result = null;
-    if (StringUtils.isNotBlank(userIdStr)) {
+    if (nonNull(userIdStr)) {
       try {
-        result = UUID.fromString(userIdStr);
+        result = userIdStr;
       } catch (Exception ignore) {
         // Nothing to do
       }
     }
     return result;
   }
-
 }

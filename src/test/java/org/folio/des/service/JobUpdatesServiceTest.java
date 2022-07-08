@@ -32,7 +32,7 @@ class JobUpdatesServiceTest extends BaseTest {
 
   @BeforeEach
   void setUp() {
-    contextHelper.initScope();
+    contextHelper.initScope(TENANT);
   }
 
   @Test
