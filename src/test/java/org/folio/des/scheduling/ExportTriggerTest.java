@@ -1,13 +1,36 @@
 package org.folio.des.scheduling;
 
+import org.folio.de.entity.Job;
+import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.config.FolioExecutionContextHelper;
+import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.repository.JobDataExportRepository;
+import org.folio.des.security.AuthService;
+import org.folio.des.security.SecurityManagerService;
+import org.folio.des.service.JobExecutionService;
+import org.folio.des.service.JobService;
+import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.impl.JobServiceImpl;
+import org.folio.des.validator.ExportConfigValidatorResolver;
+import org.folio.spring.DefaultFolioExecutionContext;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.integration.XOkapiHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.folio.des.domain.dto.ExportConfig;
@@ -18,15 +41,30 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.SimpleTriggerContext;
-
 
 @SpringBootTest(classes = {ExportTrigger.class})
 class ExportTriggerTest {
 
+  private final int A_BIT_MORE_THAN_1_MINUTE = 65_000;
+
   @Autowired private ExportTrigger trigger;
+  @MockBean private ExportConfigService bursarExportConfigService;
+  @MockBean private FolioModuleMetadata folioModuleMetadata;
+  @MockBean private AuthService authService;
+  @MockBean private SecurityManagerService securityManagerService;
+  @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
+  @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
+  @MockBean private KafkaService kafka;
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -246,10 +284,48 @@ class ExportTriggerTest {
     assertEquals(adjustExpected(currHour + frequency), actLastHour);
   }
 
+  @Test
+  void dailySchedulePlusOneMinuteWithExportScheduler() throws InterruptedException {
+    var repository = mock(JobDataExportRepository.class);
+    Job job = new Job();
+    job.setId(UUID.randomUUID());
+    when(repository.save(any(Job.class))).thenReturn(job);
+    Map<String, Collection<String>> okapiHeaders = new HashMap<>();
+    okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
+    FolioExecutionContext folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
+    JobExecutionService jobExecutionService =
+      new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    JobService jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
+    FolioExecutionContextHelper folioExecutionContextHelper =
+      new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
+    folioExecutionContextHelper.registerTenant();
+    ExportScheduler exportScheduler = new ExportScheduler(
+      trigger, jobService, bursarExportConfigService, folioExecutionContextHelper, folioExecutionContext);
+    ExportConfig config = new ExportConfig();
+    config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
+    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
+    config.setScheduleTime(now.getHour() + ":" + adjustMinute(now.getMinute()) + ":00.000Z");
+    config.setScheduleFrequency(1);
+    config.setTenant("diku");
+    trigger.setConfig(config);
+    ScheduledTaskRegistrar scheduledTaskRegistrar = new ScheduledTaskRegistrar();
+    exportScheduler.configureTasks(scheduledTaskRegistrar);
+    exportScheduler.updateTasks(config);
+    TimeUnit.MILLISECONDS.sleep(A_BIT_MORE_THAN_1_MINUTE);
+  }
+
   private int adjustExpected(int expected) {
     if (expected >= 24) {
       expected -= 24;
     }
     return expected;
+  }
+
+  private String adjustMinute(int minute) {
+    if (minute < 10) {
+      return "0" + minute;
+    }
+    return String.valueOf(minute);
   }
 }

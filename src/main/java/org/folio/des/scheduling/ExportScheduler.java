@@ -96,11 +96,11 @@ public class ExportScheduler implements SchedulingConfigurer {
   public void deleteOldJobs() {
     var current = new Date();
     log.info("deleteOldJobs attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
-    if (contextHelper.isModuleRegistered()) {
+    if (contextHelper.isModuleRegistered() && nonNull(scheduledJob.getTenant())) {
       contextHelper.initScope(scheduledJob.getTenant());
       jobService.deleteOldJobs();
       contextHelper.finishContext();
-      log.info("deleteOldJobs executed for jobId: {} at: {}", isNull(scheduledJob) ? EMPTY : scheduledJob.getId(), current);
+      log.info("deleteOldJobs executed for jobId: {} at: {}", scheduledJob.getId(), current);
     }
   }
 

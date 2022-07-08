@@ -144,15 +144,7 @@ public class JobServiceImpl implements JobService {
 
     jobCommand.setId(result.getId());
 
-    // Send jobCommand to Kafka only after current transaction is committed, otherwise KafkaListener
-    // may not find the job by id.
-    if (withJobCommandSend) {
-      registerSynchronization(new TransactionSynchronization() {
-        @Override public void afterCommit() {
-          jobExecutionService.sendJobCommand(jobCommand);
-        }
-      });
-    }
+    jobExecutionService.sendJobCommand(jobCommand);
 
     return entityToDto(result);
   }
