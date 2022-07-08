@@ -8,12 +8,10 @@ import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.security.AuthService;
 import org.folio.des.security.SecurityManagerService;
 import org.folio.des.service.JobExecutionService;
-import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
-import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,16 +39,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.SimpleTriggerContext;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @SpringBootTest(classes = {ExportTrigger.class})
 class ExportTriggerTest {
@@ -292,27 +289,28 @@ class ExportTriggerTest {
     when(repository.save(any(Job.class))).thenReturn(job);
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
-    FolioExecutionContext folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    JobExecutionService jobExecutionService =
-      new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    JobService jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
-    FolioExecutionContextHelper folioExecutionContextHelper =
+    var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
+    var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
-    ExportScheduler exportScheduler = new ExportScheduler(
+    var exportScheduler = new ExportScheduler(
       trigger, jobService, bursarExportConfigService, folioExecutionContextHelper, folioExecutionContext);
-    ExportConfig config = new ExportConfig();
+    var config = new ExportConfig();
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
-    LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
+    var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
     config.setScheduleTime(now.getHour() + ":" + adjustMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);
     config.setTenant("diku");
     trigger.setConfig(config);
-    ScheduledTaskRegistrar scheduledTaskRegistrar = new ScheduledTaskRegistrar();
+    var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
     exportScheduler.configureTasks(scheduledTaskRegistrar);
     exportScheduler.updateTasks(config);
-    TimeUnit.MILLISECONDS.sleep(A_BIT_MORE_THAN_1_MINUTE);
+    await().pollDelay(A_BIT_MORE_THAN_1_MINUTE, TimeUnit.MILLISECONDS)
+      .timeout(A_BIT_MORE_THAN_1_MINUTE + 1, TimeUnit.MILLISECONDS).untilAsserted(() ->
+      assertEquals(1, scheduledTaskRegistrar.getScheduledTasks().size()));
   }
 
   private int adjustExpected(int expected) {
