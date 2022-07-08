@@ -1,3 +1,62 @@
+## 2022-07-08 v1.4.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.0...v1.4.0)
+
+### Technical tasks
+* [MODEXPS-114](https://issues.folio.org/browse/MODEXPS-114) Migrate to new progress json schema
+* [MODEXPS-79](https://issues.folio.org/browse/MODEXPS-79) Update folio-export-common schemas
+* [MODEXPS-73](https://issues.folio.org/browse/MODEXPS-73) mod-data-export-spring: folio-spring-base v4.1.0 update
+
+### Stories
+* [MODEXPS-107](https://issues.folio.org/browse/MODEXPS-107) Add migration test InstallUpgradeIT
+* [MODEXPS-106](https://issues.folio.org/browse/MODEXPS-106) Update folio-export-common schemas
+* [MODEXPS-103](https://issues.folio.org/browse/MODEXPS-103)  Improve error handling if provided data from EDIFACT export configuration has incorrect format
+* [MODEXPS-94](https://issues.folio.org/browse/MODEXPS-94) Export eHoldings: ability to create export jobs
+* [MODEXPS-39](https://issues.folio.org/browse/MODEXPS-39) Improve scheduling logic
+* [MODEXPS-21](https://issues.folio.org/browse/MODEXPS-21) Remove gen_random_uuid(), it fails in pgpool native replication
+
+### Bug fixes
+* [MODEXPS-124](https://issues.folio.org/browse/MODEXPS-124) Bursar scheduling - Morning Glory work
+
+## 2022-06-08 v1.3.5
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.4...v1.3.5)
+
+### Bug fixes
+* [MODEXPS-116](https://issues.folio.org/browse/MODEXPS-116) Release 1.3.5 fixing ZipException on 64-bit systems (Lotus HF#1)
+
+No module code changes. The base Docker container has been fixed.
+
+## 2022-04-18 v1.3.4
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.3...v1.3.4)
+
+### Bug fixes
+* [MODEXPS-95](https://issues.folio.org/browse/MODEXPS-95) Authtoken required
+
+## 2022-04-15 v1.3.3
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.2...v1.3.3)
+
+### Bug fixes
+* [MODEXPS-91](https://issues.folio.org/browse/MODEXPS-91) Scheduled Job is not saved in the Lotus Bugfest Database
+
+## 2022-04-10 v1.3.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.1...v1.3.2)
+
+### Bug fixes
+* [MODEXPS-90](https://issues.folio.org/browse/MODEXPS-90) Fix issue with permissions for EDIFACT manual orders export
+
+
+## 2022-04-10 v1.3.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.0...v1.3.1)
+
+### Bug fixes
+* [MODEXPS-70](https://issues.folio.org/browse/MODEXPS-70) Fix issue with EDIFACT Job hour scheduling after mod-data-export-spring restart or update
+* [MODEXPS-82](https://issues.folio.org/browse/MODEXPS-82) Fix issue with permissions for EDIFACT orders export
+
 ## 2022-03-03 v1.3.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.2.1...v1.3.0)
