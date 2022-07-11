@@ -44,6 +44,7 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
             jobExecutionService.sendJobCommand(jobCommand);
             log.info("Configured task scheduled and KafkaTopic sent for jobId: {}", resultJob.getId());
           }
+          contextHelper.finishContext();
       }
     };
   }
