@@ -2,54 +2,42 @@ package org.folio.des.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.Progress;
 import org.folio.des.repository.JobDataExportRepository;
-import org.folio.des.support.BaseTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
-@Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:job.sql")
-@Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
-class JobUpdatesServiceTest extends BaseTest {
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
-  @Autowired
-  private JobUpdatesService updatesService;
-  @Autowired
+@ExtendWith(MockitoExtension.class)
+class JobUpdatesServiceTest  {
+
+  @Mock
   private JobDataExportRepository repository;
-  @Autowired
-  private FolioExecutionContextHelper contextHelper;
-
-  @BeforeEach
-  void setUp() {
-    contextHelper.initScope(TENANT);
-  }
-
-  @AfterEach
-  void tearDown() {
-    contextHelper.finishContext();
-  }
+  @InjectMocks
+  private JobUpdatesService updatesService;
 
   @Test
   @DisplayName("Update job")
   void updateJob() {
-    Job job = new Job();
     var id = UUID.fromString("9d72fb44-eef7-4b9c-9bd9-f191feec6255");
+    Job job = new Job();
     job.setId(id);
     job.setBatchStatus(BatchStatus.COMPLETED);
     job.setStatus(JobStatus.SUCCESSFUL);
-    job.setDescription("Test job updated");
+    job.setDescription("Test job");
     job.setFiles(List.of("new test files"));
     job.setFileNames(List.of("new_file.json"));
     job.setStartTime(new Date());
@@ -58,18 +46,25 @@ class JobUpdatesServiceTest extends BaseTest {
     job.setExitStatus(ExitStatus.COMPLETED);
     job.setProgress(new Progress().progress(100).processed(1).total(1));
 
-    updatesService.receiveJobExecutionUpdate(job);
+    var updatedJob = new Job();
+    updatedJob.setId(id);
+    updatedJob.setBatchStatus(BatchStatus.COMPLETED);
+    updatedJob.setStatus(JobStatus.SUCCESSFUL);
+    updatedJob.setDescription("Test job updated");
+    updatedJob.setName("Updated job");
+    updatedJob.setFiles(List.of("new test files"));
+    updatedJob.setFileNames(List.of("new_file.json"));
+    updatedJob.setStartTime(new Date());
+    updatedJob.setEndTime(new Date());
+    updatedJob.setErrorDetails("No errors");
+    updatedJob.setExitStatus(ExitStatus.COMPLETED);
+    updatedJob.setProgress(new Progress().progress(100).processed(1).total(1));
 
-    final Job savedJob = repository.findById(id).orElse(null);
-    Assertions.assertAll(() -> Assertions.assertNotNull(savedJob),
-        () -> Assertions.assertEquals(job.getBatchStatus(), savedJob.getBatchStatus()),
-        () -> Assertions.assertEquals(job.getExitStatus(), savedJob.getExitStatus()),
-        () -> Assertions.assertEquals(job.getDescription(), savedJob.getDescription()),
-        () -> Assertions.assertEquals(job.getStatus(), savedJob.getStatus()),
-        () -> Assertions.assertEquals(job.getStartTime(), savedJob.getStartTime()),
-        () -> Assertions.assertEquals(job.getEndTime(), savedJob.getEndTime()),
-        () -> Assertions.assertEquals(job.getFiles(), savedJob.getFiles()),
-        () -> Assertions.assertEquals(job.getErrorDetails(), savedJob.getErrorDetails()));
+    doReturn(Optional.of(job)).when(repository).findById(id);
+
+    updatesService.receiveJobExecutionUpdate(updatedJob);
+
+    verify(repository).save(isA(Job.class));
   }
 
 }
