@@ -9,6 +9,7 @@ import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.Progress;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.support.BaseTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +34,11 @@ class JobUpdatesServiceTest extends BaseTest {
   @BeforeEach
   void setUp() {
     contextHelper.initScope(TENANT);
+  }
+
+  @AfterEach
+  void tearDown() {
+    contextHelper.finishContext();
   }
 
   @Test

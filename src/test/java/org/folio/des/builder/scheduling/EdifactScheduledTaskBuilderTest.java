@@ -103,7 +103,8 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
-    verify(contextHelperMock, times(1)).initScope(TENANT);
+    verify(contextHelperMock).initScope(TENANT);
+    verify(contextHelperMock).finishContext();
   }
 
   @Test
@@ -139,7 +140,8 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
-    verify(contextHelperMock, times(1)).initScope(TENANT);
+    verify(contextHelperMock).initScope(TENANT);
+    verify(contextHelperMock).finishContext();
     verify(edifactOrdersJobCommandSchedulerBuilder, times(0)).buildJobCommand(scheduledJob);
     verify(jobExecutionService, times(0)).sendJobCommand(any());
   }
@@ -182,7 +184,8 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(false));
-    verify(contextHelperMock, times(1)).initScope(TENANT);
+    verify(contextHelperMock).initScope(TENANT);
+    verify(contextHelperMock).finishContext();
     verify(edifactOrdersJobCommandSchedulerBuilder, times(1)).buildJobCommand(any(Job.class));
     verify(jobExecutionService, times(1)).sendJobCommand(any());
   }
