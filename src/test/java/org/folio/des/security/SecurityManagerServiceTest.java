@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.support.BaseTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,11 @@ class SecurityManagerServiceTest extends BaseTest {
   @BeforeEach
   void setUp() {
     contextHelper.initScope(TENANT);
+  }
+
+  @AfterEach
+  void tearDown() {
+    contextHelper.finishContext();
   }
 
   @Test
