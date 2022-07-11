@@ -34,6 +34,7 @@ public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
         contextHelper.initScope(job.getTenant());
         Job resultJob = jobService.upsert(job, true);
         log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
+        contextHelper.finishContext();
       }
     };
   }
