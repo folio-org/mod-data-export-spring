@@ -1,3 +1,10 @@
+## 2022-07-22 v1.4.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.0...v1.4.1)
+
+### Technical tasks
+* [MODEXPS-123](https://issues.folio.org/browse/MODEXPS-123) Close FolioExecutionContext if it is opened
+
 ## 2022-07-08 v1.4.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.0...v1.4.0)

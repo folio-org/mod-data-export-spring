@@ -54,6 +54,7 @@ class BaseScheduledTaskBuilderTest {
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doNothing().when(contextHelperMock).initScope(TENANT);
+    doNothing().when(contextHelperMock).finishContext();
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -71,6 +72,7 @@ class BaseScheduledTaskBuilderTest {
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(true));
     verify(contextHelperMock).initScope(TENANT);
+    verify(contextHelperMock).finishContext();
   }
 
   @Test
@@ -90,6 +92,7 @@ class BaseScheduledTaskBuilderTest {
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doNothing().when(contextHelperMock).initScope(TENANT);
+    doNothing().when(contextHelperMock).finishContext();
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -107,6 +110,7 @@ class BaseScheduledTaskBuilderTest {
     service.shutdown();
     verify(jobServiceMock).upsert(any(), eq(true));
     verify(contextHelperMock).initScope(TENANT);
+    verify(contextHelperMock).finishContext();
   }
 
   public static class MockSpringContext {
