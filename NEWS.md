@@ -1,3 +1,7 @@
+## v1.5.0 IN-PROGRESS
+
+* [MODEXPS-130] (https://issues.folio.org/browse/MODEXPS-130) Supports users interface version 15.3, 16.0
+
 ## 2022-07-08 v1.4.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.3.0...v1.4.0)
