@@ -27,7 +27,7 @@ public class BulkEditConfigService {
   private final ConfigurationClient configurationClient;
 
   public ConfigurationCollection getBulkEditConfigurations() {
-    return configurationClient.getConfigurations(String.format(BULK_EDIT_CONFIGURATIONS_QUERY_TEMPLATE, MODULE_NAME, CONFIG_NAME));
+    return configurationClient.getConfigurations(String.format(BULK_EDIT_CONFIGURATIONS_QUERY_TEMPLATE, MODULE_NAME, CONFIG_NAME), Integer.MAX_VALUE);
   }
 
   @SneakyThrows

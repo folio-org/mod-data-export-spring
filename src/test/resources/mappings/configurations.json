@@ -3,7 +3,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/configurations/entries?query=module%3D%3Dmod-data-export-spring%20and%20configName%3D%3Dexport_config_parameters"
+        "url": "/configurations/entries?query=module%3D%3Dmod-data-export-spring%20and%20configName%3D%3Dexport_config_parameters&limit=1"
       },
       "response": {
         "status": 200,
@@ -42,7 +42,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/configurations/entries?query=module%3D%3DBULKEDIT%20and%20configName%3D%3Dgeneral"
+        "url": "/configurations/entries?query=module%3D%3DBULKEDIT%20and%20configName%3D%3Dgeneral&limit=2147483647"
       },
       "response": {
         "status": 200,

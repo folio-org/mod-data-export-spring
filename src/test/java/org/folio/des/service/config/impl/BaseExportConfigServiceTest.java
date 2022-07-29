@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.util.List;
 import java.util.UUID;
@@ -138,7 +139,7 @@ class BaseExportConfigServiceTest {
   @DisplayName("Config is not set")
   void noConfig() throws JsonProcessingException {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var config = service.getFirstConfig();
 
@@ -149,10 +150,10 @@ class BaseExportConfigServiceTest {
   @DisplayName("Fetch empty config collection")
   void fetchEmptyConfigCollection() throws JsonProcessingException {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
-    var config = service.getConfigCollection(query);
+    var config = service.getConfigCollection(query, 1);
 
     Assertions.assertAll(
         () -> assertEquals(0, config.getTotalRecords()),
@@ -163,10 +164,10 @@ class BaseExportConfigServiceTest {
   @DisplayName("Fetch config collection")
   void fetchConfigCollection() throws JsonProcessingException {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
-    var config = service.getConfigCollection(query);
+    var config = service.getConfigCollection(query, 1);
 
     Assertions.assertAll(
         () -> assertEquals(1, config.getTotalRecords()),
@@ -185,7 +186,7 @@ class BaseExportConfigServiceTest {
   @DisplayName("Config exists and parsed correctly")
   void getConfig() throws JsonProcessingException {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var config = service.getFirstConfig();
 
