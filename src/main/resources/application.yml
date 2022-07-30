@@ -51,5 +51,8 @@ feign:
         loggerLevel: basic
 application:
   kafka:
+    topic-configuration:
+      "data-export.job.command":
+        partitions: ${DATA_EXPORT_JOB_COMMAND_TOPIC_PARTITIONS:50}
     topic-pattern: ${ENV:folio}.(.*\.)?data-export.job.update
     group-id: ${ENV:folio}-mod-data-export-spring-events-group

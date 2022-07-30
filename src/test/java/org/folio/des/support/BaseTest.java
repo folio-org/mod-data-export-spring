@@ -37,7 +37,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ContextConfiguration(initializers = BaseTest.DockerPostgreDataSourceInitializer.class)
 @AutoConfigureMockMvc
 @Testcontainers
-@EmbeddedKafka(topics = { "diku.data-export.job.update", "diku.data-export.job.command" })
+@EmbeddedKafka(topics = { "diku.data-export.job.update" })
 @EnableKafka
 public abstract class BaseTest {
 
