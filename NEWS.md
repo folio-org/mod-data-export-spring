@@ -1,3 +1,10 @@
+## 2022-08-02 v1.4.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.1...v1.4.2)
+
+### Technical tasks
+* [MODEXPS-132](https://issues.folio.org/browse/MODEXPS-132) Kafka: increase number of partitions, set concurrency level for listener and implement KafkaRecordInterceptor
+
 ## 2022-07-22 v1.4.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.0...v1.4.1)
