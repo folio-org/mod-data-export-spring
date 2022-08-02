@@ -59,16 +59,16 @@ public class ExportTypeBasedConfigManager {
     return defaultExportConfigService.postConfig(exportConfig);
   }
 
-  public ExportConfigCollection getConfigCollection(String query) {
+  public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     Optional<ExportType> exportTypeOpt = extractExportType(query);
     String normalizedQuery = normalizeQuery(exportTypeOpt, query);
     if (exportTypeOpt.isPresent()) {
       Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportTypeOpt.get());
       if (exportConfigService.isPresent()) {
-        return exportConfigService.get().getConfigCollection(normalizedQuery);
+        return exportConfigService.get().getConfigCollection(normalizedQuery, limit);
       }
     }
-    return defaultExportConfigService.getConfigCollection(normalizedQuery);
+    return defaultExportConfigService.getConfigCollection(normalizedQuery, limit);
   }
 
   public ExportConfig getConfigById(String exportConfigId) {

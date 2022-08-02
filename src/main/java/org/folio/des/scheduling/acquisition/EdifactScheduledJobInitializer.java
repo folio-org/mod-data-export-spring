@@ -30,7 +30,7 @@ public class EdifactScheduledJobInitializer {
       boolean isJobScheduleAllowed = isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
                                                           contextHelper.isModuleRegistered());
       if (isJobScheduleAllowed) {
-        ExportConfigCollection exportConfigCol = basedConfigManager.getConfigCollection(ALL_EDIFACT_ORDERS_CONFIG_QUERY);
+        ExportConfigCollection exportConfigCol = basedConfigManager.getConfigCollection(ALL_EDIFACT_ORDERS_CONFIG_QUERY, Integer.MAX_VALUE);
         exportConfigs = exportConfigCol.getConfigs();
         for (ExportConfig exportConfig : exportConfigs) {
           List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);

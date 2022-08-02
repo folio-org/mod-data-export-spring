@@ -26,13 +26,13 @@ import java.util.Map;
 public class BulkEditConfigService {
   private final ConfigurationClient configurationClient;
 
-  public ConfigurationCollection getBulkEditConfigurations() {
-    return configurationClient.getConfigurations(String.format(BULK_EDIT_CONFIGURATIONS_QUERY_TEMPLATE, MODULE_NAME, CONFIG_NAME));
+  public ConfigurationCollection getBulkEditConfigurations(Integer limit) {
+    return configurationClient.getConfigurations(String.format(BULK_EDIT_CONFIGURATIONS_QUERY_TEMPLATE, MODULE_NAME, CONFIG_NAME), limit);
   }
 
   @SneakyThrows
   public int getBulkEditJobExpirationPeriod() {
-    var configs = getBulkEditConfigurations();
+    var configs = getBulkEditConfigurations(1);
     if (!configs.getConfigs().isEmpty()) {
       var config = configs.getConfigs().get(0);
       log.info("Found bulk-edit configuration: {}", config);
@@ -43,7 +43,7 @@ public class BulkEditConfigService {
   }
 
   public void checkBulkEditConfiguration() {
-    if (getBulkEditConfigurations().getConfigs().isEmpty()) {
+    if (getBulkEditConfigurations(1).getConfigs().isEmpty()) {
       log.info("Bulk-edit configuration was not found, uploading default");
       configurationClient.postConfiguration(buildDefaultConfig());
     }

@@ -1,7 +1,6 @@
 package org.folio.des.scheduling.acquisition;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -37,7 +36,7 @@ class EdifactScheduledJobInitializerTest {
     //When
     initializer.initAllScheduledJob();
     //Then
-    verify(exportTypeBasedConfigManager, times(0)).getConfigCollection(anyString());
+    verify(exportTypeBasedConfigManager, times(0)).getConfigCollection(anyString(), eq(Integer.MAX_VALUE));
     verify(exportJobScheduler, times(0)).scheduleExportJob(any(ExportConfig.class));
   }
 
@@ -49,11 +48,11 @@ class EdifactScheduledJobInitializerTest {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(UUID.randomUUID().toString());
     configCollection.addConfigsItem(exportConfig);
-    doReturn(configCollection).when(exportTypeBasedConfigManager).getConfigCollection(anyString());
+    doReturn(configCollection).when(exportTypeBasedConfigManager).getConfigCollection(anyString(), eq(Integer.MAX_VALUE));
     //When
     initializer.initAllScheduledJob();
     //Then
-    verify(exportTypeBasedConfigManager, times(1)).getConfigCollection(anyString());
+    verify(exportTypeBasedConfigManager, times(1)).getConfigCollection(anyString(), eq(Integer.MAX_VALUE));
     verify(exportJobScheduler, times(1)).scheduleExportJob(any(ExportConfig.class));
   }
 
@@ -61,7 +60,7 @@ class EdifactScheduledJobInitializerTest {
   void shouldSkipScheduleJobsIfNoExportConfigs() {
     doReturn(false).when(contextHelper).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
-    doReturn(new ExportConfigCollection()).when(exportTypeBasedConfigManager).getConfigCollection(anyString());
+    doReturn(new ExportConfigCollection()).when(exportTypeBasedConfigManager).getConfigCollection(anyString(), eq(Integer.MAX_VALUE));
     //When
     initializer.initAllScheduledJob();
     //Then

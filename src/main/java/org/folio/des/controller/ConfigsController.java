@@ -24,8 +24,8 @@ public class ConfigsController implements ConfigsApi {
   private final ExportTypeBasedConfigManager manager;
 
   @Override
-  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query) {
-      return ResponseEntity.ok(manager.getConfigCollection(query));
+  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
+      return ResponseEntity.ok(manager.getConfigCollection(query, limit));
   }
 
   @Override

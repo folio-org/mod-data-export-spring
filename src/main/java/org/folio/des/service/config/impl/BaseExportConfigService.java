@@ -48,8 +48,8 @@ public class BaseExportConfigService implements ExportConfigService {
   }
 
   @Override
-  public ExportConfigCollection getConfigCollection(String query) {
-    ConfigurationCollection configurationCollection = client.getConfigurations(query);
+  public ExportConfigCollection getConfigCollection(String query, Integer limit) {
+    ConfigurationCollection configurationCollection = client.getConfigurations(query, limit);
     if (configurationCollection.getTotalRecords() > 0) {
       var exportConfigCollection = new ExportConfigCollection();
       configurationCollection.getConfigs().forEach(modelConfig -> exportConfigCollection
@@ -62,7 +62,7 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @Override
   public Optional<ExportConfig> getFirstConfig() {
-    var configurationCollection = getConfigCollection(StringUtils.EMPTY);
+    var configurationCollection = getConfigCollection(StringUtils.EMPTY, 1);
     if (configurationCollection.getTotalRecords() == 0) {
       return Optional.empty();
     }
