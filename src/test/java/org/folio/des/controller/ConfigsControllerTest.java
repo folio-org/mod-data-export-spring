@@ -7,6 +7,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
@@ -78,7 +79,7 @@ class ConfigsControllerTest extends BaseTest {
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.totalRecords", is(0))));
 
-    verify(configurationClient, times(1)).getConfigurations(modConfigQuery);
+    verify(configurationClient, times(1)).getConfigurations(eq(modConfigQuery), any());
   }
 
   @Test

@@ -9,6 +9,7 @@ paths:
     get:
       parameters:
         - $ref: "#/components/parameters/trait_queryable_query"
+        - $ref: "#/components/parameters/trait_pageable_limit"
       description: Get a list of data export configurations
       operationId: getExportConfigs
       responses:
@@ -208,6 +209,13 @@ components:
       description: A query string to filter rules based on matching criteria in fields.
       schema:
         type: string
+    trait_pageable_limit:
+      name: limit
+      in: query
+      description: Limit the number of elements returned in the response
+      schema:
+        default: 10
+        type: integer
   examples:
     errors:
       value:
