@@ -13,6 +13,9 @@ public interface JobService {
 
   Job upsert(Job job, boolean withJobCommandSend);
 
+  /**
+   * Deletes old jobs.
+   */
   void deleteOldJobs();
 
 }
