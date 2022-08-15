@@ -36,19 +36,25 @@ public final class ScheduleDateTimeUtil {
   }
 
   public static ZonedDateTime convertScheduleTime(Date lastActualExecutionTime, ScheduleParameters scheduleParameters) {
-    ZoneId zoneId = ZoneId.of("UTC");
-    ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
     if (lastActualExecutionTime != null) {
       Instant instant = Instant.ofEpochMilli(lastActualExecutionTime.getTime());
-      startZoneDate = ZonedDateTime.ofInstant(instant, zoneId);
+      ZoneId zoneId = ZoneId.of("UTC");
+      return ZonedDateTime.ofInstant(instant, zoneId).truncatedTo(ChronoUnit.SECONDS);
+
+    } else if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
+      LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
+      ZoneId zoneId =  ZoneId.of(scheduleParameters.getTimeZone());
+      ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
+      LocalDate nowDate = startZoneDate.toLocalDate();
+      return nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS);
+
     } else {
-      if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
-        LocalDate nowDate = startZoneDate.toLocalDate();
-        LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
-        zoneId =  ZoneId.of(scheduleParameters.getTimeZone());
-        return nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS);
-      }
+      return getUtcDateTime().truncatedTo(ChronoUnit.SECONDS);
     }
-    return startZoneDate.truncatedTo(ChronoUnit.SECONDS);
+  }
+
+  private static ZonedDateTime getUtcDateTime() {
+    ZoneId zoneId = ZoneId.of("UTC");
+    return Instant.now().atZone(zoneId);
   }
 }
