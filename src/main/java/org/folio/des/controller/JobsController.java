@@ -47,7 +47,7 @@ public class JobsController implements JobsApi {
     if (isMissingRequiredParameters(job)) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-    return new ResponseEntity<>(service.upsert(job, true), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
+    return new ResponseEntity<>(service.upsertAndSendToKafka(job, true), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
   }
 
   private boolean isMissingRequiredParameters(Job job) {

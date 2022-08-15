@@ -1,8 +1,6 @@
 package org.folio.des.scheduling;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.util.Date;
 import java.util.Optional;
@@ -57,7 +55,7 @@ public class ExportScheduler implements SchedulingConfigurer {
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
         contextHelper.initScope(scheduledJob.getTenant());
-        Job resultJob = jobService.upsert(scheduledJob, true);
+        Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
         log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
         contextHelper.finishContext();
       }
