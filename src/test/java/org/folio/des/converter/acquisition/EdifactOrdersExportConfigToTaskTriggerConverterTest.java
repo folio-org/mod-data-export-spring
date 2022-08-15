@@ -30,6 +30,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class,
                             EdifactOrdersExportConfigToTaskTriggerConverter.class})
 class EdifactOrdersExportConfigToTaskTriggerConverterTest {
+  private static final String ACC_TIME = "17:08:39";
+
   @Autowired
   EdifactOrdersExportConfigToTaskTriggerConverter converter;
   @MockBean
@@ -37,40 +39,8 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
 
   @Test
   void shouldCreateTriggerIfExportConfigIsValid() {
-    String expId = UUID.randomUUID().toString();
-    UUID vendorId = UUID.randomUUID();
-    ExportConfig exportConfig = new ExportConfig();
-    exportConfig.setId(expId);
-    exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    EdiFtp ediFtp = new EdiFtp();
+    ExportConfig exportConfig = getExportConfig();
 
-    vendorEdiOrdersExportConfig.setVendorId(vendorId);
-
-    EdiConfig ediConfig =new EdiConfig();
-    EdiSchedule accountEdiSchedule = new EdiSchedule();
-    accountEdiSchedule.enableScheduledExport(true);
-    String accTime = "17:08:39";
-    ScheduleParameters accScheduledParameters = new ScheduleParameters();
-    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
-    accScheduledParameters.setScheduleFrequency(7);
-    accScheduledParameters.setScheduleTime(accTime);
-    accScheduledParameters.setTimeZone("Pacific/Midway");
-    accountEdiSchedule.scheduleParameters(accScheduledParameters);
-    vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.setLibEdiCode("7659876");
-    ediConfig.setLibEdiType(EdiConfig.LibEdiTypeEnum._31B_US_SAN);
-    ediConfig.setVendorEdiCode("1694510");
-    ediConfig.setVendorEdiType(EdiConfig.VendorEdiTypeEnum._31B_US_SAN);
-    ediFtp.setFtpPort(22);
-
-    vendorEdiOrdersExportConfig.setEdiFtp(ediFtp);
-    vendorEdiOrdersExportConfig.setEdiConfig(ediConfig);
-
-    parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    exportConfig.exportTypeSpecificParameters(parameters);
     //When
     List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
 
@@ -78,7 +48,7 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
     ScheduleParameters accScheduleParameters = exportTaskTriggers.get(0).getScheduleParameters();
     Assertions.assertAll(
       () -> assertNotNull(accScheduleParameters.getId()),
-      () -> assertEquals(accTime, accScheduleParameters.getScheduleTime()),
+      () -> assertEquals(ACC_TIME, accScheduleParameters.getScheduleTime()),
       () -> assertEquals(7, accScheduleParameters.getScheduleFrequency()),
       () -> assertEquals("Pacific/Midway", accScheduleParameters.getTimeZone()),
       () -> assertEquals(ScheduleParameters.SchedulePeriodEnum.WEEK, accScheduleParameters.getSchedulePeriod())
@@ -87,51 +57,23 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
 
   @Test
   void shouldCreateTriggerAndSkipReassignIdForScheduledParameter() {
-    String expId = UUID.randomUUID().toString();
-    UUID vendorId = UUID.randomUUID();
-    ExportConfig exportConfig = new ExportConfig();
-    exportConfig.setId(expId);
-    exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    EdiFtp ediFtp = new EdiFtp();
+    ExportConfig exportConfig = getExportConfig();
 
-    vendorEdiOrdersExportConfig.setVendorId(vendorId);
+    UUID schedulerId = UUID.randomUUID();
+    exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .getScheduleParameters()
+      .setId(schedulerId);
 
-    EdiConfig ediConfig =new EdiConfig();
-    EdiSchedule accountEdiSchedule = new EdiSchedule();
-    accountEdiSchedule.enableScheduledExport(true);
-    String accTime = "17:08:39";
-    ScheduleParameters accScheduledParameters = new ScheduleParameters();
-    UUID scheduledId = UUID.randomUUID();
-    accScheduledParameters.setId(scheduledId);
-    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
-    accScheduledParameters.setScheduleFrequency(7);
-    accScheduledParameters.setScheduleTime(accTime);
-    accScheduledParameters.setTimeZone("Pacific/Midway");
-    accountEdiSchedule.scheduleParameters(accScheduledParameters);
-    vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.setLibEdiCode("7659876");
-    ediConfig.setLibEdiType(EdiConfig.LibEdiTypeEnum._31B_US_SAN);
-    ediConfig.setVendorEdiCode("1694510");
-    ediConfig.setVendorEdiType(EdiConfig.VendorEdiTypeEnum._31B_US_SAN);
-    ediFtp.setFtpPort(22);
-
-    vendorEdiOrdersExportConfig.setEdiFtp(ediFtp);
-    vendorEdiOrdersExportConfig.setEdiConfig(ediConfig);
-
-    parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    exportConfig.exportTypeSpecificParameters(parameters);
     //When
     List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
 
     assertEquals(1, exportTaskTriggers.size());
     ScheduleParameters accScheduleParameters = exportTaskTriggers.get(0).getScheduleParameters();
     Assertions.assertAll(
-      () -> assertEquals(scheduledId.toString(), accScheduleParameters.getId().toString()),
-      () -> assertEquals(accTime, accScheduleParameters.getScheduleTime()),
+      () -> assertEquals(schedulerId.toString(), accScheduleParameters.getId().toString()),
+      () -> assertEquals(ACC_TIME, accScheduleParameters.getScheduleTime()),
       () -> assertEquals(7, accScheduleParameters.getScheduleFrequency()),
       () -> assertEquals("Pacific/Midway", accScheduleParameters.getTimeZone()),
       () -> assertEquals(ScheduleParameters.SchedulePeriodEnum.WEEK, accScheduleParameters.getSchedulePeriod())
@@ -139,42 +81,27 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   }
 
   @Test
-  void shouldNotCreateTriggerIfShceduledParameterTypeIsNONE() {
-    String expId = UUID.randomUUID().toString();
-    UUID vendorId = UUID.randomUUID();
-    ExportConfig exportConfig = new ExportConfig();
-    exportConfig.setId(expId);
-    exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    EdiFtp ediFtp = new EdiFtp();
+  void shouldNotCreateTriggerIfScheduledParameterTypeIsNONE() {
+    ExportConfig exportConfig = getExportConfig();
+    exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .getScheduleParameters()
+      .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
 
-    vendorEdiOrdersExportConfig.setVendorId(vendorId);
+    //When
+    List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
 
-    EdiConfig ediConfig =new EdiConfig();
-    EdiSchedule accountEdiSchedule = new EdiSchedule();
-    accountEdiSchedule.enableScheduledExport(true);
-    String accTime = "17:08:39";
-    ScheduleParameters accScheduledParameters = new ScheduleParameters();
-    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
-    accScheduledParameters.setScheduleFrequency(7);
-    accScheduledParameters.setScheduleTime(accTime);
-    accScheduledParameters.setTimeZone("Pacific/Midway");
-    accountEdiSchedule.scheduleParameters(accScheduledParameters);
-    vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.setLibEdiCode("7659876");
-    ediConfig.setLibEdiType(EdiConfig.LibEdiTypeEnum._31B_US_SAN);
-    ediConfig.setVendorEdiCode("1694510");
-    ediConfig.setVendorEdiType(EdiConfig.VendorEdiTypeEnum._31B_US_SAN);
-    ediFtp.setFtpPort(22);
+    assertEquals(0, exportTaskTriggers.size());
+  }
 
-    vendorEdiOrdersExportConfig.setEdiFtp(ediFtp);
-    vendorEdiOrdersExportConfig.setEdiConfig(ediConfig);
-
-    parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    exportConfig.exportTypeSpecificParameters(parameters);
+  @Test
+  void shouldNotCreateTriggerIfSchedulerDisabled() {
+    ExportConfig exportConfig = getExportConfig();
+    exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .setEnableScheduledExport(false);
 
     //When
     List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
@@ -184,39 +111,11 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
 
   @Test
   void shouldThrowExceptionBecauseFtpPortIsNull() {
-    String expId = UUID.randomUUID().toString();
-    UUID vendorId = UUID.randomUUID();
-    ExportConfig exportConfig = new ExportConfig();
-    exportConfig.setId(expId);
-    exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-
-    vendorEdiOrdersExportConfig.setVendorId(vendorId);
-
-    EdiConfig ediConfig =new EdiConfig();
-    EdiSchedule accountEdiSchedule = new EdiSchedule();
-    accountEdiSchedule.enableScheduledExport(true);
-    String accTime = "17:08:39";
-    ScheduleParameters accScheduledParameters = new ScheduleParameters();
-    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
-    accScheduledParameters.setScheduleFrequency(7);
-    accScheduledParameters.setScheduleTime(accTime);
-    accScheduledParameters.setTimeZone("Pacific/Midway");
-    accountEdiSchedule.scheduleParameters(accScheduledParameters);
-    vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.addAccountNoListItem("account-22222");
-    ediConfig.setLibEdiCode("7659876");
-    ediConfig.setLibEdiType(EdiConfig.LibEdiTypeEnum._31B_US_SAN);
-    ediConfig.setVendorEdiCode("1694510");
-    ediConfig.setVendorEdiType(EdiConfig.VendorEdiTypeEnum._31B_US_SAN);
-
-    vendorEdiOrdersExportConfig.setEdiFtp(new EdiFtp());
-    vendorEdiOrdersExportConfig.setEdiConfig(ediConfig);
-
-    parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    exportConfig.exportTypeSpecificParameters(parameters);
+    ExportConfig exportConfig = getExportConfig();
+    exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiFtp()
+      .setFtpPort(null);
 
     Exception exception = assertThrows(IllegalArgumentException.class, () -> converter.convert(exportConfig));
 
@@ -228,6 +127,21 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
 
   @Test
   void shouldThrowExceptionBecauseVendorEdiCodeIsNull() {
+    ExportConfig exportConfig = getExportConfig();
+    exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiConfig()
+      .setVendorEdiCode(null);
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> converter.convert(exportConfig));
+
+    String expectedMessage = "Export configuration is incomplete, missing library EDI code/Vendor EDI code";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  private ExportConfig getExportConfig() {
     String expId = UUID.randomUUID().toString();
     UUID vendorId = UUID.randomUUID();
     ExportConfig exportConfig = new ExportConfig();
@@ -242,11 +156,10 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
     EdiConfig ediConfig =new EdiConfig();
     EdiSchedule accountEdiSchedule = new EdiSchedule();
     accountEdiSchedule.enableScheduledExport(true);
-    String accTime = "17:08:39";
     ScheduleParameters accScheduledParameters = new ScheduleParameters();
-    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
     accScheduledParameters.setScheduleFrequency(7);
-    accScheduledParameters.setScheduleTime(accTime);
+    accScheduledParameters.setScheduleTime(ACC_TIME);
     accScheduledParameters.setTimeZone("Pacific/Midway");
     accountEdiSchedule.scheduleParameters(accScheduledParameters);
     vendorEdiOrdersExportConfig.setEdiSchedule(accountEdiSchedule);
@@ -254,6 +167,7 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
     ediConfig.addAccountNoListItem("account-22222");
     ediConfig.setLibEdiCode("7659876");
     ediConfig.setLibEdiType(EdiConfig.LibEdiTypeEnum._31B_US_SAN);
+    ediConfig.setVendorEdiCode("1694510");
     ediConfig.setVendorEdiType(EdiConfig.VendorEdiTypeEnum._31B_US_SAN);
     ediFtp.setFtpPort(22);
 
@@ -263,12 +177,6 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
 
     parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     exportConfig.exportTypeSpecificParameters(parameters);
-
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> converter.convert(exportConfig));
-
-    String expectedMessage = "Export configuration is incomplete, missing library EDI code/Vendor EDI code";
-    String actualMessage = exception.getMessage();
-
-    assertTrue(actualMessage.contains(expectedMessage));
+    return exportConfig;
   }
 }
