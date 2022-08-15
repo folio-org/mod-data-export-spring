@@ -36,17 +36,18 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
 
     List<ExportTaskTrigger> exportTaskTriggers = new ArrayList<>(1);
     Optional.ofNullable(specificParameters.getVendorEdiOrdersExportConfig())
-            .map(VendorEdiOrdersExportConfig::getEdiSchedule)
-            .ifPresent(ediSchedule -> {
+      .map(VendorEdiOrdersExportConfig::getEdiSchedule)
+      .ifPresent(ediSchedule -> {
         ScheduleParameters scheduleParameters = ediSchedule.getScheduleParameters();
-        if (scheduleParameters != null && !NONE.equals(scheduleParameters.getSchedulePeriod())) {
-         if (scheduleParameters.getId() == null) {
+        if (scheduleParameters == null || !ediSchedule.getEnableScheduledExport() || NONE.equals(scheduleParameters.getSchedulePeriod())) {
+          return;
+        }
+        if (scheduleParameters.getId() == null) {
            scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
-         }
-         scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
-                var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, ediSchedule.getEnableScheduledExport());
-         exportTaskTriggers.add(trigger);
-       }
+        }
+        scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
+        var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, ediSchedule.getEnableScheduledExport());
+        exportTaskTriggers.add(trigger);
     });
     return exportTaskTriggers;
   }
