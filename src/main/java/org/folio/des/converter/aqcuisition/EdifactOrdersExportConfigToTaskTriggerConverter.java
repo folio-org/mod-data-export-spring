@@ -38,7 +38,7 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
       .ifPresent(ediSchedule -> {
         ScheduleParameters scheduleParams = ediSchedule.getScheduleParameters();
         if (isScheduleTimePresent(scheduleParams)) {
-          if (scheduleParams.getId() == null) {
+          if (Objects.isNull(scheduleParams.getId())) {
             scheduleParams.setId(UUID.fromString(exportConfig.getId()));
           }
           scheduleParams.setTimeZone(scheduleParams.getTimeZone());
