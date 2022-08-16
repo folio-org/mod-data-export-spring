@@ -14,7 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Log4j2
@@ -46,6 +50,6 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
   }
 
   private boolean isScheduleTimePresent(ScheduleParameters params) {
-    return !Objects.isNull(params) && !Objects.isNull(params.getScheduleTime());
+    return Objects.nonNull(params) && Objects.nonNull(params.getScheduleTime());
   }
 }
