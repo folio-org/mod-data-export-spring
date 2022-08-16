@@ -81,32 +81,64 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   }
 
   @Test
-  void shouldNotCreateTriggerIfScheduledParameterTypeIsNONE() {
+  void shouldCreateTriggerIfScheduledParameterTypeIsNONEButScheduleTimeSet() {
+    // we need to create trigger even if scheduler period is NONE, because this trigger is required to delete existing scheduler task for this case
+    ExportConfig exportConfig = getExportConfig();
+    ScheduleParameters scheduleParams = exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .getScheduleParameters();
+
+    scheduleParams.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+    scheduleParams.setScheduleTime(ACC_TIME);
+
+    //When
+    List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
+
+    assertEquals(1, exportTaskTriggers.size());
+  }
+
+  @Test
+  void shouldCreateTriggerIfSchedulerDisabledButScheduleTimeSet() {
+    // we need to create trigger even scheduler disabled, because this trigger is required to delete existing scheduler task for this case
+    ExportConfig exportConfig = getExportConfig();
+    EdiSchedule ediSchedule = exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule();
+
+    ediSchedule.setEnableScheduledExport(false);
+    ediSchedule.getScheduleParameters().setScheduleTime(ACC_TIME);
+
+    //When
+    List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
+
+    assertEquals(1, exportTaskTriggers.size());
+  }
+
+  @Test
+  void shouldNotCreateTriggerIfSchedulerParamsAreNull() {
     ExportConfig exportConfig = getExportConfig();
     exportConfig.getExportTypeSpecificParameters()
       .getVendorEdiOrdersExportConfig()
       .getEdiSchedule()
-      .getScheduleParameters()
-      .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+      .scheduleParameters(null);
 
-    //When
     List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
 
     assertEquals(0, exportTaskTriggers.size());
   }
 
   @Test
-  void shouldNotCreateTriggerIfSchedulerDisabled() {
+  void shouldNotCreateTriggerIfSchedulerTimeIsNull() {
     ExportConfig exportConfig = getExportConfig();
     exportConfig.getExportTypeSpecificParameters()
       .getVendorEdiOrdersExportConfig()
       .getEdiSchedule()
-      .setEnableScheduledExport(false);
+      .getScheduleParameters()
+      .scheduleTime(null);
 
-    //When
-    List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
-
-    assertEquals(0, exportTaskTriggers.size());
+    assertThrows(IllegalArgumentException.class, () -> converter.convert(exportConfig),
+      "EDIFACT_ORDERS_EXPORT scheduled parameters should contain scheduled time");
   }
 
   @Test

@@ -160,6 +160,16 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
+  /**
+   * This method normalized date because if date was in past - spring scheduler invoked it now, that is not the desired behaviour.
+   * Some examples for this new logic:
+   * User selects 13.30 as a start time and current time is 16.10 - next run will be at 16.30
+   * User selects 13.10 as a start time and current time is 16.40 - next run will be at 17.10
+   *
+   * @param startTime the start time
+   * @param nowTime the now time
+   * @return normalized time
+   */
   private ZonedDateTime normalizeIfNextRunInPast(ZonedDateTime startTime, ZonedDateTime nowTime) {
     if (startTime.isBefore(nowTime)) {
       if (startTime.getMinute() > nowTime.getMinute()) {
