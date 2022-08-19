@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.base.AbstractExportTaskTrigger;
 import org.folio.des.scheduling.base.ScheduleDateTimeUtil;
@@ -126,36 +127,64 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   @SneakyThrows
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
-    ZonedDateTime startTimeUTC = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
-    ZoneId zoneId = ZoneId.of("UTC");
-    ZonedDateTime nowDate = Instant.now().atZone(zoneId);
+    ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
+
     if (lastActualExecutionTime != null) {
-      long diffHours = (nowDate.toInstant().toEpochMilli() - startTimeUTC.toInstant().toEpochMilli())/(60 * 60 * 1000);
+      ZoneId zoneId = ZoneId.of("UTC");
+      ZonedDateTime nowDate = Instant.now().atZone(zoneId);
+      long diffHours = (nowDate.toInstant().toEpochMilli() - startTime.toInstant().toEpochMilli())/(60 * 60 * 1000);
       if (diffHours > 0 && hours !=0 && diffHours > hours) {
         BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
           .divide(BigDecimal.valueOf(hours), RoundingMode.FLOOR)
           .add(BigDecimal.ONE);
-        startTimeUTC = startTimeUTC.plusHours(hoursToIncrease.longValue() * hours);
-      } else
-      {
-        startTimeUTC = startTimeUTC.plusHours(hours);
+        startTime = startTime.plusHours(hoursToIncrease.longValue() * hours);
+      } else {
+        startTime = startTime.plusHours(hours);
       }
     }
-    log.info("Hourly next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTimeUTC);
-    return ScheduleDateTimeUtil.convertToOldDateFormat(startTimeUTC, scheduleParameters);
+
+    startTime = normalizeIfNextRunInPast(startTime, getNowDateTime(scheduleParameters.getTimeZone()));
+
+    log.info("Hourly next schedule execution time in {} for config {} is : {}", scheduleParameters.getTimeZone(), scheduleParameters.getId(), startTime);
+    return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
   @SneakyThrows
   private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
-    ZonedDateTime startTimeUTC = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
+    ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     if (lastActualExecutionTime != null) {
-      startTimeUTC = startTimeUTC.plusDays(days);
+      startTime = startTime.plusDays(days);
     }
-    log.info("Day next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTimeUTC);
-    return ScheduleDateTimeUtil.convertToOldDateFormat(startTimeUTC, scheduleParameters);
+
+    log.info("Day next schedule execution time in {} for config {} is : {}", scheduleParameters.getTimeZone(), scheduleParameters.getId(), startTime);
+    return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
+  /**
+   * This method normalized date because if date was in past - spring scheduler invoked it now, that is not the desired behaviour.
+   * Some examples for this new logic:
+   * User selects 13.30 as a start time and current time is 16.10 - next run will be at 16.30
+   * User selects 13.10 as a start time and current time is 16.40 - next run will be at 17.10
+   *
+   * @param startTime the start time
+   * @param nowTime the now time
+   * @return normalized time
+   */
+  private ZonedDateTime normalizeIfNextRunInPast(ZonedDateTime startTime, ZonedDateTime nowTime) {
+    if (startTime.isBefore(nowTime)) {
+      if (startTime.getMinute() > nowTime.getMinute()) {
+        return nowTime.withMinute(startTime.getMinute());
+      } else {
+        return nowTime.plusHours(1).withMinute(startTime.getMinute());
+      }
+    }
+    return startTime;
+  }
 
+  private ZonedDateTime getNowDateTime(String timeZoneId) {
+    ZoneId zoneId = ZoneId.of(StringUtils.defaultIfBlank(timeZoneId, "UTC"));
+    return Instant.now().atZone(zoneId);
+  }
 
   @Override
   public int hashCode() {

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ConfigurationClient {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  ConfigurationCollection getConfigurations(@RequestParam("query") String query);
+  ConfigurationCollection getConfigurations(@RequestParam("query") String query, @RequestParam("limit") Integer limit);
 
   @PostMapping
   ModelConfiguration postConfiguration(@RequestBody ModelConfiguration config);

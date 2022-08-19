@@ -1,12 +1,7 @@
 package org.folio.des.converter.aqcuisition;
 
-import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum.NONE;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ScheduleParameters;
@@ -19,8 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Log4j2
@@ -36,18 +34,22 @@ public class EdifactOrdersExportConfigToTaskTriggerConverter implements Converte
 
     List<ExportTaskTrigger> exportTaskTriggers = new ArrayList<>(1);
     Optional.ofNullable(specificParameters.getVendorEdiOrdersExportConfig())
-            .map(VendorEdiOrdersExportConfig::getEdiSchedule)
-            .ifPresent(ediSchedule -> {
-        ScheduleParameters scheduleParameters = ediSchedule.getScheduleParameters();
-        if (scheduleParameters != null && !NONE.equals(scheduleParameters.getSchedulePeriod())) {
-         if (scheduleParameters.getId() == null) {
-           scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
-         }
-         scheduleParameters.setTimeZone(scheduleParameters.getTimeZone());
-                var trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, ediSchedule.getEnableScheduledExport());
-         exportTaskTriggers.add(trigger);
-       }
+      .map(VendorEdiOrdersExportConfig::getEdiSchedule)
+      .ifPresent(ediSchedule -> {
+        ScheduleParameters scheduleParams = ediSchedule.getScheduleParameters();
+        if (isScheduleTimePresent(scheduleParams)) {
+          if (Objects.isNull(scheduleParams.getId())) {
+            scheduleParams.setId(UUID.fromString(exportConfig.getId()));
+          }
+          scheduleParams.setTimeZone(scheduleParams.getTimeZone());
+          var trigger = new AcqBaseExportTaskTrigger(scheduleParams, null, ediSchedule.getEnableScheduledExport());
+          exportTaskTriggers.add(trigger);
+        }
     });
     return exportTaskTriggers;
+  }
+
+  private boolean isScheduleTimePresent(ScheduleParameters params) {
+    return Objects.nonNull(params) && Objects.nonNull(params.getScheduleTime());
   }
 }

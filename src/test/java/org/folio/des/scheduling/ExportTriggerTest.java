@@ -301,7 +301,7 @@ class ExportTriggerTest {
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
-    config.setScheduleTime(now.getHour() + ":" + adjustMinute(now.getMinute()) + ":00.000Z");
+    config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);
     config.setTenant("diku");
     trigger.setConfig(config);
@@ -320,10 +320,10 @@ class ExportTriggerTest {
     return expected;
   }
 
-  private String adjustMinute(int minute) {
-    if (minute < 10) {
-      return "0" + minute;
+  private String adjustHourOrMinute(int val) {
+    if (val < 10) {
+      return "0" + val;
     }
-    return String.valueOf(minute);
+    return String.valueOf(val);
   }
 }

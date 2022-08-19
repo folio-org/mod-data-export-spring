@@ -1,3 +1,12 @@
+## 2022-08-19 v1.4.3 (Morning Glory Bug Fix)
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.2...v1.4.3)
+
+### Bug fixes
+* [MODEXPS-88](https://issues.folio.org/browse/MODEXPS-88) Filter organization export logs limited to 10 options
+* [MODEXPS-97](https://issues.folio.org/browse/MODEXPS-97) Export time is set as when configuration is saved rather than the time chosen in the UI
+* [MODEXPS-137](https://issues.folio.org/browse/MODEXPS-137) Export jobs continue to run after scheduler was disabled
+
 ## 2022-08-02 v1.4.2
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.1...v1.4.2)

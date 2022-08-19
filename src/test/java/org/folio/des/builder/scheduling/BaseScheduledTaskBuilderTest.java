@@ -60,7 +60,7 @@ class BaseScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any(), eq(true))).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsertAndSendToKafka(any(), eq(true))).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
 
@@ -70,7 +70,7 @@ class BaseScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any(), eq(true));
+    verify(jobServiceMock).upsertAndSendToKafka(any(), eq(true));
     verify(contextHelperMock).initScope(TENANT);
     verify(contextHelperMock).finishContext();
   }
@@ -98,7 +98,7 @@ class BaseScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any(), eq(true))).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsertAndSendToKafka(any(), eq(true))).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
     assertNotNull(scheduledTask.get().getJob());
@@ -108,7 +108,7 @@ class BaseScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any(), eq(true));
+    verify(jobServiceMock).upsertAndSendToKafka(any(), eq(true));
     verify(contextHelperMock).initScope(TENANT);
     verify(contextHelperMock).finishContext();
   }

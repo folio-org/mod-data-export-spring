@@ -25,13 +25,13 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
   }
 
   @Override
-  public ExportConfigCollection getConfigCollection(String query) {
+  public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     return getFirstConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());
   }
 
   @Override
   public Optional<ExportConfig> getFirstConfig() {
-    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME));
+    var configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME), 1);
     if (configurationCollection.getTotalRecords() == 0) {
       return Optional.empty();
     }

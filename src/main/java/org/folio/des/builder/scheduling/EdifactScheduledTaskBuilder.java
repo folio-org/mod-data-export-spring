@@ -37,7 +37,7 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
                                                                        contextHelper.isModuleRegistered());
       if (isJobScheduleAllowed) {
           contextHelper.initScope(job.getTenant());
-          Job resultJob = jobService.upsert(job, false);
+          Job resultJob = jobService.upsertAndSendToKafka(job, false);
           log.info("Configured task saved in DB jobId: {}", resultJob.getId());
           if (resultJob.getId() != null) {
             var jobCommand = jobSchedulerCommandBuilder.buildJobCommand(resultJob);
