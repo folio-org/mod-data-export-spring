@@ -56,6 +56,10 @@ class JobsControllerTest extends BaseTest {
   private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY =
     "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {\"query\":\"barcode==123\"}, \"entityType\" : \"USER\"}";
 
+  private static final String E_HOLDINGS_REQUEST =
+    "{ \"type\": \"E_HOLDINGS\", \"exportTypeSpecificParameters\" : { \"eHoldingsExportConfig\":" +
+      "{\"recordId\":\"test\", \"recordType\" : \"PACKAGE\"}}}";
+
   @Test
   @DisplayName("Find all jobs")
   void getJobs() throws Exception {
@@ -342,6 +346,20 @@ class JobsControllerTest extends BaseTest {
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders())
           .content(content))
+      .andExpect(
+        matchAll(
+          status().isBadRequest()));
+  }
+
+  @Test
+  @DisplayName("Start new eHoldings job, should be 400")
+  void shouldReturnBadRequestWhenEholdingsJob() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(E_HOLDINGS_REQUEST))
       .andExpect(
         matchAll(
           status().isBadRequest()));

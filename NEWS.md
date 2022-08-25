@@ -1,3 +1,10 @@
+## 2022-08-25 v1.4.4 (Morning Glory Bug Fix)
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.3...v1.4.4)
+
+### Stories
+* [MODEXPS-142](https://issues.folio.org/browse/MODEXPS-142) Morning Glory: Disable eholdings export
+
 ## 2022-08-19 v1.4.3 (Morning Glory Bug Fix)
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.2...v1.4.3)
