@@ -52,10 +52,9 @@ public class JobsController implements JobsApi {
 
   private boolean isMissingRequiredParameters(Job job) {
     var exportTypeParameters = job.getExportTypeSpecificParameters();
-    var eHoldingsExportConfig = exportTypeParameters.geteHoldingsExportConfig();
     return (BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(exportTypeParameters.getQuery()))) ||
       (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) ||
-      (E_HOLDINGS == job.getType() && (isNull(eHoldingsExportConfig.getRecordId()) || isNull(eHoldingsExportConfig.getRecordType())));
+      E_HOLDINGS == job.getType();
   }
 
 }
