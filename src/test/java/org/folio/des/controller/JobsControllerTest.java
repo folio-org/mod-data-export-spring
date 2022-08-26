@@ -317,7 +317,10 @@ class JobsControllerTest extends BaseTest {
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HRID\"}",
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"FORMER_IDS\"}",
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"ACCESSION_NUMBER\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HOLDINGS_RECORD_ID\"}"
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HOLDINGS_RECORD_ID\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"ID\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"HRID\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"INSTANCE_HRID\"}"
   })
   @DisplayName("Start new bulk edit identifiers job with identifiers and entity type, should be 201")
   void postBulkEditIdentifiersJobWithIdentifiersAndEntityType(String contentString) throws Exception {
