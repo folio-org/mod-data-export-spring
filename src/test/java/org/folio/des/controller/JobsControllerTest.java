@@ -320,7 +320,8 @@ class JobsControllerTest extends BaseTest {
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HOLDINGS_RECORD_ID\"}",
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"ID\"}",
     "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"HRID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"INSTANCE_HRID\"}"
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"INSTANCE_HRID\"}",
+    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"ITEM_BARCODE\"}"
   })
   @DisplayName("Start new bulk edit identifiers job with identifiers and entity type, should be 201")
   void postBulkEditIdentifiersJobWithIdentifiersAndEntityType(String contentString) throws Exception {

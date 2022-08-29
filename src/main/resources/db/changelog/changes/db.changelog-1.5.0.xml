@@ -7,6 +7,7 @@
   <changeSet id="MODEXPS-141@@update schemas" author="siarhei_charniak">
     <sql dbms="postgresql">
       ALTER TYPE IdentifierType ADD VALUE 'INSTANCE_HRID';
+      ALTER TYPE IdentifierType ADD VALUE 'ITEM_BARCODE';
       ALTER TYPE EntityType ADD VALUE 'HOLDINGS_RECORD';
     </sql>
   </changeSet>
