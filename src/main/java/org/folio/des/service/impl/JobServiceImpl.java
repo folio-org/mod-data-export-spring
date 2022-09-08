@@ -95,7 +95,7 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
-  public org.folio.des.domain.dto.Job upsert(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
+  public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
@@ -136,15 +136,14 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    var jobCommand = jobExecutionService.prepareStartJobCommand(result);
-
     log.info("Upserting {}.", result);
     result = repository.save(result);
     log.info("Upserted {}.", result);
 
-    jobCommand.setId(result.getId());
-
-    jobExecutionService.sendJobCommand(jobCommand);
+    if (withJobCommandSend) {
+      var jobCommand = jobExecutionService.prepareStartJobCommand(result);
+      jobExecutionService.sendJobCommand(jobCommand);
+    }
 
     return entityToDto(result);
   }

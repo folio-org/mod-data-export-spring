@@ -11,7 +11,7 @@ public interface ExportConfigService {
 
   ModelConfiguration postConfig(ExportConfig exportConfig);
 
-  ExportConfigCollection getConfigCollection(String query);
+  ExportConfigCollection getConfigCollection(String query, Integer limit);
 
   Optional<ExportConfig> getFirstConfig();
 }

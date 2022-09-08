@@ -92,7 +92,7 @@ class EdifactScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any(), eq(false))).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsertAndSendToKafka(any(), eq(false))).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
 
@@ -102,7 +102,7 @@ class EdifactScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any(), eq(false));
+    verify(jobServiceMock).upsertAndSendToKafka(any(), eq(false));
     verify(contextHelperMock).initScope(TENANT);
     verify(contextHelperMock).finishContext();
   }
@@ -129,7 +129,7 @@ class EdifactScheduledTaskBuilderTest {
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
-    Mockito.when(jobServiceMock.upsert(any(), eq(false))).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsertAndSendToKafka(any(), eq(false))).thenReturn(scheduledJob);
 
     Optional<ScheduledTask> scheduledTask = builder.buildTask(ediConfig);
     assertNotNull(scheduledTask.get().getJob());
@@ -139,7 +139,7 @@ class EdifactScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any(), eq(false));
+    verify(jobServiceMock).upsertAndSendToKafka(any(), eq(false));
     verify(contextHelperMock).initScope(TENANT);
     verify(contextHelperMock).finishContext();
     verify(edifactOrdersJobCommandSchedulerBuilder, times(0)).buildJobCommand(scheduledJob);
@@ -171,7 +171,7 @@ class EdifactScheduledTaskBuilderTest {
 
     JobCommand jobCommand = new JobCommand();
     jobCommand.setId(UUID.randomUUID());
-    Mockito.when(jobServiceMock.upsert(any(), eq(false))).thenReturn(scheduledJob);
+    Mockito.when(jobServiceMock.upsertAndSendToKafka(any(), eq(false))).thenReturn(scheduledJob);
     Mockito.when(edifactOrdersJobCommandSchedulerBuilder.buildJobCommand(scheduledJob)).thenReturn(jobCommand);
     Mockito.doNothing().when(jobExecutionService).sendJobCommand(any());
 
@@ -183,7 +183,7 @@ class EdifactScheduledTaskBuilderTest {
 
     Object actJob = actJobFuture.get();
     service.shutdown();
-    verify(jobServiceMock).upsert(any(), eq(false));
+    verify(jobServiceMock).upsertAndSendToKafka(any(), eq(false));
     verify(contextHelperMock).initScope(TENANT);
     verify(contextHelperMock).finishContext();
     verify(edifactOrdersJobCommandSchedulerBuilder, times(1)).buildJobCommand(any(Job.class));

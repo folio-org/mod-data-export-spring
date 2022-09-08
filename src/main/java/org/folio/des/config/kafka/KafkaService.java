@@ -12,6 +12,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
@@ -31,6 +32,7 @@ public class KafkaService {
   private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
   private final BeanFactory beanFactory;
   private final FolioExecutionContext folioExecutionContext;
+  private final Environment springEnvironment;
 
   @Value("${env:folio}")
   private String environment;
@@ -38,9 +40,7 @@ public class KafkaService {
   @RequiredArgsConstructor
   @Getter
   public enum Topic {
-    JOB_COMMAND("data-export.job.command"),
-    JOB_UPDATE("data-export.job.update");
-
+    JOB_COMMAND("data-export.job.command");
     private final String topicName;
   }
 
@@ -71,13 +71,15 @@ public class KafkaService {
 
   private List<NewTopic> tenantSpecificTopics(String tenant) {
     return Arrays.stream(Topic.values())
-      .map(topic -> getTenantTopicName(topic.getTopicName(), tenant))
-      .map(this::toKafkaTopic)
+      .map(topic -> toKafkaTopic(tenant, topic))
       .collect(Collectors.toList());
   }
 
-  private NewTopic toKafkaTopic(String topic) {
-    return TopicBuilder.name(topic).build();
+  private NewTopic toKafkaTopic(String tenant, Topic topic) {
+    var envProperty = String.format("application.kafka.topic-configuration.%s.partitions", topic.getTopicName());
+    var partitions = Integer.parseInt(springEnvironment.getProperty(envProperty, "50"));
+    var tenantTopicName = getTenantTopicName(topic.getTopicName(), tenant);
+    return TopicBuilder.name(tenantTopicName).partitions(partitions).build();
   }
 
   /**

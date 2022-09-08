@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
   ServiceConfiguration.class})
@@ -81,7 +82,7 @@ class EdifactOrdersExportServiceTest {
   @DisplayName("Config is not set")
   void noConfig() throws JsonProcessingException {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any())).thenReturn(mockedResponse);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var config = service.getFirstConfig();
 
