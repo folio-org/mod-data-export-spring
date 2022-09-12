@@ -210,9 +210,9 @@ class AcqBaseExportTaskTriggerTest {
     "SATURDAY",
     "SUNDAY"
   })
-  public void weeklyTestForEachDay(String weekDays) {
+  public void weeklyTestForEachDay(String weekDay) {
     //Given
-    ScheduleParameters scheduleParameters = getScheduleParameters(weekDays, null);
+    ScheduleParameters scheduleParameters = getScheduleParameters(weekDay, null);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
     //When
@@ -223,7 +223,7 @@ class AcqBaseExportTaskTriggerTest {
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(actDateTime.getDayOfWeek().toString(), weekDays);
+    assertEquals(actDateTime.getDayOfWeek().toString(), weekDay);
   }
 
   /**
