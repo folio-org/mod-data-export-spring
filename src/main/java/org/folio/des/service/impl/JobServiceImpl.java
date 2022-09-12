@@ -34,6 +34,7 @@ import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
+import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
@@ -51,11 +52,8 @@ import org.springframework.transaction.support.TransactionSynchronization;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
-  private final ConfigurationClient client;
 
   public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
-
-
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
@@ -69,6 +67,7 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
+  private final ConfigurationClient client=null;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
