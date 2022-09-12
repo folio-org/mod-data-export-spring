@@ -55,6 +55,7 @@ public abstract class BaseTest {
 
   static {
     postgreDBContainer.start();
+    System.out.println("Hello");
   }
 
   public static class DockerPostgreDataSourceInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
