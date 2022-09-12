@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCollection;
@@ -48,6 +49,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
+  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
@@ -62,6 +64,7 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
+  private final ConfigurationClient client;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
@@ -96,6 +99,17 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
+
+    String exportConfigId = jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString();
+
+    try {
+      log.info("Looking config with id {}", exportConfigId);
+      client.getConfigById(exportConfigId);
+    }
+    catch (NotFoundException e) {
+      log.info("config not found", exportConfigId);
+      throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, exportConfigId));
+    }
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
