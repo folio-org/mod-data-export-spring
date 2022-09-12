@@ -109,7 +109,7 @@ public class JobServiceImpl implements JobService {
       client.getConfigById(exportConfigId);
     }
     catch (NotFoundException e) {
-      log.info("config not available", exportConfigId);
+      log.info("config not found", exportConfigId);
       throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, exportConfigId));
     }
 
