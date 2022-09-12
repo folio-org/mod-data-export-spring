@@ -275,7 +275,7 @@ class AcqBaseExportTaskTriggerTest {
   }
 
   /**
-   * For example, now is Wednesday 15:00, user selects to schedule on Monday at 15:00 - so scheduling should be triggered at
+   * For example, now is Wednesday 15:00, user selects to schedule on Monday at 15:00 - so scheduling should be triggered after 5 days
    */
   @Test
   public void weeklyTestForDayOfWeekInPast() {
