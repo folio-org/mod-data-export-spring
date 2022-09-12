@@ -39,6 +39,7 @@ import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
@@ -61,13 +62,14 @@ public class JobServiceImpl implements JobService {
     OUTPUT_FORMATS.put(ExportType.EDIFACT_ORDERS_EXPORT, "EDIFACT orders export (EDI)");
   }
 
+  @Autowired
+  @Lazy
+  private ExportTypeBasedConfigManager manager;
   private final JobExecutionService jobExecutionService;
   private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
-  @Autowired
-  private ExportTypeBasedConfigManager manager;
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
   @Transactional(readOnly = true)
