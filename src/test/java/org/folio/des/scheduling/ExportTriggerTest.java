@@ -291,7 +291,7 @@ class ExportTriggerTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, null);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
