@@ -103,14 +103,16 @@ public class JobServiceImpl implements JobService {
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     String exportConfigId = jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString();
+
     try {
       log.info("Looking config with id {}", exportConfigId);
       client.getConfigById(exportConfigId);
     }
     catch (NotFoundException e) {
-      log.info("config not found", exportConfigId);
+      log.info("config not available", exportConfigId);
       throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, exportConfigId));
     }
+
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
