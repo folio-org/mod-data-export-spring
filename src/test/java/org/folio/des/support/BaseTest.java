@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -49,6 +50,7 @@ public abstract class BaseTest {
   public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:13");
 
   @Autowired
+  @Lazy
   protected MockMvc mockMvc;
   @MockBean
   protected ExportTrigger trigger;
