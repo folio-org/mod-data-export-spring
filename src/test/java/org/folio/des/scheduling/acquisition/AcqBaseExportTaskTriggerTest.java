@@ -9,12 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -212,7 +207,7 @@ class AcqBaseExportTaskTriggerTest {
   })
   public void weeklyTestForEachDay(String weekDay) {
     //Given
-    ScheduleParameters scheduleParameters = getScheduleParameters(weekDay, null);
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(weekDay), null);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
     //When
@@ -234,8 +229,8 @@ class AcqBaseExportTaskTriggerTest {
     //Given
     ZonedDateTime scheduledDateTime = getNowTime();
     scheduledDateTime = scheduledDateTime.minusHours(1);
-    ScheduleParameters scheduleParameters =
-      getScheduleParameters(scheduledDateTime.getDayOfWeek().toString(), scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
 
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
@@ -258,8 +253,8 @@ class AcqBaseExportTaskTriggerTest {
     //Given
     ZonedDateTime scheduledDateTime = getNowTime();
     scheduledDateTime = scheduledDateTime.plusHours(1);
-    ScheduleParameters scheduleParameters =
-      getScheduleParameters(scheduledDateTime.getDayOfWeek().toString(), scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
 
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
@@ -279,10 +274,11 @@ class AcqBaseExportTaskTriggerTest {
    */
   @Test
   public void weeklyTestForDayOfWeekInPast() {
+    //Given
     ZonedDateTime scheduledDateTime = getNowTime();
     scheduledDateTime = scheduledDateTime.minusDays(2);
-    ScheduleParameters scheduleParameters =
-      getScheduleParameters(scheduledDateTime.getDayOfWeek().toString(), scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
 
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
@@ -298,14 +294,40 @@ class AcqBaseExportTaskTriggerTest {
   }
 
   /**
+   * For example, now is Tuesday 10:00, and user selects Monday, Tuesday and Wednesday at 08:00 - so scheduling should be run on Wednesday
+   */
+  @Test
+  public void weeklyTestForMultipleDays() {
+    //Given
+    ZonedDateTime scheduledDateTime = getNowTime();
+    scheduledDateTime = scheduledDateTime.minusHours(1);
+    DayOfWeek currentDay = scheduledDateTime.getDayOfWeek();
+    DayOfWeek dayBefore = getNowTime().minusDays(1).getDayOfWeek();
+    DayOfWeek dayAfter = getNowTime().plusDays(1).getDayOfWeek();
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(currentDay.name(), dayBefore.name(), dayAfter.name()),
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+
+    //When
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    triggerContext.update(new Date(), null, new Date());
+    Date actDate = trigger.nextExecutionTime(triggerContext);
+
+    //Then
+    ZonedDateTime actDateTime = getActualTime(actDate);
+    assertEquals(dayAfter, actDateTime.getDayOfWeek());
+    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
+  }
+
+  /**
    * For example, if user selects scheduled frequency - 2, we need to shift scheduling day for 2 weeks
    */
   @Test
   public void weeklyTestForTwiceAWeek() {
     ZonedDateTime scheduledDateTime = getNowTime();
     scheduledDateTime = scheduledDateTime.plusHours(1);
-    ScheduleParameters scheduleParameters =
-      getScheduleParameters(scheduledDateTime.getDayOfWeek().toString(), scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
     scheduleParameters.setScheduleFrequency(2);
 
     //When
@@ -321,15 +343,12 @@ class AcqBaseExportTaskTriggerTest {
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
   }
 
-  private ScheduleParameters getScheduleParameters(String weekDays, String scheduledTime) {
+  private ScheduleParameters getScheduleParameters(List<String> weekDays, String scheduledTime) {
     ScheduleParameters params = new ScheduleParameters();
     params.setId(UUID.randomUUID());
     params.setScheduleFrequency(1);
     params.setSchedulePeriod(SchedulePeriodEnum.WEEK);
-    List<WeekDaysEnum> weekDaysList = new ArrayList<>(Arrays.asList(weekDays.split(" "))).stream()
-      .map(WeekDaysEnum::fromValue)
-      .collect(Collectors.toList());
-    params.setWeekDays(weekDaysList);
+    params.setWeekDays(weekDays.stream().map(WeekDaysEnum::fromValue).collect(Collectors.toList()));
     params.setTimeZone("UTC");
     params.setScheduleTime(scheduledTime);
     return params;

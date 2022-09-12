@@ -102,23 +102,18 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     DayOfWeek currentDay = currentDateTime.getDayOfWeek();
 
     if (CollectionUtils.isNotEmpty(sortedChosenDays)) {
-      // iterate thought all days from Mon to Sun
-      for (DayOfWeek day: DayOfWeek.values()) {
-        // iterate thought chosen days
-        for (DayOfWeek chosenDay : sortedChosenDays) {
-          if (day == chosenDay) {
-            if (currentDay == chosenDay) {
-              if (currentDateTime.isBefore(scheduleDateTime)) {
-                // run scheduler in the same day
-                return scheduleDateTime;
-              } else {
-                return scheduleDateTime.plusDays(7); // schedule after a week
-              }
-            } else {
-              int delta = chosenDay.getValue() - currentDay.getValue();
-              return scheduleDateTime.plusDays(delta);
-            }
+      // iterate thought chosen days
+      for (DayOfWeek chosenDay : sortedChosenDays) {
+        if (currentDay == chosenDay) {
+          if (currentDateTime.isBefore(scheduleDateTime)) {
+            // run scheduler in the same day
+            return scheduleDateTime;
+          } else if (sortedChosenDays.size() == 1) {
+            return scheduleDateTime.plusDays(7); // schedule after a week
           }
+        } else {
+          int delta = chosenDay.getValue() - currentDay.getValue();
+          return scheduleDateTime.plusDays(delta);
         }
       }
     }
