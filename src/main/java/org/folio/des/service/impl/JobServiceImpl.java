@@ -32,6 +32,7 @@ import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.BulkEditConfigService;
+import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
@@ -64,8 +65,7 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
-  private final ConfigurationClient client;
-
+  private ExportTypeBasedConfigManager manager;
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
   @Transactional(readOnly = true)
@@ -104,7 +104,7 @@ public class JobServiceImpl implements JobService {
 
     try {
       log.info("Looking config with id {}", exportConfigId);
-      client.getConfigById(exportConfigId);
+      manager.getConfigById(exportConfigId);
     }
     catch (NotFoundException e) {
       log.info("config not found", exportConfigId);
