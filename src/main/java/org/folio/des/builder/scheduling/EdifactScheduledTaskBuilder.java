@@ -11,12 +11,21 @@ import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 
 import lombok.extern.log4j.Log4j2;
+import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
+import org.folio.spring.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 @Log4j2
 public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
   private final AcqSchedulingProperties acqSchedulingProperties;
   private final JobExecutionService jobExecutionService;
   private final JobCommandSchedulerBuilder jobSchedulerCommandBuilder;
+  @Autowired
+  @Lazy
+  private ExportTypeBasedConfigManager manager;
+  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
+
 
   public EdifactScheduledTaskBuilder(JobService jobService, FolioExecutionContextHelper contextHelper,
                                      AcqSchedulingProperties acqSchedulingProperties,
@@ -37,6 +46,15 @@ public class EdifactScheduledTaskBuilder extends BaseScheduledTaskBuilder {
                                                                        contextHelper.isModuleRegistered());
       if (isJobScheduleAllowed) {
           contextHelper.initScope(job.getTenant());
+          String exportConfigId = job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString();
+          try {
+      log.info("Looking config with id {}", exportConfigId);
+      manager.getConfigById(exportConfigId);
+    }
+    catch (NotFoundException e) {
+      log.info("config not found", exportConfigId);
+      throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, exportConfigId));
+    }
           Job resultJob = jobService.upsertAndSendToKafka(job, false);
           log.info("Configured task saved in DB jobId: {}", resultJob.getId());
           if (resultJob.getId() != null) {

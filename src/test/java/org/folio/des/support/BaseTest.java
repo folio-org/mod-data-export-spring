@@ -50,8 +50,8 @@ public abstract class BaseTest {
   public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:13");
 
   @Autowired
-  @Lazy
   protected MockMvc mockMvc;
+
   @MockBean
   protected ExportTrigger trigger;
 
