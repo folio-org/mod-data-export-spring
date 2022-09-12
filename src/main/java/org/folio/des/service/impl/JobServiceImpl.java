@@ -20,17 +20,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.BulkEditConfigService;
+import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
@@ -48,6 +51,10 @@ import org.springframework.transaction.support.TransactionSynchronization;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
+  private final ConfigurationClient client;
+
+  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
+
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
@@ -96,6 +103,15 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
+    String exportConfigId = jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString();
+    try {
+      log.info("Looking config with id {}", exportConfigId);
+      client.getConfigById(exportConfigId);
+    }
+    catch (NotFoundException e) {
+      log.info("config not found", exportConfigId);
+      throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, exportConfigId));
+    }
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
@@ -135,7 +151,6 @@ public class JobServiceImpl implements JobService {
     if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
-
     log.info("Upserting {}.", result);
     result = repository.save(result);
     log.info("Upserted {}.", result);
