@@ -287,11 +287,6 @@ class ExportTriggerTest {
     var repository = mock(JobDataExportRepository.class);
     Job job = new Job();
     job.setId(UUID.randomUUID());
-    ExportTypeSpecificParameters a =new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig v = new VendorEdiOrdersExportConfig();
-    v.setExportConfigId(UUID.randomUUID());
-    a.setVendorEdiOrdersExportConfig(v);
-    job.setExportTypeSpecificParameters(a);
     when(repository.save(any(Job.class))).thenReturn(job);
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
@@ -304,8 +299,13 @@ class ExportTriggerTest {
     var exportScheduler = new ExportScheduler(
       trigger, jobService, bursarExportConfigService, folioExecutionContextHelper, folioExecutionContext);
     var config = new ExportConfig();
+    ExportTypeSpecificParameters a = new ExportTypeSpecificParameters();
+    VendorEdiOrdersExportConfig v = new VendorEdiOrdersExportConfig();
+    v.setExportConfigId(UUID.randomUUID());
+    v.setConfigName("Test");
+    a.setVendorEdiOrdersExportConfig(v);
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
-    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    config.setExportTypeSpecificParameters(a);
     var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
     config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);
