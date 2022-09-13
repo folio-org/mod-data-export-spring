@@ -86,7 +86,6 @@ class BaseScheduledTaskBuilderTest {
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
-    vendorEdiOrdersExportConfig.setExportConfigId(UUID.randomUUID());
     parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     ediConfig.exportTypeSpecificParameters(parameters);
 
