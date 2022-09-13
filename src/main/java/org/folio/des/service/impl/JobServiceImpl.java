@@ -106,16 +106,17 @@ public class JobServiceImpl implements JobService {
 
      Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
        f -> {
+       if(f.getVendorEdiOrdersExportConfig() != null && f.getVendorEdiOrdersExportConfig().getExportConfigId()!=null){
        try {
       log.info("Looking config with id {}", f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
-      //manager.getConfigById(f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
+      manager.getConfigById(f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
     }
     catch (NotFoundException e) {
       log.info("config not found", f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
       throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE,f.getVendorEdiOrdersExportConfig().getExportConfigId().toString()));
     }
 
-        }
+        }}
      );
 //      //throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString()));
 //
