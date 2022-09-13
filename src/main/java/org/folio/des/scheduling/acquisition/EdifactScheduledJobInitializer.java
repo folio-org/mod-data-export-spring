@@ -29,14 +29,14 @@ public class EdifactScheduledJobInitializer {
     try {
       boolean isJobScheduleAllowed = isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
                                                           contextHelper.isModuleRegistered());
-      if (isJobScheduleAllowed) {
+      //if (isJobScheduleAllowed) {
         ExportConfigCollection exportConfigCol = basedConfigManager.getConfigCollection(ALL_EDIFACT_ORDERS_CONFIG_QUERY, Integer.MAX_VALUE);
         exportConfigs = exportConfigCol.getConfigs();
         for (ExportConfig exportConfig : exportConfigs) {
           List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);
           scheduledJobs.forEach(scheduledJob -> log.info("InitialJob scheduled: {}", scheduledJob.getId()));
         }
-      }
+      //}
     }
     catch (Exception exception) {
       log.error("Exception for initial EDIFACT scheduling : " + exportConfigs.size());

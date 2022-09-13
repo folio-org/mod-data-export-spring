@@ -6,10 +6,10 @@ import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.IsoFields;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -85,33 +85,37 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer everyWeek) {
+  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer weeksFrequency) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
-    startTime = findNextDayOfWeek(startTime);
-    if (Objects.nonNull(startTime) && everyWeek > 1) {
-      startTime = startTime.plusWeeks(everyWeek);
-    }
+    startTime = findNextDayOfWeek(startTime, weeksFrequency);
     log.info("Weekly next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTime);
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
-  private ZonedDateTime findNextDayOfWeek(ZonedDateTime scheduleDateTime) {
+  private ZonedDateTime findNextDayOfWeek(ZonedDateTime scheduleDateTime, Integer weeksFrequency) {
     List<DayOfWeek> sortedChosenDays = normalizeAndSortDayOfWeek();
 
     ZonedDateTime currentDateTime = getNowDateTime(scheduleParameters.getTimeZone());
     DayOfWeek currentDay = currentDateTime.getDayOfWeek();
 
     if (CollectionUtils.isNotEmpty(sortedChosenDays)) {
-      // iterate thought chosen days
+      // iterate through chosen days
       for (DayOfWeek chosenDay : sortedChosenDays) {
         if (currentDay == chosenDay) {
           if (currentDateTime.isBefore(scheduleDateTime)) {
             // run scheduler in the same day
             return scheduleDateTime;
           } else if (sortedChosenDays.size() == 1) {
-            return scheduleDateTime.plusDays(7); // schedule after a week
+            return scheduleDateTime.plusWeeks(weeksFrequency);
+          } else if (isLastChosenDay(sortedChosenDays, chosenDay)) {
+            // run would be from the next week
+            int daysToSunday = DayOfWeek.SUNDAY.getValue() - chosenDay.getValue();
+            DayOfWeek firstDayFromNextWeek = sortedChosenDays.get(0);
+            return scheduleDateTime
+              .plusDays(daysToSunday + firstDayFromNextWeek.getValue())
+              .plusWeeks(weeksFrequency - 1);
           }
-        } else {
+        } else if (!containsDaysAfter(sortedChosenDays, chosenDay)) {
           int delta = chosenDay.getValue() - currentDay.getValue();
           return scheduleDateTime.plusDays(delta);
         }
@@ -125,6 +129,14 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     return weekDays.stream()
             .sorted(Comparator.comparing(WeekDaysEnum::getValue))
             .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
+  }
+
+  private boolean containsDaysAfter(List<DayOfWeek> sortedChosenDays, DayOfWeek chosenDay) {
+    return sortedChosenDays.stream().anyMatch(dayOfWeek -> dayOfWeek.getValue() > chosenDay.getValue());
+  }
+
+  private boolean isLastChosenDay(List<DayOfWeek> sortedChosenDays, DayOfWeek chosenDay) {
+    return sortedChosenDays.get(sortedChosenDays.size() - 1) == chosenDay;
   }
 
   @SneakyThrows
