@@ -68,7 +68,8 @@ public class JobServiceImpl implements JobService {
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
-  private final ExportTypeBasedConfigManager exportTypeBasedConfigManager;
+  @Lazy
+  private final ExportTypeBasedConfigManager client;
 
   @Transactional(readOnly = true)
   @Override
@@ -108,7 +109,7 @@ public class JobServiceImpl implements JobService {
            .ifPresent(s -> {
            try {
                log.info("Looking config with id {}", s.toString());
-               exportTypeBasedConfigManager.getConfigById(s.toString());
+               client.getConfigById(s.toString());
              } catch (NotFoundException e) {
                log.info("config not found", f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
                throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, s));
