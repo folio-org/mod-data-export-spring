@@ -105,7 +105,7 @@ public class JobServiceImpl implements JobService {
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
 
      Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
-       f -> Optional.ofNullable(f.getVendorEdiOrdersExportConfig()).ifPresent(f1-> {
+       f -> Optional.ofNullable(f.getVendorEdiOrdersExportConfig()).ifPresent(f1->
          Optional.ofNullable(f1.getExportConfigId())
            .ifPresent(s -> {
            try {
@@ -115,8 +115,8 @@ public class JobServiceImpl implements JobService {
                log.info("config not found", f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
                throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, f.getVendorEdiOrdersExportConfig().getExportConfigId().toString()));
              }
-           });
-       }));
+           })
+       ));
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
