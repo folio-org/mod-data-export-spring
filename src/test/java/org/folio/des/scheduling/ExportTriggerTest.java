@@ -2,6 +2,7 @@ package org.folio.des.scheduling;
 
 import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -10,6 +11,7 @@ import org.folio.des.security.AuthService;
 import org.folio.des.security.SecurityManagerService;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -63,6 +65,7 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
+  @MockBean private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -292,7 +295,7 @@ class ExportTriggerTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null,exportTypeBasedConfigManager);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
