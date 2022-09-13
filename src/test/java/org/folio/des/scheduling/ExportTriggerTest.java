@@ -55,7 +55,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @SpringBootTest(classes = {ExportTrigger.class})
 class ExportTriggerTest {
 
-  private final int A_BIT_MORE_THAN_1_MINUTE = 65_000;
+  private final int A_BIT_MORE_THAN_1_MINUTE = 5_000;
 
   @Autowired private ExportTrigger trigger;
   @MockBean private ExportConfigService bursarExportConfigService;
@@ -65,7 +65,7 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  @MockBean private ConfigurationClient client;
+  private ConfigurationClient client;
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -290,7 +290,9 @@ class ExportTriggerTest {
     var repository = mock(JobDataExportRepository.class);
     Job job = new Job();
     job.setId(UUID.randomUUID());
+
     when(repository.save(any(Job.class))).thenReturn(job);
+
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
@@ -306,6 +308,7 @@ class ExportTriggerTest {
     VendorEdiOrdersExportConfig v = new VendorEdiOrdersExportConfig();
     v.setExportConfigId(UUID.randomUUID());
     v.setConfigName("Test");
+
     a.setVendorEdiOrdersExportConfig(v);
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
     config.setExportTypeSpecificParameters(a);
