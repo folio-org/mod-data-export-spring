@@ -52,7 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
-
+  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
@@ -104,7 +104,14 @@ public class JobServiceImpl implements JobService {
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
 
-
+     try {
+      log.info("Looking config with id {}", jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString());
+      manager.getConfigById(jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString());
+    }
+    catch (NotFoundException e) {
+      log.info("config not found", jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString());
+      throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString()));
+    }
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 

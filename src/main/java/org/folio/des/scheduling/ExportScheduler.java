@@ -14,10 +14,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
-import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.exception.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -48,11 +45,6 @@ public class ExportScheduler implements SchedulingConfigurer {
 
   private ScheduledTaskRegistrar registrar;
   private Job scheduledJob;
-  @Autowired
-  @Lazy
-  private ExportTypeBasedConfigManager manager;
-  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
-
 
   @Override
   public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -63,16 +55,7 @@ public class ExportScheduler implements SchedulingConfigurer {
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
         contextHelper.initScope(scheduledJob.getTenant());
-        String exportConfigId = scheduledJob.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString();
 
-    try {
-      log.info("Looking config with id {}", exportConfigId);
-      manager.getConfigById(exportConfigId);
-    }
-    catch (NotFoundException e) {
-      log.info("config not found", exportConfigId);
-      throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, exportConfigId));
-    }
         Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
         log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
         contextHelper.finishContext();
