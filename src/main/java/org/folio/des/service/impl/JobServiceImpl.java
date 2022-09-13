@@ -68,8 +68,9 @@ public class JobServiceImpl implements JobService {
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
+  @Autowired
   @Lazy
-  private final ExportTypeBasedConfigManager client;
+  private final ConfigurationClient client;
 
   @Transactional(readOnly = true)
   @Override

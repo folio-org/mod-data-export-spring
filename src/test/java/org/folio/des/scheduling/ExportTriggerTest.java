@@ -65,7 +65,7 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  @MockBean private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
+  @MockBean private ConfigurationClient client;
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -295,7 +295,7 @@ class ExportTriggerTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, exportTypeBasedConfigManager);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
