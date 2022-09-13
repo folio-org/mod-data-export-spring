@@ -309,6 +309,8 @@ class ExportTriggerTest {
     a.setVendorEdiOrdersExportConfig(v);
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
     config.setExportTypeSpecificParameters(a);
+
+
     var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
     config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);

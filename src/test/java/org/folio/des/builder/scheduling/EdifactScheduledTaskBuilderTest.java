@@ -29,6 +29,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
@@ -89,6 +90,7 @@ class EdifactScheduledTaskBuilderTest {
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
     Job scheduledJob = new Job();
+    scheduledJob.setMetadata(new Metadata().createdDate(new java.util.Date()));
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
 
