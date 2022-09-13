@@ -129,6 +129,19 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   }
 
   @Test
+  void shouldNotCreateTriggerIfConfigNameNull() {
+    ExportConfig exportConfig = getExportConfig();
+    exportConfig.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .scheduleParameters(null);
+
+    List<ExportTaskTrigger> exportTaskTriggers = converter.convert(exportConfig);
+
+    assertEquals(0, exportTaskTriggers.size());
+  }
+
+  @Test
   void shouldNotCreateTriggerIfSchedulerTimeIsNull() {
     ExportConfig exportConfig = getExportConfig();
     exportConfig.getExportTypeSpecificParameters()
@@ -182,7 +195,7 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     EdiFtp ediFtp = new EdiFtp();
-
+    vendorEdiOrdersExportConfig.setExportConfigId(UUID.randomUUID());
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
 
     EdiConfig ediConfig =new EdiConfig();
