@@ -55,7 +55,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @SpringBootTest(classes = {ExportTrigger.class})
 class ExportTriggerTest {
 
-  private final int A_BIT_MORE_THAN_1_MINUTE = 5_000;
+  private final int A_BIT_MORE_THAN_1_MINUTE = 65_000;
 
   @Autowired private ExportTrigger trigger;
   @MockBean private ExportConfigService bursarExportConfigService;
