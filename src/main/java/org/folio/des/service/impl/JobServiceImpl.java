@@ -106,14 +106,16 @@ public class JobServiceImpl implements JobService {
 
      Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
        f -> Optional.ofNullable(f.getVendorEdiOrdersExportConfig()).ifPresent(f1->
-         Optional.ofNullable(f1.getExportConfigId()).ifPresent(s -> {
+         Optional.ofNullable(f1.getExportConfigId())
+           .ifPresent(s -> {
            try {
                log.info("Looking config with id {}", s.toString());
                client.getConfigById(s.toString());
-             } catch (Exception e) {
+             } catch (NotFoundException e) {
                log.info("config not found", f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
                throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, s));
-             }})
+             }
+           })
        ));
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);

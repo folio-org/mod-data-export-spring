@@ -5,6 +5,7 @@ import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.security.AuthService;
@@ -65,7 +66,8 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  private ConfigurationClient client;
+  @MockBean private ConfigurationClient client;
+  @MockBean JobServiceImpl jobService;
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -81,7 +83,7 @@ class ExportTriggerTest {
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
     trigger.setConfig(null);
-
+    client.getConfigById(UUID.randomUUID().toString());
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
     assertNull(date);
@@ -319,6 +321,11 @@ class ExportTriggerTest {
     config.setScheduleFrequency(1);
     config.setTenant("diku");
     trigger.setConfig(config);
+    org.folio.des.domain.dto.Job j = new org.folio.des.domain.dto.Job();
+    j.setMetadata(new Metadata());
+    j.setExportTypeSpecificParameters(a);
+    j.setId(UUID.randomUUID());
+    jobService.upsertAndSendToKafka(j,true);
     var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
     exportScheduler.configureTasks(scheduledTaskRegistrar);
     exportScheduler.updateTasks(config);
