@@ -328,7 +328,9 @@ class ExportTriggerTest {
     j.setMetadata(new Metadata());
     j.setExportTypeSpecificParameters(a);
     j.setId(UUID.randomUUID());
+    jobService.upsertAndSendToKafka(j,true);
     Mockito.when(client.getConfigById(v.getExportConfigId().toString())).thenThrow(new NotFoundException(""));
+
     var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
     exportScheduler.configureTasks(scheduledTaskRegistrar);
     exportScheduler.updateTasks(config);
