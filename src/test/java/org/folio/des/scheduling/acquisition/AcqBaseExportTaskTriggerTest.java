@@ -323,9 +323,10 @@ class AcqBaseExportTaskTriggerTest {
    * For example, if user selects scheduled frequency - 2, we need to shift scheduling day for 2 weeks
    */
   @Test
-  public void weeklyTestForTwiceAWeek() {
+  public void weeklyTestScheduleOnceAtTwoWeek() {
+    //Given
     ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.plusHours(1);
+    scheduledDateTime = scheduledDateTime.minusHours(1);
     ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
       scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
     scheduleParameters.setScheduleFrequency(2);
@@ -338,7 +339,7 @@ class AcqBaseExportTaskTriggerTest {
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(getNowTime().plusWeeks(2).getDayOfMonth(), actDateTime.getDayOfMonth());
+    assertEquals(getNowTime().getDayOfMonth(), actDateTime.minusWeeks(2).getDayOfMonth());
     assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
   }
