@@ -7,6 +7,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -369,6 +370,28 @@ class AcqBaseExportTaskTriggerTest {
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
     assertEquals(dayBefore, actDateTime.getDayOfWeek());
     assertNotEquals(scheduledDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), actDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+  }
+
+  @Test
+  public void weeklyTestWhenAllDaysChosen() {
+    //Given
+    ZonedDateTime scheduledDateTime = getNowTime();
+    scheduledDateTime = scheduledDateTime.minusHours(1);
+    DayOfWeek[] values = DayOfWeek.values();
+    List<String> allDaysOfWeek = Arrays.stream(values).map(DayOfWeek::name).collect(Collectors.toList());
+    ScheduleParameters scheduleParameters = getScheduleParameters(allDaysOfWeek,
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+
+    //When
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    triggerContext.update(new Date(), null, new Date());
+    Date actDate = trigger.nextExecutionTime(triggerContext);
+
+    //Then
+    ZonedDateTime actDateTime = getActualTime(actDate);
+    assertEquals(scheduledDateTime.plusDays(1).getDayOfWeek(), actDateTime.getDayOfWeek());
+    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
   }
 
   private ScheduleParameters getScheduleParameters(List<String> weekDays, String scheduledTime) {
