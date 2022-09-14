@@ -103,15 +103,15 @@ public class JobServiceImpl implements JobService {
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
-       f -> Optional.ofNullable(f.getVendorEdiOrdersExportConfig()).ifPresent(f1->
-         Optional.ofNullable(f1.getExportConfigId())
-           .ifPresent(s -> {
+       expTypeSpecificParams -> Optional.ofNullable(expTypeSpecificParams.getVendorEdiOrdersExportConfig()).ifPresent(ediExportConfigParams->
+         Optional.ofNullable(ediExportConfigParams.getExportConfigId())
+           .ifPresent(configId -> {
            try {
-               log.info("Looking config with id {}", s.toString());
-               client.getConfigById(s.toString());
+               log.info("Looking config with id {}", configId.toString());
+               client.getConfigById(configId.toString());
              } catch (NotFoundException e) {
-               log.info("config not found", f.getVendorEdiOrdersExportConfig().getExportConfigId().toString());
-               throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, s));
+               log.info("config not found", configId.toString());
+               throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
              }
            })
        ));
