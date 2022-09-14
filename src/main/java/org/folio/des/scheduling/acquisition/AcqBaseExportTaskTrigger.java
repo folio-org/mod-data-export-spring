@@ -145,7 +145,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
                                      List<DayOfWeek> sortedChosenDays,
                                      DayOfWeek currentDay,
                                      Integer weeksFrequency) {
-    int daysToSunday = DayOfWeek.SUNDAY.getValue() - currentDay.getValue();
+    long daysToSunday = DayOfWeek.SUNDAY.getValue() - currentDay.getValue();
     DayOfWeek firstDayFromNextWeek = sortedChosenDays.get(0);
     return scheduleDateTime
       .plusDays(daysToSunday + firstDayFromNextWeek.getValue())
