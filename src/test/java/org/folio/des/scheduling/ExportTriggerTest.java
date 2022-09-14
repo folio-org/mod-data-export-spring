@@ -2,8 +2,11 @@ package org.folio.des.scheduling;
 
 import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.domain.dto.Metadata;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.security.AuthService;
 import org.folio.des.security.SecurityManagerService;
@@ -13,6 +16,7 @@ import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,6 +46,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -62,6 +68,9 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
+  @MockBean private ConfigurationClient client;
+  @MockBean private JobServiceImpl jobService;
+
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -291,20 +300,32 @@ class ExportTriggerTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, null);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
     var exportScheduler = new ExportScheduler(
       trigger, jobService, bursarExportConfigService, folioExecutionContextHelper, folioExecutionContext);
     var config = new ExportConfig();
+    ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig= new VendorEdiOrdersExportConfig();
+    vendorEdiOrdersExportConfig.setExportConfigId(UUID.randomUUID());
+    vendorEdiOrdersExportConfig.setConfigName("Test");
+    exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
+    config.setExportTypeSpecificParameters(exportTypeSpecificParameters);
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
     config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);
     config.setTenant("diku");
     trigger.setConfig(config);
+    org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
+    jobDto.setMetadata(new Metadata());
+    jobDto.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+    jobDto.setId(UUID.randomUUID());
+    jobService.upsertAndSendToKafka(jobDto,true);
+    Mockito.when(client.getConfigById(vendorEdiOrdersExportConfig.getExportConfigId().toString())).thenThrow(new NotFoundException(UUID.randomUUID().toString()));
     var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
     exportScheduler.configureTasks(scheduledTaskRegistrar);
     exportScheduler.updateTasks(config);
