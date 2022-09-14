@@ -2,18 +2,23 @@ package org.folio.des.scheduling.acquisition;
 
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
 import static org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.time.temporal.IsoFields;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ScheduleParameters;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -240,7 +245,6 @@ class AcqBaseExportTaskTriggerTest {
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(scheduledDateTime.plusDays(7).getDayOfMonth(), actDateTime.getDayOfMonth());
     assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
   }
@@ -288,7 +292,6 @@ class AcqBaseExportTaskTriggerTest {
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(getNowTime().plusDays(5).getDayOfMonth(), actDateTime.getDayOfMonth());
     assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
   }
@@ -339,9 +342,33 @@ class AcqBaseExportTaskTriggerTest {
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(getNowTime().getDayOfMonth(), actDateTime.minusWeeks(2).getDayOfMonth());
+    assertNotEquals(scheduledDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), actDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
     assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
+  }
+
+  @Test
+  public void weeklyTestScheduleOnceWithMultipleChosenDaysAndFrequencyWhenDayFromNextWeekChosen() {
+    //Given
+    ZonedDateTime scheduledDateTime = getNowTime();
+    scheduledDateTime = scheduledDateTime.minusHours(1);
+    DayOfWeek currentDay = scheduledDateTime.getDayOfWeek();
+    DayOfWeek dayBefore = getNowTime().minusDays(1).getDayOfWeek();
+    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(currentDay.name(), dayBefore.name()),
+      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    scheduleParameters.scheduleFrequency(2);
+
+    //When
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    triggerContext.update(new Date(), null, new Date());
+    Date actDate = trigger.nextExecutionTime(triggerContext);
+
+    //Then
+    ZonedDateTime actDateTime = getActualTime(actDate);
+    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
+    assertEquals(dayBefore, actDateTime.getDayOfWeek());
+    assertNotEquals(scheduledDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), actDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
   }
 
   private ScheduleParameters getScheduleParameters(List<String> weekDays, String scheduledTime) {

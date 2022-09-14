@@ -6,7 +6,6 @@ import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.IsoFields;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -106,18 +105,21 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
             // run scheduler in the same day
             return scheduleDateTime;
           } else if (sortedChosenDays.size() == 1) {
+            // run scheduler on the same day but after weeksFrequency weeks
             return scheduleDateTime.plusWeeks(weeksFrequency);
           } else if (isLastChosenDay(sortedChosenDays, chosenDay)) {
-            // run would be from the next week
-            int daysToSunday = DayOfWeek.SUNDAY.getValue() - chosenDay.getValue();
-            DayOfWeek firstDayFromNextWeek = sortedChosenDays.get(0);
-            return scheduleDateTime
-              .plusDays(daysToSunday + firstDayFromNextWeek.getValue())
-              .plusWeeks(weeksFrequency - 1);
+            // run next weeks depends on weeksFrequency
+            return runNextWeeks(scheduleDateTime, sortedChosenDays, currentDay, weeksFrequency);
           }
         } else if (!containsDaysAfter(sortedChosenDays, chosenDay)) {
-          int delta = chosenDay.getValue() - currentDay.getValue();
-          return scheduleDateTime.plusDays(delta);
+          if (chosenDay.getValue() > currentDay.getValue()) {
+            // run scheduler on the same day on the same week
+            int delta = chosenDay.getValue() - currentDay.getValue();
+            return scheduleDateTime.plusDays(delta);
+          } else {
+            // run next weeks depends on weeksFrequency
+            return runNextWeeks(scheduleDateTime, sortedChosenDays, currentDay, weeksFrequency);
+          }
         }
       }
     }
@@ -137,6 +139,17 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
   private boolean isLastChosenDay(List<DayOfWeek> sortedChosenDays, DayOfWeek chosenDay) {
     return sortedChosenDays.get(sortedChosenDays.size() - 1) == chosenDay;
+  }
+
+  private ZonedDateTime runNextWeeks(ZonedDateTime scheduleDateTime,
+                                     List<DayOfWeek> sortedChosenDays,
+                                     DayOfWeek currentDay,
+                                     Integer weeksFrequency) {
+    int daysToSunday = DayOfWeek.SUNDAY.getValue() - currentDay.getValue();
+    DayOfWeek firstDayFromNextWeek = sortedChosenDays.get(0);
+    return scheduleDateTime
+      .plusDays(daysToSunday + firstDayFromNextWeek.getValue())
+      .plusWeeks(weeksFrequency - 1);
   }
 
   @SneakyThrows
