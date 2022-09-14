@@ -69,7 +69,7 @@ class ExportTriggerTest {
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
   @MockBean private ConfigurationClient client;
-  @MockBean private JobServiceImpl jobService;
+  @MockBean JobServiceImpl jobService;
 
 
   @Test
@@ -314,7 +314,6 @@ class ExportTriggerTest {
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
     config.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
     config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);
