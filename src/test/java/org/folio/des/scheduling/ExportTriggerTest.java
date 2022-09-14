@@ -17,6 +17,7 @@ import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,6 +47,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -66,7 +69,8 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  @MockBean private ConfigurationClient client;
+  @MockBean
+  private ConfigurationClient client;
   @MockBean JobServiceImpl jobService;
 
   @Test
@@ -83,7 +87,6 @@ class ExportTriggerTest {
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
     trigger.setConfig(null);
-    client.getConfigById(UUID.randomUUID().toString());
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
     assertNull(date);
@@ -325,6 +328,7 @@ class ExportTriggerTest {
     j.setMetadata(new Metadata());
     j.setExportTypeSpecificParameters(a);
     j.setId(UUID.randomUUID());
+    Mockito.when(client.getConfigById(v.getExportConfigId().toString())).thenThrow(new NotFoundException(""));
     jobService.upsertAndSendToKafka(j,true);
     var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
     exportScheduler.configureTasks(scheduledTaskRegistrar);
