@@ -111,15 +111,13 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
             // run next weeks depends on weeksFrequency
             return runNextWeeks(scheduleDateTime, sortedChosenDays, currentDay, weeksFrequency);
           }
+        } else if (chosenDay.getValue() > currentDay.getValue()) {
+          // run scheduler on the same day on the same week
+          int delta = chosenDay.getValue() - currentDay.getValue();
+          return scheduleDateTime.plusDays(delta);
         } else if (!containsDaysAfter(sortedChosenDays, chosenDay)) {
-          if (chosenDay.getValue() > currentDay.getValue()) {
-            // run scheduler on the same day on the same week
-            int delta = chosenDay.getValue() - currentDay.getValue();
-            return scheduleDateTime.plusDays(delta);
-          } else {
-            // run next weeks depends on weeksFrequency
-            return runNextWeeks(scheduleDateTime, sortedChosenDays, currentDay, weeksFrequency);
-          }
+          // run next weeks depends on weeksFrequency
+          return runNextWeeks(scheduleDateTime, sortedChosenDays, currentDay, weeksFrequency);
         }
       }
     }
