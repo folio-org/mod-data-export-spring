@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -28,6 +29,7 @@ import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
@@ -102,19 +104,6 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
-    Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
-       expTypeSpecificParams -> Optional.ofNullable(expTypeSpecificParams.getVendorEdiOrdersExportConfig()).ifPresent(ediExportConfigParams->
-         Optional.ofNullable(ediExportConfigParams.getExportConfigId())
-           .ifPresent(configId -> {
-           try {
-               log.info("Looking config with id {}", configId.toString());
-               client.getConfigById(configId.toString());
-             } catch (NotFoundException e) {
-               log.info("config not found", configId.toString());
-               throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
-             }
-           })
-       ));
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
@@ -154,6 +143,22 @@ public class JobServiceImpl implements JobService {
     if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
+
+    Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
+        expTypeSpecificParams -> Optional.ofNullable(expTypeSpecificParams.getVendorEdiOrdersExportConfig()).ifPresent(ediExportConfigParams ->
+          Optional.ofNullable(ediExportConfigParams.getExportConfigId())
+            .ifPresent(configId -> {
+              try {
+                log.info("Looking config with id {}", configId.toString());
+                client.getConfigById(configId.toString());
+              } catch (NotFoundException e) {
+                log.info("config not found", configId.toString());
+                ediExportConfigParams.getEdiSchedule().getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+                throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
+              }
+            })
+    ));
+
     log.info("Upserting {}.", result);
     result = repository.save(result);
     log.info("Upserted {}.", result);
