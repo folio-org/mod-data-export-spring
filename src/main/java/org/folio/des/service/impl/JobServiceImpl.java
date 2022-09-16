@@ -3,7 +3,6 @@ package org.folio.des.service.impl;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
-import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -11,7 +10,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -21,22 +19,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.de.entity.Job;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
-import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
@@ -46,7 +43,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
 
 @Service
 @EnableScheduling
@@ -55,7 +51,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
 
-  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
+  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available for config with id %s";
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
@@ -69,7 +65,7 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
-  private final ConfigurationClient client;
+  private final ExportTypeBasedConfigManager client;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
@@ -143,21 +139,18 @@ public class JobServiceImpl implements JobService {
     if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
-
-    Optional.ofNullable(jobDto.getExportTypeSpecificParameters()).ifPresent(
-        expTypeSpecificParams -> Optional.ofNullable(expTypeSpecificParams.getVendorEdiOrdersExportConfig()).ifPresent(ediExportConfigParams ->
-          Optional.ofNullable(ediExportConfigParams.getExportConfigId())
-            .ifPresent(configId -> {
-              try {
-                log.info("Looking config with id {}", configId.toString());
-                client.getConfigById(configId.toString());
-              } catch (NotFoundException e) {
-                log.info("config not found", configId.toString());
-                ediExportConfigParams.getEdiSchedule().getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
-                throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
-              }
-            })
-    ));
+    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId->{
+          try {
+            log.info("Config with id {} not found", configId.toString());
+            client.getConfigById(configId.toString());
+          } catch (NotFoundException e) {
+          log.info("config not found", configId.toString());
+          jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
+          getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+          throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
+    }});
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
