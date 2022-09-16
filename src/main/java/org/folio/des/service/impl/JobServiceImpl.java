@@ -46,6 +46,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Lazy
 @Service
 @EnableScheduling
 @Log4j2
