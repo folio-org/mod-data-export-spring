@@ -331,6 +331,7 @@ class ExportTriggerTest {
   }
   @Test
   void disableScheduleForDeletedIntigration() {
+
     var repository = mock(JobDataExportRepository.class);
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
@@ -358,7 +359,6 @@ class ExportTriggerTest {
     assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());
   }
-
 
   private int adjustExpected(int expected) {
     if (expected >= 24) {
