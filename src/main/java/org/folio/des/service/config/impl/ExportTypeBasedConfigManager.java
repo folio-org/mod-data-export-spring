@@ -24,9 +24,13 @@ import org.folio.spring.exception.NotFoundException;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Log4j2
+@Lazy
+@Component
 public class ExportTypeBasedConfigManager {
   public static final String EXPORT_CONFIGURATION_NOT_FOUND = "Export configuration not found or parse error : %s";
   private static final int EXPORT_TYPE = 1;
