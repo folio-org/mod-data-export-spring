@@ -66,15 +66,9 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
-  private ExportTypeBasedConfigManager client;
+  private final ExportTypeBasedConfigManager client;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
-
-  @Autowired
-  public void setExportTypeBasedConfigManager(ExportTypeBasedConfigManager client)
-  {
-  this.client = client;
-  }
 
   @Transactional(readOnly = true)
   @Override
