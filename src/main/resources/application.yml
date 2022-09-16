@@ -15,6 +15,8 @@ logging:
     liquibase: debug
     org.folio.des.client.*: debug
 spring:
+  main:
+   allow-bean-definition-overriding: true
   application:
     name: mod-data-export-spring
   jpa:
@@ -56,3 +58,6 @@ application:
         partitions: ${DATA_EXPORT_JOB_COMMAND_TOPIC_PARTITIONS:50}
     topic-pattern: ${ENV:folio}.(.*\.)?data-export.job.update
     group-id: ${ENV:folio}-mod-data-export-spring-events-group
+
+
+
