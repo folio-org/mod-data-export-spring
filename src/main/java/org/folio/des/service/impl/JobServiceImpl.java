@@ -55,7 +55,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
 
-  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available";
+  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available for config with id %s";
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
@@ -152,7 +152,7 @@ public class JobServiceImpl implements JobService {
                 log.info("Looking config with id {}", configId.toString());
                 client.getConfigById(configId.toString());
               } catch (NotFoundException e) {
-                log.info("config not found", configId.toString());
+                log.info("Config with id {} not found", configId.toString());
                 ediExportConfigParams.getEdiSchedule().getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
                 throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
               }
