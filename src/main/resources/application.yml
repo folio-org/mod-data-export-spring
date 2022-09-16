@@ -16,7 +16,8 @@ logging:
     org.folio.des.client.*: debug
 spring:
   main:
-   allow-bean-definition-overriding: true
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
   application:
     name: mod-data-export-spring
   jpa:
