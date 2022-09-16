@@ -308,7 +308,7 @@ class ExportTriggerTest {
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
     var exportconfig = new ExportTypeBasedConfigManager(client,exportConfigServiceResolver,bursarExportConfigService,defaultModelConfigToExportConfigConverter);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, exportconfig);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
@@ -330,7 +330,7 @@ class ExportTriggerTest {
       assertEquals(1, scheduledTaskRegistrar.getScheduledTasks().size()));
   }
   @Test
-  void disableScheduleForDeletedIntigration() {
+  void disableScheduleForDeletedIntegration() {
 
     var repository = mock(JobDataExportRepository.class);
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
@@ -338,7 +338,8 @@ class ExportTriggerTest {
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
     var exportconfig = new ExportTypeBasedConfigManager(client,exportConfigServiceResolver,bursarExportConfigService,defaultModelConfigToExportConfigConverter);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, exportconfig);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null);
+    jobService.setExportTypeBasedConfigManager(exportconfig);
     var config = new ExportConfig();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig= new VendorEdiOrdersExportConfig();
