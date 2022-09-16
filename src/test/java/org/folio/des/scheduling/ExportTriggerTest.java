@@ -5,13 +5,17 @@ import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
+import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.Metadata;
+import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.security.AuthService;
 import org.folio.des.security.SecurityManagerService;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.impl.ExportConfigServiceResolver;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
@@ -19,6 +23,8 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
+
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -47,8 +53,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -69,9 +73,11 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  @MockBean
-  private ConfigurationClient client;
-  @MockBean JobServiceImpl jobService;
+  @MockBean private ConfigurationClient client;
+  @MockBean private JobServiceImpl jobService;
+  @MockBean private ExportConfigServiceResolver exportConfigServiceResolver;
+  @MockBean private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+
 
   @Test
   @DisplayName("No configuration for scheduling")
@@ -87,6 +93,7 @@ class ExportTriggerTest {
   @DisplayName("Empty configuration for scheduling")
   void emptyConfig() {
     trigger.setConfig(null);
+
     final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
 
     assertNull(date);
@@ -292,51 +299,65 @@ class ExportTriggerTest {
 
   @Test
   void dailySchedulePlusOneMinuteWithExportScheduler() throws InterruptedException {
-    var repository = mock(JobDataExportRepository.class);
+     var repository = mock(JobDataExportRepository.class);
     Job job = new Job();
     job.setId(UUID.randomUUID());
-
     when(repository.save(any(Job.class))).thenReturn(job);
-
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
+    var exportconfig = new ExportTypeBasedConfigManager(client,exportConfigServiceResolver,bursarExportConfigService,defaultModelConfigToExportConfigConverter);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null,exportconfig);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
     var exportScheduler = new ExportScheduler(
       trigger, jobService, bursarExportConfigService, folioExecutionContextHelper, folioExecutionContext);
     var config = new ExportConfig();
-    ExportTypeSpecificParameters a = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig v = new VendorEdiOrdersExportConfig();
-    v.setExportConfigId(UUID.randomUUID());
-    v.setConfigName("Test");
-
-    a.setVendorEdiOrdersExportConfig(v);
     config.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.DAY);
-    config.setExportTypeSpecificParameters(a);
-
-
+    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
     config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
     config.setScheduleFrequency(1);
     config.setTenant("diku");
     trigger.setConfig(config);
-    org.folio.des.domain.dto.Job j = new org.folio.des.domain.dto.Job();
-    j.setMetadata(new Metadata());
-    j.setExportTypeSpecificParameters(a);
-    j.setId(UUID.randomUUID());
-    jobService.upsertAndSendToKafka(j,true);
-    Mockito.when(client.getConfigById(v.getExportConfigId().toString())).thenThrow(new NotFoundException(""));
-
     var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
     exportScheduler.configureTasks(scheduledTaskRegistrar);
     exportScheduler.updateTasks(config);
     await().pollDelay(A_BIT_MORE_THAN_1_MINUTE, TimeUnit.MILLISECONDS)
       .timeout(A_BIT_MORE_THAN_1_MINUTE + 1, TimeUnit.MILLISECONDS).untilAsserted(() ->
       assertEquals(1, scheduledTaskRegistrar.getScheduledTasks().size()));
+  }
+  @Test
+  void disableScheduleForDeletedIntegration() {
+
+    var repository = mock(JobDataExportRepository.class);
+    Map<String, Collection<String>> okapiHeaders = new HashMap<>();
+    okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
+    var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    var exportconfig = new ExportTypeBasedConfigManager(client,exportConfigServiceResolver,bursarExportConfigService,defaultModelConfigToExportConfigConverter);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null,exportconfig);
+    var config = new ExportConfig();
+    ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig= new VendorEdiOrdersExportConfig();
+    vendorEdiOrdersExportConfig.setExportConfigId(UUID.randomUUID());
+    vendorEdiOrdersExportConfig.setConfigName("Test");
+    exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
+    config.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+    org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
+    jobDto.setMetadata(new Metadata());
+    jobDto.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+    jobDto.setId(UUID.randomUUID());
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    EdiSchedule ediSchedule = new EdiSchedule();
+    ediSchedule.setScheduleParameters(scheduleParameters);
+    jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().setEdiSchedule(ediSchedule);
+
+    assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
+    assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
+     .getEdiSchedule().getScheduleParameters().getSchedulePeriod());
   }
 
   private int adjustExpected(int expected) {
