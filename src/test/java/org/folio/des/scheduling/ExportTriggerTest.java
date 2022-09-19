@@ -72,7 +72,7 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  @Autowired private ConfigurationClient client;
+  @MockBean private ConfigurationClient client;
   @MockBean private JobServiceImpl jobService;
   @MockBean private ExportConfigServiceResolver exportConfigServiceResolver;
   @MockBean private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
