@@ -72,11 +72,7 @@ public class JobServiceImpl implements JobService {
   @Transactional(readOnly = true)
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
-    Optional<Job> jobDtoOptional = repository.findById(id);
-    if (jobDtoOptional.isEmpty()) {
-      throw new NotFoundException(String.format("Job %s not found", id));
-    }
-    return entityToDto(jobDtoOptional.get());
+    return entityToDto(getJobEntity(id));
   }
 
   public Job getJobEntity(UUID id) {
@@ -206,7 +202,7 @@ public class JobServiceImpl implements JobService {
   public InputStream downloadExportedFile(UUID jobId) {
     Job job = getJobEntity(jobId);
     if (job.getFiles().isEmpty()) {
-      throw new FileDownloadException("The URL of the exported file is missing");
+      throw new FileDownloadException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
     try {
       URL url = new URL(job.getFiles().get(0));
@@ -215,8 +211,8 @@ public class JobServiceImpl implements JobService {
       conn.setConnectTimeout(5 * 1000);
       return conn.getInputStream();
     } catch (Exception e) {
-      log.error("Error downloading a file: {}", e.getMessage());
-      throw new FileDownloadException(String.format("Error downloading a file: %s", e.getMessage()));
+      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
+      throw new FileDownloadException(String.format("Error downloading a file: %s", e));
     }
   }
 
@@ -231,7 +227,7 @@ public class JobServiceImpl implements JobService {
     result.setType(entity.getType());
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
-    if (!entity.getType().equals(ExportType.EDIFACT_ORDERS_EXPORT)) {
+    if (!ExportType.EDIFACT_ORDERS_EXPORT.equals(entity.getType())) {
       result.setFiles(entity.getFiles());
     }
     result.setFileNames(entity.getFileNames());
