@@ -3,6 +3,7 @@ package org.folio.des.service;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 public interface JobService {
@@ -38,5 +39,7 @@ public interface JobService {
    * Deletes old jobs.
    */
   void deleteOldJobs();
+
+  InputStream downloadExportedFile(UUID jobId) throws Exception;
 
 }

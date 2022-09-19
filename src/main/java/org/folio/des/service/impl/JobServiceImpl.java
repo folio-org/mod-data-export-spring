@@ -3,8 +3,10 @@ package org.folio.des.service.impl;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
-import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -16,16 +18,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.de.entity.Job;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
-import org.folio.de.entity.Job;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
@@ -40,7 +40,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @EnableScheduling
@@ -73,6 +75,15 @@ public class JobServiceImpl implements JobService {
       throw new NotFoundException(String.format("Job %s not found", id));
     }
     return entityToDto(jobDtoOptional.get());
+  }
+
+  @Transactional(readOnly = true)
+  public Job getJobEntity(UUID id) {
+    Optional<Job> jobDtoOptional = repository.findById(id);
+    if (jobDtoOptional.isEmpty()) {
+      throw new NotFoundException(String.format("Job %s not found", id));
+    }
+    return jobDtoOptional.get();
   }
 
   @Transactional(readOnly = true)
@@ -190,6 +201,19 @@ public class JobServiceImpl implements JobService {
     jobExecutionService.deleteJobs(jobs);
   }
 
+  @Override
+  public InputStream downloadExportedFile(UUID jobId) throws Exception {
+    Job job = getJobEntity(jobId);
+    if (job.getFiles().isEmpty()) {
+      throw new Exception("The URL of the exported file is missing");
+    }
+    URL url = new URL(job.getFiles().get(0));
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("GET");
+    conn.setConnectTimeout(5 * 1000);
+    return conn.getInputStream();
+  }
+
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
     var result = new org.folio.des.domain.dto.Job();
 
@@ -201,7 +225,9 @@ public class JobServiceImpl implements JobService {
     result.setType(entity.getType());
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
-    result.setFiles(entity.getFiles());
+    if (!entity.getType().equals(ExportType.EDIFACT_ORDERS_EXPORT)) {
+      result.setFiles(entity.getFiles());
+    }
     result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
