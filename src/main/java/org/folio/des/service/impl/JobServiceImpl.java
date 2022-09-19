@@ -101,6 +101,7 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
+  @SuppressWarnings({})
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
