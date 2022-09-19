@@ -214,9 +214,9 @@ public class JobServiceImpl implements JobService {
       conn.setRequestMethod("GET");
       conn.setConnectTimeout(5 * 1000);
       return conn.getInputStream();
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Error downloading a file: {}", e.getMessage());
-      throw new FileDownloadException("Error downloading a file", e.getCause());
+      throw new FileDownloadException(String.format("Error downloading a file: %s", e.getMessage()));
     }
   }
 
