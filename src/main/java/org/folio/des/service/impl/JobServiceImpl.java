@@ -4,7 +4,6 @@ import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,12 +13,12 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.des.config.FolioExecutionContextHelper;
@@ -223,7 +222,7 @@ public class JobServiceImpl implements JobService {
     result.setType(entity.getType());
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
-    if (!ExportType.EDIFACT_ORDERS_EXPORT.equals(entity.getType())) {
+    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
       result.setFiles(entity.getFiles());
     }
     result.setFileNames(entity.getFileNames());
