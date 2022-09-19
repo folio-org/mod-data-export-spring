@@ -73,7 +73,7 @@ public class ServiceConfiguration {
 
   @Bean
   ExportTypeBasedConfigManager exportTypeBasedConfigManager(ConfigurationClient client,
-                      @Lazy ExportConfigServiceResolver exportConfigServiceResolver,
+                       ExportConfigServiceResolver exportConfigServiceResolver,
                       BaseExportConfigService baseExportConfigService,
                       DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter) {
     return new ExportTypeBasedConfigManager(client, exportConfigServiceResolver,
