@@ -299,7 +299,7 @@ class ExportTriggerTest {
 
   @Test
   void dailySchedulePlusOneMinuteWithExportScheduler() throws InterruptedException {
-     var repository = mock(JobDataExportRepository.class);
+    var repository = mock(JobDataExportRepository.class);
     Job job = new Job();
     job.setId(UUID.randomUUID());
     when(repository.save(any(Job.class))).thenReturn(job);

@@ -141,16 +141,18 @@ public class JobServiceImpl implements JobService {
     }
     Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
       .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId->{
+        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
           try {
             log.info("Config with id {} not found", configId.toString());
             client.getConfigById(configId.toString());
           } catch (NotFoundException e) {
-          log.info("config not found", configId.toString());
-          jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
-          getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
-          throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
-    }});
+            log.info("config not found", configId.toString());
+            jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
+            getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+            throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
+          }
+        }
+      );
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
