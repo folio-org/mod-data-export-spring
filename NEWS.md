@@ -1,10 +1,3 @@
-## 2022-09-19 v1.4.5 (Morning Glory Bug Fix)
-
-[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.4...v1.4.5)
-
-### Bug fixes
-* [MODEXPS-154](https://issues.folio.org/browse/MODEXPS-154) Export does not run when "Weekly" frequency was specified in scheduling
-
 ## 2022-08-25 v1.4.4 (Morning Glory Bug Fix)
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.3...v1.4.4)
