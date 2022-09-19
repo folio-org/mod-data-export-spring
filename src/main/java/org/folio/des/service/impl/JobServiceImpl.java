@@ -76,9 +76,7 @@ public class JobServiceImpl implements JobService {
   }
 
   public Job getJobEntity(UUID id) {
-    Optional<Job> jobDtoOptional = repository.findById(id);
-    jobDtoOptional.orElseThrow(() -> new NotFoundException(String.format("Job %s not found", id)));
-    return jobDtoOptional.get();
+    return repository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Job %s not found", id)));
   }
 
   @Transactional(readOnly = true)
