@@ -72,7 +72,7 @@ class ExportTriggerTest {
   @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
   @MockBean private KafkaService kafka;
-  @MockBean private ConfigurationClient client;
+  @Autowired private ConfigurationClient client;
   @MockBean private JobServiceImpl jobService;
   @MockBean private ExportConfigServiceResolver exportConfigServiceResolver;
   @MockBean private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
@@ -351,7 +351,7 @@ class ExportTriggerTest {
     EdiSchedule ediSchedule = new EdiSchedule();
     ediSchedule.setScheduleParameters(scheduleParameters);
     jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().setEdiSchedule(ediSchedule);
-    when(client.getConfigById(jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getExportConfigId().toString())).thenThrow(new NotFoundException("Not available"));
+    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not available"));
     assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
     assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());

@@ -101,7 +101,6 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
-  @SuppressWarnings({})
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
@@ -153,9 +152,8 @@ public class JobServiceImpl implements JobService {
             jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
             getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
             throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
-          }
-        }
-      );
+          }});
+
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
