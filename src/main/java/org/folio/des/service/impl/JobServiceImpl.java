@@ -149,6 +149,7 @@ public class JobServiceImpl implements JobService {
             log.info("Config with id {} not found", configId.toString());
             jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
             getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+
             throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
           }});
 
