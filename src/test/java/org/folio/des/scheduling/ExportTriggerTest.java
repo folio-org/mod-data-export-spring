@@ -307,8 +307,7 @@ class ExportTriggerTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var exportconfig = new ExportTypeBasedConfigManager(client,exportConfigServiceResolver,bursarExportConfigService,defaultModelConfigToExportConfigConverter);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, exportconfig);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
     folioExecutionContextHelper.registerTenant();
@@ -337,8 +336,7 @@ class ExportTriggerTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
-    var exportconfig = new ExportTypeBasedConfigManager(client,exportConfigServiceResolver,bursarExportConfigService,defaultModelConfigToExportConfigConverter);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, exportconfig);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig= new VendorEdiOrdersExportConfig();
@@ -354,7 +352,7 @@ class ExportTriggerTest {
     EdiSchedule ediSchedule = new EdiSchedule();
     ediSchedule.setScheduleParameters(scheduleParameters);
     jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().setEdiSchedule(ediSchedule);
-
+    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not available"));
     assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
     assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -33,13 +34,11 @@ import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.BulkEditConfigService;
-import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,7 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
-  private final ExportTypeBasedConfigManager client;
+  private final ConfigurationClient client;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
