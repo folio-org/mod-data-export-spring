@@ -369,7 +369,6 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime actDateTime = getActualTime(actDate);
     assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
     assertEquals(dayBefore, actDateTime.getDayOfWeek());
-    assertNotEquals(scheduledDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), actDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
   }
 
   @Test
