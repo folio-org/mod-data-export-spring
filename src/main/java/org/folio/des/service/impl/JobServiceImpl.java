@@ -51,7 +51,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
 
-  public static final String INTEGRATION_NOT_AVAILABLE = "Integration not available for config with id %s";
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
@@ -100,6 +99,22 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
+    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
+          try {
+            client.getConfigById(configId.toString());
+          } catch (NotFoundException e) {
+            log.info("Config with id {} not found", configId.toString());
+            jobDto.getExportTypeSpecificParameters()
+              .getVendorEdiOrdersExportConfig()
+              .getEdiSchedule()
+              .getScheduleParameters()
+              .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+
+            throw e;
+          }});
+
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
@@ -139,19 +154,6 @@ public class JobServiceImpl implements JobService {
     if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
-
-    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
-      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
-          try {
-            client.getConfigById(configId.toString());
-          } catch (NotFoundException e) {
-            log.info("Config with id {} not found", configId.toString());
-            jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
-            getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
-
-            throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
-          }});
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
