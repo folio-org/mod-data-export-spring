@@ -2,23 +2,21 @@ package org.folio.des.scheduling.acquisition;
 
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
 import static org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
-
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.IsoFields;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.folio.des.domain.dto.ScheduleParameters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.folio.des.domain.dto.ScheduleParameters;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -199,199 +197,71 @@ class AcqBaseExportTaskTriggerTest {
     assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
   }
 
-  @DisplayName("Weekly job scheduled for specific hour, when last time behind current time")
-  @ParameterizedTest
-  @CsvSource({
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-    "SUNDAY"
-  })
-  public void weeklyTestForEachDay(String weekDay) {
-    //Given
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(weekDay), null);
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
-
-    //When
-    Date now = new Date();
-    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(now, now, now);
-    Date actDate = trigger.nextExecutionTime(triggerContext);
-
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(actDateTime.getDayOfWeek().toString(), weekDay);
-  }
-
-  /**
-   * For example, now is Monday 15:00, user selects to schedule on Monday at 14:00 - so scheduling should be triggered after a week
-   */
   @Test
-  public void weeklyTestForTheSameDayAndTimeIsInPast() {
-    //Given
-    ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.minusHours(1);
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
-      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+  @DisplayName("Weekly job scheduled")
+  void weeklySchedule() {
+    int expDiffWeeks = 0;
+    String expTime = "06:12:13";
+    Map<DayOfWeek, DayOfWeek> expMap = new HashMap<>();
+    expMap.put(DayOfWeek.MONDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.TUESDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.WEDNESDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.THURSDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY);
+    expMap.put(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+    expMap.put(DayOfWeek.SUNDAY, DayOfWeek.MONDAY);
+    ZonedDateTime currZoneDate = Instant.now().atZone(ZoneId.of(EUROPE_MONACO));
 
-    //When
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    scheduleParameters.setId(UUID.randomUUID());
+    scheduleParameters.setScheduleTime(expTime);
+    scheduleParameters.setScheduleFrequency(expDiffWeeks);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.WEEK);
+    scheduleParameters.setWeekDays(List.of(WeekDaysEnum.MONDAY, WeekDaysEnum.SATURDAY, WeekDaysEnum.SUNDAY));
+    scheduleParameters.setTimeZone(EUROPE_MONACO);
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
-    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
-
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
-    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
-  }
-
-  /**
-   * For example, now is Monday 15:00, user selects to schedule on Monday at 16:00 - so scheduling should be triggered at the same day after a hour
-   */
-  @Test
-  public void weeklyTestForTheSameDayAndTimeIsInFuture() {
-    //Given
-    ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.plusHours(1);
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
-      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
-
     //When
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    final Date actDate = trigger.nextExecutionTime(triggerContext);
 
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(scheduledDateTime.getDayOfMonth(), actDateTime.getDayOfMonth());
-    assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
-    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
-  }
+    Instant firstInstant = Instant.ofEpochMilli(actDate.getTime());
+    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(EUROPE_MONACO));
+    DayOfWeek firstDayOfWeek = firstZonedDateTime.getDayOfWeek();
+    DayOfWeek expDay =  expMap.get(currZoneDate.getDayOfWeek());
+    assertEquals(expDay, firstDayOfWeek);
+    final String EXP_TIME = "T"+expTime+firstZonedDateTime.getOffset()+"["+ EUROPE_MONACO +"]";
+    assertTrue(firstZonedDateTime.toString().contains(firstZonedDateTime.getDayOfMonth() + EXP_TIME));
 
-  /**
-   * For example, now is Wednesday 15:00, user selects to schedule on Monday at 15:00 - so scheduling should be triggered after 5 days
-   */
-  @Test
-  public void weeklyTestForDayOfWeekInPast() {
-    //Given
-    ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.minusDays(2);
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
-      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    //Second try
+    triggerContext.update(actDate, actDate, actDate);
+    final Date secondDateDayLate = trigger.nextExecutionTime(triggerContext);
 
-    //When
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
-    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    Instant instant = Instant.ofEpochMilli(secondDateDayLate.getTime());
+    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(EUROPE_MONACO));
+    DayOfWeek secondDayOfWeek = secondZonedDateTime.getDayOfWeek();
+    DayOfWeek secondExpDay =  expMap.get(firstZonedDateTime.getDayOfWeek());
+    assertEquals(secondExpDay, secondDayOfWeek);
+    assertTrue(secondZonedDateTime.toString().contains(secondZonedDateTime.getDayOfMonth()+ EXP_TIME));
+    //Third try
+    triggerContext.update(secondDateDayLate, secondDateDayLate, secondDateDayLate);
+    final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
 
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
-    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
-  }
+    Instant thirdInstant = Instant.ofEpochMilli(thirdDateDayLate.getTime());
+    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(EUROPE_MONACO));
+    DayOfWeek thirdDayOfWeek = thirdZonedDateTime.getDayOfWeek();
+    DayOfWeek thirdExpDay =  expMap.get(secondZonedDateTime.getDayOfWeek());
+    assertEquals(thirdExpDay, thirdDayOfWeek);
+    assertTrue(thirdZonedDateTime.toString().contains(thirdZonedDateTime.getDayOfMonth()+ EXP_TIME));
+    //Forth try
+    triggerContext.update(thirdDateDayLate, thirdDateDayLate, thirdDateDayLate);
+    final Date forthDateDayLate = trigger.nextExecutionTime(triggerContext);
 
-  /**
-   * For example, now is Tuesday 10:00, and user selects Monday, Tuesday and Wednesday at 08:00 - so scheduling should be run on Wednesday
-   */
-  @Test
-  public void weeklyTestForMultipleDays() {
-    //Given
-    ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.minusHours(1);
-    DayOfWeek currentDay = scheduledDateTime.getDayOfWeek();
-    DayOfWeek dayBefore = getNowTime().minusDays(1).getDayOfWeek();
-    DayOfWeek dayAfter = getNowTime().plusDays(1).getDayOfWeek();
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(currentDay.name(), dayBefore.name(), dayAfter.name()),
-      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
-
-    //When
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
-    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
-
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(dayAfter, actDateTime.getDayOfWeek());
-    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
-  }
-
-  /**
-   * For example, if user selects scheduled frequency - 2, we need to shift scheduling day for 2 weeks
-   */
-  @Test
-  public void weeklyTestScheduleOnceAtTwoWeek() {
-    //Given
-    ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.minusHours(1);
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(scheduledDateTime.getDayOfWeek().toString()),
-      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
-    scheduleParameters.setScheduleFrequency(2);
-
-    //When
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
-    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
-
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertNotEquals(scheduledDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), actDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
-    assertEquals(scheduledDateTime.getDayOfWeek(), actDateTime.getDayOfWeek());
-    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
-  }
-
-  @Test
-  public void weeklyTestScheduleOnceWithMultipleChosenDaysAndFrequencyWhenDayFromNextWeekChosen() {
-    //Given
-    ZonedDateTime scheduledDateTime = getNowTime();
-    scheduledDateTime = scheduledDateTime.minusHours(1);
-    DayOfWeek currentDay = scheduledDateTime.getDayOfWeek();
-    DayOfWeek dayBefore = getNowTime().minusDays(1).getDayOfWeek();
-    ScheduleParameters scheduleParameters = getScheduleParameters(List.of(currentDay.name(), dayBefore.name()),
-      scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
-    scheduleParameters.scheduleFrequency(2);
-
-    //When
-    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
-    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
-
-    //Then
-    ZonedDateTime actDateTime = getActualTime(actDate);
-    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
-    assertEquals(dayBefore, actDateTime.getDayOfWeek());
-    assertNotEquals(scheduledDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), actDateTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
-  }
-
-  private ScheduleParameters getScheduleParameters(List<String> weekDays, String scheduledTime) {
-    ScheduleParameters params = new ScheduleParameters();
-    params.setId(UUID.randomUUID());
-    params.setScheduleFrequency(1);
-    params.setSchedulePeriod(SchedulePeriodEnum.WEEK);
-    params.setWeekDays(weekDays.stream().map(WeekDaysEnum::fromValue).collect(Collectors.toList()));
-    params.setTimeZone("UTC");
-    params.setScheduleTime(scheduledTime);
-    return params;
-  }
-
-  private ZonedDateTime getNowTime() {
-    Calendar scheduledCal = Calendar.getInstance();
-    Date scheduledDate = scheduledCal.getTime();
-    Instant scheduledInstant = Instant.ofEpochMilli(scheduledDate.getTime());
-    return ZonedDateTime.ofInstant(scheduledInstant, ZoneId.of("UTC"));
-  }
-
-  private ZonedDateTime getActualTime(Date actDate) {
-    Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
-    return ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
+    Instant forthInstant = Instant.ofEpochMilli(forthDateDayLate.getTime());
+    ZonedDateTime forthZonedDateTime = ZonedDateTime.ofInstant(forthInstant, ZoneId.of(EUROPE_MONACO));
+    DayOfWeek forthDayOfWeek = forthZonedDateTime.getDayOfWeek();
+    DayOfWeek forthExpDay =  expMap.get(thirdZonedDateTime.getDayOfWeek());
+    assertEquals(forthExpDay, forthDayOfWeek);
+    assertTrue(forthZonedDateTime.toString().contains(forthZonedDateTime.getDayOfMonth() + EXP_TIME));
   }
 
   @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
