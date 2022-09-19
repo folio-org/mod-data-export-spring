@@ -199,8 +199,8 @@
     },
     {
       "permissionName": "data-export.job.item.download",
-      "displayName": "Download exported file by by id",
-      "description": "Download exported file by by id"
+      "displayName": "Download exported file by job id",
+      "description": "Download exported file by job id"
     },
     {
       "permissionName": "data-export.config.item.post",
