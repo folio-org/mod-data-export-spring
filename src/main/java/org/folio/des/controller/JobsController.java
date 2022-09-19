@@ -54,8 +54,12 @@ public class JobsController implements JobsApi {
   }
 
   @Override
-  public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) throws Exception {
-    return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
+  public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
+    try {
+      return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
+    } catch (Exception e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   private boolean isMissingRequiredParameters(Job job) {
