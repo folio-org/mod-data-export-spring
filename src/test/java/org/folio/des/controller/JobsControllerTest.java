@@ -68,8 +68,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(6)),
-                jsonPath("$.jobRecords", hasSize(6))));
+                jsonPath("$.totalRecords", is(8)),
+                jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -84,7 +84,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(6)),
+                jsonPath("$.totalRecords", is(8)),
                 jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -130,8 +130,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(5)),
-              jsonPath("$.jobRecords", hasSize(5))));
+              jsonPath("$.totalRecords", is(7)),
+              jsonPath("$.jobRecords", hasSize(7))));
   }
 
   @Test
@@ -146,8 +146,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(5)),
-              jsonPath("$.jobRecords", hasSize(5))));
+              jsonPath("$.totalRecords", is(7)),
+              jsonPath("$.jobRecords", hasSize(7))));
   }
 
   @Test
@@ -192,8 +192,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(1)),
-                jsonPath("$.jobRecords", hasSize(1))));
+                jsonPath("$.totalRecords", is(3)),
+                jsonPath("$.jobRecords", hasSize(3))));
   }
 
   @Test
@@ -223,7 +223,7 @@ class JobsControllerTest extends BaseTest {
                 .headers(defaultHeaders()))
         .andExpect(
             matchAll(
-                status().is4xxClientError()));
+                status().is5xxServerError()));
   }
 
   @Test

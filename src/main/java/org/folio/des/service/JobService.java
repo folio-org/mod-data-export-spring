@@ -40,6 +40,11 @@ public interface JobService {
    */
   void deleteOldJobs();
 
+  /**
+   * Downloading the exported file. A job can have only one exported file.
+   * @param jobId the job id
+   * @return Input stream of exported file.
+   */
   InputStream downloadExportedFile(UUID jobId);
 
 }

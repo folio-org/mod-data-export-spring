@@ -27,6 +27,7 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
+import org.folio.des.exceptions.FileDownloadException;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
@@ -205,7 +206,7 @@ public class JobServiceImpl implements JobService {
   public InputStream downloadExportedFile(UUID jobId) {
     Job job = getJobEntity(jobId);
     if (job.getFiles().isEmpty()) {
-      throw new NotFoundException("The URL of the exported file is missing");
+      throw new FileDownloadException("The URL of the exported file is missing");
     }
     try {
       URL url = new URL(job.getFiles().get(0));
@@ -214,8 +215,8 @@ public class JobServiceImpl implements JobService {
       conn.setConnectTimeout(5 * 1000);
       return conn.getInputStream();
     } catch (IOException e) {
-      log.error("Error when downloading a file: {}", e.getMessage());
-      throw new RuntimeException(e.getMessage());
+      log.error("Error downloading a file: {}", e.getMessage());
+      throw new FileDownloadException("Error downloading a file", e.getCause());
     }
   }
 
