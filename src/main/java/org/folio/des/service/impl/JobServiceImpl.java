@@ -139,6 +139,7 @@ public class JobServiceImpl implements JobService {
     if (result.getExitStatus() == null) {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
+
     Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
       .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
@@ -150,9 +151,7 @@ public class JobServiceImpl implements JobService {
             jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().getEdiSchedule().
             getScheduleParameters().setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
             throw new NotFoundException(String.format(INTEGRATION_NOT_AVAILABLE, configId));
-          }
-        }
-      );
+          }});
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
