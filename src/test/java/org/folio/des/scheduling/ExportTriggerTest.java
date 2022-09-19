@@ -16,7 +16,6 @@ import org.folio.des.security.SecurityManagerService;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.impl.ExportConfigServiceResolver;
-import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -352,7 +351,7 @@ class ExportTriggerTest {
     EdiSchedule ediSchedule = new EdiSchedule();
     ediSchedule.setScheduleParameters(scheduleParameters);
     jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().setEdiSchedule(ediSchedule);
-    when(client.getConfigById(UUID.randomUUID().toString())).thenThrow(new NotFoundException("Not available"));
+    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not available"));
     assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
     assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());
