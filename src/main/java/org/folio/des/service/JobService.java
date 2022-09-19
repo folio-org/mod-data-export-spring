@@ -40,6 +40,6 @@ public interface JobService {
    */
   void deleteOldJobs();
 
-  InputStream downloadExportedFile(UUID jobId) throws Exception;
+  InputStream downloadExportedFile(UUID jobId);
 
 }

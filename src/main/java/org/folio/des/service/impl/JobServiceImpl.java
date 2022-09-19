@@ -4,6 +4,7 @@ import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -77,7 +78,6 @@ public class JobServiceImpl implements JobService {
     return entityToDto(jobDtoOptional.get());
   }
 
-  @Transactional(readOnly = true)
   public Job getJobEntity(UUID id) {
     Optional<Job> jobDtoOptional = repository.findById(id);
     if (jobDtoOptional.isEmpty()) {
@@ -202,16 +202,21 @@ public class JobServiceImpl implements JobService {
   }
 
   @Override
-  public InputStream downloadExportedFile(UUID jobId) throws Exception {
+  public InputStream downloadExportedFile(UUID jobId) {
     Job job = getJobEntity(jobId);
     if (job.getFiles().isEmpty()) {
-      throw new Exception("The URL of the exported file is missing");
+      throw new NotFoundException("The URL of the exported file is missing");
     }
-    URL url = new URL(job.getFiles().get(0));
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestMethod("GET");
-    conn.setConnectTimeout(5 * 1000);
-    return conn.getInputStream();
+    try {
+      URL url = new URL(job.getFiles().get(0));
+      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setRequestMethod("GET");
+      conn.setConnectTimeout(5 * 1000);
+      return conn.getInputStream();
+    } catch (IOException e) {
+      log.error("Error when downloading a file: {}", e.getMessage());
+      throw new RuntimeException(e.getMessage());
+    }
   }
 
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {

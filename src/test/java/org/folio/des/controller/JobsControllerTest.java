@@ -214,6 +214,32 @@ class JobsControllerTest extends BaseTest {
   }
 
   @Test
+  @DisplayName("Should failed download file with NotFound")
+  void shouldFailedDownloadWithNotFound() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs/35ae5d0f-1525-42a1-a361-1bc9b88e8180/download")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().is4xxClientError()));
+  }
+
+  @Test
+  @DisplayName("Should failed download file with BadRequest")
+  void shouldFailedDownloadWithBadRequest() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs/42ae5d0f-6425-82a1-a361-1bc9b88e8172/download")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().is4xxClientError()));
+  }
+
+  @Test
   @DisplayName("Can not fetch job with wrong id")
   void notFoundJob() throws Exception {
     mockMvc
