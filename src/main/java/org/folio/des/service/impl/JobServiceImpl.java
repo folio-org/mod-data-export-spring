@@ -105,7 +105,7 @@ public class JobServiceImpl implements JobService {
           try {
             client.getConfigById(configId.toString());
           } catch (NotFoundException e) {
-            log.info("Config with id {} not found", configId.toString());
+            log.error("Config with id {} not found", configId.toString());
             jobDto.getExportTypeSpecificParameters()
               .getVendorEdiOrdersExportConfig()
               .getEdiSchedule()
