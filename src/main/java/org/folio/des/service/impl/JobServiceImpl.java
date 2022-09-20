@@ -3,7 +3,6 @@ package org.folio.des.service.impl;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
-import static org.springframework.transaction.support.TransactionSynchronizationManager.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -20,12 +19,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
@@ -40,7 +43,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
 
 @Service
 @EnableScheduling
@@ -62,6 +64,7 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
+  private final ConfigurationClient client;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
@@ -96,6 +99,22 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
+    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
+          try {
+            client.getConfigById(configId.toString());
+          } catch (NotFoundException e) {
+            log.error("Config with id {} not found", configId.toString());
+            jobDto.getExportTypeSpecificParameters()
+              .getVendorEdiOrdersExportConfig()
+              .getEdiSchedule()
+              .getScheduleParameters()
+              .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+
+            throw e;
+          }});
+
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
