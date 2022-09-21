@@ -3,6 +3,7 @@ package org.folio.des.service;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 public interface JobService {
@@ -38,5 +39,12 @@ public interface JobService {
    * Deletes old jobs.
    */
   void deleteOldJobs();
+
+  /**
+   * Downloading the exported file. A job can have only one exported file.
+   * @param jobId the job id
+   * @return Input stream of exported file.
+   */
+  InputStream downloadExportedFile(UUID jobId);
 
 }
