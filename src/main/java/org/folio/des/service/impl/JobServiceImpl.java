@@ -18,16 +18,21 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.de.entity.Job;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
+import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.exceptions.FileDownloadException;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
@@ -44,15 +49,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-
 @Service
 @EnableScheduling
 @Log4j2
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
+  public static final int CONNECTION_TIMEOUT = 5000;
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
@@ -67,17 +70,18 @@ public class JobServiceImpl implements JobService {
   private final FolioExecutionContext context;
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
+  private final ConfigurationClient client;
 
   private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
   @Transactional(readOnly = true)
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
-    Optional<Job> jobDtoOptional = repository.findById(id);
-    if (jobDtoOptional.isEmpty()) {
-      throw new NotFoundException(String.format("Job %s not found", id));
-    }
-    return entityToDto(jobDtoOptional.get());
+    return entityToDto(getJobEntity(id));
+  }
+
+  public Job getJobEntity(UUID id) {
+    return repository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Job %s not found", id)));
   }
 
   @Transactional(readOnly = true)
@@ -101,6 +105,22 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
+    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
+          try {
+            client.getConfigById(configId.toString());
+          } catch (NotFoundException e) {
+            log.error("Config with id {} not found", configId.toString());
+            jobDto.getExportTypeSpecificParameters()
+              .getVendorEdiOrdersExportConfig()
+              .getEdiSchedule()
+              .getScheduleParameters()
+              .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+
+            throw e;
+          }});
+
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
@@ -195,6 +215,24 @@ public class JobServiceImpl implements JobService {
     jobExecutionService.deleteJobs(jobs);
   }
 
+  @Override
+  public InputStream downloadExportedFile(UUID jobId) {
+    Job job = getJobEntity(jobId);
+    if (job.getFiles().isEmpty()) {
+      throw new FileDownloadException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
+    }
+    try {
+      URL url = new URL(job.getFiles().get(0));
+      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setRequestMethod("GET");
+      conn.setConnectTimeout(CONNECTION_TIMEOUT);
+      return conn.getInputStream();
+    } catch (Exception e) {
+      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
+      throw new FileDownloadException(String.format("Error downloading a file: %s", e));
+    }
+  }
+
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
     var result = new org.folio.des.domain.dto.Job();
 
@@ -206,7 +244,9 @@ public class JobServiceImpl implements JobService {
     result.setType(entity.getType());
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
-    result.setFiles(entity.getFiles());
+    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
+      result.setFiles(entity.getFiles());
+    }
     result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
