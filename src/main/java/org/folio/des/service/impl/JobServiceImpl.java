@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Metadata;
@@ -71,11 +73,11 @@ public class JobServiceImpl implements JobService {
   @Transactional(readOnly = true)
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
-    return entityToDto(getJobEntity(id));
-  }
-
-  public Job getJobEntity(UUID id) {
-    return repository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Job %s not found", id)));
+    Optional<Job> jobDtoOptional = repository.findById(id);
+    if (jobDtoOptional.isEmpty()) {
+      throw new NotFoundException(String.format("Job %s not found", id));
+    }
+    return entityToDto(jobDtoOptional.get());
   }
 
   @Transactional(readOnly = true)
@@ -193,24 +195,6 @@ public class JobServiceImpl implements JobService {
     jobExecutionService.deleteJobs(jobs);
   }
 
-  @Override
-  public InputStream downloadExportedFile(UUID jobId) {
-    Job job = getJobEntity(jobId);
-    if (job.getFiles().isEmpty()) {
-      throw new FileDownloadException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
-    }
-    try {
-      URL url = new URL(job.getFiles().get(0));
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      conn.setConnectTimeout(5 * 1000);
-      return conn.getInputStream();
-    } catch (Exception e) {
-      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
-      throw new FileDownloadException(String.format("Error downloading a file: %s", e));
-    }
-  }
-
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
     var result = new org.folio.des.domain.dto.Job();
 
@@ -222,9 +206,7 @@ public class JobServiceImpl implements JobService {
     result.setType(entity.getType());
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
-    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
-      result.setFiles(entity.getFiles());
-    }
+    result.setFiles(entity.getFiles());
     result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
