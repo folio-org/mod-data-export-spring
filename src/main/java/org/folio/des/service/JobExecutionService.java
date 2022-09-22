@@ -85,12 +85,12 @@ public class  JobExecutionService {
             .getVendorEdiOrdersExportConfig()
             .getEdiFtp())));
 
-        }  catch (JsonProcessingException e) {
-      throw new IllegalArgumentException(e);
-    }
+        } catch (JsonProcessingException e) {
+             throw new IllegalArgumentException(e);
+        }
         jobCommand.setJobParameters(new JobParameters(params));
-      },
-      () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
+    },
+    () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
 
     return jobCommand;
   }
