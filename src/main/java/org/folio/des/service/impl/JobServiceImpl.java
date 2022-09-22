@@ -187,6 +187,7 @@ public class JobServiceImpl implements JobService {
     deleteJobs(jobsToDelete);
   }
 
+  @Transactional
   @Override
   public void resend(org.folio.des.domain.dto.Job job) {
   var resultJob = upsertAndSendToKafka(job,false);

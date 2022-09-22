@@ -60,7 +60,7 @@ public class JobsController implements JobsApi {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     service.resend(job);
-    return new ResponseEntity<Void>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @Override
