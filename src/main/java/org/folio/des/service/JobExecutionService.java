@@ -47,6 +47,18 @@ public class  JobExecutionService {
     return jobCommand;
   }
 
+  public JobCommand prepareResendJobCommand(Job job) {
+    validateIncomingExportConfig(job);
+    JobCommand jobCommand = buildResendJobCommand(job);
+
+    jobCommandBuilderResolver.resolve(job.getType()).ifPresentOrElse(builder -> {
+        JobParameters jobParameters = builder.buildJobCommand(job);
+        jobCommand.setJobParameters(jobParameters);
+      },
+      () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
+    return jobCommand;
+  }
+
   public void sendJobCommand(JobCommand jobCommand) {
     kafka.send(KafkaService.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
@@ -86,6 +98,22 @@ public class  JobExecutionService {
     result.setIdentifierType(job.getIdentifierType());
     result.setEntityType(job.getEntityType());
     result.setProgress(job.getProgress());
+    return result;
+  }
+
+  private JobCommand buildResendJobCommand(Job job) {
+    var result = new JobCommand();
+    result.setType(JobCommand.Type.RESEND);
+    result.setId(job.getId());
+    result.setName(job.getName());
+    result.setDescription(job.getDescription());
+    result.setExportType(job.getType());
+    result.setIdentifierType(job.getIdentifierType());
+    result.setEntityType(job.getEntityType());
+    result.setProgress(job.getProgress());
+    result.setFilename(String.valueOf(job.getFileNames()));
+
+
     return result;
   }
 }

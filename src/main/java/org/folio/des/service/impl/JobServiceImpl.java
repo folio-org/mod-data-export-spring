@@ -99,21 +99,8 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
-    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
-      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
-          try {
-            client.getConfigById(configId.toString());
-          } catch (NotFoundException e) {
-            log.error("Config with id {} not found", configId.toString());
-            jobDto.getExportTypeSpecificParameters()
-              .getVendorEdiOrdersExportConfig()
-              .getEdiSchedule()
-              .getScheduleParameters()
-              .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
 
-            throw e;
-          }});
+    isConfigAvailable(jobDto);
 
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
@@ -167,6 +154,13 @@ public class JobServiceImpl implements JobService {
     return entityToDto(result);
   }
 
+  @Override
+  public void resend(org.folio.des.domain.dto.Job jobDto) {
+  var resultJob = upsertAndSendToKafka(jobDto,false);
+  var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
+  jobExecutionService.sendJobCommand(jobCommand);
+  }
+
   @Transactional
   @Override
   public void deleteOldJobs() {
@@ -179,6 +173,24 @@ public class JobServiceImpl implements JobService {
     jobsToDelete.addAll(filterJobsMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), bulkEditTypes));
 
     deleteJobs(jobsToDelete);
+  }
+
+  private void isConfigAvailable(org.folio.des.domain.dto.Job jobDto) {
+   Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+        .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
+          try {
+             client.getConfigById(configId.toString());
+          } catch (NotFoundException e) {
+            log.error("Config with id {} not found", configId.toString());
+            jobDto.getExportTypeSpecificParameters()
+              .getVendorEdiOrdersExportConfig()
+              .getEdiSchedule()
+              .getScheduleParameters()
+              .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
+
+            throw e;
+          }});
   }
 
   private Date createExpirationDate(int days) {

@@ -50,6 +50,16 @@ public class JobsController implements JobsApi {
     return new ResponseEntity<>(service.upsertAndSendToKafka(job, true), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
   }
 
+  @Override
+  public ResponseEntity resendExportedFile(UUID id) {
+    Job job = service.get(id);
+    if (isMissingRequiredParameters(job)) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    service.resend(job);
+    return new ResponseEntity<Void>(HttpStatus.OK);
+  }
+
   private boolean isMissingRequiredParameters(Job job) {
     var exportTypeParameters = job.getExportTypeSpecificParameters();
     var eHoldingsExportConfig = exportTypeParameters.geteHoldingsExportConfig();

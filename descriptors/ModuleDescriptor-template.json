@@ -72,6 +72,16 @@
         },
         {
           "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export-spring/jobs/{id}/resend",
+          "permissionsRequired": [
+            "data-export.job.item.resend"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/data-export-spring/configs",
@@ -178,6 +188,11 @@
   ],
   "permissionSets": [
     {
+      "permissionName": "data-export.job.item.resend",
+      "displayName": "resend EDIFACT export",
+      "description": "resend EDIFACT export"
+    },
+    {
       "permissionName": "data-export.config.collection.get",
       "displayName": "Get data export configurations",
       "description": "Get data export configurations"
@@ -255,7 +270,8 @@
         "inventory-storage.service-points.collection.get",
         "organizations-storage.organizations.item.get",
         "orders.item.get",
-        "orders-storage.purchase-orders.collection.get"
+        "orders-storage.purchase-orders.collection.get",
+        "data-export.job.item.resend"
       ]
     }
   ],

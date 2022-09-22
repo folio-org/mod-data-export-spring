@@ -39,4 +39,10 @@ public interface JobService {
    */
   void deleteOldJobs();
 
+
+  /**
+   * Deletes old jobs.
+   */
+  void resend(Job job);
+
 }

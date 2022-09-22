@@ -1,6 +1,7 @@
 package org.folio.de.entity;
 
 import lombok.Data;
+import org.folio.des.domain.dto.EdiFtp;
 import org.folio.des.domain.dto.EntityType;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.IdentifierType;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Data
 public class JobCommand {
 
-  public enum Type {START, DELETE}
+  public enum Type {START, RESEND, DELETE}
 
   private Type type;
   private UUID id;
@@ -23,5 +24,7 @@ public class JobCommand {
   private IdentifierType identifierType;
   private EntityType entityType;
   private Progress progress;
+  private EdiFtp ediFtp;
+  private String filename;
 
 }
