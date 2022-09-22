@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
@@ -22,7 +21,6 @@ import org.folio.des.domain.JobParameterNames;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -56,6 +54,7 @@ public class  JobExecutionService {
       () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
     return jobCommand;
   }
+
   public JobCommand prepareResendJobCommand(Job job) {
     validateIncomingExportConfig(job);
     JobCommand jobCommand = buildResendJobCommand(job);

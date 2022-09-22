@@ -50,7 +50,7 @@ class JobServiceTest {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
   private static final int DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD = 14;
 
-  @Mock
+  @InjectMocks
   private JobServiceImpl jobService;
   @Mock
   private JobDataExportRepository repository;
@@ -70,9 +70,6 @@ class JobServiceTest {
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Mock
   private KafkaService kafka;
-  @Mock
-  private ObjectMapper objectMapper;
-
 
   @Test
   void shouldCollectExpiredJobs() {
