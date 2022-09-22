@@ -187,6 +187,13 @@ public class JobServiceImpl implements JobService {
     deleteJobs(jobsToDelete);
   }
 
+  @Override
+  public void resend(org.folio.des.domain.dto.Job job) {
+  var resultJob = upsertAndSendToKafka(job,false);
+  var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
+  jobExecutionService.sendJobCommand(jobCommand);
+  }
+
   private Date createExpirationDate(int days) {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
   }
@@ -286,6 +293,7 @@ public class JobServiceImpl implements JobService {
     result.setIdentifierType(dto.getIdentifierType());
     result.setEntityType(dto.getEntityType());
     result.setProgress(dto.getProgress());
+    result.setFileNames(dto.getFileNames());
 
     if (dto.getMetadata() != null) {
       result.setCreatedDate(dto.getMetadata().getCreatedDate());

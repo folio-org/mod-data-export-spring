@@ -128,6 +128,36 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
+  /jobs/{id}/resend:
+    post:
+      description: resend exported file by the job ID
+      operationId: resendExportedFile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the job
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "201":
+          description: Resend job created
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
   /jobs/{id}/download:
     get:
       description: Download exported file by the job ID

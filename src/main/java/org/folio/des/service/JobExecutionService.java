@@ -4,17 +4,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.JobParameterNames;
+import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -33,6 +41,8 @@ public class  JobExecutionService {
   private final KafkaService kafka;
   private final ExportConfigValidatorResolver exportConfigValidatorResolver;
   private final JobCommandBuilderResolver jobCommandBuilderResolver;
+  private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+  private final ConfigurationClient manager;
 
   public JobCommand prepareStartJobCommand(Job job) {
     validateIncomingExportConfig(job);
@@ -45,6 +55,29 @@ public class  JobExecutionService {
       },
       () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
     return jobCommand;
+  }
+  public JobCommand prepareResendJobCommand(Job job) {
+    validateIncomingExportConfig(job);
+    JobCommand jobCommand = buildResendJobCommand(job);
+
+    Map<String, JobParameter> params = new HashMap<>();
+    String exportConfigId = job.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getExportConfigId().toString();
+
+    ModelConfiguration modelConfiguration = manager.getConfigById(exportConfigId);
+    ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
+    Optional.ofNullable(config.getExportTypeSpecificParameters()).
+      map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+      .ifPresent(vendorEdiOrdersExportConfig ->
+        params.put("edifactOrdersExport",
+          new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
+    Optional.ofNullable(job.getFileNames()).ifPresent(fileName->
+        params.put("fileName", new JobParameter(String.valueOf(fileName.get(0)))));
+
+    jobCommand.setJobParameters(new JobParameters(params));
+
+   return jobCommand;
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
@@ -86,6 +119,19 @@ public class  JobExecutionService {
     result.setIdentifierType(job.getIdentifierType());
     result.setEntityType(job.getEntityType());
     result.setProgress(job.getProgress());
+    return result;
+  }
+  private JobCommand buildResendJobCommand(Job job) {
+    var result = new JobCommand();
+    result.setType(JobCommand.Type.RESEND);
+    result.setId(job.getId());
+    result.setName(job.getName());
+    result.setDescription(job.getDescription());
+    result.setExportType(job.getType());
+    result.setIdentifierType(job.getIdentifierType());
+    result.setEntityType(job.getEntityType());
+    result.setProgress(job.getProgress());
+
     return result;
   }
 }

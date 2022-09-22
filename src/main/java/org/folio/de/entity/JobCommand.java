@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 public class JobCommand {
 
-  public enum Type {START, DELETE}
+  public enum Type {START, RESEND, DELETE}
 
   private Type type;
   private UUID id;
