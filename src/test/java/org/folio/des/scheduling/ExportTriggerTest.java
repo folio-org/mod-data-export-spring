@@ -1,5 +1,6 @@
 package org.folio.des.scheduling;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
@@ -75,6 +76,7 @@ class ExportTriggerTest {
   @MockBean private KafkaService kafka;
   @MockBean private ConfigurationClient client;
   @MockBean private JobServiceImpl jobService;
+  @MockBean private ObjectMapper objectMapper;
   @MockBean private ExportConfigServiceResolver exportConfigServiceResolver;
   @MockBean private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
 
@@ -306,7 +308,9 @@ class ExportTriggerTest {
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    //var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver,
+      defaultModelConfigToExportConfigConverter, objectMapper, client);
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
@@ -335,7 +339,9 @@ class ExportTriggerTest {
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver,
+      defaultModelConfigToExportConfigConverter, objectMapper, client);
+
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();

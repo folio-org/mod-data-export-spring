@@ -73,6 +73,7 @@ class JobCommandBuilderResolverTest {
     bursarFeeFines.addPatronGroupsItem("Test");
 
     vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
+    vendorEdiOrdersExportConfig.setExportConfigId(UUID.randomUUID());
     vendorEdiOrdersExportConfig.setConfigName("TestConfig");
 
     eHoldingsExportConfig.setRecordId("packageId");
@@ -84,6 +85,7 @@ class JobCommandBuilderResolverTest {
     exportTypeSpecificParameters.setQuery("TestQuery");
     exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
     exportTypeSpecificParameters.seteHoldingsExportConfig(eHoldingsExportConfig);
+    exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
 
     job.setEntityType(EntityType.USER);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
