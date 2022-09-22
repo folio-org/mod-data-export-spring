@@ -62,7 +62,7 @@ public class JobsController implements JobsApi {
     }
     service.resend(job);
     return new ResponseEntity<Void>(HttpStatus.OK);
-=======
+   }
   public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
     return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
 
