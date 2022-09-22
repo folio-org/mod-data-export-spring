@@ -158,6 +158,25 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
+  /jobs/{id}/download:
+    get:
+      description: Download exported file by the job ID
+      operationId: downloadExportedFileByJobId
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the job
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: Export file successfully retrieved
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
 components:
   schemas:
     jobStatus:

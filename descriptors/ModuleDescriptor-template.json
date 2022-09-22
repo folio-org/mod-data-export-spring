@@ -84,6 +84,16 @@
           "methods": [
             "GET"
           ],
+          "pathPattern": "/data-export-spring/jobs/{id}/download",
+          "permissionsRequired": [
+            "data-export.job.item.download"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/configs",
           "permissionsRequired": [
             "data-export.config.collection.get"
@@ -203,6 +213,11 @@
       "description": "Get data export configuration by id"
     },
     {
+      "permissionName": "data-export.job.item.download",
+      "displayName": "Download exported file by job id",
+      "description": "Download exported file by job id"
+    },
+    {
       "permissionName": "data-export.config.item.post",
       "displayName": "Create a data export configuration",
       "description": "Create a data export configuration"
@@ -251,7 +266,8 @@
       "subPermissions": [
         "data-export.job.item.post",
         "data-export.job.item.get",
-        "data-export.job.collection.get"
+        "data-export.job.collection.get",
+        "data-export.job.item.download"
       ]
     },
     {
