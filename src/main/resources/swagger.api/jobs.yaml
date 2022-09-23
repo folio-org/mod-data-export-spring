@@ -185,22 +185,6 @@ paths:
               schema:
                 type: string
                 format: binary
-        "404":
-          description: ExportFile with a given Job ID not found
-          content:
-            application/json:
-              example:
-                $ref: "#/components/examples/errors"
-              schema:
-                $ref: "#/components/schemas/errors"
-        "500":
-          description: Internal server errors
-            content:
-              application/json:
-                example:
-                  $ref: "#/components/examples/errors"
-                schema:
-                  $ref: "#/components/schemas/errors"
 components:
   schemas:
     jobStatus:
