@@ -223,7 +223,7 @@ class JobsControllerTest extends BaseTest {
                 .headers(defaultHeaders()))
         .andExpect(
             matchAll(
-                status().is5xxServerError()));
+                status().is4xxClientError()));
   }
 
   @Test
