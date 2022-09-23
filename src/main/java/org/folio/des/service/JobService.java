@@ -41,7 +41,8 @@ public interface JobService {
   void deleteOldJobs();
 
   /**
-   * Resend export file.
+   * Resending the exported file. A job can have only one exported file.
+   * @param jobId the job id
    */
   void resendExportedFile(UUID jobId);
 

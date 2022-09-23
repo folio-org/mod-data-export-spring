@@ -190,13 +190,13 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void resendExportedFile(UUID jobId) {
-  org.folio.des.domain.dto.Job job = get(jobId);
-  if (job.getFiles().isEmpty()) {
+    org.folio.des.domain.dto.Job job = get(jobId);
+    if (job.getFiles().isEmpty()) {
     throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
-  }
-  var resultJob = upsertAndSendToKafka(job,false);
-  var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
-  jobExecutionService.sendJobCommand(jobCommand);
+    }
+    var resultJob = upsertAndSendToKafka(job,false);
+    var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
+    jobExecutionService.sendJobCommand(jobCommand);
   }
 
   private Date createExpirationDate(int days) {

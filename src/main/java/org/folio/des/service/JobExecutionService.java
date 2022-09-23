@@ -41,8 +41,8 @@ public class  JobExecutionService {
   private final JobCommandBuilderResolver jobCommandBuilderResolver;
   private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   private final ConfigurationClient manager;
-  public static final String edifactOrdersExport = "EDIFACT_ORDERS_EXPORT";
-  public static final String fileName = "FILE_NAME";
+  public static final String EDIFACT_ORDERS_EXPORT_KEY = "EDIFACT_ORDERS_EXPORT";
+  public static final String FILE_NAME_KEY = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
     validateIncomingExportConfig(job);
@@ -71,10 +71,10 @@ public class  JobExecutionService {
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .ifPresent(vendorEdiOrdersExportConfig ->
-          params.put(edifactOrdersExport,
+          params.put(EDIFACT_ORDERS_EXPORT_KEY,
           new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
     Optional.ofNullable(job.getFileNames()).ifPresent(fileNames->
-      params.put(fileName, new JobParameter(String.valueOf(fileNames.get(0)))));
+      params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
 
     jobCommand.setJobParameters(new JobParameters(params));
 
@@ -113,10 +113,10 @@ public class  JobExecutionService {
   private JobCommand buildBaseJobCommand(Job job, JobCommand.Type type) {
     var result = new JobCommand();
     if(type == JobCommand.Type.START) {
-      result.setType(JobCommand.Type.START);
+      result.setType(type);
     }
     else if(type == JobCommand.Type.RESEND) {
-      result.setType(JobCommand.Type.RESEND);
+      result.setType(type);
     }
     result.setId(job.getId());
     result.setName(job.getName());
