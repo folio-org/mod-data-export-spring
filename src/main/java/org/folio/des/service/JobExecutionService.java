@@ -71,10 +71,10 @@ public class  JobExecutionService {
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .ifPresent(vendorEdiOrdersExportConfig ->
-          params.put(EDIFACT_ORDERS_EXPORT_KEY,
-          new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
-    Optional.ofNullable(job.getFileNames()).ifPresent(fileNames->
-      params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
+          params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
+    Optional.ofNullable(job.getFileNames())
+        .ifPresent(fileNames->
+          params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
 
     jobCommand.setJobParameters(new JobParameters(params));
 
@@ -112,12 +112,7 @@ public class  JobExecutionService {
 
   private JobCommand buildBaseJobCommand(Job job, JobCommand.Type type) {
     var result = new JobCommand();
-    if(type == JobCommand.Type.START) {
-      result.setType(type);
-    }
-    else if(type == JobCommand.Type.RESEND) {
-      result.setType(type);
-    }
+    result.setType(type);
     result.setId(job.getId());
     result.setName(job.getName());
     result.setDescription(job.getDescription());

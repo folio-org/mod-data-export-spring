@@ -192,7 +192,7 @@ public class JobServiceImpl implements JobService {
   public void resendExportedFile(UUID jobId) {
     org.folio.des.domain.dto.Job job = get(jobId);
     if (job.getFiles().isEmpty()) {
-    throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
+      throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
     }
     var resultJob = upsertAndSendToKafka(job,false);
     var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));

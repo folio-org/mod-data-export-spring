@@ -91,7 +91,6 @@ class JobServiceTest {
   @Test
   void testResendJob() {
     var id = UUID.randomUUID();
-    var repository = mock(JobDataExportRepository.class);
     Job job = new Job();
     job.setId(UUID.randomUUID());
     ArrayList<String> list = new ArrayList<>();
@@ -134,11 +133,11 @@ class JobServiceTest {
       }
     });
     when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
-    assertThrows(NotFoundException.class, () ->jobService.resendExportedFile(jobDto.getId()));
+    assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(jobDto.getId()));
     job.setFiles(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    assertEquals("TestFile",command.getJobParameters().getParameters().get("FILE_NAME").toString());
+    assertEquals("TestFile", command.getJobParameters().getParameters().get("FILE_NAME").toString());
 
   }
 
