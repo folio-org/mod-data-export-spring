@@ -204,8 +204,8 @@
     },
     {
       "permissionName": "data-export.job.item.resend",
-      "displayName": "resend EDIFACT export",
-      "description": "resend EDIFACT export"
+      "displayName": "Resend EDIFACT export",
+      "description": "Resend EDIFACT export"
     },
     {
       "permissionName": "data-export.config.item.get",

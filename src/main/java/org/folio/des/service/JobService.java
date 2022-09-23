@@ -41,7 +41,7 @@ public interface JobService {
   void deleteOldJobs();
 
   /**
-   * resend export file.
+   * Resend export file.
    */
   void resend(Job job);
 
