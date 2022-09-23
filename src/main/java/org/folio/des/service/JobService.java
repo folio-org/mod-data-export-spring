@@ -43,7 +43,7 @@ public interface JobService {
   /**
    * Resend export file.
    */
-  void resend(Job job);
+  void resendExportedFile(UUID jobId);
 
   /**
    * Downloading the exported file. A job can have only one exported file.

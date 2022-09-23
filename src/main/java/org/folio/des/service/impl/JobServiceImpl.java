@@ -189,7 +189,11 @@ public class JobServiceImpl implements JobService {
 
   @Transactional
   @Override
-  public void resend(org.folio.des.domain.dto.Job job) {
+  public void resendExportedFile(UUID jobId) {
+  org.folio.des.domain.dto.Job job = get(jobId);
+  if (job.getFiles().isEmpty()) {
+    throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
+  }
   var resultJob = upsertAndSendToKafka(job,false);
   var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
   jobExecutionService.sendJobCommand(jobCommand);
@@ -227,7 +231,7 @@ public class JobServiceImpl implements JobService {
   public InputStream downloadExportedFile(UUID jobId) {
     Job job = getJobEntity(jobId);
     if (job.getFiles().isEmpty()) {
-      throw new FileDownloadException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
+      throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
     try {
       URL url = new URL(job.getFiles().get(0));
@@ -255,6 +259,7 @@ public class JobServiceImpl implements JobService {
     if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
       result.setFiles(entity.getFiles());
     }
+    result.setFiles(entity.getFiles());
     result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());

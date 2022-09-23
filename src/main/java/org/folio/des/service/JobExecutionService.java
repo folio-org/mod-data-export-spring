@@ -41,11 +41,13 @@ public class  JobExecutionService {
   private final JobCommandBuilderResolver jobCommandBuilderResolver;
   private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   private final ConfigurationClient manager;
+  public static final String edifactOrdersExport = "EDIFACT_ORDERS_EXPORT";
+  public static final String fileName = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
     validateIncomingExportConfig(job);
 
-    JobCommand jobCommand = buildBaseJobCommand(job);
+    JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.START);
 
     jobCommandBuilderResolver.resolve(job.getType()).ifPresentOrElse(builder -> {
         JobParameters jobParameters = builder.buildJobCommand(job);
@@ -57,7 +59,7 @@ public class  JobExecutionService {
 
   public JobCommand prepareResendJobCommand(Job job) {
     validateIncomingExportConfig(job);
-    JobCommand jobCommand = buildResendJobCommand(job);
+    JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
 
     Map<String, JobParameter> params = new HashMap<>();
     String exportConfigId = job.getExportTypeSpecificParameters()
@@ -68,11 +70,11 @@ public class  JobExecutionService {
     ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-      .ifPresent(vendorEdiOrdersExportConfig ->
-        params.put("edifactOrdersExport",
+        .ifPresent(vendorEdiOrdersExportConfig ->
+          params.put(edifactOrdersExport,
           new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
-    Optional.ofNullable(job.getFileNames()).ifPresent(fileName->
-        params.put("fileName", new JobParameter(String.valueOf(fileName.get(0)))));
+    Optional.ofNullable(job.getFileNames()).ifPresent(fileNames->
+      params.put(fileName, new JobParameter(String.valueOf(fileNames.get(0)))));
 
     jobCommand.setJobParameters(new JobParameters(params));
 
@@ -108,9 +110,14 @@ public class  JobExecutionService {
     });
   }
 
-  private JobCommand buildBaseJobCommand(Job job) {
+  private JobCommand buildBaseJobCommand(Job job, JobCommand.Type type) {
     var result = new JobCommand();
-    result.setType(JobCommand.Type.START);
+    if(type == JobCommand.Type.START) {
+      result.setType(JobCommand.Type.START);
+    }
+    else if(type == JobCommand.Type.RESEND) {
+      result.setType(JobCommand.Type.RESEND);
+    }
     result.setId(job.getId());
     result.setName(job.getName());
     result.setDescription(job.getDescription());
@@ -118,19 +125,6 @@ public class  JobExecutionService {
     result.setIdentifierType(job.getIdentifierType());
     result.setEntityType(job.getEntityType());
     result.setProgress(job.getProgress());
-    return result;
-  }
-  private JobCommand buildResendJobCommand(Job job) {
-    var result = new JobCommand();
-    result.setType(JobCommand.Type.RESEND);
-    result.setId(job.getId());
-    result.setName(job.getName());
-    result.setDescription(job.getDescription());
-    result.setExportType(job.getType());
-    result.setIdentifierType(job.getIdentifierType());
-    result.setEntityType(job.getEntityType());
-    result.setProgress(job.getProgress());
-
     return result;
   }
 }

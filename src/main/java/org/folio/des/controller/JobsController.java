@@ -54,13 +54,9 @@ public class JobsController implements JobsApi {
   }
 
   @Override
-  public ResponseEntity<Void> resendExportedFile(UUID id) {
-  Job job = service.get(id);
-    if (isMissingRequiredParameters(job)) {
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
-    service.resend(job);
-    return new ResponseEntity<>(HttpStatus.OK);
+  public ResponseEntity resendExportedFile(UUID jobId) {
+    service.resendExportedFile(jobId);
+    return ResponseEntity.ok(HttpStatus.OK);
   }
 
   @Override

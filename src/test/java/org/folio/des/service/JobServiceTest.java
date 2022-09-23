@@ -1,12 +1,12 @@
 package org.folio.des.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
@@ -24,6 +24,7 @@ import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
@@ -94,18 +94,11 @@ class JobServiceTest {
     var repository = mock(JobDataExportRepository.class);
     Job job = new Job();
     job.setId(UUID.randomUUID());
-    when(repository.save(any(Job.class))).thenReturn(job);
-    Map<String, Collection<String>> okapiHeaders = new HashMap<>();
-    okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
-    var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
-    var config = new ExportConfig();
-    config.setId(id.toString());
-    org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
     ArrayList<String> list = new ArrayList<>();
     list.add("TestFile");
     job.setFileNames(list);
+    job.setFiles(new ArrayList<>());
+    job.setType(ExportType.EDIFACT_ORDERS_EXPORT);
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setExportConfigId(id);
     vendorEdiOrdersExportConfig.setConfigName("Test");
@@ -116,10 +109,18 @@ class JobServiceTest {
     vendorEdiOrdersExportConfig.setEdiFtp(ediFtp);
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    config.setExportTypeSpecificParameters(exportTypeSpecificParameters);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-    job.setFileNames(list);
-    job.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    when(repository.save(any(Job.class))).thenReturn(job);
+    Map<String, Collection<String>> okapiHeaders = new HashMap<>();
+    okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
+    var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
+    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
+    var config = new ExportConfig();
+    config.setId(id.toString());
+    org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
+    config.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+    jobDto.setId(UUID.randomUUID());
     jobDto.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 
     when(defaultModelConfigToExportConfigConverter.convert(any())).then(new Answer<Object>() {
@@ -132,9 +133,12 @@ class JobServiceTest {
         return exportConfig;
       }
     });
-    jobService.resend(jobDto);
+    when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
+    assertThrows(NotFoundException.class, () ->jobService.resendExportedFile(jobDto.getId()));
+    job.setFiles(list);
+    jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    assertEquals("TestFile",command.getJobParameters().getParameters().get("fileName").toString());
+    assertEquals("TestFile",command.getJobParameters().getParameters().get("FILE_NAME").toString());
 
   }
 
