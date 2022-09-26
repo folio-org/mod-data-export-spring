@@ -191,7 +191,7 @@ public class JobServiceImpl implements JobService {
   @Override
   public void resendExportedFile(UUID jobId) {
     org.folio.des.domain.dto.Job job = get(jobId);
-    if (job.getFiles().isEmpty()) {
+    if (CollectionUtils.isEmpty(job.getFiles())) {
       throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
     }
     var resultJob = upsertAndSendToKafka(job,false);
@@ -259,7 +259,6 @@ public class JobServiceImpl implements JobService {
     if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
       result.setFiles(entity.getFiles());
     }
-    result.setFiles(entity.getFiles());
     result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());

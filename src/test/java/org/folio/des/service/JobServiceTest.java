@@ -97,7 +97,6 @@ class JobServiceTest {
     list.add("TestFile");
     job.setFileNames(list);
     job.setFiles(new ArrayList<>());
-    job.setType(ExportType.EDIFACT_ORDERS_EXPORT);
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setExportConfigId(id);
     vendorEdiOrdersExportConfig.setConfigName("Test");
@@ -133,7 +132,7 @@ class JobServiceTest {
       }
     });
     when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
-    assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(jobDto.getId()));
+    assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(id));
     job.setFiles(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
