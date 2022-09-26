@@ -354,7 +354,9 @@ class ExportTriggerTest {
     EdiSchedule ediSchedule = new EdiSchedule();
     ediSchedule.setScheduleParameters(scheduleParameters);
     jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().setEdiSchedule(ediSchedule);
-    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not available"));
+
+    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not Found"));
+
     assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
     assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());
