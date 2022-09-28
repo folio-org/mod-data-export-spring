@@ -1,5 +1,6 @@
 package org.folio.des.scheduling;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
@@ -7,6 +8,7 @@ import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.EdiSchedule;
+import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -16,7 +18,6 @@ import org.folio.des.security.SecurityManagerService;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.impl.ExportConfigServiceResolver;
-import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -77,6 +78,7 @@ class ExportTriggerTest {
   @MockBean private JobServiceImpl jobService;
   @MockBean private ExportConfigServiceResolver exportConfigServiceResolver;
   @MockBean private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+  @MockBean private ObjectMapper objectMapper;
 
 
   @Test
@@ -306,7 +308,7 @@ class ExportTriggerTest {
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var folioExecutionContextHelper =
       new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
@@ -335,7 +337,7 @@ class ExportTriggerTest {
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
@@ -352,7 +354,9 @@ class ExportTriggerTest {
     EdiSchedule ediSchedule = new EdiSchedule();
     ediSchedule.setScheduleParameters(scheduleParameters);
     jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig().setEdiSchedule(ediSchedule);
-    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not available"));
+
+    when(client.getConfigById(any())).thenThrow(new NotFoundException("Not Found"));
+
     assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
     assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());

@@ -187,6 +187,18 @@ public class JobServiceImpl implements JobService {
     deleteJobs(jobsToDelete);
   }
 
+  @Transactional
+  @Override
+  public void resendExportedFile(UUID jobId) {
+    org.folio.des.domain.dto.Job job = get(jobId);
+    if (CollectionUtils.isEmpty(job.getFiles())) {
+      throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
+    }
+    var resultJob = upsertAndSendToKafka(job,false);
+    var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
+    jobExecutionService.sendJobCommand(jobCommand);
+  }
+
   private Date createExpirationDate(int days) {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
   }
@@ -218,8 +230,8 @@ public class JobServiceImpl implements JobService {
   @Override
   public InputStream downloadExportedFile(UUID jobId) {
     Job job = getJobEntity(jobId);
-    if (job.getFiles().isEmpty()) {
-      throw new FileDownloadException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
+    if (CollectionUtils.isEmpty(job.getFiles())) {
+      throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
     try {
       URL url = new URL(job.getFiles().get(0));
@@ -286,6 +298,7 @@ public class JobServiceImpl implements JobService {
     result.setIdentifierType(dto.getIdentifierType());
     result.setEntityType(dto.getEntityType());
     result.setProgress(dto.getProgress());
+    result.setFileNames(dto.getFileNames());
 
     if (dto.getMetadata() != null) {
       result.setCreatedDate(dto.getMetadata().getCreatedDate());

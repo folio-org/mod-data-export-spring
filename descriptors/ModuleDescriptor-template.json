@@ -82,6 +82,16 @@
         },
         {
           "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export-spring/jobs/{id}/resend",
+          "permissionsRequired": [
+            "data-export.job.item.resend"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/data-export-spring/configs",
@@ -193,6 +203,11 @@
       "description": "Get data export configurations"
     },
     {
+      "permissionName": "data-export.job.item.resend",
+      "displayName": "Resend EDIFACT export",
+      "description": "Resend EDIFACT export"
+    },
+    {
       "permissionName": "data-export.config.item.get",
       "displayName": "Get data export configuration by id",
       "description": "Get data export configuration by id"
@@ -252,7 +267,8 @@
         "data-export.job.item.post",
         "data-export.job.item.get",
         "data-export.job.collection.get",
-        "data-export.job.item.download"
+        "data-export.job.item.download",
+        "data-export.job.item.resend"
       ]
     },
     {
