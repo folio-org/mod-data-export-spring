@@ -68,8 +68,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(6)),
-                jsonPath("$.jobRecords", hasSize(6))));
+                jsonPath("$.totalRecords", is(8)),
+                jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -84,7 +84,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(6)),
+                jsonPath("$.totalRecords", is(8)),
                 jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -130,8 +130,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(5)),
-              jsonPath("$.jobRecords", hasSize(5))));
+              jsonPath("$.totalRecords", is(7)),
+              jsonPath("$.jobRecords", hasSize(7))));
   }
 
   @Test
@@ -146,8 +146,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(5)),
-              jsonPath("$.jobRecords", hasSize(5))));
+              jsonPath("$.totalRecords", is(7)),
+              jsonPath("$.jobRecords", hasSize(7))));
   }
 
   @Test
@@ -192,8 +192,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(1)),
-                jsonPath("$.jobRecords", hasSize(1))));
+                jsonPath("$.totalRecords", is(3)),
+                jsonPath("$.jobRecords", hasSize(3))));
   }
 
   @Test
@@ -211,6 +211,32 @@ class JobsControllerTest extends BaseTest {
                 jsonPath("$.id", is("12ae5d0f-1525-44a1-a361-0bc9b88e8179")),
                 jsonPath("$.status", is("SUCCESSFUL")),
                 jsonPath("$.outputFormat", is("Fees & Fines Bursar Report"))));
+  }
+
+  @Test
+  @DisplayName("Should failed download file with NotFound")
+  void shouldFailedDownloadWithNotFound() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs/35ae5d0f-1525-42a1-a361-1bc9b88e8180/download")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().is4xxClientError()));
+  }
+
+  @Test
+  @DisplayName("Should failed download file with BadRequest")
+  void shouldFailedDownloadWithBadRequest() throws Exception {
+    mockMvc
+        .perform(
+            get("/data-export-spring/jobs/42ae5d0f-6425-82a1-a361-1bc9b88e8172/download")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders()))
+        .andExpect(
+            matchAll(
+                status().is5xxServerError()));
   }
 
   @Test

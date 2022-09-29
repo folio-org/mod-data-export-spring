@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -12,9 +14,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
+import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.JobParameterNames;
+import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -33,11 +39,15 @@ public class  JobExecutionService {
   private final KafkaService kafka;
   private final ExportConfigValidatorResolver exportConfigValidatorResolver;
   private final JobCommandBuilderResolver jobCommandBuilderResolver;
+  private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+  private final ConfigurationClient manager;
+  public static final String EDIFACT_ORDERS_EXPORT_KEY = "EDIFACT_ORDERS_EXPORT";
+  public static final String FILE_NAME_KEY = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
     validateIncomingExportConfig(job);
 
-    JobCommand jobCommand = buildBaseJobCommand(job);
+    JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.START);
 
     jobCommandBuilderResolver.resolve(job.getType()).ifPresentOrElse(builder -> {
         JobParameters jobParameters = builder.buildJobCommand(job);
@@ -45,6 +55,30 @@ public class  JobExecutionService {
       },
       () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
     return jobCommand;
+  }
+
+  public JobCommand prepareResendJobCommand(Job job) {
+    validateIncomingExportConfig(job);
+    JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
+
+    Map<String, JobParameter> params = new HashMap<>();
+    String exportConfigId = job.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getExportConfigId().toString();
+
+    ModelConfiguration modelConfiguration = manager.getConfigById(exportConfigId);
+    ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
+    Optional.ofNullable(config.getExportTypeSpecificParameters()).
+      map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+        .ifPresent(vendorEdiOrdersExportConfig ->
+          params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
+    Optional.ofNullable(job.getFileNames())
+        .ifPresent(fileNames->
+          params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
+
+    jobCommand.setJobParameters(new JobParameters(params));
+
+   return jobCommand;
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
@@ -76,9 +110,9 @@ public class  JobExecutionService {
     });
   }
 
-  private JobCommand buildBaseJobCommand(Job job) {
+  private JobCommand buildBaseJobCommand(Job job, JobCommand.Type type) {
     var result = new JobCommand();
-    result.setType(JobCommand.Type.START);
+    result.setType(type);
     result.setId(job.getId());
     result.setName(job.getName());
     result.setDescription(job.getDescription());

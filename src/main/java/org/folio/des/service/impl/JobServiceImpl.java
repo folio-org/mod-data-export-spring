@@ -4,6 +4,9 @@ import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.FolioExecutionContextHelper;
@@ -29,6 +33,7 @@ import org.folio.des.domain.dto.Metadata;
 import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.exceptions.FileDownloadException;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.service.JobExecutionService;
@@ -50,6 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
+  public static final int CONNECTION_TIMEOUT = 5000;
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
@@ -71,11 +77,11 @@ public class JobServiceImpl implements JobService {
   @Transactional(readOnly = true)
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
-    Optional<Job> jobDtoOptional = repository.findById(id);
-    if (jobDtoOptional.isEmpty()) {
-      throw new NotFoundException(String.format("Job %s not found", id));
-    }
-    return entityToDto(jobDtoOptional.get());
+    return entityToDto(getJobEntity(id));
+  }
+
+  public Job getJobEntity(UUID id) {
+    return repository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Job %s not found", id)));
   }
 
   @Transactional(readOnly = true)
@@ -181,6 +187,18 @@ public class JobServiceImpl implements JobService {
     deleteJobs(jobsToDelete);
   }
 
+  @Transactional
+  @Override
+  public void resendExportedFile(UUID jobId) {
+    org.folio.des.domain.dto.Job job = get(jobId);
+    if (CollectionUtils.isEmpty(job.getFiles())) {
+      throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
+    }
+    var resultJob = upsertAndSendToKafka(job,false);
+    var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
+    jobExecutionService.sendJobCommand(jobCommand);
+  }
+
   private Date createExpirationDate(int days) {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
   }
@@ -209,6 +227,24 @@ public class JobServiceImpl implements JobService {
     jobExecutionService.deleteJobs(jobs);
   }
 
+  @Override
+  public InputStream downloadExportedFile(UUID jobId) {
+    Job job = getJobEntity(jobId);
+    if (CollectionUtils.isEmpty(job.getFiles())) {
+      throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
+    }
+    try {
+      URL url = new URL(job.getFiles().get(0));
+      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setRequestMethod("GET");
+      conn.setConnectTimeout(CONNECTION_TIMEOUT);
+      return conn.getInputStream();
+    } catch (Exception e) {
+      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
+      throw new FileDownloadException(String.format("Error downloading a file: %s", e));
+    }
+  }
+
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
     var result = new org.folio.des.domain.dto.Job();
 
@@ -220,7 +256,9 @@ public class JobServiceImpl implements JobService {
     result.setType(entity.getType());
     result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
     result.setStatus(entity.getStatus());
-    result.setFiles(entity.getFiles());
+    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
+      result.setFiles(entity.getFiles());
+    }
     result.setFileNames(entity.getFileNames());
     result.setStartTime(entity.getStartTime());
     result.setEndTime(entity.getEndTime());
@@ -260,6 +298,7 @@ public class JobServiceImpl implements JobService {
     result.setIdentifierType(dto.getIdentifierType());
     result.setEntityType(dto.getEntityType());
     result.setProgress(dto.getProgress());
+    result.setFileNames(dto.getFileNames());
 
     if (dto.getMetadata() != null) {
       result.setCreatedDate(dto.getMetadata().getCreatedDate());
