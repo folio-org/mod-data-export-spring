@@ -230,7 +230,7 @@ public class JobServiceImpl implements JobService {
   @Override
   public InputStream downloadExportedFile(UUID jobId) {
     Job job = getJobEntity(jobId);
-    if (CollectionUtils.isEmpty(job.getFiles())) {
+    if (CollectionUtils.isEmpty(job.getFileNames())) {
       throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
     try {
