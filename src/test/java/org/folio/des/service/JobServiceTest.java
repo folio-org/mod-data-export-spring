@@ -133,7 +133,7 @@ class JobServiceTest {
     job.setFileNames(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    assertEquals("TestFile", command.getJobParameters().getParameters().get("FILE_NAME").toString());
+    assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
 
   }
 
