@@ -37,7 +37,7 @@ VALUES ('35ae5d0f-1525-42a1-a361-1bc9b88e8180', '000100', 'test-desc', 'data-exp
   }');
 
 INSERT INTO diku_mod_data_export_spring.job (id, name, description, source, is_system_source, type,
-                                             export_type_specific_parameters, status, files,
+                                             export_type_specific_parameters, status, files, file_names,
                                              start_time, end_time, created_date, created_by_user_id,
                                              created_by_username, updated_date, updated_by_user_id,
                                              updated_by_username, output_format, error_details,
@@ -45,7 +45,7 @@ INSERT INTO diku_mod_data_export_spring.job (id, name, description, source, is_s
 VALUES ('42ae5d0f-6425-82a1-a361-1bc9b88e8172', '000101', 'test-desc', 'data-export-system-user', true,
         'EDIFACT_ORDERS_EXPORT',
         '{}',
-        'SUCCESSFUL', '["http:/test-url/"]', '2021-03-16 09:29:54.250000', '2021-03-16 09:30:09.831000', '2021-03-16 09:29:54.170000',
+        'SUCCESSFUL', '["http:/test-url/"]', '["TestFile.csv"]', '2021-03-16 09:29:54.250000', '2021-03-16 09:30:09.831000', '2021-03-16 09:29:54.170000',
         null, 'data-export-system-user', '2021-03-16 09:30:09.968000', null,
         'data-export-system-user', 'Fees & Fines Bursar Report', null, 'COMPLETED', '{
     "running": false,
