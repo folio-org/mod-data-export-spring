@@ -26,6 +26,7 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -90,15 +91,14 @@ class JobServiceTest {
 
   @Test
   void testResendJob() {
-    var id = UUID.randomUUID();
+    UUID configId = UUID.randomUUID();
     Job job = new Job();
     job.setId(UUID.randomUUID());
     ArrayList<String> list = new ArrayList<>();
-    list.add("TestFile");
-    job.setFileNames(list);
+    list.add("TestFile.csv");
     job.setFiles(new ArrayList<>());
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    vendorEdiOrdersExportConfig.setExportConfigId(id);
+    vendorEdiOrdersExportConfig.setExportConfigId(configId);
     vendorEdiOrdersExportConfig.setConfigName("Test");
     EdiFtp ediFtp = new EdiFtp();
     ediFtp.setFtpConnMode(EdiFtp.FtpConnModeEnum.PASSIVE);
@@ -115,25 +115,22 @@ class JobServiceTest {
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
-    config.setId(id.toString());
+    config.setId(configId.toString());
     org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
     config.setExportTypeSpecificParameters(exportTypeSpecificParameters);
     jobDto.setId(UUID.randomUUID());
     jobDto.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 
-    when(defaultModelConfigToExportConfigConverter.convert(any())).then(new Answer<Object>() {
-      @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        ExportConfig exportConfig = new ExportConfig();
-        exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-        exportConfig.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+    when(defaultModelConfigToExportConfigConverter.convert(any())).then(invocationOnMock -> {
+      ExportConfig exportConfig = new ExportConfig();
+      exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+      exportConfig.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 
-        return exportConfig;
-      }
+      return exportConfig;
     });
     when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
-    assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(id));
-    job.setFiles(list);
+    assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(configId));
+    job.setFileNames(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
     assertEquals("TestFile", command.getJobParameters().getParameters().get("FILE_NAME").toString());
