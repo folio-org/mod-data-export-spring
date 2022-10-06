@@ -194,8 +194,7 @@ public class JobServiceImpl implements JobService {
     if (CollectionUtils.isEmpty(job.getFileNames())) {
       throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
     }
-    var resultJob = upsertAndSendToKafka(job,false);
-    var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(resultJob));
+    var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(job));
     jobExecutionService.sendJobCommand(jobCommand);
   }
 

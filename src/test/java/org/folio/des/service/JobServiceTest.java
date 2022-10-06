@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
@@ -41,6 +42,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest
 class JobServiceTest {
@@ -67,6 +69,8 @@ class JobServiceTest {
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Mock
   private KafkaService kafka;
+  @MockBean
+  private ObjectMapper objectMapper;
 
   @Test
   void shouldCollectExpiredJobs() {
@@ -108,7 +112,7 @@ class JobServiceTest {
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     config.setId(configId.toString());

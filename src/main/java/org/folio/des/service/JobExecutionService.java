@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
@@ -41,6 +43,7 @@ public class  JobExecutionService {
   private final JobCommandBuilderResolver jobCommandBuilderResolver;
   private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   private final ConfigurationClient manager;
+  private final ObjectMapper objectMapper;
   public static final String EDIFACT_ORDERS_EXPORT_KEY = "EDIFACT_ORDERS_EXPORT";
   public static final String FILE_NAME_KEY = "FILE_NAME";
 
@@ -70,8 +73,13 @@ public class  JobExecutionService {
     ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .ifPresent(vendorEdiOrdersExportConfig ->
-          params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(String.valueOf(vendorEdiOrdersExportConfig))));
+        .ifPresent(vendorEdiOrdersExportConfig -> {
+          try {
+            params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig)));
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        });
     Optional.ofNullable(job.getFileNames())
         .ifPresent(fileNames->
           params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
