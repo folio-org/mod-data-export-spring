@@ -112,6 +112,7 @@ class JobUpdatesServiceTest  {
   @Test
   @DisplayName("Update job without change")
   void updateJobWithoutChange() {
+    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     var id = UUID.fromString("9d72fb44-eef7-4b9c-9bd9-f191feec6255");
     Job job = new Job();
     job.setId(id);
@@ -124,6 +125,7 @@ class JobUpdatesServiceTest  {
     job.setEndTime(new Date());
     job.setErrorDetails("No errors");
     job.setExitStatus(ExitStatus.COMPLETED);
+    job.setExportTypeSpecificParameters(parameters);
     job.setProgress(new Progress().progress(100).processed(1).total(1));
 
     var updatedJob = new Job();
@@ -138,6 +140,7 @@ class JobUpdatesServiceTest  {
     updatedJob.setEndTime(new Date());
     updatedJob.setErrorDetails("No errors");
     updatedJob.setExitStatus(ExitStatus.COMPLETED);
+    job.setExportTypeSpecificParameters(parameters);
     updatedJob.setProgress(new Progress().progress(100).processed(1).total(1));
 
     doReturn(Optional.of(job)).when(repository).findById(id);

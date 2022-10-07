@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -37,6 +38,7 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -107,7 +109,7 @@ class JobServiceTest {
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-    when(repository.save(any(Job.class))).thenReturn(job);
+    when(repository.findById(any())).thenReturn(Optional.of(job));
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
@@ -132,8 +134,8 @@ class JobServiceTest {
     job.setFileNames(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
-
+    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
+    Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
   }
 
   private List<Job> createExpiredJobs() {

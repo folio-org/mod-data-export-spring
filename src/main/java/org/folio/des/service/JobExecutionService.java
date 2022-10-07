@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +22,7 @@ import org.folio.des.domain.JobParameterNames;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -31,6 +31,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 @Service
@@ -73,13 +74,7 @@ public class  JobExecutionService {
     ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .ifPresent(vendorEdiOrdersExportConfig -> {
-          try {
-            params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig)));
-          } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-          }
-        });
+        .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(params, vendorEdiOrdersExportConfig));
     Optional.ofNullable(job.getFileNames())
         .ifPresent(fileNames->
           params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
@@ -87,6 +82,11 @@ public class  JobExecutionService {
     jobCommand.setJobParameters(new JobParameters(params));
 
    return jobCommand;
+  }
+
+  @SneakyThrows
+  private void addToParamsEdiExportConfig(Map<String, JobParameter> params, VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig) {
+    params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig)));
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
