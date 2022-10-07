@@ -48,8 +48,6 @@ class JobUpdatesServiceTest  {
     job.setBatchStatus(BatchStatus.COMPLETED);
     job.setStatus(JobStatus.SUCCESSFUL);
     job.setDescription("Test job");
-    job.setStartTime(new Date());
-    job.setEndTime(new Date());
     job.setExportTypeSpecificParameters(parameters);
     job.setProgress(new Progress().progress(100).processed(1).total(1));
 
@@ -69,6 +67,39 @@ class JobUpdatesServiceTest  {
     updatedJob.setExitStatus(ExitStatus.COMPLETED);
     updatedJob.setExportTypeSpecificParameters(parameters);
     updatedJob.setProgress(new Progress().progress(100).processed(1).total(1));
+
+    doReturn(Optional.of(job)).when(repository).findById(id);
+    doReturn(job).when(repository).save(any());
+
+    updatesService.receiveJobExecutionUpdate(updatedJob);
+
+    verify(repository, times(1)).save(any());
+  }
+
+  @Test
+  @DisplayName("Update job with error")
+  void updateJobWithError() {
+    VendorEdiOrdersExportConfig config = new VendorEdiOrdersExportConfig();
+    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
+
+    var id = UUID.randomUUID();
+    Job job = new Job();
+    job.setId(id);
+    job.setBatchStatus(BatchStatus.COMPLETED);
+    job.setStatus(JobStatus.SUCCESSFUL);
+    job.setDescription("Test job");
+    job.setStartTime(new Date());
+    job.setEndTime(new Date());
+    job.setExportTypeSpecificParameters(parameters);
+    job.setProgress(new Progress().progress(100).processed(1).total(1));
+
+    config.setConfigName("testConfig");
+    parameters.setVendorEdiOrdersExportConfig(config);
+
+    var updatedJob = new Job();
+    updatedJob.setId(id);
+    updatedJob.setDescription("Test job updated");
+    updatedJob.setErrorDetails("Something went wrong");
 
     doReturn(Optional.of(job)).when(repository).findById(id);
     doReturn(job).when(repository).save(any());
