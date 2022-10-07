@@ -92,6 +92,12 @@ public class JobUpdatesService {
       job.setErrorDetails(jobExecutionUpdate.getErrorDetails());
       result = true;
     }
+    if (jobExecutionUpdate.getErrorDetails() == null &&
+            jobExecutionUpdate.getExportTypeSpecificParameters() != null &&
+            jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig() != null) {
+      job.getExportTypeSpecificParameters().setVendorEdiOrdersExportConfig(jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig());
+      result = true;
+    }
     if (jobExecutionUpdate.getBatchStatus() != null && jobExecutionUpdate.getBatchStatus() != job.getBatchStatus()) {
       job.setBatchStatus(jobExecutionUpdate.getBatchStatus());
       result = true;

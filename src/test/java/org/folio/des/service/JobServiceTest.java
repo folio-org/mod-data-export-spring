@@ -14,9 +14,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
@@ -36,6 +38,7 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -67,6 +70,8 @@ class JobServiceTest {
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Mock
   private KafkaService kafka;
+  @Mock
+  private ObjectMapper objectMapper;
 
   @Test
   void shouldCollectExpiredJobs() {
@@ -104,11 +109,11 @@ class JobServiceTest {
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-    when(repository.save(any(Job.class))).thenReturn(job);
+    when(repository.findById(any())).thenReturn(Optional.of(job));
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
     var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     config.setId(configId.toString());
@@ -129,8 +134,8 @@ class JobServiceTest {
     job.setFileNames(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
-
+    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
+    Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
   }
 
   private List<Job> createExpiredJobs() {
