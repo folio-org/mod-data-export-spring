@@ -88,6 +88,10 @@ public class JobUpdatesService {
       job.setEndTime(jobExecutionUpdate.getEndTime());
       result = true;
     }
+    if (jobExecutionUpdate.getErrorDetails() == null && BatchStatus.COMPLETED.equals(jobExecutionUpdate.getBatchStatus())) {
+      job.setErrorDetails(null);
+      result = true;
+    }
     if (jobExecutionUpdate.getErrorDetails() != null && !jobExecutionUpdate.getErrorDetails().equals(job.getErrorDetails())) {
       job.setErrorDetails(jobExecutionUpdate.getErrorDetails());
       result = true;
