@@ -1,6 +1,16 @@
-## v1.5.0 IN-PROGRESS
+## 2022-10-20 v1.5.0
 
-* [MODEXPS-130] (https://issues.folio.org/browse/MODEXPS-130) Supports users interface version 15.3, 16.0
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.0...v1.5.0)
+
+### Stories
+* [MODEXPS-157](https://issues.folio.org/browse/MODEXPS-157) Implement Re-send EDIFACT export logic
+* [MODEXPS-141](https://issues.folio.org/browse/MODEXPS-141) Bulk edit: holdings locations - Update submodule
+* [MODEXPS-140](https://issues.folio.org/browse/MODEXPS-140) Order export job should not be rerun for deleted integration methods
+* [MODEXPS-63](https://issues.folio.org/browse/MODEXPS-63) Implement download logic from MINIO for Download export file
+
+### Technical tasks
+* [MODEXPS-159](https://issues.folio.org/browse/MODEXPS-159) mod-data-export-spring: spring upgrade
+* [MODEXPS-130](https://issues.folio.org/browse/MODEXPS-130) Supports users interface version 15.3, 16.0
 
 ## 2022-07-08 v1.4.0
 
