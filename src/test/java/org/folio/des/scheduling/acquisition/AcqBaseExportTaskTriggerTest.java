@@ -147,10 +147,11 @@ class AcqBaseExportTaskTriggerTest {
     long diff = TimeUnit.HOURS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffHours, diff);
 
-    ZonedDateTime nowDateTime = Instant.now().atZone(ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS);
-    Instant lastInstant = Instant.ofEpochMilli(actDateHourLate.getTime()).truncatedTo(ChronoUnit.DAYS);
+    ZonedDateTime expDateTime =
+      Instant.now().atZone(ZoneId.of("UTC")).plusHours(expDiffHours).truncatedTo(ChronoUnit.DAYS);
+    Instant lastInstant = Instant.ofEpochMilli(actDate.getTime()).truncatedTo(ChronoUnit.DAYS);
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(lastInstant, ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS);
-    assertTrue(nowDateTime.isEqual(zonedDateTime));
+    assertTrue(expDateTime.isEqual(zonedDateTime));
   }
 
   @Test
@@ -419,14 +420,14 @@ class AcqBaseExportTaskTriggerTest {
   @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
   @ParameterizedTest
   @CsvSource({
-   "1, 3, 1",
-   "2, 3, 1",
-   "4, 3, 1",
-   "5, 3, 2",
-   "6, 3, 3",
-   "7, 3, 4",
-   "3, 0, 3",
-   "3, 3, 1"
+    "1, 3, 1",
+    "2, 3, 1",
+    "4, 3, 1",
+    "5, 3, 2",
+    "6, 3, 3",
+    "7, 3, 4",
+    "3, 0, 3",
+    "3, 3, 1"
   })
   void hourlyScheduleWithHours(int frequency, int addHours, int expDiffHours) {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
@@ -451,7 +452,7 @@ class AcqBaseExportTaskTriggerTest {
     Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
     ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
     int actHour = actZonedDateTime.getHour();
-    assertEquals(actHour, nowHour + expDiffHours + addHours);
+    assertEquals((nowHour + expDiffHours + addHours) % 24, actHour);
   }
 
   @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
@@ -489,6 +490,6 @@ class AcqBaseExportTaskTriggerTest {
     Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
     ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
     int actHour = actZonedDateTime.getHour();
-    assertEquals(nowHour + expDiffHours + addHours, actHour);
+    assertEquals((nowHour + expDiffHours + addHours) % 24, actHour);
   }
 }
