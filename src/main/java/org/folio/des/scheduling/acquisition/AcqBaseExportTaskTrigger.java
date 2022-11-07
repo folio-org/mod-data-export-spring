@@ -168,7 +168,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
       }
     }
 
-    startTime = normalizeIfNextRunInPast(startTime, getNowDateTime(scheduleParameters.getTimeZone()));
+    startTime = normalizeHourIfNextRunInPast(startTime, getNowDateTime(scheduleParameters.getTimeZone()));
 
     log.info("Hourly next schedule execution time in {} for config {} is : {}", scheduleParameters.getTimeZone(), scheduleParameters.getId(), startTime);
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
@@ -181,12 +181,14 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
       startTime = startTime.plusDays(days);
     }
 
+    startTime = normalizeDayIfNextRunInPast(startTime, getNowDateTime(scheduleParameters.getTimeZone()));
+
     log.info("Day next schedule execution time in {} for config {} is : {}", scheduleParameters.getTimeZone(), scheduleParameters.getId(), startTime);
     return ScheduleDateTimeUtil.convertToOldDateFormat(startTime, scheduleParameters);
   }
 
   /**
-   * This method normalized date because if date was in past - spring scheduler invoked it now, that is not the desired behaviour.
+   * This method normalized date for hourly exports, because if date was in past - spring scheduler invoked it now, that is not the desired behaviour.
    * Some examples for this new logic:
    * User selects 13.30 as a start time and current time is 16.10 - next run will be at 16.30
    * User selects 13.10 as a start time and current time is 16.40 - next run will be at 17.10
@@ -195,13 +197,29 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
    * @param nowTime the now time
    * @return normalized time
    */
-  private ZonedDateTime normalizeIfNextRunInPast(ZonedDateTime startTime, ZonedDateTime nowTime) {
+  private ZonedDateTime normalizeHourIfNextRunInPast(ZonedDateTime startTime, ZonedDateTime nowTime) {
     if (startTime.isBefore(nowTime)) {
       if (startTime.getMinute() > nowTime.getMinute()) {
         return nowTime.withMinute(startTime.getMinute());
       } else {
         return nowTime.plusHours(1).withMinute(startTime.getMinute());
       }
+    }
+    return startTime;
+  }
+
+  /**
+   * This method normalized date for daily exports, because if date was in past - spring scheduler invoked it now, that is not the desired behaviour.
+   * Examples for this new logic:
+   * User selects 13.30 as a start time at 11/07 and current time is 16.10 - next run will be at 13.30 12/07
+   *
+   * @param startTime the start time
+   * @param nowTime the now time
+   * @return normalized time
+   */
+  private ZonedDateTime normalizeDayIfNextRunInPast(ZonedDateTime startTime, ZonedDateTime nowTime) {
+    if (startTime.isBefore(nowTime)) {
+      return nowTime.plusDays(1).withHour(startTime.getHour()).withMinute(startTime.getMinute());
     }
     return startTime;
   }

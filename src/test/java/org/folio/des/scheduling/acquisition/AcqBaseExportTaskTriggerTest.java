@@ -1,5 +1,6 @@
 package org.folio.des.scheduling.acquisition;
 
+import static java.util.Map.entry;
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
 import static org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
 
@@ -158,9 +159,12 @@ class AcqBaseExportTaskTriggerTest {
   @DisplayName("Should increase Days and provided time should be changed")
   void dailySchedule() {
     int expDiffDays = 3;
+    ZoneId zoneId = ZoneId.of("Asia/Shanghai");
+    ZonedDateTime nowTime = getNowTime(zoneId);
+    ZonedDateTime scheduledDateTime = nowTime.plusHours(1);
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setId(UUID.randomUUID());
-    scheduleParameters.setScheduleTime("11:12:13");
+    scheduleParameters.setScheduleTime(scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
     scheduleParameters.setScheduleFrequency(expDiffDays);
     scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.DAY);
     scheduleParameters.setTimeZone(ASIA_SHANGHAI_ZONE);
@@ -171,9 +175,9 @@ class AcqBaseExportTaskTriggerTest {
 
     Instant firstInstant = Instant.ofEpochMilli(actDate.getTime());
     ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
-    String firstDateStr = firstZonedDateTime.toString();
-    int dayOfMonth = firstZonedDateTime.getDayOfMonth();
-    assertTrue(firstDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertEquals(scheduledDateTime.getDayOfMonth(), firstZonedDateTime.getDayOfMonth());
+    assertEquals(scheduledDateTime.getHour(), firstZonedDateTime.getHour());
+    assertEquals(scheduledDateTime.getMinute(), firstZonedDateTime.getMinute());
 
     //Second try
     triggerContext.update(actDate, actDate, actDate);
@@ -182,11 +186,12 @@ class AcqBaseExportTaskTriggerTest {
     long diff = TimeUnit.DAYS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffDays, diff);
 
-    Instant instant = Instant.ofEpochMilli(actDateDayLate.getTime());
-    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
-    dayOfMonth = firstZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
-    String lastDateStr = secondZonedDateTime.toString();
-    assertTrue(lastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    Instant secondInstant = Instant.ofEpochMilli(actDateDayLate.getTime());
+    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(secondInstant, zoneId);
+    assertEquals(scheduledDateTime.plusDays(expDiffDays).getDayOfMonth(), secondZonedDateTime.getDayOfMonth());
+    assertEquals(scheduledDateTime.getHour(), secondZonedDateTime.getHour());
+    assertEquals(scheduledDateTime.getMinute(), secondZonedDateTime.getMinute());
+
     //Third try
     triggerContext.update(actDateDayLate, actDateDayLate, actDateDayLate);
     final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
@@ -196,9 +201,32 @@ class AcqBaseExportTaskTriggerTest {
 
     Instant thirdInstant = Instant.ofEpochMilli(thirdDateDayLate.getTime());
     ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
-    dayOfMonth = secondZonedDateTime.plusDays(expDiffDays).getDayOfMonth();
-    String thirdLastDateStr = thirdZonedDateTime.toString();
-    assertTrue(thirdLastDateStr.contains(dayOfMonth+"T11:12:13+08:00[Asia/Shanghai]"));
+    assertEquals(scheduledDateTime.plusDays(expDiffDays * 2).getDayOfMonth(), thirdZonedDateTime.getDayOfMonth());
+    assertEquals(scheduledDateTime.getHour(), thirdZonedDateTime.getHour());
+    assertEquals(scheduledDateTime.getMinute(), thirdZonedDateTime.getMinute());
+  }
+
+  @Test
+  @DisplayName("Daily run should be executed tomorrow in case when scheduled datetime less than current datetime")
+  public void dailyScheduleWhenScheduledDateLessThanCurrentDate() {
+    //Given
+    ZonedDateTime nowTime = getNowTime();
+    ZonedDateTime scheduledDateTime = nowTime.minusHours(1);
+    ScheduleParameters scheduleParameters = new ScheduleParameters();
+    scheduleParameters.setScheduleTime(scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
+    scheduleParameters.setScheduleFrequency(1);
+    scheduleParameters.setSchedulePeriod(SchedulePeriodEnum.DAY);
+    AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
+
+    //When
+    SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    final Date actDate = trigger.nextExecutionTime(triggerContext);
+
+    //Then
+    ZonedDateTime actDateTime = getActualTime(actDate);
+    assertEquals(scheduledDateTime.plusDays(1).getDayOfMonth(), actDateTime.getDayOfMonth());
+    assertEquals(scheduledDateTime.getHour(), actDateTime.getHour());
+    assertEquals(scheduledDateTime.getMinute(), actDateTime.getMinute());
   }
 
   @DisplayName("Weekly job scheduled for specific hour, when last time behind current time")
@@ -406,10 +434,14 @@ class AcqBaseExportTaskTriggerTest {
   }
 
   private ZonedDateTime getNowTime() {
+    return getNowTime(ZoneId.of("UTC"));
+  }
+
+  private ZonedDateTime getNowTime(ZoneId zoneId) {
     Calendar scheduledCal = Calendar.getInstance();
     Date scheduledDate = scheduledCal.getTime();
     Instant scheduledInstant = Instant.ofEpochMilli(scheduledDate.getTime());
-    return ZonedDateTime.ofInstant(scheduledInstant, ZoneId.of("UTC"));
+    return ZonedDateTime.ofInstant(scheduledInstant, zoneId);
   }
 
   private ZonedDateTime getActualTime(Date actDate) {
