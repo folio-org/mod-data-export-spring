@@ -1,3 +1,11 @@
+## 2022-11-11 v1.5.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.0...v1.5.1)
+
+### Bug fixes
+* [MODEXPS-146](https://issues.folio.org/browse/MODEXPS-146) Export time is set as when configuration is saved rather than the time chosen in the UI when schedule period is "Daily"
+* [MODEXPS-108](https://issues.folio.org/browse/MODEXPS-108) HourlySchedule tests fail at some hours (off by 24 hours)
+
 ## 2022-10-20 v1.5.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.0...v1.5.0)
