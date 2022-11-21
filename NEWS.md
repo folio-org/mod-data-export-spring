@@ -1,3 +1,10 @@
+## 2022-11-21 v1.5.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.1...v1.5.2)
+
+### Technical tasks
+* [MODEXPS-170](https://issues.folio.org/browse/MODEXPS-170) Remove redundant dependency from RMB package
+
 ## 2022-11-11 v1.5.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.0...v1.5.1)
