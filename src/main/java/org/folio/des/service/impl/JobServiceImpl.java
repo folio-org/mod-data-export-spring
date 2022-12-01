@@ -236,20 +236,16 @@ public class JobServiceImpl implements JobService {
       throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
     log.debug("Refreshing download url for jobId: {}", job.getId());
-    PresignedUrl presignedUrl = exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
-    if (presignedUrl != null) {
-      try {
-        URL url = new URL(presignedUrl.getUrl());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setConnectTimeout(CONNECTION_TIMEOUT);
-        return conn.getInputStream();
-      } catch (Exception e) {
-        log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
-        throw new FileDownloadException(String.format("Error downloading a file: %s", e));
-      }
-    } else {
-      throw new NotFoundException("PresignedUrl not retrieve");
+    try {
+      PresignedUrl presignedUrl = exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
+      URL url = new URL(presignedUrl.getUrl());
+      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setRequestMethod("GET");
+      conn.setConnectTimeout(CONNECTION_TIMEOUT);
+      return conn.getInputStream();
+    } catch (Exception e) {
+      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
+      throw new FileDownloadException(String.format("Error downloading a file: %s", e));
     }
   }
 
