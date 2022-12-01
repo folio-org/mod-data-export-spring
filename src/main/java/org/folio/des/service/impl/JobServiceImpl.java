@@ -24,7 +24,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
+import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.config.FolioExecutionContextHelper;
+import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCollection;
@@ -65,6 +67,7 @@ public class JobServiceImpl implements JobService {
     OUTPUT_FORMATS.put(ExportType.EDIFACT_ORDERS_EXPORT, "EDIFACT orders export (EDI)");
   }
 
+  private final ExportWorkerClient exportWorkerClient;
   private final JobExecutionService jobExecutionService;
   private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
@@ -232,15 +235,21 @@ public class JobServiceImpl implements JobService {
     if (CollectionUtils.isEmpty(job.getFileNames())) {
       throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
-    try {
-      URL url = new URL(job.getFiles().get(0));
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      conn.setConnectTimeout(CONNECTION_TIMEOUT);
-      return conn.getInputStream();
-    } catch (Exception e) {
-      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
-      throw new FileDownloadException(String.format("Error downloading a file: %s", e));
+    log.debug("Refreshing download url for jobId: {}", job.getId());
+    PresignedUrl presignedUrl = exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
+    if (presignedUrl != null) {
+      try {
+        URL url = new URL(presignedUrl.getUrl());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setConnectTimeout(CONNECTION_TIMEOUT);
+        return conn.getInputStream();
+      } catch (Exception e) {
+        log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
+        throw new FileDownloadException(String.format("Error downloading a file: %s", e));
+      }
+    } else {
+      throw new NotFoundException("PresignedUrl not retrieve");
     }
   }
 

@@ -191,6 +191,8 @@ components:
       $ref: '../../../../folio-export-common/schemas/jobStatus.json#/JobStatus'
     exportType:
       $ref: '../../../../folio-export-common/schemas/exportType.json#/ExportType'
+    presignedUrl:
+      $ref: '../../../../folio-export-common/schemas/exportFilePresignedUrl.json#/PresignedUrl'
     job:
       $ref: '../../../../folio-export-common/schemas/job.json#/Job'
     jobCollection:
