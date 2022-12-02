@@ -23,6 +23,7 @@ import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
+import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.EdiFtp;
@@ -60,6 +61,8 @@ class JobServiceTest {
   private BulkEditConfigService configService;
   @Mock
   private ConfigurationClient client;
+  @Mock
+  private ExportWorkerClient exportWorkerClient;
   @Mock
   private FolioModuleMetadata folioModuleMetadata;
   @Mock
@@ -114,7 +117,7 @@ class JobServiceTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
-    var jobService = new JobServiceImpl(jobExecutionService, repository, folioExecutionContext, null, null, client);
+    var jobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     config.setId(configId.toString());
     org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
