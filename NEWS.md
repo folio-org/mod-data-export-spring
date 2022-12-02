@@ -1,3 +1,10 @@
+## 2022-12-02 v1.5.3
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.2...v1.5.3)
+
+### Bug fixes
+* [MODEXPS-178](https://issues.folio.org/browse/MODEXPS-178) Extend download file logic with refreshing token
+
 ## 2022-11-21 v1.5.2
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.1...v1.5.2)

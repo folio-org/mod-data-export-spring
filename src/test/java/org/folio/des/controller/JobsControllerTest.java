@@ -2,6 +2,8 @@ package org.folio.des.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,12 +11,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.folio.des.client.ExportWorkerClient;
+import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -24,6 +30,8 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
 class JobsControllerTest extends BaseTest {
 
+  @MockBean
+  ExportWorkerClient exportWorkerClient;
   private static final String JOB_BURSAR_REQUEST =
       "{\n"
           + "  \"type\": \"BURSAR_FEES_FINES\",\n"
@@ -229,6 +237,9 @@ class JobsControllerTest extends BaseTest {
   @Test
   @DisplayName("Should failed download file with BadRequest")
   void shouldFailedDownloadWithBadRequest() throws Exception {
+    PresignedUrl presignedUrl = new PresignedUrl();
+    presignedUrl.setUrl("http:/test-url/");
+    when(exportWorkerClient.getRefreshedPresignedUrl(anyString())).thenReturn(presignedUrl);
     mockMvc
         .perform(
             get("/data-export-spring/jobs/42ae5d0f-6425-82a1-a361-1bc9b88e8172/download")
