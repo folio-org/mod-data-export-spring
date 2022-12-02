@@ -78,7 +78,9 @@
           "permissionsRequired": [
             "data-export.job.item.download"
           ],
-          "modulePermissions": []
+          "modulePermissions": [
+            "refresh-presigned-url.get"
+          ]
         },
         {
           "methods": [

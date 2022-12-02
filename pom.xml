@@ -304,7 +304,7 @@
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
                             <modelsToGenerate>
-                                Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection,IdentifierType,EntityType,Progress
+                              PresignedUrl,Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection,IdentifierType,EntityType,Progress
                             </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
