@@ -44,6 +44,9 @@ class InstallUpgradeIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(InstallUpgradeIT.class);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final DockerImageName MOCKSERVER_IMAGE = DockerImageName
+    .parse("mockserver/mockserver")
+    .withTag("mockserver-" + MockServerClient.class.getPackage().getImplementationVersion());
   private static final Network NETWORK = Network.newNetwork();
 
   @Container
@@ -65,7 +68,7 @@ class InstallUpgradeIT {
 
   @Container
   private static final MockServerContainer OKAPI =
-    new MockServerContainer(DockerImageName.parse("mockserver/mockserver:mockserver-5.13.2"))
+    new MockServerContainer(MOCKSERVER_IMAGE)
     .withNetwork(NETWORK)
     .withNetworkAliases("okapi")
     .withExposedPorts(1080);
