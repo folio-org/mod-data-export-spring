@@ -80,7 +80,7 @@ public class JobsController implements JobsApi {
     var acConfig = exportTypeParameters.getAuthorityControlExportConfig();
 
     return (AUTH_HEADINGS_UPDATES == job.getType() || FAILED_LINKED_BIB_UPDATES == job.getType())
-      && (isNull(acConfig.getFromDate()) || isNull(acConfig.getToDate()) || acConfig.getFromDate().isAfter(acConfig.getToDate()));
+      && acConfig.getFromDate().isAfter(acConfig.getToDate());
   }
 
 }
