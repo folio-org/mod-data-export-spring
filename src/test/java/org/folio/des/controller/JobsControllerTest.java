@@ -2,6 +2,7 @@ package org.folio.des.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
@@ -11,15 +12,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.LocalDate;
 import org.folio.des.client.ExportWorkerClient;
+import org.folio.des.domain.dto.AuthorityControlExportConfig;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
@@ -63,6 +72,8 @@ class JobsControllerTest extends BaseTest {
 
   private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY =
     "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {\"query\":\"barcode==123\"}, \"entityType\" : \"USER\"}";
+
+  private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
   @Test
   @DisplayName("Find all jobs")
@@ -388,6 +399,57 @@ class JobsControllerTest extends BaseTest {
           status().isBadRequest()));
   }
 
+  @ParameterizedTest
+  @EnumSource(value = ExportType.class, mode = INCLUDE, names = {"AUTH_HEADINGS_UPDATES", "FAILED_LINKED_BIB_UPDATES"})
+  @DisplayName("Start new authority control job missing required parameters, should be 400")
+  void shouldReturnBadRequestWhenRequiredParametersAreMissing(ExportType exportType) throws Exception {
+    var payload = buildAuthorityControlJobPayload(new AuthorityControlExportConfig(), exportType);
+
+    mockMvc.perform(post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isBadRequest());
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = ExportType.class, mode = INCLUDE, names = {"AUTH_HEADINGS_UPDATES", "FAILED_LINKED_BIB_UPDATES"})
+  @DisplayName("Start new authority control job with invalid dates, should be 400")
+  void shouldReturnBadRequestWhenParametersInvalid(ExportType exportType) throws Exception {
+    var date = LocalDate.now();
+    var authorityControlExportConfig = new AuthorityControlExportConfig();
+    authorityControlExportConfig.setToDate(date);
+    authorityControlExportConfig.setFromDate(date.plusDays(1));
+
+    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, exportType);
+
+    mockMvc.perform(post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isBadRequest());
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = ExportType.class, mode = INCLUDE, names = {"AUTH_HEADINGS_UPDATES", "FAILED_LINKED_BIB_UPDATES"})
+  @DisplayName("Start new authority control job, should be 201")
+  void postAuthorityControlJob(ExportType exportType) throws Exception {
+    var date = LocalDate.now();
+    var authorityControlExportConfig = new AuthorityControlExportConfig();
+    authorityControlExportConfig.setFromDate(date);
+    authorityControlExportConfig.setToDate(date.plusDays(1));
+
+    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, exportType);
+
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isCreated());
+  }
+
   @Test
   @DisplayName("Start new bulk edit query job with entity type, should be 201")
   void postBulkEditQueryJobWithEntityType() throws Exception {
@@ -435,5 +497,16 @@ class JobsControllerTest extends BaseTest {
         matchAll(
           status().isBadRequest(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE)));
+  }
+
+  private String buildAuthorityControlJobPayload(AuthorityControlExportConfig authorityControlExportConfig,
+                                                 ExportType exportType) throws JsonProcessingException {
+    var exportTypeSpecificParameters = new ExportTypeSpecificParameters();
+    exportTypeSpecificParameters.setAuthorityControlExportConfig(authorityControlExportConfig);
+    var job = new Job();
+    job.setType(exportType);
+    job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+
+    return MAPPER.writeValueAsString(job);
   }
 }

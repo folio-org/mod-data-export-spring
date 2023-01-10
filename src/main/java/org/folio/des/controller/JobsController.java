@@ -1,9 +1,11 @@
 package org.folio.des.controller;
 
 import static java.util.Objects.isNull;
+import static org.folio.des.domain.dto.ExportType.AUTH_HEADINGS_UPDATES;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.E_HOLDINGS;
+import static org.folio.des.domain.dto.ExportType.FAILED_LINKED_BIB_UPDATES;
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
 import java.util.UUID;
@@ -12,6 +14,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.rest.resource.JobsApi;
@@ -69,7 +72,15 @@ public class JobsController implements JobsApi {
     var eHoldingsExportConfig = exportTypeParameters.geteHoldingsExportConfig();
     return (BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(exportTypeParameters.getQuery()))) ||
       (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) ||
-      (E_HOLDINGS == job.getType() && (isNull(eHoldingsExportConfig.getRecordId()) || isNull(eHoldingsExportConfig.getRecordType())));
+      (E_HOLDINGS == job.getType() && (isNull(eHoldingsExportConfig.getRecordId()) || isNull(eHoldingsExportConfig.getRecordType()))) ||
+      invalidAuthorityControlJob(job, exportTypeParameters);
+  }
+
+  private boolean invalidAuthorityControlJob(Job job, ExportTypeSpecificParameters exportTypeParameters) {
+    var acConfig = exportTypeParameters.getAuthorityControlExportConfig();
+
+    return (AUTH_HEADINGS_UPDATES == job.getType() || FAILED_LINKED_BIB_UPDATES == job.getType())
+      && (isNull(acConfig.getFromDate()) || isNull(acConfig.getToDate()) || acConfig.getFromDate().isAfter(acConfig.getToDate()));
   }
 
 }

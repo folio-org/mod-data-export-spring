@@ -336,7 +336,7 @@
                             <generateApiDocumentation>true</generateApiDocumentation>
                             <generateModels>true</generateModels>
                             <modelsToGenerate>
-                               BursarFeeFinesTypeMapping,BursarFeeFines,EdiConfig,Edi,EdiSchedule,ScheduleParameters,EdiEmail,EdiFtp,VendorEdiOrdersExportConfig,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection,EHoldingsExportConfig
+                               BursarFeeFinesTypeMapping,BursarFeeFines,EdiConfig,Edi,EdiSchedule,ScheduleParameters,EdiEmail,EdiFtp,VendorEdiOrdersExportConfig,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection,EHoldingsExportConfig,AuthorityControlExportConfig
                             </modelsToGenerate>
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
