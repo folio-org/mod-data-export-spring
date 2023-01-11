@@ -4,8 +4,6 @@ import static java.util.Objects.isNull;
 import static org.folio.des.domain.dto.ExportType.AUTH_HEADINGS_UPDATES;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
-import static org.folio.des.domain.dto.ExportType.E_HOLDINGS;
-import static org.folio.des.domain.dto.ExportType.FAILED_LINKED_BIB_UPDATES;
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
 import java.util.UUID;
@@ -69,10 +67,8 @@ public class JobsController implements JobsApi {
 
   private boolean isMissingRequiredParameters(Job job) {
     var exportTypeParameters = job.getExportTypeSpecificParameters();
-    var eHoldingsExportConfig = exportTypeParameters.geteHoldingsExportConfig();
     return (BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(exportTypeParameters.getQuery()))) ||
       (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) ||
-      (E_HOLDINGS == job.getType() && (isNull(eHoldingsExportConfig.getRecordId()) || isNull(eHoldingsExportConfig.getRecordType()))) ||
       invalidAuthorityControlJob(job, exportTypeParameters);
   }
 

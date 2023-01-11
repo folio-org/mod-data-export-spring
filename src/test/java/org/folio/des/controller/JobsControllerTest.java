@@ -2,7 +2,6 @@ package org.folio.des.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
@@ -16,8 +15,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.domain.dto.AuthorityControlExportConfig;
+import org.folio.des.domain.dto.EHoldingsExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
@@ -26,8 +28,9 @@ import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -399,10 +402,12 @@ class JobsControllerTest extends BaseTest {
           status().isBadRequest()));
   }
 
-  @Test
-  @DisplayName("Start new authority control job missing required parameters, should be 400")
-  void shouldReturnBadRequestWhenRequiredParametersAreMissing() throws Exception {
-    var payload = buildAuthorityControlJobPayload(new AuthorityControlExportConfig(), ExportType.AUTH_HEADINGS_UPDATES);
+  @ParameterizedTest
+  @MethodSource("getPayloadForJobWithoutRequiredParameters")
+  @DisplayName("Start new job missing required parameters, should be 400")
+  void shouldReturnBadRequestWhenRequiredParametersAreMissing(ExportType exportType,
+                                                              ExportTypeSpecificParameters params) throws Exception {
+    var payload = buildJobPayload(exportType, params);
 
     mockMvc.perform(post("/data-export-spring/jobs")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -475,6 +480,23 @@ class JobsControllerTest extends BaseTest {
           status().isCreated()));
   }
 
+  @Test
+  @DisplayName("Start new job with id filled, should be 200")
+  void postJobWithIdShouldRespondOk() throws Exception {
+    var job = new Job()
+      .id(UUID.randomUUID())
+      .type(ExportType.E_HOLDINGS)
+      .exportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    var content =  MAPPER.writeValueAsString(job);
+
+    mockMvc.perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(content))
+      .andExpect(status().isOk());
+  }
+
   @ParameterizedTest
   @DisplayName("Test JSONB criteria")
   @CsvSource({
@@ -510,22 +532,30 @@ class JobsControllerTest extends BaseTest {
           content().contentType(MediaType.APPLICATION_JSON_VALUE)));
   }
 
+  private static Stream<Arguments> getPayloadForJobWithoutRequiredParameters() {
+    return Stream.of(
+      Arguments.of(ExportType.E_HOLDINGS,
+        new ExportTypeSpecificParameters().eHoldingsExportConfig(new EHoldingsExportConfig())),
+      Arguments.of(ExportType.AUTH_HEADINGS_UPDATES,
+        new ExportTypeSpecificParameters().authorityControlExportConfig(new AuthorityControlExportConfig())));
+  }
+
   private String buildAuthorityControlJobPayload(AuthorityControlExportConfig authorityControlExportConfig,
                                                  ExportType exportType) throws JsonProcessingException {
-    var exportTypeSpecificParameters = new ExportTypeSpecificParameters();
-    exportTypeSpecificParameters.setAuthorityControlExportConfig(authorityControlExportConfig);
-    var job = new Job();
-    job.setType(exportType);
-    job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-
-    return MAPPER.writeValueAsString(job);
+    var exportTypeSpecificParameters = new ExportTypeSpecificParameters()
+      .authorityControlExportConfig(authorityControlExportConfig);
+    return buildJobPayload(exportType, exportTypeSpecificParameters);
   }
 
   private String buildEmptyJobPayload(ExportType exportType) throws JsonProcessingException {
-    var exportTypeSpecificParameters = new ExportTypeSpecificParameters();
-    var job = new Job();
-    job.setType(exportType);
-    job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+    return buildJobPayload(exportType, new ExportTypeSpecificParameters());
+  }
+
+  private String buildJobPayload(ExportType exportType, ExportTypeSpecificParameters params)
+    throws JsonProcessingException {
+    var job = new Job()
+      .type(exportType)
+      .exportTypeSpecificParameters(params);
 
     return MAPPER.writeValueAsString(job);
   }
