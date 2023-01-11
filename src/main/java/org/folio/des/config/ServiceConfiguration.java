@@ -128,7 +128,6 @@ public class ServiceConfiguration {
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
     converters.put(ExportType.E_HOLDINGS, eHoldingsJobCommandBuilder);
     converters.put(ExportType.AUTH_HEADINGS_UPDATES, authorityControlJobCommandBuilder);
-    converters.put(ExportType.FAILED_LINKED_BIB_UPDATES, authorityControlJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
   }
 

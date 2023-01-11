@@ -44,13 +44,18 @@ class JobCommandBuilderResolverTest {
     "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
     "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",
     "E_HOLDINGS, EHoldingsJobCommandBuilder",
-    "AUTH_HEADINGS_UPDATES, AuthorityControlJobCommandBuilder",
-    "FAILED_LINKED_BIB_UPDATES, AuthorityControlJobCommandBuilder"
+    "AUTH_HEADINGS_UPDATES, AuthorityControlJobCommandBuilder"
   })
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver(ExportType exportType,
               String expBuilderClass) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);
     assertEquals(expBuilderClass, builder.get().getClass().getSimpleName());
+  }
+
+  @Test
+  void shouldNotRetrieveBuilderForFailedLinkedBibUpdates() {
+    Optional<JobCommandBuilder> builder = resolver.resolve(ExportType.FAILED_LINKED_BIB_UPDATES);
+    assertTrue(builder.isEmpty());
   }
 
   @Test
@@ -68,8 +73,7 @@ class JobCommandBuilderResolverTest {
     "BULK_EDIT_QUERY, query",
     "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
     "E_HOLDINGS, eHoldingsExportConfig",
-    "AUTH_HEADINGS_UPDATES, authorityControlExportConfig",
-    "FAILED_LINKED_BIB_UPDATES, authorityControlExportConfig"
+    "AUTH_HEADINGS_UPDATES, authorityControlExportConfig"
   })
   void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);

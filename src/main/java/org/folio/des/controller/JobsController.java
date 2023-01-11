@@ -79,8 +79,7 @@ public class JobsController implements JobsApi {
   private boolean invalidAuthorityControlJob(Job job, ExportTypeSpecificParameters exportTypeParameters) {
     var acConfig = exportTypeParameters.getAuthorityControlExportConfig();
 
-    return (AUTH_HEADINGS_UPDATES == job.getType() || FAILED_LINKED_BIB_UPDATES == job.getType())
-      && acConfig.getFromDate().isAfter(acConfig.getToDate());
+    return AUTH_HEADINGS_UPDATES == job.getType() && acConfig.getFromDate().isAfter(acConfig.getToDate());
   }
 
 }

@@ -399,11 +399,10 @@ class JobsControllerTest extends BaseTest {
           status().isBadRequest()));
   }
 
-  @ParameterizedTest
-  @EnumSource(value = ExportType.class, mode = INCLUDE, names = {"AUTH_HEADINGS_UPDATES", "FAILED_LINKED_BIB_UPDATES"})
+  @Test
   @DisplayName("Start new authority control job missing required parameters, should be 400")
-  void shouldReturnBadRequestWhenRequiredParametersAreMissing(ExportType exportType) throws Exception {
-    var payload = buildAuthorityControlJobPayload(new AuthorityControlExportConfig(), exportType);
+  void shouldReturnBadRequestWhenRequiredParametersAreMissing() throws Exception {
+    var payload = buildAuthorityControlJobPayload(new AuthorityControlExportConfig(), ExportType.AUTH_HEADINGS_UPDATES);
 
     mockMvc.perform(post("/data-export-spring/jobs")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -412,16 +411,15 @@ class JobsControllerTest extends BaseTest {
       .andExpect(status().isBadRequest());
   }
 
-  @ParameterizedTest
-  @EnumSource(value = ExportType.class, mode = INCLUDE, names = {"AUTH_HEADINGS_UPDATES", "FAILED_LINKED_BIB_UPDATES"})
+  @Test
   @DisplayName("Start new authority control job with invalid dates, should be 400")
-  void shouldReturnBadRequestWhenParametersInvalid(ExportType exportType) throws Exception {
+  void shouldReturnBadRequestWhenParametersInvalid() throws Exception {
     var date = LocalDate.now();
     var authorityControlExportConfig = new AuthorityControlExportConfig();
     authorityControlExportConfig.setToDate(date);
     authorityControlExportConfig.setFromDate(date.plusDays(1));
 
-    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, exportType);
+    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, ExportType.AUTH_HEADINGS_UPDATES);
 
     mockMvc.perform(post("/data-export-spring/jobs")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -430,16 +428,29 @@ class JobsControllerTest extends BaseTest {
       .andExpect(status().isBadRequest());
   }
 
-  @ParameterizedTest
-  @EnumSource(value = ExportType.class, mode = INCLUDE, names = {"AUTH_HEADINGS_UPDATES", "FAILED_LINKED_BIB_UPDATES"})
-  @DisplayName("Start new authority control job, should be 201")
-  void postAuthorityControlJob(ExportType exportType) throws Exception {
+  @Test
+  @DisplayName("Start new auth headings update job, should be 201")
+  void postAuthHeadingsUpdateJob() throws Exception {
     var date = LocalDate.now();
     var authorityControlExportConfig = new AuthorityControlExportConfig();
     authorityControlExportConfig.setFromDate(date);
     authorityControlExportConfig.setToDate(date.plusDays(1));
 
-    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, exportType);
+    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, ExportType.AUTH_HEADINGS_UPDATES);
+
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isCreated());
+  }
+
+  @Test
+  @DisplayName("Start new failed linked bib updates job, should be 201")
+  void postFailedLinkedBibUpdatesJob() throws Exception {
+    var payload = buildEmptyJobPayload(ExportType.FAILED_LINKED_BIB_UPDATES);
 
     mockMvc
       .perform(
@@ -503,6 +514,15 @@ class JobsControllerTest extends BaseTest {
                                                  ExportType exportType) throws JsonProcessingException {
     var exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     exportTypeSpecificParameters.setAuthorityControlExportConfig(authorityControlExportConfig);
+    var job = new Job();
+    job.setType(exportType);
+    job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
+
+    return MAPPER.writeValueAsString(job);
+  }
+
+  private String buildEmptyJobPayload(ExportType exportType) throws JsonProcessingException {
+    var exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     var job = new Job();
     job.setType(exportType);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
