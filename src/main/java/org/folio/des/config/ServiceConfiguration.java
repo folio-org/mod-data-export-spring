@@ -3,6 +3,7 @@ package org.folio.des.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.folio.des.builder.job.AuthorityControlJobCommandBuilder;
 import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
 import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
 import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
@@ -118,13 +119,15 @@ public class ServiceConfiguration {
                           BurSarFeeFinesJobCommandBuilder burSarFeeFinesJobCommandBuilder,
                           CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
                           EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
-                          EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder) {
+                          EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder,
+                          AuthorityControlJobCommandBuilder authorityControlJobCommandBuilder) {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
     converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
     converters.put(ExportType.E_HOLDINGS, eHoldingsJobCommandBuilder);
+    converters.put(ExportType.AUTH_HEADINGS_UPDATES, authorityControlJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
   }
 

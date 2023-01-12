@@ -11,15 +11,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.folio.des.client.ExportWorkerClient;
+import org.folio.des.domain.dto.AuthorityControlExportConfig;
+import org.folio.des.domain.dto.EHoldingsExportConfig;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
@@ -63,6 +75,8 @@ class JobsControllerTest extends BaseTest {
 
   private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY =
     "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {\"query\":\"barcode==123\"}, \"entityType\" : \"USER\"}";
+
+  private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
   @Test
   @DisplayName("Find all jobs")
@@ -388,6 +402,70 @@ class JobsControllerTest extends BaseTest {
           status().isBadRequest()));
   }
 
+  @ParameterizedTest
+  @MethodSource("getPayloadForJobWithoutRequiredParameters")
+  @DisplayName("Start new job missing required parameters, should be 400")
+  void shouldReturnBadRequestWhenRequiredParametersAreMissing(ExportType exportType,
+                                                              ExportTypeSpecificParameters params) throws Exception {
+    var payload = buildJobPayload(exportType, params);
+
+    mockMvc.perform(post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Start new authority control job with invalid dates, should be 400")
+  void shouldReturnBadRequestWhenParametersInvalid() throws Exception {
+    var date = LocalDate.now();
+    var authorityControlExportConfig = new AuthorityControlExportConfig();
+    authorityControlExportConfig.setToDate(date);
+    authorityControlExportConfig.setFromDate(date.plusDays(1));
+
+    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, ExportType.AUTH_HEADINGS_UPDATES);
+
+    mockMvc.perform(post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Start new auth headings update job, should be 201")
+  void postAuthHeadingsUpdateJob() throws Exception {
+    var date = LocalDate.now();
+    var authorityControlExportConfig = new AuthorityControlExportConfig();
+    authorityControlExportConfig.setFromDate(date);
+    authorityControlExportConfig.setToDate(date.plusDays(1));
+
+    var payload = buildAuthorityControlJobPayload(authorityControlExportConfig, ExportType.AUTH_HEADINGS_UPDATES);
+
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isCreated());
+  }
+
+  @Test
+  @DisplayName("Start new failed linked bib updates job, should be 201")
+  void postFailedLinkedBibUpdatesJob() throws Exception {
+    var payload = buildEmptyJobPayload(ExportType.FAILED_LINKED_BIB_UPDATES);
+
+    mockMvc
+      .perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(payload))
+      .andExpect(status().isCreated());
+  }
+
   @Test
   @DisplayName("Start new bulk edit query job with entity type, should be 201")
   void postBulkEditQueryJobWithEntityType() throws Exception {
@@ -400,6 +478,23 @@ class JobsControllerTest extends BaseTest {
       .andExpect(
         matchAll(
           status().isCreated()));
+  }
+
+  @Test
+  @DisplayName("Start new job with id filled, should be 200")
+  void postJobWithIdShouldRespondOk() throws Exception {
+    var job = new Job()
+      .id(UUID.randomUUID())
+      .type(ExportType.E_HOLDINGS)
+      .exportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    var content =  MAPPER.writeValueAsString(job);
+
+    mockMvc.perform(
+        post("/data-export-spring/jobs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(content))
+      .andExpect(status().isOk());
   }
 
   @ParameterizedTest
@@ -435,5 +530,33 @@ class JobsControllerTest extends BaseTest {
         matchAll(
           status().isBadRequest(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE)));
+  }
+
+  private static Stream<Arguments> getPayloadForJobWithoutRequiredParameters() {
+    return Stream.of(
+      Arguments.of(ExportType.E_HOLDINGS,
+        new ExportTypeSpecificParameters().eHoldingsExportConfig(new EHoldingsExportConfig())),
+      Arguments.of(ExportType.AUTH_HEADINGS_UPDATES,
+        new ExportTypeSpecificParameters().authorityControlExportConfig(new AuthorityControlExportConfig())));
+  }
+
+  private String buildAuthorityControlJobPayload(AuthorityControlExportConfig authorityControlExportConfig,
+                                                 ExportType exportType) throws JsonProcessingException {
+    var exportTypeSpecificParameters = new ExportTypeSpecificParameters()
+      .authorityControlExportConfig(authorityControlExportConfig);
+    return buildJobPayload(exportType, exportTypeSpecificParameters);
+  }
+
+  private String buildEmptyJobPayload(ExportType exportType) throws JsonProcessingException {
+    return buildJobPayload(exportType, new ExportTypeSpecificParameters());
+  }
+
+  private String buildJobPayload(ExportType exportType, ExportTypeSpecificParameters params)
+    throws JsonProcessingException {
+    var job = new Job()
+      .type(exportType)
+      .exportTypeSpecificParameters(params);
+
+    return MAPPER.writeValueAsString(job);
   }
 }

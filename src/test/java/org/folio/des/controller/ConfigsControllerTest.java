@@ -165,7 +165,7 @@ class ConfigsControllerTest extends BaseTest {
                 .headers(defaultHeaders())
                 .content(UPDATE_CONFIG_REQUEST_FAILED))
         .andExpect(
-          matchAll(status().isInternalServerError(),
+          matchAll(status().isBadRequest(),
             content().contentType(MediaType.APPLICATION_JSON_VALUE),
             jsonPath("$.errors[0].type", is("MethodArgumentNotValidException"))));
   }
