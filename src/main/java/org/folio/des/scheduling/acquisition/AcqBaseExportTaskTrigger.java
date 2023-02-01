@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -71,16 +70,12 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
     Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
 
-    switch (schedulePeriod) {
-    case DAY:
-      return scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-    case HOUR:
-      return scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-    case WEEK:
-      return scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-    default:
-      return null;
-    }
+    return switch (schedulePeriod) {
+      case DAY -> scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
+      case HOUR -> scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+      case WEEK -> scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
+      default -> null;
+    };
   }
 
   @SneakyThrows
@@ -128,7 +123,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     List<WeekDaysEnum> weekDays = scheduleParameters.getWeekDays();
     return weekDays.stream()
             .sorted(Comparator.comparing(WeekDaysEnum::getValue))
-            .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
+            .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().toList();
   }
 
   private boolean containsDaysAfter(List<DayOfWeek> sortedChosenDays, DayOfWeek chosenDay) {

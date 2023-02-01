@@ -1,6 +1,5 @@
 package org.folio.des.scheduling.acquisition;
 
-import static java.util.Map.entry;
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
 import static org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
 
@@ -14,7 +13,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ScheduleParameters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -406,7 +404,7 @@ class AcqBaseExportTaskTriggerTest {
     ZonedDateTime scheduledDateTime = getNowTime();
     scheduledDateTime = scheduledDateTime.minusHours(1);
     DayOfWeek[] values = DayOfWeek.values();
-    List<String> allDaysOfWeek = Arrays.stream(values).map(DayOfWeek::name).collect(Collectors.toList());
+    List<String> allDaysOfWeek = Arrays.stream(values).map(DayOfWeek::name).toList();
     ScheduleParameters scheduleParameters = getScheduleParameters(allDaysOfWeek,
       scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_TIME));
 
@@ -427,7 +425,7 @@ class AcqBaseExportTaskTriggerTest {
     params.setId(UUID.randomUUID());
     params.setScheduleFrequency(1);
     params.setSchedulePeriod(SchedulePeriodEnum.WEEK);
-    params.setWeekDays(weekDays.stream().map(WeekDaysEnum::fromValue).collect(Collectors.toList()));
+    params.setWeekDays(weekDays.stream().map(WeekDaysEnum::fromValue).toList());
     params.setTimeZone("UTC");
     params.setScheduleTime(scheduledTime);
     return params;

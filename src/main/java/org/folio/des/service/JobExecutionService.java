@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -98,7 +97,7 @@ public class  JobExecutionService {
         .map(Job::getFiles)
         .filter(CollectionUtils::isNotEmpty)
         .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+        .toList();
     if (CollectionUtils.isEmpty(files)) {
       return;
     }

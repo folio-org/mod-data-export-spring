@@ -256,18 +256,13 @@ class EdifactScheduledTaskBuilderTest {
       public JobParameter deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode jsonNode = jp.getCodec().readTree(jp);
         var identifying = jsonNode.get("identifying").asBoolean();
-        switch (JobParameter.ParameterType.valueOf(jsonNode.get("type").asText())) {
-        case STRING:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), identifying);
-        case DATE:
-          return new JobParameter(
+        return switch (JobParameter.ParameterType.valueOf(jsonNode.get("type").asText())) {
+          case STRING -> new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), identifying);
+          case DATE -> new JobParameter(
             Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), identifying);
-        case LONG:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), identifying);
-        case DOUBLE:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), identifying);
-        }
-        return null;
+          case LONG -> new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), identifying);
+          case DOUBLE -> new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), identifying);
+        };
       }
     }
 

@@ -4,7 +4,6 @@ import static org.folio.des.repository.criteria.CQL2JPACriteria.CRITERIA_JSONB_S
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -44,7 +43,7 @@ public class JsonbNodeToPredicateConverter {
   private List<String> getFieldNames(String jsonPath) {
     return Arrays.stream(jsonPath.split("\\."))
                                     .filter(fieldName -> !CRITERIA_JSONB_START.equals(fieldName))
-                                    .collect(Collectors.toList());
+                                    .toList();
   }
 
 }

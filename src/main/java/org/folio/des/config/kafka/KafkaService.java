@@ -2,7 +2,7 @@ package org.folio.des.config.kafka;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -72,7 +72,7 @@ public class KafkaService {
   private List<NewTopic> tenantSpecificTopics(String tenant) {
     return Arrays.stream(Topic.values())
       .map(topic -> toKafkaTopic(tenant, topic))
-      .collect(Collectors.toList());
+      .toList();
   }
 
   private NewTopic toKafkaTopic(String tenant, Topic topic) {

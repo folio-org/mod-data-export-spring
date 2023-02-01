@@ -13,7 +13,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -48,17 +47,12 @@ public class ExportTrigger implements Trigger {
     Integer scheduleFrequency = config.getScheduleFrequency();
 
     switch (schedulePeriod) {
-      case DAY:
-        nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-        break;
-      case WEEK:
-        nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-        break;
-      case HOUR:
-        nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-        break;
-      default:
+      case DAY -> nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
+      case WEEK -> nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
+      case HOUR -> nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+      default -> {
         return null;
+      }
     }
 
     return nextExecutionTime;
@@ -98,7 +92,7 @@ public class ExportTrigger implements Trigger {
 
   private List<DayOfWeek> normalizeDayOfWeek() {
     List<WeekDaysEnum> weekDays = config.getWeekDays();
-    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
+    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().toList();
   }
 
   private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {

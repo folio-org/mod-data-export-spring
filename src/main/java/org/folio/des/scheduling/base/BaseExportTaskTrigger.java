@@ -50,7 +50,7 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
       List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
                         .filter(weekDaysEnumSet::contains)
                         .map(ScheduleParameters.WeekDaysEnum::valueOf)
-                        .collect(Collectors.toList());
+                        .toList();
 
       scheduleParam.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParam.setWeekDays(weekDays);
