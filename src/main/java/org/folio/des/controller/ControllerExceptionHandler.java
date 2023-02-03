@@ -27,7 +27,7 @@ public class ControllerExceptionHandler {
 
   @ExceptionHandler({
     IllegalArgumentException.class,
-    javax.validation.ConstraintViolationException.class,
+    jakarta.validation.ConstraintViolationException.class,
     HttpMessageNotReadableException.class,
     MissingServletRequestParameterException.class,
     MethodArgumentTypeMismatchException.class,

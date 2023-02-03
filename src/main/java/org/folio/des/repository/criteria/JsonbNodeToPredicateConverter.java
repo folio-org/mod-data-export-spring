@@ -2,14 +2,14 @@ package org.folio.des.repository.criteria;
 
 import static org.folio.des.repository.criteria.CQL2JPACriteria.CRITERIA_JSONB_START;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotNull;
 
 import org.z3950.zing.cql.CQLTermNode;
 

@@ -1,15 +1,17 @@
 package org.folio.de.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+
 import lombok.Data;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -19,12 +21,10 @@ import org.folio.des.domain.dto.EntityType;
 import org.folio.des.domain.dto.Progress;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 
 @Entity
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Data
 public class Job {
 
@@ -45,18 +45,18 @@ public class Job {
   @Enumerated(EnumType.STRING)
   private ExportType type;
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
   private ExportTypeSpecificParameters exportTypeSpecificParameters;
 
   @Enumerated(EnumType.STRING)
   private JobStatus status;
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
   private List<String> files = null;
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
   private List<String> fileNames = null;
 
@@ -83,7 +83,7 @@ public class Job {
   @Enumerated(EnumType.STRING)
   private BatchStatus batchStatus;
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
   private ExitStatus exitStatus;
 
@@ -93,7 +93,7 @@ public class Job {
   @Enumerated(EnumType.STRING)
   private EntityType entityType;
 
-  @Type(type = "jsonb")
+  @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
   private Progress progress;
 

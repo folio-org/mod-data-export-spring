@@ -1,9 +1,9 @@
 package org.folio.des.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaQuery;
 import lombok.extern.log4j.Log4j2;
 import org.folio.cql2pgjson.exception.QueryValidationException;
 import org.folio.des.repository.criteria.CQL2JPACriteria;

@@ -1,6 +1,6 @@
 package org.folio.des.builder.scheduling;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
 import org.folio.des.config.FolioExecutionContextHelper;

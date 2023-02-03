@@ -3,6 +3,7 @@ package org.folio.des.scheduling;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -35,6 +36,11 @@ public class ExportTrigger implements Trigger {
   public Date nextExecutionTime(TriggerContext triggerContext) {
     Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
     return getNextTime(lastActualExecutionTime);
+  }
+
+  @Override
+  public Instant nextExecution(TriggerContext triggerContext) {
+    return null;
   }
 
   protected Date getNextTime(Date lastActualExecutionTime) {
