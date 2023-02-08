@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.folio.des.client.ConfigurationClient;
-import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
@@ -31,41 +30,46 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
+@SpringBootTest(classes = { ServiceConfiguration.class})
+@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
 class ExportTypeBasedConfigManagerTest {
 
   public static final String CONFIG_RESPONSE =
-      "    {\n"
-          + "      \"configs\": [\n"
-          + "        {\n"
-          + "          \"id\": \"d855141f-aa62-40bb-a34b-da986b35d6d4\",\n"
-          + "          \"module\": \"mod-bursar-export\",\n"
-          + "          \"configName\": \"query_parameters\",\n"
-          + "          \"description\": \"for launch job\",\n"
-          + "          \"default\": true,\n"
-          + "          \"enabled\": true,\n"
-          + "          \"value\": \"{\\\"id\\\":\\\"6c163f99-9df5-419d-9174-da638a1c76ed\\\",\\\"schedulePeriod\\\":\\\"DAY\\\",\\\"weekDays\\\":[\\\"FRIDAY\\\",\\\"MONDAY\\\"]}\",\n"
-          + "          \"metadata\": {\n"
-          + "            \"createdDate\": \"2021-02-04T05:25:19.580+00:00\",\n"
-          + "            \"createdByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\",\n"
-          + "            \"updatedDate\": \"2021-02-04T06:06:18.875+00:00\",\n"
-          + "            \"updatedByUserId\": \"1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f\"\n"
-          + "          }\n"
-          + "        }\n"
-          + "      ],\n"
-          + "      \"totalRecords\": 1,\n"
-          + "      \"resultInfo\": {\n"
-          + "        \"totalRecords\": 1,\n"
-          + "        \"facets\": [],\n"
-          + "        \"diagnostics\": []\n"
-          + "      }\n"
-          + "    }";
+    """
+          {
+            "configs": [
+              {
+                "id": "d855141f-aa62-40bb-a34b-da986b35d6d4",
+                "module": "mod-bursar-export",
+                "configName": "query_parameters",
+                "description": "for launch job",
+                "default": true,
+                "enabled": true,
+                "value": "{\\"id\\":\\"6c163f99-9df5-419d-9174-da638a1c76ed\\",\\"schedulePeriod\\":\\"DAY\\",\\"weekDays\\":[\\"FRIDAY\\",\\"MONDAY\\"]}",
+                "metadata": {
+                  "createdDate": "2021-02-04T05:25:19.580+00:00",
+                  "createdByUserId": "1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f",
+                  "updatedDate": "2021-02-04T06:06:18.875+00:00",
+                  "updatedByUserId": "1d3b58cb-07b5-5fcd-8a2a-3ce06a0eb90f"
+                }
+              }
+            ],
+            "totalRecords": 1,
+            "resultInfo": {
+              "totalRecords": 1,
+              "facets": [],
+              "diagnostics": []
+            }
+          }\
+      """;
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
@@ -121,9 +125,7 @@ class ExportTypeBasedConfigManagerTest {
   @DisplayName("Should throw RequestValidationException")
   void shouldThrowRequestValidationException() {
     ExportConfig exportConfig = new ExportConfig();
-    Exception exception = assertThrows(RequestValidationException.class, () -> {
-      service.updateConfig(null, exportConfig);
-    });
+    Exception exception = assertThrows(RequestValidationException.class, () -> service.updateConfig(null, exportConfig));
 
     String expectedMessage = "Mismatch between id in path and request body";
     String actualMessage = exception.getMessage();

@@ -8,6 +8,7 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
@@ -26,6 +27,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.RefreshConfigAspect;
 import org.folio.des.support.BaseTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,6 +54,11 @@ class ConfigsControllerTest extends BaseTest {
   @Autowired private MockMvc mockMvc;
   @SpyBean private RefreshConfigAspect configAspect;
   @SpyBean private ConfigurationClient configurationClient;
+
+  @AfterEach
+  void clear(){
+    reset(configAspect, configurationClient);
+  }
 
   @ParameterizedTest
   @CsvSource({

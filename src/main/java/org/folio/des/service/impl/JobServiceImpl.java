@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -205,9 +206,9 @@ public class JobServiceImpl implements JobService {
   }
 
   private List<Job> filterJobsNotMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
-    return jobs.stream()
+    return new ArrayList<>(jobs.stream()
       .filter(j -> !exportTypes.contains(j.getType()))
-      .toList();
+      .toList());
   }
 
   private List<Job> filterJobsMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {

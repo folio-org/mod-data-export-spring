@@ -23,6 +23,8 @@ spring:
     show-sql: false
     properties:
       hibernate.format_sql: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
@@ -41,6 +43,8 @@ spring:
   sql:
     init:
       continue-on-error: true
+  jackson:
+    default-property-inclusion: non_null
 management:
   endpoints:
     web:

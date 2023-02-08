@@ -94,14 +94,14 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
   }
 
   private Date getConfigScheduledDate(Date lastActualExecutionTime, ScheduleParameters scheduleParameters) {
-    ZonedDateTime configStartTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
+    ZonedDateTime configStartTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime.toInstant(), scheduleParameters);
     return convertToOldDateFormat(configStartTime, scheduleParameters);
   }
 
   private Date convertToOldDateFormat(ZonedDateTime configStartTime, ScheduleParameters scheduleParameters) {
     Date lastExecutionDate;
     try {
-      lastExecutionDate = ScheduleDateTimeUtil.convertToOldDateFormat(configStartTime, scheduleParameters);
+      lastExecutionDate = Date.from(ScheduleDateTimeUtil.convertToOldDateFormat(configStartTime, scheduleParameters));
     } catch (ParseException e) {
       log.warn("Configuration start time is not provided for config : " + scheduleParameters.getId());
       return null;

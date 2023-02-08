@@ -44,10 +44,10 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @Override
-  public Date nextExecutionTime(TriggerContext triggerContext) {
-    Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+  public Instant nextExecution(TriggerContext triggerContext) {
+    Instant lastActualExecutionTime = triggerContext.lastActualExecution();
     if (lastActualExecutionTime == null && lastJobStartDate != null)  {
-      lastActualExecutionTime = lastJobStartDate;
+      lastActualExecutionTime = lastJobStartDate.toInstant();
     }
     return getNextTime(lastActualExecutionTime);
   }
@@ -60,7 +60,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
                   .orElse(false) || !enableScheduler;
   }
 
-  private Date getNextTime(Date lastActualExecutionTime) {
+  private Instant getNextTime(Instant lastActualExecutionTime) {
     if (scheduleParameters == null) return null;
 
     ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
@@ -79,7 +79,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer weeksFrequency) {
+  private Instant scheduleTaskWeekly(Instant lastActualExecutionTime, Integer weeksFrequency) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     startTime = findNextDayOfWeek(startTime, weeksFrequency);
     log.info("Weekly next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTime);
@@ -146,7 +146,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
+  private Instant scheduleTaskWithHourPeriod(Instant lastActualExecutionTime, Integer hours) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
 
     if (lastActualExecutionTime != null) {
@@ -170,7 +170,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
+  private Instant scheduleTaskWithDayPeriod(Instant lastActualExecutionTime, Integer days) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     if (lastActualExecutionTime != null) {
       startTime = startTime.plusDays(days);

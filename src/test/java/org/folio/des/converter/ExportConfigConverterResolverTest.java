@@ -11,11 +11,14 @@ import org.folio.des.domain.dto.ModelConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.convert.converter.Converter;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
+@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
 class ExportConfigConverterResolverTest {
 
   @Autowired

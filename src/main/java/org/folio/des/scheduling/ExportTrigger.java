@@ -33,23 +33,18 @@ public class ExportTrigger implements Trigger {
   private ExportConfig config;
 
   @Override
-  public Date nextExecutionTime(TriggerContext triggerContext) {
-    Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+  public Instant nextExecution(TriggerContext triggerContext) {
+    Instant lastActualExecutionTime = triggerContext.lastActualExecution();
     return getNextTime(lastActualExecutionTime);
   }
 
-  @Override
-  public Instant nextExecution(TriggerContext triggerContext) {
-    return null;
-  }
-
-  protected Date getNextTime(Date lastActualExecutionTime) {
+  protected Instant getNextTime(Instant lastActualExecutionTime) {
     if (config == null) return null;
 
     SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
     if (schedulePeriod == null || schedulePeriod == SchedulePeriodEnum.NONE) return null;
 
-    Date nextExecutionTime;
+    Instant nextExecutionTime;
     Integer scheduleFrequency = config.getScheduleFrequency();
 
     switch (schedulePeriod) {
@@ -64,20 +59,19 @@ public class ExportTrigger implements Trigger {
     return nextExecutionTime;
   }
 
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer scheduleFrequency) {
+  private Instant scheduleTaskWeekly(Instant lastActualExecutionTime, Integer scheduleFrequency) {
     String scheduleTime = config.getScheduleTime();
     var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
 
     var offsetDateTime = LocalDate.now().atTime(time);
 
     if (lastActualExecutionTime == null) {
-      return Date.from(offsetDateTime.toInstant());
+      return offsetDateTime.toInstant();
 
     } else {
-      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
+      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime,
           ZoneId.systemDefault());
-      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
-      return Date.from(instant);
+      return findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
     }
   }
 
@@ -101,14 +95,14 @@ public class ExportTrigger implements Trigger {
     return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().toList();
   }
 
-  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
+  private Instant scheduleTaskWithHourPeriod(Instant lastActualExecutionTime, Integer hours) {
     Calendar nextExecutionTime = new GregorianCalendar();
     Date nowDate = new Date();
     if (lastActualExecutionTime == null) {
       nextExecutionTime.setTime(nowDate);
       nextExecutionTime.add(Calendar.HOUR, 1);
     } else {
-      nextExecutionTime.setTime(lastActualExecutionTime);
+      nextExecutionTime.setTimeInMillis(lastActualExecutionTime.toEpochMilli());
       long diffHours = (nowDate.getTime() - nextExecutionTime.getTime().getTime())/(60 * 60 * 1000);
       if (diffHours > 0 && hours !=0 && diffHours > hours) {
         BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
@@ -119,22 +113,21 @@ public class ExportTrigger implements Trigger {
         nextExecutionTime.add(Calendar.HOUR, hours);
       }
     }
-    return nextExecutionTime.getTime();
+    return nextExecutionTime.toInstant();
   }
 
-  private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
+  private Instant scheduleTaskWithDayPeriod(Instant lastActualExecutionTime, Integer days) {
     String scheduleTime = config.getScheduleTime();
     var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
 
     if (lastActualExecutionTime == null) {
       var nextExecutionDateTime = LocalDateTime.of(LocalDate.now(), time.toLocalTime());
-      return Date.from(nextExecutionDateTime.toInstant(time.getOffset()));
+      return nextExecutionDateTime.toInstant(time.getOffset());
 
     } else {
-      var instant = lastActualExecutionTime.toInstant();
-      var localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+      var localDateTime = LocalDateTime.ofInstant(lastActualExecutionTime, ZoneId.systemDefault());
       var newScheduledDate = localDateTime.plusDays(days);
-      return Date.from(newScheduledDate.toInstant(time.getOffset()));
+      return newScheduledDate.toInstant(time.getOffset());
     }
   }
 

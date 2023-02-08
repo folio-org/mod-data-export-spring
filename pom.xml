@@ -33,9 +33,9 @@
     </export-configs.yaml.file>
 
     <folio-spring-base.version>6.0.0-SNAPSHOT</folio-spring-base.version>
-    <hibernate-types-60.version>2.21.1</hibernate-types-60.version>
+    <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
     <commons-collections4.version>4.4</commons-collections4.version>
-    <openapi-generator.version>4.3.1</openapi-generator.version>
+    <openapi-generator.version>6.2.1</openapi-generator.version>
     <testcontainers-bom.version>1.17.6</testcontainers-bom.version>
 
     <!-- Test properties-->
@@ -105,9 +105,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.vladmihalcea</groupId>
-      <artifactId>hibernate-types-60</artifactId>
-      <version>${hibernate-types-60.version}</version>
+      <groupId>io.hypersistence</groupId>
+      <artifactId>hypersistence-utils-hibernate-60</artifactId>
+      <version>${hypersistence-utils-hibernate-60.version}</version>
     </dependency>
 
     <dependency>
@@ -334,9 +334,9 @@
               <generateApiTests>true</generateApiTests>
               <generateApiDocumentation>true</generateApiDocumentation>
               <generateModels>true</generateModels>
-              <modelsToGenerate>
-                PresignedUrl,Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection,IdentifierType,EntityType,Progress
-              </modelsToGenerate>
+<!--              <modelsToGenerate>-->
+<!--                PresignedUrl,Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection,IdentifierType,EntityType,Progress-->
+<!--              </modelsToGenerate>-->
               <generateModelTests>false</generateModelTests>
               <generateSupportingFiles>true</generateSupportingFiles>
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
@@ -367,9 +367,9 @@
               <generateApiTests>true</generateApiTests>
               <generateApiDocumentation>true</generateApiDocumentation>
               <generateModels>true</generateModels>
-              <modelsToGenerate>
-                BursarFeeFinesTypeMapping,BursarFeeFines,EdiConfig,Edi,EdiSchedule,ScheduleParameters,EdiEmail,EdiFtp,VendorEdiOrdersExportConfig,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection,EHoldingsExportConfig,AuthorityControlExportConfig
-              </modelsToGenerate>
+<!--              <modelsToGenerate>-->
+<!--                BursarFeeFinesTypeMapping,BursarFeeFines,EdiConfig,Edi,EdiSchedule,ScheduleParameters,EdiEmail,EdiFtp,VendorEdiOrdersExportConfig,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection,EHoldingsExportConfig,AuthorityControlExportConfig-->
+<!--              </modelsToGenerate>-->
               <generateModelTests>false</generateModelTests>
               <generateSupportingFiles>true</generateSupportingFiles>
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
@@ -379,6 +379,7 @@
                 <dateLibrary>java8</dateLibrary>
                 <interfaceOnly>true</interfaceOnly>
                 <useSpringBoot3>true</useSpringBoot3>
+                <inlineSchemaNameDefaults>arrayItemSuffix=</inlineSchemaNameDefaults>
               </configOptions>
             </configuration>
           </execution>

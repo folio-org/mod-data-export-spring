@@ -27,8 +27,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.SocketUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -41,7 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @EnableKafka
 public abstract class BaseTest {
 
-  public static final int WIRE_MOCK_PORT = SocketUtils.findAvailableTcpPort();
+  public static final int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   public static final String TENANT = "diku";
 

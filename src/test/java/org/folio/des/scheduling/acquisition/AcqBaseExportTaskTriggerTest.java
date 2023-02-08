@@ -35,9 +35,9 @@ class AcqBaseExportTaskTriggerTest {
   @DisplayName("No configuration for scheduling")
   void noConfig() {
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(null, null, true);
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -46,9 +46,9 @@ class AcqBaseExportTaskTriggerTest {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -61,9 +61,9 @@ class AcqBaseExportTaskTriggerTest {
     scheduleParameters.setScheduleTime("12:00:00");
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -94,33 +94,31 @@ class AcqBaseExportTaskTriggerTest {
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
 
-    final Date actDate = trigger.nextExecutionTime(triggerContext);
+    final Instant actInstant = trigger.nextExecution(new SimpleTriggerContext());
 
-    Instant firstInstant = Instant.ofEpochMilli(actDate.getTime());
-    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String firstDateStr = firstZonedDateTime.toString();
     assertTrue(firstDateStr.contains("11:12:13+08:00[Asia/Shanghai]"));
     int dayOfMonth = firstZonedDateTime.getDayOfMonth();
 
-    triggerContext.update(actDate, actDate, actDate);
-    final Date actDateHourLate = trigger.nextExecutionTime(triggerContext);
-    long diffInMilliseconds = Math.abs(actDateHourLate.getTime() - actDate.getTime());
+    triggerContext.update(actInstant, actInstant, actInstant);
+    final Instant actDateHourLate = trigger.nextExecution(triggerContext);
+    long diffInMilliseconds = Math.abs(actDateHourLate.toEpochMilli() - actInstant.toEpochMilli());
     long diff = TimeUnit.HOURS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffHours, diff);
 
-    Instant instant = Instant.ofEpochMilli(actDateHourLate.getTime());
-    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(actDateHourLate, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String lastDateStr = zonedDateTime.toString();
     assertTrue(lastDateStr.contains(dayOfMonth+"T18:12:13+08:00[Asia/Shanghai]"));
 
-    triggerContext.update((Date) actDateHourLate.clone(), (Date) actDateHourLate.clone(), (Date) actDateHourLate.clone());
-    final Date thirdDateHourLate = trigger.nextExecutionTime(triggerContext);
-    long thirdDiffInMilliseconds = Math.abs(thirdDateHourLate.getTime() - actDateHourLate.getTime());
+    Instant actDateHourLateClone = Instant.ofEpochMilli(actDateHourLate.toEpochMilli());
+    triggerContext.update(actDateHourLateClone, actDateHourLateClone,actDateHourLateClone);
+    final Instant thirdDateHourLate = trigger.nextExecution(triggerContext);
+    long thirdDiffInMilliseconds = Math.abs(thirdDateHourLate.toEpochMilli() - actDateHourLate.toEpochMilli());
     long thirdDiff = TimeUnit.HOURS.convert(thirdDiffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffHours, thirdDiff);
 
-    Instant thirdInstant = Instant.ofEpochMilli(thirdDateHourLate.getTime());
-    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdDateHourLate, ZoneId.of(ASIA_SHANGHAI_ZONE));
     String thirdLastDateStr = thirdZonedDateTime.toString();
     dayOfMonth = dayOfMonth + 1;
     assertTrue(thirdLastDateStr.contains(dayOfMonth+"T01:12:13+08:00[Asia/Shanghai]"));
@@ -138,17 +136,17 @@ class AcqBaseExportTaskTriggerTest {
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    final Date actDate = trigger.nextExecutionTime(triggerContext);
+    final Instant actDate = trigger.nextExecution(triggerContext);
 
     triggerContext.update(actDate, actDate, actDate);
-    final Date actDateHourLate = trigger.nextExecutionTime(triggerContext);
-    long diffInMilliseconds = Math.abs(actDateHourLate.getTime() - actDate.getTime());
+    final Instant actDateHourLate = trigger.nextExecution(triggerContext);
+    long diffInMilliseconds = Math.abs(actDateHourLate.toEpochMilli() - actDate.toEpochMilli());
     long diff = TimeUnit.HOURS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffHours, diff);
 
     ZonedDateTime expDateTime =
       Instant.now().atZone(ZoneId.of("UTC")).plusHours(expDiffHours).truncatedTo(ChronoUnit.DAYS);
-    Instant lastInstant = Instant.ofEpochMilli(actDate.getTime()).truncatedTo(ChronoUnit.DAYS);
+    Instant lastInstant = Instant.ofEpochMilli(actDate.toEpochMilli()).truncatedTo(ChronoUnit.DAYS);
     ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(lastInstant, ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS);
     assertTrue(expDateTime.isEqual(zonedDateTime));
   }
@@ -169,36 +167,33 @@ class AcqBaseExportTaskTriggerTest {
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    final Date actDate = trigger.nextExecutionTime(triggerContext);
+    final Instant actDate = trigger.nextExecution(triggerContext);
 
-    Instant firstInstant = Instant.ofEpochMilli(actDate.getTime());
-    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(firstInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime firstZonedDateTime = ZonedDateTime.ofInstant(actDate, ZoneId.of(ASIA_SHANGHAI_ZONE));
     assertEquals(scheduledDateTime.getDayOfMonth(), firstZonedDateTime.getDayOfMonth());
     assertEquals(scheduledDateTime.getHour(), firstZonedDateTime.getHour());
     assertEquals(scheduledDateTime.getMinute(), firstZonedDateTime.getMinute());
 
     //Second try
     triggerContext.update(actDate, actDate, actDate);
-    final Date actDateDayLate = trigger.nextExecutionTime(triggerContext);
-    long diffInMilliseconds = Math.abs(actDateDayLate.getTime() - actDate.getTime());
+    final Instant actDateDayLate = trigger.nextExecution(triggerContext);
+    long diffInMilliseconds = Math.abs(actDateDayLate.toEpochMilli() - actDate.toEpochMilli());
     long diff = TimeUnit.DAYS.convert(diffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffDays, diff);
 
-    Instant secondInstant = Instant.ofEpochMilli(actDateDayLate.getTime());
-    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(secondInstant, zoneId);
+    ZonedDateTime secondZonedDateTime = ZonedDateTime.ofInstant(actDateDayLate, zoneId);
     assertEquals(scheduledDateTime.plusDays(expDiffDays).getDayOfMonth(), secondZonedDateTime.getDayOfMonth());
     assertEquals(scheduledDateTime.getHour(), secondZonedDateTime.getHour());
     assertEquals(scheduledDateTime.getMinute(), secondZonedDateTime.getMinute());
 
     //Third try
     triggerContext.update(actDateDayLate, actDateDayLate, actDateDayLate);
-    final Date thirdDateDayLate = trigger.nextExecutionTime(triggerContext);
-    long thirdDiffInMilliseconds = Math.abs(thirdDateDayLate.getTime() - actDateDayLate.getTime());
+    final Instant thirdDateDayLate = trigger.nextExecution(triggerContext);
+    long thirdDiffInMilliseconds = Math.abs(thirdDateDayLate.toEpochMilli() - actDateDayLate.toEpochMilli());
     long thirdDiff = TimeUnit.DAYS.convert(thirdDiffInMilliseconds, TimeUnit.MILLISECONDS);
     assertEquals(expDiffDays, thirdDiff);
 
-    Instant thirdInstant = Instant.ofEpochMilli(thirdDateDayLate.getTime());
-    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdInstant, ZoneId.of(ASIA_SHANGHAI_ZONE));
+    ZonedDateTime thirdZonedDateTime = ZonedDateTime.ofInstant(thirdDateDayLate, ZoneId.of(ASIA_SHANGHAI_ZONE));
     assertEquals(scheduledDateTime.plusDays(expDiffDays * 2).getDayOfMonth(), thirdZonedDateTime.getDayOfMonth());
     assertEquals(scheduledDateTime.getHour(), thirdZonedDateTime.getHour());
     assertEquals(scheduledDateTime.getMinute(), thirdZonedDateTime.getMinute());
@@ -218,7 +213,7 @@ class AcqBaseExportTaskTriggerTest {
 
     //When
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    final Date actDate = trigger.nextExecutionTime(triggerContext);
+    final Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -244,10 +239,10 @@ class AcqBaseExportTaskTriggerTest {
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
 
     //When
-    Date now = new Date();
+    Instant now = Instant.now();
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     triggerContext.update(now, now, now);
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -268,8 +263,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -291,8 +286,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -315,8 +310,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -341,8 +336,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -365,8 +360,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -389,8 +384,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -411,8 +406,8 @@ class AcqBaseExportTaskTriggerTest {
     //When
     AcqBaseExportTaskTrigger trigger = new AcqBaseExportTaskTrigger(scheduleParameters, null, true);
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(new Date(), null, new Date());
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update(Instant.now(), null, Instant.now());
+    Instant actDate = trigger.nextExecution(triggerContext);
 
     //Then
     ZonedDateTime actDateTime = getActualTime(actDate);
@@ -442,9 +437,8 @@ class AcqBaseExportTaskTriggerTest {
     return ZonedDateTime.ofInstant(scheduledInstant, zoneId);
   }
 
-  private ZonedDateTime getActualTime(Date actDate) {
-    Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
-    return ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
+  private ZonedDateTime getActualTime(Instant actDate) {
+    return ZonedDateTime.ofInstant(actDate, ZoneId.of("UTC"));
   }
 
   @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
@@ -470,17 +464,15 @@ class AcqBaseExportTaskTriggerTest {
     //When
     Calendar cal = Calendar.getInstance();
     cal.add(Calendar.HOUR, -addHours);
-    Date now = cal.getTime();
-    Instant nowInstant = Instant.ofEpochMilli(now.getTime());
-    ZonedDateTime nowZonedDateTime = ZonedDateTime.ofInstant(nowInstant, ZoneId.of("UTC"));
+    Instant now = Instant.ofEpochMilli(cal.getTimeInMillis());
+    ZonedDateTime nowZonedDateTime = ZonedDateTime.ofInstant(now, ZoneId.of("UTC"));
     int nowHour = nowZonedDateTime.getHour();
 
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
     triggerContext.update(now, now, now);
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    Instant act = trigger.nextExecution(triggerContext);
 
-    Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
-    ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
+    ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(act, ZoneId.of("UTC"));
     int actHour = actZonedDateTime.getHour();
     assertEquals((nowHour + expDiffHours + addHours) % 24, actHour);
   }
@@ -514,10 +506,9 @@ class AcqBaseExportTaskTriggerTest {
     int nowHour = lastJobZonedDateTime.getHour();
 
     SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    triggerContext.update(null, null, null);
-    Date actDate = trigger.nextExecutionTime(triggerContext);
+    triggerContext.update((Instant) null, null, null);
+    Instant actInstant = trigger.nextExecution(triggerContext);
 
-    Instant actInstant = Instant.ofEpochMilli(actDate.getTime());
     ZonedDateTime actZonedDateTime = ZonedDateTime.ofInstant(actInstant, ZoneId.of("UTC"));
     int actHour = actZonedDateTime.getHour();
     assertEquals((nowHour + expDiffHours + addHours) % 24, actHour);

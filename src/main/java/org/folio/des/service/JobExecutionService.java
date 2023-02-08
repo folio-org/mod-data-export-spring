@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +24,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -64,7 +64,7 @@ public class  JobExecutionService {
     validateIncomingExportConfig(job);
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
 
-    Map<String, JobParameter> params = new HashMap<>();
+    var paramsBuilder = new JobParametersBuilder();
     String exportConfigId = job.getExportTypeSpecificParameters()
       .getVendorEdiOrdersExportConfig()
       .getExportConfigId().toString();
@@ -73,19 +73,19 @@ public class  JobExecutionService {
     ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(params, vendorEdiOrdersExportConfig));
+        .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(paramsBuilder, vendorEdiOrdersExportConfig));
     Optional.ofNullable(job.getFileNames())
         .ifPresent(fileNames->
-          params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
+          paramsBuilder.addString(FILE_NAME_KEY, fileNames.get(0)));
 
-    jobCommand.setJobParameters(new JobParameters(params));
+    jobCommand.setJobParameters(paramsBuilder.toJobParameters());
 
    return jobCommand;
   }
 
   @SneakyThrows
-  private void addToParamsEdiExportConfig(Map<String, JobParameter> params, VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig) {
-    params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig)));
+  private void addToParamsEdiExportConfig(JobParametersBuilder paramsBuilder, VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig) {
+    paramsBuilder.addString(EDIFACT_ORDERS_EXPORT_KEY, objectMapper.writeValueAsString(vendorEdiOrdersExportConfig));
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
@@ -106,7 +106,7 @@ public class  JobExecutionService {
     jobCommand.setType(JobCommand.Type.DELETE);
     jobCommand.setId(UUID.randomUUID());
     jobCommand.setJobParameters(new JobParameters(
-        Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter(StringUtils.join(files, ';')))));
+        Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter<>(StringUtils.join(files, ';'), String.class))));
     sendJobCommand(jobCommand);
   }
 

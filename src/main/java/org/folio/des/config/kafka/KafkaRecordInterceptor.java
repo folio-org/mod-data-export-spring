@@ -29,7 +29,7 @@ public class KafkaRecordInterceptor<V> implements RecordInterceptor<String, V> {
   private final FolioModuleMetadata folioModuleMetadata;
 
   @Override
-  public ConsumerRecord<String, V> intercept(ConsumerRecord<String, V> consumerRecord) {
+  public ConsumerRecord<String, V> intercept(ConsumerRecord<String, V> consumerRecord, Consumer<String, V> consumer) {
     Map<String, Collection<String>> okapiHeaders = headersToMap(consumerRecord.headers());
 
     var defaultFolioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
@@ -40,7 +40,8 @@ public class KafkaRecordInterceptor<V> implements RecordInterceptor<String, V> {
   }
 
   @Override
-  public void afterRecord(ConsumerRecord<String, V> record, Consumer<String, V> consumer) {
+  public void success(ConsumerRecord<String, V> record, Consumer<String, V> consumer) {
+    RecordInterceptor.super.success(record, consumer);
   }
 
   private Map<String, Collection<String>> headersToMap(Headers header) {
