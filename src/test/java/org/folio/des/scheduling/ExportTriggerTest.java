@@ -1,6 +1,7 @@
 package org.folio.des.scheduling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
@@ -9,7 +10,6 @@ import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.EdiSchedule;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -88,9 +88,9 @@ class ExportTriggerTest {
   void noConfig() {
     trigger.setConfig(null);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -98,9 +98,9 @@ class ExportTriggerTest {
   void emptyConfig() {
     trigger.setConfig(null);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -112,9 +112,9 @@ class ExportTriggerTest {
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -127,12 +127,12 @@ class ExportTriggerTest {
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 
-    final Date now = new Date();
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant now = Instant.now();
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
     Calendar nowPlusOneHour = Calendar.getInstance();
-    nowPlusOneHour.setTime(now);
+    nowPlusOneHour.setTimeInMillis(now.toEpochMilli());
     nowPlusOneHour.add(Calendar.HOUR, 1);
-    assertTrue(DateUtils.truncatedEquals(nowPlusOneHour.getTime(), date, Calendar.HOUR));
+    assertTrue(DateUtils.truncatedEquals(nowPlusOneHour.getTime(), Date.from(instant), Calendar.HOUR));
   }
 
   @Test
@@ -146,10 +146,10 @@ class ExportTriggerTest {
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 
-      final Date now =  DateUtils.addHours(new Date(), scheduleFrequency);
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
+    final Instant now =  DateUtils.addHours(new Date(), scheduleFrequency).toInstant();
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 
   @Test
@@ -162,9 +162,9 @@ class ExportTriggerTest {
     config.setScheduleTime("12:00:00.000Z");
     trigger.setConfig(config);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 
   @Test
@@ -177,10 +177,10 @@ class ExportTriggerTest {
     config.setScheduleTime("12:00:00.000Z");
     trigger.setConfig(config);
 
-    final Date now = new Date();
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
+    final Instant now = Instant.now();
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 
   @Test
@@ -193,9 +193,9 @@ class ExportTriggerTest {
     config.setScheduleTime("12:00:00.000Z");
     trigger.setConfig(config);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 
   @DisplayName("Weekly job scheduled for specific days")
@@ -209,10 +209,10 @@ class ExportTriggerTest {
     trigger.setConfig(config);
 
 
-    final Date now = new Date();
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
+    final Instant now = Instant.now();
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 
   @DisplayName("Hour job scheduled for specific hour, when last time behind current time")
@@ -235,12 +235,12 @@ class ExportTriggerTest {
     cal.add(Calendar.HOUR, -addHours);
     int currHour = cal.get(Calendar.HOUR_OF_DAY);
 
-    Date now = cal.getTime();
+    Instant now = Instant.ofEpochMilli(cal.getTimeInMillis());
     SimpleTriggerContext triggerContext = new SimpleTriggerContext(now, now, now);
-    Date date = trigger.nextExecutionTime(triggerContext);
+    Instant instant = trigger.nextExecution(triggerContext);
 
     Calendar actCal = Calendar.getInstance();
-    actCal.setTime(date);
+    actCal.setTimeInMillis(instant.toEpochMilli());
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
      assertEquals(adjustExpected(currHour + addHours + 1), actLastHour);
   }
@@ -262,12 +262,12 @@ class ExportTriggerTest {
     cal.add(Calendar.HOUR, -addHours);
     int currHour = cal.get(Calendar.HOUR_OF_DAY);
 
-    Date now = cal.getTime();
+    Instant now = Instant.ofEpochMilli(cal.getTimeInMillis());
     SimpleTriggerContext triggerContext = new SimpleTriggerContext(now, now, now);
-    Date date = trigger.nextExecutionTime(triggerContext);
+    Instant instant = trigger.nextExecution(triggerContext);
 
     Calendar actCal = Calendar.getInstance();
-    actCal.setTime(date);
+    actCal.setTimeInMillis(instant.toEpochMilli());
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
     assertEquals(adjustExpected(currHour + addHours), actLastHour);
   }
@@ -291,12 +291,12 @@ class ExportTriggerTest {
     cal.add(Calendar.HOUR, -addHours);
     int currHour = cal.get(Calendar.HOUR_OF_DAY);
 
-    Date now = cal.getTime();
+    Instant now = Instant.ofEpochMilli(cal.getTimeInMillis());
     SimpleTriggerContext triggerContext = new SimpleTriggerContext(now, now, now);
-    Date date = trigger.nextExecutionTime(triggerContext);
+    Instant instant = trigger.nextExecution(triggerContext);
 
     Calendar actCal = Calendar.getInstance();
-    actCal.setTime(date);
+    actCal.setTimeInMillis(instant.toEpochMilli());
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
     assertEquals(adjustExpected(currHour + frequency), actLastHour);
   }
