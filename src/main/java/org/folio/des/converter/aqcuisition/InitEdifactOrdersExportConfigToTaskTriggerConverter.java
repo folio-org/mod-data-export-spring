@@ -1,5 +1,6 @@
 package org.folio.des.converter.aqcuisition;
 
+import static java.util.Objects.isNull;
 import static org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum.NONE;
 
 import java.text.ParseException;
@@ -94,7 +95,13 @@ public class InitEdifactOrdersExportConfigToTaskTriggerConverter implements Conv
   }
 
   private Date getConfigScheduledDate(Date lastActualExecutionTime, ScheduleParameters scheduleParameters) {
-    ZonedDateTime configStartTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime.toInstant(), scheduleParameters);
+    ZonedDateTime configStartTime;
+    if (isNull(lastActualExecutionTime)) {
+      configStartTime = ScheduleDateTimeUtil.convertScheduleTime(null, scheduleParameters);
+    } else {
+      configStartTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime.toInstant(),
+        scheduleParameters);
+    }
     return convertToOldDateFormat(configStartTime, scheduleParameters);
   }
 

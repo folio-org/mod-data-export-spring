@@ -49,23 +49,6 @@
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
 
-    <!--    <folio-spring-base.version>6.0.0-SNAPSHOT</folio-spring-base.version>-->
-    <!--    <hibernate-types-60.version>2.21.1</hibernate-types-60.version>-->
-    <!--    <commons-collections4.version>4.4</commons-collections4.version>-->
-    <!--    <openapi-generator.version>6.2.1</openapi-generator.version>-->
-    <!--    <testcontainers-bom.version>1.17.6</testcontainers-bom.version>-->
-
-    <!--    &lt;!&ndash; Test properties&ndash;&gt;-->
-    <!--    <junit-extensions.version>2.4.0</junit-extensions.version>-->
-    <!--    <wiremock-standalone.version>2.27.2</wiremock-standalone.version>-->
-    <!--    <mockserver-client-java.version>5.15.0</mockserver-client-java.version>-->
-
-    <!--    &lt;!&ndash;Plugin properties&ndash;&gt;-->
-    <!--    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>-->
-    <!--    <copy-rename-maven-plugin>1.0.1</copy-rename-maven-plugin>-->
-    <!--    <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>-->
-    <!--    <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>-->
-
     <sonar.exclusions>
       **/src/main/java/org/folio/des/ModDataExportSpringApplication.java,
       **/src/main/java/org/folio/des/rest/**,
@@ -334,9 +317,6 @@
               <generateApiTests>true</generateApiTests>
               <generateApiDocumentation>true</generateApiDocumentation>
               <generateModels>true</generateModels>
-<!--              <modelsToGenerate>-->
-<!--                PresignedUrl,Parameter,Error,Errors,ExportType,JobStatus,Metadata,Job,JobCollection,Metadata,Tags,User,UserCollection,ResultInfo,Personal,Diagnostic,Facet,Address,FacetValue,Configuration,ConfigurationCollection,IdentifierType,EntityType,Progress-->
-<!--              </modelsToGenerate>-->
               <generateModelTests>false</generateModelTests>
               <generateSupportingFiles>true</generateSupportingFiles>
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
@@ -367,9 +347,6 @@
               <generateApiTests>true</generateApiTests>
               <generateApiDocumentation>true</generateApiDocumentation>
               <generateModels>true</generateModels>
-<!--              <modelsToGenerate>-->
-<!--                BursarFeeFinesTypeMapping,BursarFeeFines,EdiConfig,Edi,EdiSchedule,ScheduleParameters,EdiEmail,EdiFtp,VendorEdiOrdersExportConfig,ExportTypeSpecificParameters,ExportConfig,ExportConfigCollection,EHoldingsExportConfig,AuthorityControlExportConfig-->
-<!--              </modelsToGenerate>-->
               <generateModelTests>false</generateModelTests>
               <generateSupportingFiles>true</generateSupportingFiles>
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
