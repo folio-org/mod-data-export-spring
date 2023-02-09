@@ -17,7 +17,7 @@ public class EdifactOrdersJobCommandBuilder implements JobCommandBuilder {
 
   @Override
   public JobParameters buildJobCommand(Job job) {
-    JobParametersBuilder paramsBuilder = new JobParametersBuilder();
+    var paramsBuilder = new JobParametersBuilder();
     try {
       paramsBuilder.addString("edifactOrdersExport",
         objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()));
