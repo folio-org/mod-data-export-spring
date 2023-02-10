@@ -3,7 +3,7 @@ info:
   title: Data Export Spring Jobs
   version: v1
 servers:
-  - url: /data-export-spring/
+  - url: https://localhost/data-export-spring/
 paths:
   /jobs:
     get:
@@ -188,27 +188,27 @@ paths:
 components:
   schemas:
     jobStatus:
-      $ref: '../../../../folio-export-common/schemas/jobStatus.json#/JobStatus'
+      $ref: "../../../../folio-export-common/schemas/jobStatus.json#/JobStatus"
     exportType:
-      $ref: '../../../../folio-export-common/schemas/exportType.json#/ExportType'
+      $ref: "../../../../folio-export-common/schemas/exportType.json#/ExportType"
     presignedUrl:
-      $ref: '../../../../folio-export-common/schemas/exportFilePresignedUrl.json#/PresignedUrl'
+      $ref: "../../../../folio-export-common/schemas/exportFilePresignedUrl.json#/PresignedUrl"
     job:
-      $ref: '../../../../folio-export-common/schemas/job.json#/Job'
+      $ref: "../../../../folio-export-common/schemas/job.json#/Job"
     jobCollection:
-      $ref: '../../../../folio-export-common/schemas/jobCollection.json#/JobCollection'
+      $ref: "../../../../folio-export-common/schemas/jobCollection.json#/JobCollection"
     userdataCollection:
-      $ref: '../../../../folio-export-common/schemas/user/userCollection.json#/UserCollection'
+      $ref: "../../../../folio-export-common/schemas/user/userCollection.json#/UserCollection"
     configurationdataCollection:
-      $ref: '../../../../folio-export-common/schemas/configuration/configurationCollection.json#/ConfigurationCollection'
+      $ref: "../../../../folio-export-common/schemas/configuration/configurationCollection.json#/ConfigurationCollection"
     errors:
-      $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
+      $ref: "../../../../folio-export-common/schemas/common/errors.json#/Errors"
     identifierType:
-      $ref: '../../../../folio-export-common/schemas/bulk-edit/identifierType.json#/IdentifierType'
+      $ref: "../../../../folio-export-common/schemas/bulk-edit/identifierType.json#/IdentifierType"
     entityType:
-      $ref: '../../../../folio-export-common/schemas/bulk-edit/entityType.json#/EntityType'
+      $ref: "../../../../folio-export-common/schemas/bulk-edit/entityType.json#/EntityType"
     progress:
-      $ref: '../../../../folio-export-common/schemas/progress.json#/Progress'
+      $ref: "../../../../folio-export-common/schemas/progress.json#/Progress"
     UUID:
       type: string
       format: uuid
@@ -222,7 +222,8 @@ components:
     trait_pageable_offset:
       name: offset
       in: query
-      description: Skip over a number of elements by specifying an offset value for
+      description:
+        Skip over a number of elements by specifying an offset value for
         the query
       schema:
         default: 0
@@ -241,4 +242,4 @@ components:
   examples:
     errors:
       value:
-        $ref: '../../../../folio-export-common/examples/errors.sample'
+        $ref: "../../../../folio-export-common/examples/errors.sample"

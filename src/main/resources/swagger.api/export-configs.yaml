@@ -3,7 +3,7 @@ info:
   title: Data Export Spring Configurations
   version: v1
 servers:
-  - url: /data-export-spring/
+  - url: https://localhost/data-export-spring/
 paths:
   /configs:
     get:
@@ -13,13 +13,13 @@ paths:
       description: Get a list of data export configurations
       operationId: getExportConfigs
       responses:
-        '200':
-          description: ''
+        "200":
+          description: ""
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/exportConfigCollection"
-        '500':
+        "500":
           description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
@@ -43,14 +43,14 @@ paths:
           schema:
             type: string
       responses:
-        '201':
-          description: ''
+        "201":
+          description: ""
           content:
             text/plain:
               schema:
                 type: string
                 example: good
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
@@ -58,7 +58,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '500':
+        "500":
           description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
@@ -132,9 +132,9 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
@@ -142,7 +142,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '404':
+        "404":
           description: Export config not found
           content:
             application/json:
@@ -150,7 +150,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '500':
+        "500":
           description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
@@ -168,9 +168,9 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: No Content
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
@@ -178,7 +178,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '404':
+        "404":
           description: Export config not found
           content:
             application/json:
@@ -186,7 +186,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '500':
+        "500":
           description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
@@ -197,11 +197,11 @@ paths:
 components:
   schemas:
     exportConfig:
-      $ref: '../../../../folio-export-common/schemas/exportConfig.json#/ExportConfig'
+      $ref: "../../../../folio-export-common/schemas/exportConfig.json#/ExportConfig"
     exportConfigCollection:
-      $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
+      $ref: "../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection"
     errors:
-      $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
+      $ref: "../../../../folio-export-common/schemas/common/errors.json#/Errors"
   parameters:
     trait_queryable_query:
       name: query
@@ -219,4 +219,4 @@ components:
   examples:
     errors:
       value:
-        $ref: '../../../../folio-export-common/examples/errors.sample'
+        $ref: "../../../../folio-export-common/examples/errors.sample"
