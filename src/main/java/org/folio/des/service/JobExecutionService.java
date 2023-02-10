@@ -1,15 +1,9 @@
 package org.folio.des.service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
@@ -26,13 +20,18 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -65,7 +64,7 @@ public class  JobExecutionService {
     validateIncomingExportConfig(job);
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
 
-    Map<String, JobParameter> params = new HashMap<>();
+    var parametersBuilder = new JobParametersBuilder();
     String exportConfigId = job.getExportTypeSpecificParameters()
       .getVendorEdiOrdersExportConfig()
       .getExportConfigId().toString();
@@ -74,19 +73,19 @@ public class  JobExecutionService {
     ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-        .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(params, vendorEdiOrdersExportConfig));
+        .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(parametersBuilder, vendorEdiOrdersExportConfig));
     Optional.ofNullable(job.getFileNames())
-        .ifPresent(fileNames->
-          params.put(FILE_NAME_KEY, new JobParameter(String.valueOf(fileNames.get(0)))));
+        .ifPresent(fileNames-> parametersBuilder.addString(FILE_NAME_KEY, String.valueOf(fileNames.get(0))));
 
-    jobCommand.setJobParameters(new JobParameters(params));
+    jobCommand.setJobParameters(parametersBuilder.toJobParameters());
 
    return jobCommand;
   }
 
   @SneakyThrows
-  private void addToParamsEdiExportConfig(Map<String, JobParameter> params, VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig) {
-    params.put(EDIFACT_ORDERS_EXPORT_KEY, new JobParameter(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig)));
+  private void addToParamsEdiExportConfig(JobParametersBuilder parametersBuilder, VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig) {
+    Optional.ofNullable(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig))
+      .ifPresent(config -> parametersBuilder.addString(EDIFACT_ORDERS_EXPORT_KEY, config));
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
@@ -107,7 +106,7 @@ public class  JobExecutionService {
     jobCommand.setType(JobCommand.Type.DELETE);
     jobCommand.setId(UUID.randomUUID());
     jobCommand.setJobParameters(new JobParameters(
-        Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter(StringUtils.join(files, ';')))));
+        Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter<>(StringUtils.join(files, ';'), String.class))));
     sendJobCommand(jobCommand);
   }
 

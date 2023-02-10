@@ -1,15 +1,11 @@
 package org.folio.des.builder.job;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.folio.de.entity.Job;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.stereotype.Service;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.de.entity.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.stereotype.Service;
 
 @Service
 @Log4j2
@@ -17,9 +13,11 @@ import lombok.extern.log4j.Log4j2;
 public class BulkEditQueryJobCommandBuilder implements JobCommandBuilder {
   @Override
   public JobParameters buildJobCommand(Job job) {
-    Map<String, JobParameter> params = new HashMap<>();
-    params.put("entityType", new JobParameter(job.getEntityType().getValue()));
-    params.put("query", new JobParameter(job.getExportTypeSpecificParameters().getQuery()));
-    return new JobParameters(params);
+    var parametersBuilder = new JobParametersBuilder();
+
+    addJobCommand(parametersBuilder, "entityType", job.getEntityType().getValue());
+    addJobCommand(parametersBuilder, "query", job.getExportTypeSpecificParameters().getQuery());
+
+    return parametersBuilder.toJobParameters();
   }
 }

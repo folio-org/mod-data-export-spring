@@ -1,18 +1,14 @@
 package org.folio.des.builder.job;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.folio.de.entity.JobCommand;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.de.entity.JobCommand;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @Log4j2
@@ -22,13 +18,15 @@ public class EdifactOrdersJobCommandSchedulerBuilder implements JobCommandSchedu
 
   @Override
   public JobCommand buildJobCommand(org.folio.des.domain.dto.Job job) {
-    JobCommand jobCommand = buildBaseJobCommand(job);
-    Map<String, JobParameter> params = new HashMap<>();
+    var jobCommand = buildBaseJobCommand(job);
     try {
-      params.put("edifactOrdersExport",
-        new JobParameter(objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig())));
-      JobParameters jobParameters = new JobParameters(params);
-      jobCommand.setJobParameters(jobParameters);
+      var parametersBuilder = new JobParametersBuilder();
+      var vetVendorEdiOrdersExportConfig = Optional.ofNullable(
+        objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()));
+
+      vetVendorEdiOrdersExportConfig.ifPresent(config -> parametersBuilder.addString("edifactOrdersExport",config));
+      jobCommand.setJobParameters(parametersBuilder.toJobParameters());
+
       return jobCommand;
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException(e);

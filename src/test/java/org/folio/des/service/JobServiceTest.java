@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
@@ -93,6 +94,7 @@ class JobServiceTest {
     verify(jobExecutionService).deleteJobs(expiredJobs);
   }
 
+  @SneakyThrows
   @Test
   void testResendJob() {
     UUID configId = UUID.randomUUID();
@@ -133,11 +135,12 @@ class JobServiceTest {
       return exportConfig;
     });
     when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
+    when(objectMapper.writeValueAsString(vendorEdiOrdersExportConfig)).thenReturn("TestConf");
     assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(configId));
     job.setFileNames(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
+    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").getValue());
     Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
   }
 

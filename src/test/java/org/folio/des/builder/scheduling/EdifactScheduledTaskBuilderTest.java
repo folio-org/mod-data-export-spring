@@ -205,8 +205,7 @@ class EdifactScheduledTaskBuilderTest {
           .findAndRegisterModules()
           .registerModule(
             new SimpleModule()
-              .addDeserializer(ExitStatus.class, new MockSpringContext.ExitStatusDeserializer())
-              .addDeserializer(JobParameter.class, new MockSpringContext.JobParameterDeserializer()))
+              .addDeserializer(ExitStatus.class, new MockSpringContext.ExitStatusDeserializer()))
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
           .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
           .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -238,37 +237,6 @@ class EdifactScheduledTaskBuilderTest {
         return EXIT_STATUSES.get(((JsonNode) jp.getCodec().readTree(jp)).get("exitCode").asText());
       }
 
-    }
-
-    static class JobParameterDeserializer extends StdDeserializer<JobParameter> {
-
-      private static final String VALUE_PARAMETER_PROPERTY = "value";
-
-      public JobParameterDeserializer() {
-        this(null);
-      }
-
-      public JobParameterDeserializer(Class<?> vc) {
-        super(vc);
-      }
-
-      @Override
-      public JobParameter deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        JsonNode jsonNode = jp.getCodec().readTree(jp);
-        var identifying = jsonNode.get("identifying").asBoolean();
-        switch (JobParameter.ParameterType.valueOf(jsonNode.get("type").asText())) {
-        case STRING:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), identifying);
-        case DATE:
-          return new JobParameter(
-            Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), identifying);
-        case LONG:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), identifying);
-        case DOUBLE:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), identifying);
-        }
-        return null;
-      }
     }
 
     @Bean

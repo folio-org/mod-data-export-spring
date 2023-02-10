@@ -40,7 +40,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:job.sql")
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
-class JobsControllerTest extends BaseTest {
+class sJobsControllerTest extends BaseTest {
 
   @MockBean
   ExportWorkerClient exportWorkerClient;
