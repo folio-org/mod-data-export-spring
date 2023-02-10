@@ -1,6 +1,5 @@
 package org.folio.des.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -19,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
@@ -44,9 +44,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
+@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
 class JobServiceTest {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
   private static final int DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD = 14;
@@ -94,6 +97,7 @@ class JobServiceTest {
   }
 
   @Test
+  @SneakyThrows
   void testResendJob() {
     UUID configId = UUID.randomUUID();
     Job job = new Job();
@@ -113,6 +117,7 @@ class JobServiceTest {
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
     when(repository.findById(any())).thenReturn(Optional.of(job));
+    when(objectMapper.writeValueAsString(any())).thenReturn("any non-null string");
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
@@ -137,7 +142,7 @@ class JobServiceTest {
     job.setFileNames(list);
     jobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").toString());
+    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").getValue());
     Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
   }
 

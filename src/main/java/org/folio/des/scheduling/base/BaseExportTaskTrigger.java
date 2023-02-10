@@ -1,7 +1,7 @@
 package org.folio.des.scheduling.base;
 
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
       List<ScheduleParameters.WeekDaysEnum> weekDays = sourceWeekDays.stream()
                         .filter(weekDaysEnumSet::contains)
                         .map(ScheduleParameters.WeekDaysEnum::valueOf)
-                        .collect(Collectors.toList());
+                        .toList();
 
       scheduleParam.setScheduleTime(exportConfig.getScheduleTime());
       scheduleParam.setWeekDays(weekDays);
@@ -59,8 +59,8 @@ public class BaseExportTaskTrigger extends AbstractExportTaskTrigger implements 
   }
 
   @Override
-  public Date nextExecutionTime(TriggerContext triggerContext) {
-    return exportTrigger.nextExecutionTime(triggerContext);
+  public Instant nextExecution(TriggerContext triggerContext) {
+    return exportTrigger.nextExecution(triggerContext);
   }
 
   @Override

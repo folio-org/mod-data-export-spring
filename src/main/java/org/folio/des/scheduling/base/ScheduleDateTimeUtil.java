@@ -12,7 +12,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.TimeZone;
 
 public final class ScheduleDateTimeUtil {
@@ -20,7 +19,7 @@ public final class ScheduleDateTimeUtil {
   private ScheduleDateTimeUtil() {
 
   }
-  public static Date convertToOldDateFormat(ZonedDateTime startTime, ScheduleParameters scheduleParameters) throws ParseException {
+  public static Instant convertToOldDateFormat(ZonedDateTime startTime, ScheduleParameters scheduleParameters) throws ParseException {
     if (startTime == null) {
       throw new ParseException("Start time can not be empty", 0);
     }
@@ -32,14 +31,13 @@ public final class ScheduleDateTimeUtil {
 
     SimpleDateFormat isoFormat = new SimpleDateFormat(format);
     isoFormat.setTimeZone(TimeZone.getTimeZone(scheduleParameters.getTimeZone()));
-    return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString());
+    return isoFormat.parse(startTime.truncatedTo(ChronoUnit.SECONDS).toString()).toInstant();
   }
 
-  public static ZonedDateTime convertScheduleTime(Date lastActualExecutionTime, ScheduleParameters scheduleParameters) {
+  public static ZonedDateTime convertScheduleTime(Instant lastActualExecutionTime, ScheduleParameters scheduleParameters) {
     if (lastActualExecutionTime != null) {
-      Instant instant = Instant.ofEpochMilli(lastActualExecutionTime.getTime());
       ZoneId zoneId = ZoneId.of("UTC");
-      return ZonedDateTime.ofInstant(instant, zoneId).truncatedTo(ChronoUnit.SECONDS);
+      return ZonedDateTime.ofInstant(lastActualExecutionTime, zoneId).truncatedTo(ChronoUnit.SECONDS);
 
     } else if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
       LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);

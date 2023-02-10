@@ -1,11 +1,7 @@
 package org.folio.des.builder.job;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.folio.de.entity.JobCommand;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,12 +19,11 @@ public class EdifactOrdersJobCommandSchedulerBuilder implements JobCommandSchedu
   @Override
   public JobCommand buildJobCommand(org.folio.des.domain.dto.Job job) {
     JobCommand jobCommand = buildBaseJobCommand(job);
-    Map<String, JobParameter> params = new HashMap<>();
+    var paramsBuilder = new JobParametersBuilder();
     try {
-      params.put("edifactOrdersExport",
-        new JobParameter(objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig())));
-      JobParameters jobParameters = new JobParameters(params);
-      jobCommand.setJobParameters(jobParameters);
+      paramsBuilder.addString("edifactOrdersExport",
+        objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()));
+      jobCommand.setJobParameters(paramsBuilder.toJobParameters());
       return jobCommand;
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException(e);

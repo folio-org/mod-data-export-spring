@@ -7,12 +7,21 @@ import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
-import org.folio.des.domain.dto.*;
+import org.folio.des.domain.dto.ConfigurationCollection;
+import org.folio.des.domain.dto.EdiSchedule;
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -24,6 +33,7 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
   ServiceConfiguration.class})
+@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
 class EdifactOrdersExportServiceTest {
 
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";

@@ -27,7 +27,7 @@ public class ControllerExceptionHandler {
 
   @ExceptionHandler({
     IllegalArgumentException.class,
-    javax.validation.ConstraintViolationException.class,
+    jakarta.validation.ConstraintViolationException.class,
     HttpMessageNotReadableException.class,
     MissingServletRequestParameterException.class,
     MethodArgumentTypeMismatchException.class,
@@ -59,8 +59,8 @@ public class ControllerExceptionHandler {
      * all the details related to the original database error/exception
      */
     Throwable cause = exception.getCause();
-    while (cause instanceof Exception && cause != exception) {
-      exception = (Exception) cause;
+    while (cause instanceof Exception exception1 && cause != exception) {
+      exception = exception1;
       cause = exception.getCause();
     }
     return buildError(exception, HttpStatus.BAD_REQUEST);

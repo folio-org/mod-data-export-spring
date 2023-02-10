@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -99,7 +99,7 @@ public class JobServiceImpl implements JobService {
       result.setJobRecords(cqlService.getByCQL(Job.class, query, offset, limit)
           .stream()
           .map(JobServiceImpl::entityToDto)
-          .collect(Collectors.toList()));
+          .toList());
       result.setTotalRecords(cqlService.countByCQL(Job.class, query));
     }
     return result;
@@ -206,15 +206,15 @@ public class JobServiceImpl implements JobService {
   }
 
   private List<Job> filterJobsNotMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
-    return jobs.stream()
+    return new ArrayList<>(jobs.stream()
       .filter(j -> !exportTypes.contains(j.getType()))
-      .collect(Collectors.toList());
+      .toList());
   }
 
   private List<Job> filterJobsMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
     return jobs.stream()
       .filter(j -> exportTypes.contains(j.getType()))
-      .collect(Collectors.toList());
+      .toList();
   }
 
   public void deleteJobs(List<Job> jobs) {

@@ -12,7 +12,7 @@ import org.folio.des.service.JobService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 @Log4j2
 @RequiredArgsConstructor
