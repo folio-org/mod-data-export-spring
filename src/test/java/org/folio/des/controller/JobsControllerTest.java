@@ -300,7 +300,7 @@ class JobsControllerTest extends BaseTest {
   }
 
   @Test
-  @Disabled
+  @Disabled("The test fails because prior to Spring Batch v5 JobParameter value accepted null, but it does not anymore, so there should be change on logic which is not in scope of Spring batch migration")
   @DisplayName("Start new circulation export job")
   void postCirculationJob() throws Exception {
     mockMvc
