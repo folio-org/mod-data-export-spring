@@ -25,6 +25,7 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.support.BaseTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -298,23 +299,24 @@ class JobsControllerTest extends BaseTest {
                 jsonPath("$.outputFormat", is("Fees & Fines Bursar Report"))));
   }
 
-//  @Test
-//  @DisplayName("Start new circulation export job")
-//  void postCirculationJob() throws Exception {
-//    mockMvc
-//        .perform(
-//            post("/data-export-spring/jobs")
-//                .contentType(MediaType.APPLICATION_JSON_VALUE)
-//                .headers(defaultHeaders())
-//                .content(JOB_CIRCULATION_REQUEST))
-//        .andExpect(
-//            matchAll(
-//                status().isCreated(),
-//                content().contentType(MediaType.APPLICATION_JSON_VALUE),
-//                jsonPath("$.type", is("CIRCULATION_LOG")),
-//                jsonPath("$.status", is("SCHEDULED")),
-//                jsonPath("$.outputFormat", is("Comma-Separated Values (CSV)"))));
-//  }
+  @Test
+  @Disabled
+  @DisplayName("Start new circulation export job")
+  void postCirculationJob() throws Exception {
+    mockMvc
+        .perform(
+            post("/data-export-spring/jobs")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders())
+                .content(JOB_CIRCULATION_REQUEST))
+        .andExpect(
+            matchAll(
+                status().isCreated(),
+                content().contentType(MediaType.APPLICATION_JSON_VALUE),
+                jsonPath("$.type", is("CIRCULATION_LOG")),
+                jsonPath("$.status", is("SCHEDULED")),
+                jsonPath("$.outputFormat", is("Comma-Separated Values (CSV)"))));
+  }
 
   @Test
   @DisplayName("Start new bulk edit identifiers job without identifiers and entity types, should be 404")
