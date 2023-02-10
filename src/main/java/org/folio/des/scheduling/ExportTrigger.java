@@ -3,6 +3,7 @@ package org.folio.des.scheduling;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -13,7 +14,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -33,51 +33,45 @@ public class ExportTrigger implements Trigger {
   private ExportConfig config;
 
   @Override
-  public Date nextExecutionTime(TriggerContext triggerContext) {
-    Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+  public Instant nextExecution(TriggerContext triggerContext) {
+    Instant lastActualExecutionTime = triggerContext.lastActualExecution();
     return getNextTime(lastActualExecutionTime);
   }
 
-  protected Date getNextTime(Date lastActualExecutionTime) {
+  protected Instant getNextTime(Instant lastActualExecutionTime) {
     if (config == null) return null;
 
     SchedulePeriodEnum schedulePeriod = config.getSchedulePeriod();
     if (schedulePeriod == null || schedulePeriod == SchedulePeriodEnum.NONE) return null;
 
-    Date nextExecutionTime;
+    Instant nextExecutionTime;
     Integer scheduleFrequency = config.getScheduleFrequency();
 
     switch (schedulePeriod) {
-      case DAY:
-        nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-        break;
-      case WEEK:
-        nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-        break;
-      case HOUR:
-        nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-        break;
-      default:
+      case DAY -> nextExecutionTime = scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
+      case WEEK -> nextExecutionTime = scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
+      case HOUR -> nextExecutionTime = scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+      default -> {
         return null;
+      }
     }
 
     return nextExecutionTime;
   }
 
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer scheduleFrequency) {
+  private Instant scheduleTaskWeekly(Instant lastActualExecutionTime, Integer scheduleFrequency) {
     String scheduleTime = config.getScheduleTime();
     var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
 
     var offsetDateTime = LocalDate.now().atTime(time);
 
     if (lastActualExecutionTime == null) {
-      return Date.from(offsetDateTime.toInstant());
+      return offsetDateTime.toInstant();
 
     } else {
-      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime.toInstant(),
+      var lastExecutionOffsetDateTime = OffsetDateTime.ofInstant(lastActualExecutionTime,
           ZoneId.systemDefault());
-      var instant = findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
-      return Date.from(instant);
+      return findNextDayOfWeek(lastExecutionOffsetDateTime, scheduleFrequency).toInstant();
     }
   }
 
@@ -98,17 +92,17 @@ public class ExportTrigger implements Trigger {
 
   private List<DayOfWeek> normalizeDayOfWeek() {
     List<WeekDaysEnum> weekDays = config.getWeekDays();
-    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
+    return weekDays.stream().map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().toList();
   }
 
-  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
+  private Instant scheduleTaskWithHourPeriod(Instant lastActualExecutionTime, Integer hours) {
     Calendar nextExecutionTime = new GregorianCalendar();
     Date nowDate = new Date();
     if (lastActualExecutionTime == null) {
       nextExecutionTime.setTime(nowDate);
       nextExecutionTime.add(Calendar.HOUR, 1);
     } else {
-      nextExecutionTime.setTime(lastActualExecutionTime);
+      nextExecutionTime.setTimeInMillis(lastActualExecutionTime.toEpochMilli());
       long diffHours = (nowDate.getTime() - nextExecutionTime.getTime().getTime())/(60 * 60 * 1000);
       if (diffHours > 0 && hours !=0 && diffHours > hours) {
         BigDecimal hoursToIncrease = BigDecimal.valueOf(diffHours)
@@ -119,22 +113,21 @@ public class ExportTrigger implements Trigger {
         nextExecutionTime.add(Calendar.HOUR, hours);
       }
     }
-    return nextExecutionTime.getTime();
+    return nextExecutionTime.toInstant();
   }
 
-  private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
+  private Instant scheduleTaskWithDayPeriod(Instant lastActualExecutionTime, Integer days) {
     String scheduleTime = config.getScheduleTime();
     var time = OffsetTime.parse(scheduleTime, DateTimeFormatter.ISO_TIME);
 
     if (lastActualExecutionTime == null) {
       var nextExecutionDateTime = LocalDateTime.of(LocalDate.now(), time.toLocalTime());
-      return Date.from(nextExecutionDateTime.toInstant(time.getOffset()));
+      return nextExecutionDateTime.toInstant(time.getOffset());
 
     } else {
-      var instant = lastActualExecutionTime.toInstant();
-      var localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+      var localDateTime = LocalDateTime.ofInstant(lastActualExecutionTime, ZoneId.systemDefault());
       var newScheduledDate = localDateTime.plusDays(days);
-      return Date.from(newScheduledDate.toInstant(time.getOffset()));
+      return newScheduledDate.toInstant(time.getOffset());
     }
   }
 

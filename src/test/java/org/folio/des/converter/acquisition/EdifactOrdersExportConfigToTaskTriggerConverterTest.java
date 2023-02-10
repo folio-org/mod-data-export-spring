@@ -24,11 +24,14 @@ import org.folio.des.scheduling.base.ExportTaskTrigger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class,
                             EdifactOrdersExportConfigToTaskTriggerConverter.class})
+@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
 class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   private static final String ACC_TIME = "17:08:39";
 

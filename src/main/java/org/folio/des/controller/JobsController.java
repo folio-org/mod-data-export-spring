@@ -6,11 +6,8 @@ import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
-import java.util.UUID;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import java.util.UUID;
 
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
@@ -40,13 +37,12 @@ public class JobsController implements JobsApi {
   }
 
   @Override
-  public ResponseEntity<JobCollection> getJobs(@Min(0) @Max(2147483647) @Valid Integer offset,
-      @Min(0) @Max(2147483647) @Valid Integer limit, @Valid String query) {
+  public ResponseEntity<JobCollection> getJobs(Integer offset, Integer limit, String query) {
     return ResponseEntity.ok(service.get(offset, limit, query));
   }
 
   @Override
-  public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, @Valid Job job) {
+  public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, Job job) {
     job.setTenant(tenantId);
     if (isMissingRequiredParameters(job)) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

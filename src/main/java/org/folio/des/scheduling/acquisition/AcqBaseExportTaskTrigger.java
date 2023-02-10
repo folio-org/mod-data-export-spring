@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,10 +44,10 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @Override
-  public Date nextExecutionTime(TriggerContext triggerContext) {
-    Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+  public Instant nextExecution(TriggerContext triggerContext) {
+    Instant lastActualExecutionTime = triggerContext.lastActualExecution();
     if (lastActualExecutionTime == null && lastJobStartDate != null)  {
-      lastActualExecutionTime = lastJobStartDate;
+      lastActualExecutionTime = lastJobStartDate.toInstant();
     }
     return getNextTime(lastActualExecutionTime);
   }
@@ -61,7 +60,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
                   .orElse(false) || !enableScheduler;
   }
 
-  private Date getNextTime(Date lastActualExecutionTime) {
+  private Instant getNextTime(Instant lastActualExecutionTime) {
     if (scheduleParameters == null) return null;
 
     ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
@@ -71,20 +70,16 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
 
     Integer scheduleFrequency = scheduleParameters.getScheduleFrequency();
 
-    switch (schedulePeriod) {
-    case DAY:
-      return scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
-    case HOUR:
-      return scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
-    case WEEK:
-      return scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
-    default:
-      return null;
-    }
+    return switch (schedulePeriod) {
+      case DAY -> scheduleTaskWithDayPeriod(lastActualExecutionTime, scheduleFrequency);
+      case HOUR -> scheduleTaskWithHourPeriod(lastActualExecutionTime, scheduleFrequency);
+      case WEEK -> scheduleTaskWeekly(lastActualExecutionTime, scheduleFrequency);
+      default -> null;
+    };
   }
 
   @SneakyThrows
-  private Date scheduleTaskWeekly(Date lastActualExecutionTime, Integer weeksFrequency) {
+  private Instant scheduleTaskWeekly(Instant lastActualExecutionTime, Integer weeksFrequency) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     startTime = findNextDayOfWeek(startTime, weeksFrequency);
     log.info("Weekly next schedule execution time in UTC for config {} is : {}", scheduleParameters.getId(), startTime);
@@ -128,7 +123,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
     List<WeekDaysEnum> weekDays = scheduleParameters.getWeekDays();
     return weekDays.stream()
             .sorted(Comparator.comparing(WeekDaysEnum::getValue))
-            .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().collect(Collectors.toList());
+            .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString())).sorted().toList();
   }
 
   private boolean containsDaysAfter(List<DayOfWeek> sortedChosenDays, DayOfWeek chosenDay) {
@@ -151,7 +146,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWithHourPeriod(Date lastActualExecutionTime, Integer hours) {
+  private Instant scheduleTaskWithHourPeriod(Instant lastActualExecutionTime, Integer hours) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
 
     if (lastActualExecutionTime != null) {
@@ -175,7 +170,7 @@ public class AcqBaseExportTaskTrigger extends AbstractExportTaskTrigger {
   }
 
   @SneakyThrows
-  private Date scheduleTaskWithDayPeriod(Date lastActualExecutionTime, Integer days) {
+  private Instant scheduleTaskWithDayPeriod(Instant lastActualExecutionTime, Integer days) {
     ZonedDateTime startTime = ScheduleDateTimeUtil.convertScheduleTime(lastActualExecutionTime, scheduleParameters);
     if (lastActualExecutionTime != null) {
       startTime = startTime.plusDays(days);

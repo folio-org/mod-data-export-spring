@@ -23,8 +23,10 @@ spring:
     show-sql: false
     properties:
       hibernate.format_sql: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
-    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     changeLog: classpath:db/changelog/changelog-master.xml
     enabled: true
@@ -34,6 +36,15 @@ spring:
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_DATABASE:okapi_modules}
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+  sql:
+    init:
+      continue-on-error: true
+  jackson:
+    default-property-inclusion: non_null
 management:
   endpoints:
     web:
@@ -43,9 +54,9 @@ management:
   endpoint:
     loggers:
       enabled: true
-  metrics:
-    export:
-      influx:
+  influx:
+    metrics:
+      export:
         enabled: false
 feign:
   client:

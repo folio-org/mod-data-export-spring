@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,9 +29,9 @@ class BaseExportTaskTriggerTest {
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -44,9 +45,9 @@ class BaseExportTaskTriggerTest {
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
 
-    assertNull(date);
+    assertNull(instant);
   }
 
   @Test
@@ -61,12 +62,12 @@ class BaseExportTaskTriggerTest {
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
     final Date now = new Date();
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext());
     Calendar nowPlusOneHour = Calendar.getInstance();
     nowPlusOneHour.setTime(now);
     nowPlusOneHour.add(Calendar.HOUR, 1);
 
-    assertTrue(DateUtils.truncatedEquals(nowPlusOneHour.getTime(), date, Calendar.HOUR));
+    assertTrue(DateUtils.truncatedEquals(nowPlusOneHour.getTime(), Date.from(instant), Calendar.HOUR));
   }
 
   @Test
@@ -81,8 +82,8 @@ class BaseExportTaskTriggerTest {
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
 
-    final Date now =  DateUtils.addHours(new Date(), 1);
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
+    final Instant now =  DateUtils.addHours(new Date(), 1).toInstant();
+    final Instant date = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
     assertNotNull(date);
   }
@@ -99,9 +100,9 @@ class BaseExportTaskTriggerTest {
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
-    trigger.nextExecutionTime(new SimpleTriggerContext());
+    trigger.nextExecution(new SimpleTriggerContext());
 
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant date = trigger.nextExecution(new SimpleTriggerContext());
 
     assertNotNull(date);
   }
@@ -118,10 +119,10 @@ class BaseExportTaskTriggerTest {
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
 
-    final Date now = new Date();
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
+    final Instant now = Instant.now();
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 
   @Test
@@ -135,7 +136,7 @@ class BaseExportTaskTriggerTest {
     ExportTrigger exportTrigger = new ExportTrigger();
     exportTrigger.setConfig(exportConfig);
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext());
+    final Instant date = trigger.nextExecution(new SimpleTriggerContext());
 
     assertNotNull(date);
   }
@@ -154,9 +155,9 @@ class BaseExportTaskTriggerTest {
     BaseExportTaskTrigger trigger = new BaseExportTaskTrigger(exportTrigger);
 
 
-    final Date now = new Date();
-    final Date date = trigger.nextExecutionTime(new SimpleTriggerContext(now, now, now));
+    final Instant now = Instant.now();
+    final Instant instant = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
-    assertNotNull(date);
+    assertNotNull(instant);
   }
 }

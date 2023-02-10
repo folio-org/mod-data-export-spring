@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.vladmihalcea.hibernate.type.util.ObjectMapperSupplier;
+import io.hypersistence.utils.hibernate.type.util.ObjectMapperSupplier;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
 
   }
 
-  static class JobParameterDeserializer extends StdDeserializer<JobParameter> {
+  static class JobParameterDeserializer extends StdDeserializer<JobParameter<?>> {
 
     private static final String VALUE_PARAMETER_PROPERTY = "value";
 
@@ -78,19 +78,15 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
     }
 
     @Override
-    public JobParameter deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+    public JobParameter<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
       JsonNode jsonNode = jp.getCodec().readTree(jp);
       var identifying = jsonNode.get("identifying").asBoolean();
-      switch (JobParameter.ParameterType.valueOf(jsonNode.get("type").asText())) {
-        case STRING:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), identifying);
-        case DATE:
-          return new JobParameter(
-              Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), identifying);
-        case LONG:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), identifying);
-        case DOUBLE:
-          return new JobParameter(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), identifying);
+      switch (jsonNode.get("type").asText()) {
+        case "STRING" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
+        case "DATE" -> new JobParameter<>(
+          Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
+        case "LONG" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
+        case "DOUBLE" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
       }
       return null;
     }
