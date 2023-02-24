@@ -1,3 +1,13 @@
+## 2023-02-24 v2.0.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.3...v2.0.0)
+
+### Technical tasks
+* [MODEXPS-187](https://issues.folio.org/browse/MODEXPS-187) Authority control: add new export type
+* [MODEXPS-181](https://issues.folio.org/browse/MODEXPS-181) mockserver 5.14.0 for arm64 support
+* [MODEXPS-177](https://issues.folio.org/browse/MODEXPS-177) Update the module to Spring boot v3.0.0 and identify issues.
+* [MODEXPS-163](https://issues.folio.org/browse/MODEXPS-163) Logging improvement - Configuration
+
 ## 2022-10-20 v1.5.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.4.0...v1.5.0)
