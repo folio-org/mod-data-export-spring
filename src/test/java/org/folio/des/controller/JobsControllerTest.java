@@ -117,7 +117,7 @@ class JobsControllerTest extends BaseTest {
   void findSortedJobsByExportMethodName() throws Exception {
     mockMvc
       .perform(
-        get("/data-export-spring/jobs?limit=3&offset=0&query=(cql.allRecords=1)sortby exportTypeSpecificParameters/sort.descending")
+        get("/data-export-spring/jobs?limit=3&offset=0&query=(cql.allRecords=1)sortby jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.configName/sort.descending")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders()))
       .andExpect(
