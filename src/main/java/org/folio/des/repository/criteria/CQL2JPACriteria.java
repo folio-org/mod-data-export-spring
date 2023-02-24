@@ -44,7 +44,6 @@ public class CQL2JPACriteria<E> {
 
   private final CriteriaBuilder builder;
   private final JsonbNodeConverter jsonbNodeConverter;
-
   public final Root<E> root;
   public static final String NOT_EQUALS_OPERATOR = "<>";
   public final CriteriaQuery<E> criteria;
@@ -96,14 +95,9 @@ public class CQL2JPACriteria<E> {
       String jsonPath = sortIndex.getBase();
       int fieldNamesSize = JsonbNodeConverter.getFieldNames(jsonPath).size();
 
-      Expression<String> field;
-      if (fieldNamesSize > 1) {
-        // this case is for inner jsonb fields
-        field = JsonbNodeConverter.convertToExpression(root, jsonPath, builder);
-      } else {
-        // this case is for root fields
-        field = root.get(jsonPath);
-      }
+      Expression<String> field = fieldNamesSize > 1 ?
+        jsonbNodeConverter.convertToExpression(root, jsonPath, builder) : root.get(jsonPath);
+
       orders.add(getOrder(field, modifiers));
     }
 

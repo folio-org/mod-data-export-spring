@@ -17,12 +17,14 @@ public class JsonbNodeConverter {
 
   public static final String JSONB_EXTRACT_PATH_TEXT_FUNC = "jsonb_extract_path_text";
 
-  public static Expression<String> convertToExpression(Root<?> root, String jsonPath, CriteriaBuilder cb){
+  public Expression<String> convertToExpression(Root<?> root, String jsonPath, CriteriaBuilder cb){
     List<String> fieldNames = getFieldNames(jsonPath);
     int fieldsNumber = fieldNames.size();
+
     if (fieldsNumber > 0) {
       String rootFieldName = fieldNames.get(0);
       Expression<String> expression = cb.function(JSONB_EXTRACT_PATH_TEXT_FUNC, String.class, root.<String>get(rootFieldName));
+
       if (fieldsNumber == 2) {
         expression = cb.function(JSONB_EXTRACT_PATH_TEXT_FUNC, String.class, root.<String>get(rootFieldName),
           cb.literal(fieldNames.get(1)));
@@ -33,6 +35,7 @@ public class JsonbNodeConverter {
         expression = cb.function(JSONB_EXTRACT_PATH_TEXT_FUNC, String.class, root.<String>get(rootFieldName),
           cb.literal(fieldNames.get(1)), cb.literal(fieldNames.get(2)), cb.literal(fieldNames.get(3)));
       }
+
     return expression;
     } else {
       throw new IllegalArgumentException(String.format("Wrong JSONB criteria: %s", jsonPath));
