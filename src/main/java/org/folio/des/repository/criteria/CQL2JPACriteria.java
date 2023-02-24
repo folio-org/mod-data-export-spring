@@ -26,7 +26,6 @@ import org.folio.cql2pgjson.model.CqlModifiers;
 import org.folio.cql2pgjson.model.CqlSort;
 import org.folio.cql2pgjson.model.CqlTermFormat;
 import org.folio.cql2pgjson.util.Cql2SqlUtil;
-import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.z3950.zing.cql.CQLAndNode;
 import org.z3950.zing.cql.CQLBooleanNode;
 import org.z3950.zing.cql.CQLNode;
@@ -91,49 +90,27 @@ public class CQL2JPACriteria<E> {
 
   private void processSort(CQLSortNode node) throws CQLFeatureUnsupportedException {
     List<Order> orders = new ArrayList<>();
+
     for (ModifierSet sortIndex : node.getSortIndexes()) {
       final CqlModifiers modifiers = new CqlModifiers(sortIndex);
-      Path<?> sortPath = root.get(sortIndex.getBase());
-      // in case of request sortby+exportTypeSpecificParameters
-      if (sortPath.getJavaType().equals(ExportTypeSpecificParameters.class)) {
-        Expression<String> innerField = JsonbNodeConverter.convertToExpression(
-          root, "jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.configName", builder
-        );
+      String jsonPath = sortIndex.getBase();
+      int fieldNamesSize = JsonbNodeConverter.getFieldNames(jsonPath).size();
+
+      if (fieldNamesSize > 1){ // this case is for inner jsonb fields
+        Expression<String> innerField = JsonbNodeConverter.convertToExpression(root, jsonPath, builder);
         orders.add(CqlSort.DESCENDING.equals(modifiers.getCqlSort())
           ? builder.desc(innerField)
           : builder.asc(innerField));
-      } else {
+
+      } else { // this case is for root fields
         orders.add(CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-          ? builder.desc(sortPath)
-          : builder.asc(sortPath));
+          ? builder.desc(root.get(jsonPath))
+          : builder.asc(root.get(jsonPath)));
       }
+
     }
     criteria.orderBy(orders);
   }
-//  private void processSort(CQLSortNode node) throws CQLFeatureUnsupportedException {
-//    List<Order> orders = new ArrayList<>();
-//    for (ModifierSet sortIndex : node.getSortIndexes()) {
-//      final CqlModifiers modifiers = new CqlModifiers(sortIndex);
-//// sort exportTypeSpecificParameters
-//      Path<?> sortPath = root.get(sortIndex.getBase());
-//
-//      if (sortPath.getJavaType().equals(ExportTypeSpecificParameters.class)) {
-//        Expression<JsonNode> myJsonField = root.get("exportTypeSpecificParameters");
-//        Expression<String> myInnerField = builder.function("jsonb_extract_path_text", String.class, myJsonField,
-//          builder.literal("vendorEdiOrdersExportConfig"),builder.literal("configName"));
-//        orders.add(
-//          CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-//            ? builder.desc(myInnerField)
-//            : builder.asc(myInnerField));
-//      } else {
-//        orders.add(
-//          CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-//            ? builder.desc(sortPath)
-//            : builder.asc(sortPath));
-//      }
-//    }
-//    criteria.orderBy(orders);
-//  }
 
   private Predicate process(CQLNode node) throws QueryValidationException {
     if (node instanceof CQLTermNode cqlTermNode) {

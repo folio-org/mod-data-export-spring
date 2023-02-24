@@ -113,6 +113,22 @@ class JobsControllerTest extends BaseTest {
   }
 
   @Test
+  @DisplayName("Find jobs sorted by export method name and limited")
+  void findSortedJobsByExportMethodName() throws Exception {
+    mockMvc
+      .perform(
+        get("/data-export-spring/jobs?limit=3&offset=0&query=(cql.allRecords=1)sortby exportTypeSpecificParameters/sort.descending")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpect(
+        matchAll(
+          status().isOk(),
+          content().contentType(MediaType.APPLICATION_JSON_VALUE),
+          jsonPath("$.totalRecords", is(8)),
+          jsonPath("$.jobRecords", hasSize(3))));
+  }
+
+  @Test
   @DisplayName("No jobs found cause invalid query")
   void notFoundJobs() throws Exception {
     mockMvc
