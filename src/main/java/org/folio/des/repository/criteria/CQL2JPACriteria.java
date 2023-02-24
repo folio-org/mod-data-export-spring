@@ -96,20 +96,24 @@ public class CQL2JPACriteria<E> {
       String jsonPath = sortIndex.getBase();
       int fieldNamesSize = JsonbNodeConverter.getFieldNames(jsonPath).size();
 
-      if (fieldNamesSize > 1){ // this case is for inner jsonb fields
-        Expression<String> innerField = JsonbNodeConverter.convertToExpression(root, jsonPath, builder);
-        orders.add(CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-          ? builder.desc(innerField)
-          : builder.asc(innerField));
-
-      } else { // this case is for root fields
-        orders.add(CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-          ? builder.desc(root.get(jsonPath))
-          : builder.asc(root.get(jsonPath)));
+      Expression<String> field;
+      if (fieldNamesSize > 1) {
+        // this case is for inner jsonb fields
+        field = JsonbNodeConverter.convertToExpression(root, jsonPath, builder);
+      } else {
+        // this case is for root fields
+        field = root.get(jsonPath);
       }
-
+      orders.add(getOrder(field, modifiers));
     }
+
     criteria.orderBy(orders);
+  }
+
+  private Order getOrder(Expression<String> field, CqlModifiers modifiers) {
+    return CqlSort.DESCENDING.equals(modifiers.getCqlSort())
+      ? builder.desc(field)
+      : builder.asc(field);
   }
 
   private Predicate process(CQLNode node) throws QueryValidationException {

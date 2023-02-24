@@ -38,6 +38,7 @@ public class JsonbNodeConverter {
       throw new IllegalArgumentException(String.format("Wrong JSONB criteria: %s", jsonPath));
     }
   }
+
   public Predicate convertToPredicate(CQLTermNode node, CriteriaBuilder cb, Root<?> root) {
     String jsonPath = node.getIndex();
     Expression<String> expression = convertToExpression(root, jsonPath, cb);
