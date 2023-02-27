@@ -43,8 +43,7 @@ import lombok.extern.log4j.Log4j2;
 public class CQL2JPACriteria<E> {
 
   private final CriteriaBuilder builder;
-  private final JsonbNodeToPredicateConverter jsonbNodeToPredicateConverter;
-
+  private final JsonbNodeConverter jsonbNodeConverter;
   public final Root<E> root;
   public static final String NOT_EQUALS_OPERATOR = "<>";
   public final CriteriaQuery<E> criteria;
@@ -53,7 +52,7 @@ public class CQL2JPACriteria<E> {
 
   public CQL2JPACriteria(Class<E> entityCls, EntityManager entityManager) {
     this.builder = entityManager.getCriteriaBuilder();
-    this.jsonbNodeToPredicateConverter = new JsonbNodeToPredicateConverter();
+    this.jsonbNodeConverter = new JsonbNodeConverter();
     criteria = builder.createQuery(entityCls);
     root = criteria.from(entityCls);
   }
@@ -75,7 +74,7 @@ public class CQL2JPACriteria<E> {
   }
 
   private CriteriaQuery<E> toCriteria(CQLNode node)
-      throws QueryValidationException {
+    throws QueryValidationException {
     Predicate predicates;
 
     if (node instanceof CQLSortNode cqlSortNode) {
@@ -90,14 +89,26 @@ public class CQL2JPACriteria<E> {
 
   private void processSort(CQLSortNode node) throws CQLFeatureUnsupportedException {
     List<Order> orders = new ArrayList<>();
+
     for (ModifierSet sortIndex : node.getSortIndexes()) {
       final CqlModifiers modifiers = new CqlModifiers(sortIndex);
-      orders.add(
-          CqlSort.DESCENDING.equals(modifiers.getCqlSort())
-              ? builder.desc(root.get(sortIndex.getBase()))
-              : builder.asc(root.get(sortIndex.getBase())));
+      String jsonPath = sortIndex.getBase();
+      int fieldNamesSize = jsonbNodeConverter.getFieldNames(jsonPath).size();
+
+      Expression<String> field = fieldNamesSize > 1
+        ? jsonbNodeConverter.convertToExpression(root, jsonPath, builder) // this case is for inner jsonb fields
+        : root.get(jsonPath); // this case is for root fields
+
+      orders.add(getOrder(field, modifiers));
     }
+
     criteria.orderBy(orders);
+  }
+
+  private Order getOrder(Expression<String> field, CqlModifiers modifiers) {
+    return CqlSort.DESCENDING.equals(modifiers.getCqlSort())
+      ? builder.desc(field)
+      : builder.asc(field);
   }
 
   private Predicate process(CQLNode node) throws QueryValidationException {
@@ -141,7 +152,7 @@ public class CQL2JPACriteria<E> {
     if ("cql.allRecords".equalsIgnoreCase(fieldName)) {
       return builder.and();
     } else if (StringUtils.startsWithIgnoreCase(fieldName, CRITERIA_JSONB_START)) {
-      return jsonbNodeToPredicateConverter.convert(node, builder, root);
+      return jsonbNodeConverter.convertToPredicate(node, builder, root);
     }
 
     var field = getPath(fieldName);
