@@ -95,10 +95,9 @@ public class CQL2JPACriteria<E> {
       String jsonPath = sortIndex.getBase();
       int fieldNamesSize = jsonbNodeConverter.getFieldNames(jsonPath).size();
 
-      // if sort index contains inner jsonb fields, we use converter => (sortby jsonb.export.vendor.configName)
-      // otherwise we use root.get(jsonPath) => (sortby name)
-      Expression<String> field = fieldNamesSize > 1 ?
-        jsonbNodeConverter.convertToExpression(root, jsonPath, builder) : root.get(jsonPath);
+      Expression<String> field = fieldNamesSize > 1
+        ? jsonbNodeConverter.convertToExpression(root, jsonPath, builder) // this case is for inner jsonb fields
+        : root.get(jsonPath); // this case is for root fields
 
       orders.add(getOrder(field, modifiers));
     }
