@@ -13,16 +13,18 @@ import java.util.List;
 
 import org.z3950.zing.cql.CQLTermNode;
 
-public class JsonbNodeToPredicateConverter {
+public class JsonbNodeConverter {
 
   public static final String JSONB_EXTRACT_PATH_TEXT_FUNC = "jsonb_extract_path_text";
 
-  public Predicate convert(CQLTermNode node, CriteriaBuilder cb, Root<?> root) {
-    List<String> fieldNames = getFieldNames(node.getIndex());
+  public Expression<String> convertToExpression(Root<?> root, String jsonPath, CriteriaBuilder cb){
+    List<String> fieldNames = getFieldNames(jsonPath);
     int fieldsNumber = fieldNames.size();
+
     if (fieldsNumber > 0) {
       String rootFieldName = fieldNames.get(0);
       Expression<String> expression = cb.function(JSONB_EXTRACT_PATH_TEXT_FUNC, String.class, root.<String>get(rootFieldName));
+
       if (fieldsNumber == 2) {
         expression = cb.function(JSONB_EXTRACT_PATH_TEXT_FUNC, String.class, root.<String>get(rootFieldName),
           cb.literal(fieldNames.get(1)));
@@ -33,17 +35,24 @@ public class JsonbNodeToPredicateConverter {
         expression = cb.function(JSONB_EXTRACT_PATH_TEXT_FUNC, String.class, root.<String>get(rootFieldName),
           cb.literal(fieldNames.get(1)), cb.literal(fieldNames.get(2)), cb.literal(fieldNames.get(3)));
       }
-      return expression.in(node.getTerm());
+
+    return expression;
     } else {
-      throw new IllegalArgumentException(String.format("Wrong JSONB criteria: %s", node.getIndex()));
+      throw new IllegalArgumentException(String.format("Wrong JSONB criteria: %s", jsonPath));
     }
   }
 
+  public Predicate convertToPredicate(CQLTermNode node, CriteriaBuilder cb, Root<?> root) {
+    String jsonPath = node.getIndex();
+    Expression<String> expression = convertToExpression(root, jsonPath, cb);
+    return expression.in(node.getTerm());
+  }
+
   @NotNull
-  private List<String> getFieldNames(String jsonPath) {
+  public List<String> getFieldNames(String jsonPath) {
     return Arrays.stream(jsonPath.split("\\."))
-                                    .filter(fieldName -> !CRITERIA_JSONB_START.equals(fieldName))
-                                    .toList();
+      .filter(fieldName -> !CRITERIA_JSONB_START.equals(fieldName))
+      .toList();
   }
 
 }
