@@ -49,7 +49,7 @@ public class JsonbNodeConverter {
   }
 
   @NotNull
-  public static List<String> getFieldNames(String jsonPath) {
+  public List<String> getFieldNames(String jsonPath) {
     return Arrays.stream(jsonPath.split("\\."))
       .filter(fieldName -> !CRITERIA_JSONB_START.equals(fieldName))
       .toList();
