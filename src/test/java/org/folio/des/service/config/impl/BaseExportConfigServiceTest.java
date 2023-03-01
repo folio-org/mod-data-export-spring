@@ -16,7 +16,7 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.domain.dto.BursarFeeFines;
+// import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -83,10 +83,10 @@ class BaseExportConfigServiceTest {
   void addConfig() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    parameters.setBursarFeeFines(bursarFeeFines);
+    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    // bursarFeeFines.setDaysOutstanding(9);
+    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+    // parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);

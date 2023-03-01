@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
-import org.folio.des.domain.dto.BursarFeeFines;
+// import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -153,10 +153,10 @@ class EdifactExportConfigToModelConfigConverterTest {
     ediConfig.setId(expId);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
 
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    parameters.setBursarFeeFines(bursarFeeFines);
+    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    // bursarFeeFines.setDaysOutstanding(9);
+    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+    // parameters.setBursarFeeFines(bursarFeeFines);
 
     ediConfig.exportTypeSpecificParameters(parameters);
 

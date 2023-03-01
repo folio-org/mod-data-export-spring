@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.ServiceConfiguration;
-import org.folio.des.domain.dto.BursarFeeFines;
+// import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -89,10 +89,10 @@ class ExportTypeBasedConfigManagerTest {
     ExportConfig bursarExportConfig = new ExportConfig();
     bursarExportConfig.setType(exportType);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    parameters.setBursarFeeFines(bursarFeeFines);
+    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    // bursarFeeFines.setDaysOutstanding(9);
+    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+    // parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig, exportName);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);

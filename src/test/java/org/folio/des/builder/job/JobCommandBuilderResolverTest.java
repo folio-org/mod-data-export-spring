@@ -13,7 +13,6 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.domain.dto.AuthorityControlExportConfig;
-import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.EHoldingsExportConfig;
 import org.folio.des.domain.dto.EntityType;
 import org.folio.des.domain.dto.ExportType;
@@ -84,11 +83,11 @@ class JobCommandBuilderResolverTest {
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     EHoldingsExportConfig eHoldingsExportConfig = new EHoldingsExportConfig();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
     AuthorityControlExportConfig authorityControlExportConfig = new AuthorityControlExportConfig();
 
-    bursarFeeFines.setDaysOutstanding(1);
-    bursarFeeFines.addPatronGroupsItem("Test");
+    // bursarFeeFines.setDaysOutstanding(1);
+    // bursarFeeFines.addPatronGroupsItem("Test");
 
     vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
     vendorEdiOrdersExportConfig.setConfigName("TestConfig");
@@ -103,7 +102,7 @@ class JobCommandBuilderResolverTest {
     authorityControlExportConfig.toDate(LocalDate.now());
 
     exportTypeSpecificParameters.setQuery("TestQuery");
-    exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
+    // exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
     exportTypeSpecificParameters.seteHoldingsExportConfig(eHoldingsExportConfig);
     exportTypeSpecificParameters.setAuthorityControlExportConfig(authorityControlExportConfig);

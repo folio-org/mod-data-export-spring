@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.folio.des.config.JacksonConfiguration;
-import org.folio.des.domain.dto.BursarFeeFines;
+// import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -31,10 +31,10 @@ class DefaultExportConfigToModelConfigConverterTest {
     ExportConfig bursarExportConfig = new ExportConfig();
     bursarExportConfig.setId(expId);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    parameters.setBursarFeeFines(bursarFeeFines);
+    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    // bursarFeeFines.setDaysOutstanding(9);
+    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+    // parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
 
     ModelConfiguration actConfig = converter.convert(bursarExportConfig);
@@ -59,10 +59,10 @@ class DefaultExportConfigToModelConfigConverterTest {
     bursarExportConfig.setType(exportType);
     bursarExportConfig.setId(expId);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    parameters.setBursarFeeFines(bursarFeeFines);
+    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
+    // bursarFeeFines.setDaysOutstanding(9);
+    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+    // parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
 
     ModelConfiguration actConfig = converter.convert(bursarExportConfig);
