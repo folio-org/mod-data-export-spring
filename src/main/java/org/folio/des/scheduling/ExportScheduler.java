@@ -8,13 +8,15 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -22,9 +24,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 @Lazy(false)
 @Component
@@ -54,10 +53,10 @@ public class ExportScheduler implements SchedulingConfigurer {
       var current = new Date();
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
-        contextHelper.initScope(scheduledJob.getTenant());
-        Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
-        log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
-        contextHelper.finishContext();
+        try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(scheduledJob.getTenant()))) {
+          Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
+          log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
+        }
       }
 
     }, trigger);
@@ -95,9 +94,9 @@ public class ExportScheduler implements SchedulingConfigurer {
     var current = new Date();
     log.info("deleteOldJobs attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
     if (contextHelper.isModuleRegistered() && nonNull(scheduledJob.getTenant())) {
-      contextHelper.initScope(scheduledJob.getTenant());
-      jobService.deleteOldJobs();
-      contextHelper.finishContext();
+      try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(scheduledJob.getTenant()))) {
+        jobService.deleteOldJobs();
+      }
       log.info("deleteOldJobs executed for jobId: {} at: {}", scheduledJob.getId(), current);
     }
   }

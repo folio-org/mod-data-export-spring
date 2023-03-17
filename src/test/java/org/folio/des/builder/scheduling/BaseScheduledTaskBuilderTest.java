@@ -4,7 +4,6 @@ import static org.folio.des.support.BaseTest.TENANT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -15,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -24,6 +22,7 @@ import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.service.JobService;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -41,6 +40,7 @@ class BaseScheduledTaskBuilderTest {
   private FolioExecutionContextHelper contextHelperMock;
   @Autowired
   private JobService jobServiceMock;
+  private FolioExecutionContext folioExecutionContext = new FolioExecutionContext() {};
 
   @AfterEach
   void afterEach() {
@@ -57,8 +57,8 @@ class BaseScheduledTaskBuilderTest {
     ediConfig.setTenant(TENANT);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
-    doNothing().when(contextHelperMock).initScope(TENANT);
-    doNothing().when(contextHelperMock).finishContext();
+    folioExecutionContext = new FolioExecutionContext() {};
+    doReturn(folioExecutionContext).when(contextHelperMock).getFolioExecutionContext(TENANT);
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -75,8 +75,7 @@ class BaseScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsertAndSendToKafka(any(), eq(true));
-    verify(contextHelperMock).initScope(TENANT);
-    verify(contextHelperMock).finishContext();
+    verify(contextHelperMock).getFolioExecutionContext(TENANT);
   }
 
   @Test
@@ -95,8 +94,7 @@ class BaseScheduledTaskBuilderTest {
     ediConfig.exportTypeSpecificParameters(parameters);
 
     doReturn(true).when(contextHelperMock).isModuleRegistered();
-    doNothing().when(contextHelperMock).initScope(TENANT);
-    doNothing().when(contextHelperMock).finishContext();
+    doReturn(folioExecutionContext).when(contextHelperMock).getFolioExecutionContext(TENANT);
 
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
@@ -113,8 +111,7 @@ class BaseScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsertAndSendToKafka(any(), eq(true));
-    verify(contextHelperMock).initScope(TENANT);
-    verify(contextHelperMock).finishContext();
+    verify(contextHelperMock).getFolioExecutionContext(TENANT);
   }
 
   public static class MockSpringContext {

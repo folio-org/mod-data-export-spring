@@ -1,5 +1,7 @@
 package org.folio.des.service;
 
+import static java.util.Objects.nonNull;
+
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
@@ -7,17 +9,20 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.de.entity.Job;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.dto.JobStatus;
-import org.folio.de.entity.Job;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.scheduling.ExportScheduler;
+import org.folio.spring.DefaultFolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.util.Objects.nonNull;
 
 @Service
 @Log4j2
@@ -37,6 +42,7 @@ public class JobUpdatesService {
     JOB_STATUSES.put(BatchStatus.UNKNOWN, null);
   }
 
+  private final FolioModuleMetadata folioModuleMetadata;
   private final JobDataExportRepository repository;
   private final ExportScheduler exportScheduler;
 
@@ -46,21 +52,25 @@ public class JobUpdatesService {
       containerFactory = "kafkaListenerContainerFactory",
       topicPattern = "${application.kafka.topic-pattern}",
       groupId = "${application.kafka.group-id}")
-  public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
-    log.info("Received {}.", jobExecutionUpdate);
+  public void receiveJobExecutionUpdate(@Payload Job jobExecutionUpdate, @Headers Map<String, Object> messageHeaders) {
+    var defaultFolioExecutionContext = DefaultFolioExecutionContext.fromMessageHeaders(folioModuleMetadata, messageHeaders);
 
-    Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
-    if (jobOptional.isEmpty()) {
-      log.error("Update for unknown job {}.", jobExecutionUpdate.getId());
-      return;
-    }
-    var job = jobOptional.get();
+    try (var context = new FolioExecutionContextSetter(defaultFolioExecutionContext)) {
+      log.info("Received {}.", jobExecutionUpdate);
 
-    if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
-      job.setUpdatedDate(new Date());
-      log.info("Updating {}.", job);
-      job = repository.save(job);
-      log.info("Updated {}.", job);
+      Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
+      if (jobOptional.isEmpty()) {
+        log.error("Update for unknown job {}.", jobExecutionUpdate.getId());
+        return;
+      }
+      var job = jobOptional.get();
+
+      if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
+        job.setUpdatedDate(new Date());
+        log.info("Updating {}.", job);
+        job = repository.save(job);
+        log.info("Updated {}.", job);
+      }
     }
   }
 

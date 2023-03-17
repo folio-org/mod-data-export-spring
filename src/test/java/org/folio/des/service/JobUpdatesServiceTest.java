@@ -1,16 +1,27 @@
 package org.folio.des.service;
 
+import static org.folio.des.support.BaseTest.TENANT;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
+import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobStatus;
-import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.Progress;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.repository.JobDataExportRepository;
+import org.folio.spring.integration.XOkapiHeaders;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,14 +31,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class JobUpdatesServiceTest  {
 
@@ -35,6 +38,17 @@ class JobUpdatesServiceTest  {
   private JobDataExportRepository repository;
   @InjectMocks
   private JobUpdatesService updatesService;
+
+  protected Map<String, Object> okapiHeaders;
+
+  @BeforeEach
+  void setUp() {
+    okapiHeaders = new HashMap<>();
+    okapiHeaders.put(XOkapiHeaders.TENANT, TENANT);
+    okapiHeaders.put(XOkapiHeaders.TOKEN, "TOKEN");
+    okapiHeaders.put(XOkapiHeaders.URL, "URL");
+    okapiHeaders.put(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
+  }
 
   @Test
   @DisplayName("Update job with change")
@@ -71,7 +85,7 @@ class JobUpdatesServiceTest  {
     doReturn(Optional.of(job)).when(repository).findById(id);
     doReturn(job).when(repository).save(any());
 
-    updatesService.receiveJobExecutionUpdate(updatedJob);
+    updatesService.receiveJobExecutionUpdate(updatedJob, okapiHeaders);
 
     verify(repository, times(1)).save(any());
   }
@@ -104,7 +118,7 @@ class JobUpdatesServiceTest  {
     doReturn(Optional.of(job)).when(repository).findById(id);
     doReturn(job).when(repository).save(any());
 
-    updatesService.receiveJobExecutionUpdate(updatedJob);
+    updatesService.receiveJobExecutionUpdate(updatedJob, okapiHeaders);
 
     verify(repository, times(1)).save(any());
   }
@@ -145,7 +159,7 @@ class JobUpdatesServiceTest  {
 
     doReturn(Optional.of(job)).when(repository).findById(id);
 
-    updatesService.receiveJobExecutionUpdate(updatedJob);
+    updatesService.receiveJobExecutionUpdate(updatedJob, okapiHeaders);
 
     verify(repository).save(isA(Job.class));
   }
@@ -159,7 +173,7 @@ class JobUpdatesServiceTest  {
 
     doReturn(Optional.empty()).when(repository).findById(id);
 
-    updatesService.receiveJobExecutionUpdate(updatedJob);
+    updatesService.receiveJobExecutionUpdate(updatedJob, okapiHeaders);
 
     verify(repository, never()).save(any());
   }

@@ -1,18 +1,16 @@
 package org.folio.des.builder.scheduling;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Optional;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.service.JobService;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-
-import jakarta.validation.constraints.NotNull;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -31,10 +29,10 @@ public class BaseScheduledTaskBuilder implements ScheduledTaskBuilder {
       var current = new Date();
       log.info("configureTasks attempt to execute at: {}: is module registered: {} ", current, contextHelper.isModuleRegistered());
       if (contextHelper.isModuleRegistered()) {
-        contextHelper.initScope(job.getTenant());
-        Job resultJob = jobService.upsertAndSendToKafka(job, true);
-        log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
-        contextHelper.finishContext();
+        try(var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(job.getTenant()))) {
+          Job resultJob = jobService.upsertAndSendToKafka(job, true);
+          log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
+        }
       }
     };
   }
