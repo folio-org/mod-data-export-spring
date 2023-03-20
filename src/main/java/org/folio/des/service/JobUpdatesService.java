@@ -10,17 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.de.entity.Job;
-import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.scheduling.ExportScheduler;
-import org.folio.spring.DefaultFolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.messaging.handler.annotation.Headers;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,35 +35,25 @@ public class JobUpdatesService {
     JOB_STATUSES.put(BatchStatus.UNKNOWN, null);
   }
 
-  private final FolioModuleMetadata folioModuleMetadata;
   private final JobDataExportRepository repository;
   private final ExportScheduler exportScheduler;
 
   @Transactional
-  @KafkaListener(
-      id = KafkaService.EVENT_LISTENER_ID,
-      containerFactory = "kafkaListenerContainerFactory",
-      topicPattern = "${application.kafka.topic-pattern}",
-      groupId = "${application.kafka.group-id}")
-  public void receiveJobExecutionUpdate(@Payload Job jobExecutionUpdate, @Headers Map<String, Object> messageHeaders) {
-    var defaultFolioExecutionContext = DefaultFolioExecutionContext.fromMessageHeaders(folioModuleMetadata, messageHeaders);
+  public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
+    log.info("Received {}.", jobExecutionUpdate);
 
-    try (var context = new FolioExecutionContextSetter(defaultFolioExecutionContext)) {
-      log.info("Received {}.", jobExecutionUpdate);
+    Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
+    if (jobOptional.isEmpty()) {
+      log.error("Update for unknown job {}.", jobExecutionUpdate.getId());
+      return;
+    }
+    var job = jobOptional.get();
 
-      Optional<Job> jobOptional = repository.findById(jobExecutionUpdate.getId());
-      if (jobOptional.isEmpty()) {
-        log.error("Update for unknown job {}.", jobExecutionUpdate.getId());
-        return;
-      }
-      var job = jobOptional.get();
-
-      if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
-        job.setUpdatedDate(new Date());
-        log.info("Updating {}.", job);
-        job = repository.save(job);
-        log.info("Updated {}.", job);
-      }
+    if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
+      job.setUpdatedDate(new Date());
+      log.info("Updating {}.", job);
+      job = repository.save(job);
+      log.info("Updated {}.", job);
     }
   }
 
@@ -81,7 +64,7 @@ public class JobUpdatesService {
       result = true;
     }
     if (jobExecutionUpdate.getFiles() != null && (job.getFiles() == null || !CollectionUtils.isEqualCollection(
-        jobExecutionUpdate.getFiles(), job.getFiles()))) {
+      jobExecutionUpdate.getFiles(), job.getFiles()))) {
       job.setFiles(jobExecutionUpdate.getFiles());
       result = true;
     }
@@ -107,8 +90,8 @@ public class JobUpdatesService {
       result = true;
     }
     if (jobExecutionUpdate.getErrorDetails() == null &&
-            jobExecutionUpdate.getExportTypeSpecificParameters() != null &&
-            jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig() != null) {
+      jobExecutionUpdate.getExportTypeSpecificParameters() != null &&
+      jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig() != null) {
       job.getExportTypeSpecificParameters().setVendorEdiOrdersExportConfig(jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig());
       result = true;
     }
