@@ -8,8 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.support.BaseTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,15 +49,6 @@ class SecurityManagerServiceTest extends BaseTest {
   private static final String USER_PERMS_RESPONSE =
       "{  \"permissionUsers\": [],\n  \"totalRecords\": 0,\n  \"resultInfo\": {\n    \"totalRecords\": 0,\n    \"facets\": [],\n    \"diagnostics\": []\n  }\n}";
 
-  @BeforeEach
-  void setUp() {
-    contextHelper.initScope(TENANT);
-  }
-
-  @AfterEach
-  void tearDown() {
-    contextHelper.finishContext();
-  }
 
   @Test
   @DisplayName("Update user")
@@ -78,7 +68,9 @@ class SecurityManagerServiceTest extends BaseTest {
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBody(USER_PERMS_RESPONSE)));
 
-    securityManagerService.prepareSystemUser(wireMockServer.baseUrl(), TENANT);
+    try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(TENANT))) {
+      securityManagerService.prepareSystemUser(wireMockServer.baseUrl(), TENANT);
+    }
 
     wireMockServer.verify(
         getRequestedFor(urlEqualTo("/users?query=username%3D%3Ddata-export-system-user")));
