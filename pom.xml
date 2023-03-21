@@ -12,7 +12,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export-spring</artifactId>
   <description>Data Export Spring module</description>
-  <version>2.0.1-SNAPSHOT</version>
+  <version>2.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -31,7 +31,7 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>6.0.0</folio-spring-base.version>
+    <folio-spring-base.version>6.1.0</folio-spring-base.version>
     <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>

@@ -10,6 +10,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
@@ -20,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.EdifactOrdersJobCommandSchedulerBuilder;
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
@@ -34,6 +42,7 @@ import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.scheduling.acquisition.AcqSchedulingProperties;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -43,16 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @SpringBootTest(classes = {EdifactScheduledTaskBuilderTest.MockSpringContext.class})
 class EdifactScheduledTaskBuilderTest {
@@ -71,6 +70,12 @@ class EdifactScheduledTaskBuilderTest {
   @Autowired
   private JobExecutionService jobExecutionService;
 
+  @Autowired
+  private FolioExecutionContextHelper folioExecutionContextHelper;
+
+
+  private FolioExecutionContext folioExecutionContext = new FolioExecutionContext() {};
+
   @AfterEach
   void afterEach() {
     Mockito.reset(contextHelperMock, jobServiceMock);
@@ -88,6 +93,8 @@ class EdifactScheduledTaskBuilderTest {
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
+    doReturn(folioExecutionContext).when(folioExecutionContextHelper).getFolioExecutionContext(any());
+
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
@@ -103,8 +110,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsertAndSendToKafka(any(), eq(false));
-    verify(contextHelperMock).initScope(TENANT);
-    verify(contextHelperMock).finishContext();
+    verify(contextHelperMock).getFolioExecutionContext(TENANT);
   }
 
   @Test
@@ -125,6 +131,8 @@ class EdifactScheduledTaskBuilderTest {
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
+    doReturn(folioExecutionContext).when(folioExecutionContextHelper).getFolioExecutionContext(any());
+
     Job scheduledJob = new Job();
     scheduledJob.setType(ediConfig.getType());
     scheduledJob.setIsSystemSource(true);
@@ -140,8 +148,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsertAndSendToKafka(any(), eq(false));
-    verify(contextHelperMock).initScope(TENANT);
-    verify(contextHelperMock).finishContext();
+    verify(contextHelperMock).getFolioExecutionContext(TENANT);
     verify(edifactOrdersJobCommandSchedulerBuilder, times(0)).buildJobCommand(scheduledJob);
     verify(jobExecutionService, times(0)).sendJobCommand(any());
   }
@@ -164,6 +171,8 @@ class EdifactScheduledTaskBuilderTest {
     doReturn(true).when(contextHelperMock).isModuleRegistered();
     doReturn(true).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
+    doReturn(folioExecutionContext).when(folioExecutionContextHelper).getFolioExecutionContext(any());
+
     Job scheduledJob = new Job();
     scheduledJob.setId(UUID.randomUUID());
     scheduledJob.setType(ediConfig.getType());
@@ -184,8 +193,7 @@ class EdifactScheduledTaskBuilderTest {
     Object actJob = actJobFuture.get();
     service.shutdown();
     verify(jobServiceMock).upsertAndSendToKafka(any(), eq(false));
-    verify(contextHelperMock).initScope(TENANT);
-    verify(contextHelperMock).finishContext();
+    verify(contextHelperMock).getFolioExecutionContext(TENANT);
     verify(edifactOrdersJobCommandSchedulerBuilder, times(1)).buildJobCommand(any(Job.class));
     verify(jobExecutionService, times(1)).sendJobCommand(any());
   }
@@ -241,7 +249,6 @@ class EdifactScheduledTaskBuilderTest {
     }
 
     static class JobParameterDeserializer extends StdDeserializer<JobParameter<?>> {
-
       private static final String VALUE_PARAMETER_PROPERTY = "value";
 
       public JobParameterDeserializer() {
@@ -275,7 +282,8 @@ class EdifactScheduledTaskBuilderTest {
     @Bean
     @Primary
     FolioExecutionContextHelper contextHelperMock() {
-      return mock(FolioExecutionContextHelper.class);
+      var folioExecutionContextHelper = mock(FolioExecutionContextHelper.class);
+      return folioExecutionContextHelper;
     }
     @Bean
     JobService jobServiceMock() {
