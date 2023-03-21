@@ -1,3 +1,10 @@
+## 2023-03-21 v2.0.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v2.0.0...v2.0.1)
+
+### Bug fixes
+* [FOLSPRINGB-95](https://issues.folio.org/browse/FOLSPRINGB-95) non-public beginFolioExecutionContext avoids wrong tenant/user
+
 ## 2023-02-24 v2.0.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.3...v2.0.0)
