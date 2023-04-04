@@ -60,8 +60,11 @@ More details:
 
 #### Short overview
 Before running scheduled task(job) there is check, that module is registered for the Okapi tenant.
+
 Tenant information need to define DB schema for storing information about Job and etc.
-In the post tenant API controller specific user (data-export-system-user) is created for running scheduled export tasks.
+
+In the post tenant API controller specific user (`data-export-system-user`) is created for running scheduled export tasks. Permissions are defined in `src/main/resources/permissions/system-user-permissions.csv`.
+
 Also Okapi headers, system user, tenant information are stored in memory in a FolioExecutionContext.
 
 ### Issue tracker
