@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
+import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -36,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
                   ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
 class BurSarFeesFinesExportConfigServiceTest {
 
   public static final String CONFIG_RESPONSE =

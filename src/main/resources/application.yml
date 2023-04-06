@@ -8,6 +8,10 @@ folio:
     acquisition:
       poolSize: 10
       runOnlyIfModuleRegistered: true
+  quartz:
+    enabled: false
+    schemaName: mod_data_export_spring_quartz
+    changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
   port: 8081
 logging:
@@ -45,6 +49,30 @@ spring:
       continue-on-error: true
   jackson:
     default-property-inclusion: non_null
+  quartz:
+    auto-startup: ${folio.quartz.enabled}
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org.quartz:
+        scheduler:
+          instanceId: AUTO
+        jobStore:
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+          class: org.quartz.impl.jdbcjobstore.JobStoreTX
+          tablePrefix: ${folio.quartz.schemaName}.QRTZ_
+          dataSource: quartz
+          misfireThreshold: 10000
+          isClustered: true
+          clusterCheckinInterval: 15000
+        dataSource:
+          quartz:
+            driver: org.postgresql.Driver
+            provider: hikaricp
+            URL: ${spring.datasource.url}
+            user: ${spring.datasource.username}
+            password: ${spring.datasource.password}
 management:
   endpoints:
     web:
