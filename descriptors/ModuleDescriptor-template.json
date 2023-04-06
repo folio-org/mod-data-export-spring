@@ -288,7 +288,7 @@
         "inventory-storage.material-types.item.get",
         "inventory-storage.service-points.collection.get",
         "organizations-storage.organizations.item.get",
-        "orders.item.get",
+        "orders-storage.po-lines.collection.get",
         "orders-storage.purchase-orders.collection.get"
       ]
     }
