@@ -58,21 +58,13 @@ spring:
       org.quartz:
         scheduler:
           instanceId: AUTO
+          instanceName: ModDataExportSpringScheduler
         jobStore:
           driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
-          class: org.quartz.impl.jdbcjobstore.JobStoreTX
           tablePrefix: ${folio.quartz.schemaName}.QRTZ_
-          dataSource: quartz
           misfireThreshold: 10000
           isClustered: true
           clusterCheckinInterval: 15000
-        dataSource:
-          quartz:
-            driver: org.postgresql.Driver
-            provider: hikaricp
-            URL: ${spring.datasource.url}
-            user: ${spring.datasource.username}
-            password: ${spring.datasource.password}
 management:
   endpoints:
     web:

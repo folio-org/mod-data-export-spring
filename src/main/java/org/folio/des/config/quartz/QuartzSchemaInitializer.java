@@ -34,7 +34,7 @@ public class QuartzSchemaInitializer implements InitializingBean {
   @Override
   public void afterPropertiesSet() throws LiquibaseException {
     if (!quartzEnabled) {
-      log.info("Quartz scheduling is disabled. Schema liquibase initialization is skipped");
+      log.info("Quartz scheduling is disabled. Schema liquibase initialization for quartz is skipped");
       return;
     }
     folioSpringLiquibase.setChangeLog(quartzChangeLog);
