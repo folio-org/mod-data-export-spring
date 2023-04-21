@@ -46,10 +46,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
+import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
 class JobServiceTest {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
   private static final int DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD = 14;
