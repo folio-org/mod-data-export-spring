@@ -26,14 +26,13 @@ public class ExportConfigToEdifactJobDetailConverter implements ExportConfigToJo
     if (exportConfig == null) {
       return null;
     }
-    Job job = createJob(exportConfig);
     JobDetail jobDetail = JobBuilder.newJob(EdifactJob.class)
       //.usingJobData(JOB_PARAM, objectMapper.writeValueAsString(createJob(exportConfig)))
       .usingJobData(TENANT_ID_PARAM, exportConfig.getTenant())
       .usingJobData(EXPORT_CONFIG_ID_PARAM, exportConfig.getId())
       .withIdentity(jobKey)
       .build();
-    return new ScheduledJobDetails(job, jobDetail);
+    return new ScheduledJobDetails(createJob(exportConfig), jobDetail);
   }
 
   private Job createJob(ExportConfig exportConfig) {
