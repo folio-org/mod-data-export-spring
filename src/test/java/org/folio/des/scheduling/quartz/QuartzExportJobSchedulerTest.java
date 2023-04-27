@@ -1,19 +1,30 @@
 package org.folio.des.scheduling.quartz;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
+import org.folio.des.domain.dto.Job;
+import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailsConverter;
+import org.folio.des.scheduling.quartz.job.JobKeyResolver;
+import org.folio.des.scheduling.quartz.job.ScheduledJobDetails;
+import org.folio.des.scheduling.quartz.trigger.ExportTrigger;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +46,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.convert.converter.Converter;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @SpringBootTest(properties = {
@@ -43,15 +57,15 @@ import lombok.extern.log4j.Log4j2;
 class QuartzExportJobSchedulerTest extends BaseTest {
 
   private static final String SCHEDULE_ID = "scheduleId_" + UUID.randomUUID();
-
+  private static final Job job = new Job();
   @Autowired
   private Scheduler scheduler;
   private QuartzExportJobScheduler quartzExportJobScheduler;
 
   @BeforeEach
   void init() {
-    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
-      new TestTriggerConverter(), new TestJobDetailConverter());
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(),
+      new TestJobDetailConverter(), new TestJobKeyResolver());
   }
 
   @AfterEach
@@ -65,7 +79,9 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
-    quartzExportJobScheduler.scheduleExportJob(config);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(config);
+
+    assertThat(jobs, is(List.of(job)));
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -84,7 +100,9 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     // scheduleExportJob with disabled scheduling for existing id should result in job unscheduling
     ExportConfig disabledConfig = buildExportConfig(SCHEDULE_ID, false);
-    quartzExportJobScheduler.scheduleExportJob(disabledConfig);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(disabledConfig);
+
+    assertThat(jobs, is(Collections.emptyList()));
 
     assertFalse(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -101,12 +119,15 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     // scheduleExportJob with enabled scheduling for existing id should result in job rescheduling
     ExportConfig reschedulingConfig = buildExportConfig(SCHEDULE_ID, true);
-    quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
+
+    assertThat(jobs, is(List.of(job)));
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
-    assertEquals(1, schedulerListener.getJobsAddedCount());
+    assertEquals(2, schedulerListener.getJobsAddedCount());
     assertEquals(2, schedulerListener.getJobsScheduledCount());
-    assertEquals(1, schedulerListener.getJobsUnscheduledCount());
+    assertEquals(1, schedulerListener.getJobsDeletedCount());
+    // assertEquals(1, schedulerListener.getJobsUnscheduledCount());
   }
 
   @Test
@@ -114,10 +135,87 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, false);
-    quartzExportJobScheduler.scheduleExportJob(config);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(config);
+
+    assertThat(jobs, is(Collections.emptyList()));
 
     assertFalse(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(0, schedulerListener.getJobsScheduledCount());
+  }
+
+  @Test
+  void testScheduleJobWithMultipleTriggers() throws SchedulerException {
+    int jobTriggersCount = 3;
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(jobTriggersCount),
+      new TestJobDetailConverter(), new TestJobKeyResolver());
+    TestingJobListener jobListener = registerTestingJobListener();
+    TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
+
+    ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(config);
+
+    assertThat(jobs, is(List.of(job)));
+
+    assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
+    assertEquals(1, schedulerListener.getJobsAddedCount());
+    assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
+
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(5, TimeUnit.SECONDS).untilAsserted(
+      () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
+  }
+
+  @Test
+  void testUnscheduleJobWithMultipleTriggers() throws SchedulerException {
+    int jobTriggersCount = 7;
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(jobTriggersCount),
+      new TestJobDetailConverter(), new TestJobKeyResolver());
+    TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
+
+    ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
+    quartzExportJobScheduler.scheduleExportJob(config);
+
+    // scheduleExportJob with disabled scheduling for existing id should result in job unscheduling
+    ExportConfig disabledConfig = buildExportConfig(SCHEDULE_ID, false);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(disabledConfig);
+
+    assertThat(jobs, is(Collections.emptyList()));
+
+    assertFalse(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
+    assertEquals(1, schedulerListener.getJobsAddedCount());
+    assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
+    assertEquals(1, schedulerListener.getJobsDeletedCount());
+  }
+
+  @Test
+  void testRescheduleJobWithMultipleTriggers() throws SchedulerException {
+    int jobTriggersInitialCount = 2;
+    int jobTriggersRescheduleCount = 5;
+    TestTriggerConverter testTriggerConverter = new TestTriggerConverter(jobTriggersInitialCount);
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, testTriggerConverter,
+      new TestJobDetailConverter(), new TestJobKeyResolver());
+    TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
+
+    ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
+    quartzExportJobScheduler.scheduleExportJob(config);
+
+    // scheduleExportJob with enabled scheduling for existing id should result in job rescheduling
+    ExportConfig reschedulingConfig = buildExportConfig(SCHEDULE_ID, true);
+    testTriggerConverter.setTriggerAmount(jobTriggersRescheduleCount);
+    var jobs = quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
+
+    assertThat(jobs, is(List.of(job)));
+
+    assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
+    assertEquals(2, schedulerListener.getJobsAddedCount());
+    assertEquals(jobTriggersInitialCount + jobTriggersRescheduleCount, schedulerListener.getJobsScheduledCount());
+    assertEquals(1, schedulerListener.getJobsDeletedCount());
+    // assertEquals(1, schedulerListener.getJobsUnscheduledCount());
+  }
+
+  @Test
+  void testScheduleNullExportConfig() {
+    var jobs = quartzExportJobScheduler.scheduleExportJob(null);
+    assertThat(jobs, is(Collections.emptyList()));
   }
 
   private ExportConfig buildExportConfig(String configId, boolean isEnabled) {
@@ -140,27 +238,49 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     return jobListener;
   }
 
-  private static class TestTriggerConverter implements Converter<ExportConfig, Trigger> {
+  @AllArgsConstructor
+  @NoArgsConstructor
+  private static class TestTriggerConverter implements Converter<ExportConfig, ExportTrigger> {
+    @Setter
+    private int triggerAmount = 1;
     @Override
-    public Trigger convert(ExportConfig exportConfig) {
-      return TriggerBuilder
+    public ExportTrigger convert(ExportConfig exportConfig) {
+      Set<Trigger> triggers = new HashSet<>();
+      for (int i = 0; i < triggerAmount; i++) {
+        triggers.add(TriggerBuilder
+          .newTrigger()
+          .withIdentity(UUID.randomUUID().toString())
+          .withSchedule(SimpleScheduleBuilder
+            .simpleSchedule()
+            .withRepeatCount(0))
+          .startAt(Date.from(Instant.now().plus(2, ChronoUnit.SECONDS)))
+          .build());
+      }
+     /* Trigger trigger = TriggerBuilder
         .newTrigger()
-        .withIdentity(exportConfig.getId())
+        .withIdentity(UUID.randomUUID().toString())
         .withSchedule(SimpleScheduleBuilder
           .simpleSchedule()
           .withRepeatCount(0))
         .startAt(Date.from(Instant.now().plus(2, ChronoUnit.SECONDS)))
-        .build();
+        .build();*/
+      return new ExportTrigger(exportConfig.getSchedulePeriod() == SchedulePeriodEnum.NONE, triggers);
+    }
+  }
+  private static class TestJobDetailConverter implements ExportConfigToJobDetailsConverter {
+    @Override
+    public ScheduledJobDetails convert(ExportConfig exportConfig, JobKey jobKey) {
+      return new ScheduledJobDetails(job, JobBuilder
+        .newJob(DraftJob.class)
+        .withIdentity(jobKey)
+        .build());
     }
   }
 
-  private static class TestJobDetailConverter implements Converter<ExportConfig, JobDetail> {
+  private static class TestJobKeyResolver implements JobKeyResolver {
     @Override
-    public JobDetail convert(ExportConfig exportConfig) {
-      return JobBuilder
-        .newJob(DraftJob.class)
-        .withIdentity(exportConfig.getId())
-        .build();
+    public JobKey resolve(ExportConfig exportConfig) {
+      return JobKey.jobKey(exportConfig.getId());
     }
   }
 
