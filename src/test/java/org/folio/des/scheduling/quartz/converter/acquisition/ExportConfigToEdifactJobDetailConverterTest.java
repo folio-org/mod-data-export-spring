@@ -10,12 +10,9 @@ import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
-import org.folio.des.scheduling.quartz.job.ScheduledJobDetails;
 import org.junit.jupiter.api.Test;
-import org.quartz.JobDetail;
 import org.quartz.JobKey;
 
 class ExportConfigToEdifactJobDetailConverterTest {
@@ -34,17 +31,10 @@ class ExportConfigToEdifactJobDetailConverterTest {
   @Test
   void testConvertExportConfigToJobDetailSuccessful() {
     ExportConfig exportConfig = buildExportConfig();
-    ScheduledJobDetails scheduledJobDetails = converter.convert(exportConfig, JobKey.jobKey(JOB_ID));
+    var jobDetail = converter.convert(exportConfig, JobKey.jobKey(JOB_ID));
 
-    assertNotNull(scheduledJobDetails);
-
-    Job job = scheduledJobDetails.job();
-    validateJob(job, exportConfig);
-
-    JobDetail jobDetail = scheduledJobDetails.jobDetail();
     assertNotNull(jobDetail);
     assertEquals(JOB_ID, jobDetail.getKey().getName());
-    //assertEquals(JOB_STRING_VALUE, jobDetail.getJobDataMap().get("job"));
     assertEquals(TENANT, jobDetail.getJobDataMap().get("tenantId"));
     assertEquals(EXPORT_CONFIG_ID, jobDetail.getJobDataMap().get("exportConfigId"));
   }
@@ -59,14 +49,5 @@ class ExportConfigToEdifactJobDetailConverterTest {
           .ediSchedule(new EdiSchedule()
             .scheduleParameters(new ScheduleParameters().id(UUID.fromString(SCHEDULE_ID))))));
     return exportConfig;
-  }
-
-  private void validateJob(Job job, ExportConfig exportConfig) {
-    assertNotNull(job);
-    assertNull(job.getId());
-    assertEquals(EXPORT_TYPE, job.getType());
-    assertEquals(TENANT, job.getTenant());
-    assertEquals(true, job.getIsSystemSource());
-    assertEquals(exportConfig.getExportTypeSpecificParameters(), job.getExportTypeSpecificParameters());
   }
 }

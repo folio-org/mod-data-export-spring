@@ -21,9 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
 import org.folio.des.domain.dto.Job;
-import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailsConverter;
+import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverter;
 import org.folio.des.scheduling.quartz.job.JobKeyResolver;
-import org.folio.des.scheduling.quartz.job.ScheduledJobDetails;
 import org.folio.des.scheduling.quartz.trigger.ExportTrigger;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.AfterEach;
@@ -39,7 +38,6 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
 import org.quartz.listeners.JobListenerSupport;
 import org.quartz.listeners.SchedulerListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +79,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
     var jobs = quartzExportJobScheduler.scheduleExportJob(config);
 
-    assertThat(jobs, is(List.of(job)));
+    assertThat(jobs, is(Collections.emptyList()));
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -121,13 +119,12 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     ExportConfig reschedulingConfig = buildExportConfig(SCHEDULE_ID, true);
     var jobs = quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
 
-    assertThat(jobs, is(List.of(job)));
+    assertThat(jobs, is(Collections.emptyList()));
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(2, schedulerListener.getJobsAddedCount());
     assertEquals(2, schedulerListener.getJobsScheduledCount());
     assertEquals(1, schedulerListener.getJobsDeletedCount());
-    // assertEquals(1, schedulerListener.getJobsUnscheduledCount());
   }
 
   @Test
@@ -154,7 +151,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
     var jobs = quartzExportJobScheduler.scheduleExportJob(config);
 
-    assertThat(jobs, is(List.of(job)));
+    assertThat(jobs, is(Collections.emptyList()));
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -203,7 +200,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     testTriggerConverter.setTriggerAmount(jobTriggersRescheduleCount);
     var jobs = quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
 
-    assertThat(jobs, is(List.of(job)));
+    assertThat(jobs, is(Collections.emptyList()));
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(2, schedulerListener.getJobsAddedCount());
@@ -242,6 +239,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   private static class TestTriggerConverter implements Converter<ExportConfig, ExportTrigger> {
     @Setter
     private int triggerAmount = 1;
+
     @Override
     public ExportTrigger convert(ExportConfig exportConfig) {
       Set<Trigger> triggers = new HashSet<>();
@@ -258,13 +256,13 @@ class QuartzExportJobSchedulerTest extends BaseTest {
       return new ExportTrigger(exportConfig.getSchedulePeriod() == SchedulePeriodEnum.NONE, triggers);
     }
   }
-  private static class TestJobDetailConverter implements ExportConfigToJobDetailsConverter {
+
+  private static class TestJobDetailConverter implements ExportConfigToJobDetailConverter {
     @Override
-    public ScheduledJobDetails convert(ExportConfig exportConfig, JobKey jobKey) {
-      return new ScheduledJobDetails(job, JobBuilder
-        .newJob(DraftJob.class)
+    public JobDetail convert(ExportConfig exportConfig, JobKey jobKey) {
+      return JobBuilder.newJob(DraftJob.class)
         .withIdentity(jobKey)
-        .build());
+        .build();
     }
   }
 
