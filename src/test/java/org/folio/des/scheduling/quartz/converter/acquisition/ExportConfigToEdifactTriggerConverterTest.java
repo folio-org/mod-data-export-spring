@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 
 class ExportConfigToEdifactTriggerConverterTest {
   private static final String ACC_TIME = "17:08:39";
+  private static final String TENANT = "some_tenant";
+  private static final String TRIGGER_GROUP = TENANT + "_" + "edifactOrdersExport";
   private final EdifactOrdersScheduledParamsValidator scheduledParamsValidator = new EdifactOrdersScheduledParamsValidator();
   private final EdifactOrdersExportParametersValidator exportParamsValidator = new EdifactOrdersExportParametersValidator(scheduledParamsValidator);
   private final ScheduleParametersToTriggerConverter scheduleParamsToTriggerConverter = new ScheduleParametersToTriggerConverterImpl();
@@ -44,7 +46,7 @@ class ExportConfigToEdifactTriggerConverterTest {
     var triggers = exportTrigger.triggers();
     assertNotNull(triggers);
     assertEquals(1, triggers.size());
-    assertEquals("edifact_orders_export", triggers.iterator().next().getKey().getGroup());
+    assertEquals(TRIGGER_GROUP, triggers.iterator().next().getKey().getGroup());
   }
 
   @Test
@@ -131,6 +133,7 @@ class ExportConfigToEdifactTriggerConverterTest {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(expId);
     exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    exportConfig.setTenant(TENANT);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     EdiFtp ediFtp = new EdiFtp();

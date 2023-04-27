@@ -24,9 +24,9 @@ import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
@@ -45,7 +45,7 @@ class EdifactJobTest {
   private FolioExecutionContextHelper contextHelper;
   @Mock
   private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
-  //private ObjectMapper objectMapper = new ObjectMapper();
+  @InjectMocks
   private EdifactJob edifactJob;
   @Mock
   private JobExecutionContext jobExecutionContext;
@@ -54,12 +54,6 @@ class EdifactJobTest {
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";
   private static final ExportType EXPORT_TYPE = ExportType.EDIFACT_ORDERS_EXPORT;
-
-  @BeforeEach
-  void init() {
-    edifactJob = new EdifactJob(exportTypeBasedConfigManager, jobExecutionService, jobService,
-      jobSchedulerCommandBuilder, contextHelper);
-  }
 
   @Test
   void testExecuteSuccessful() {
@@ -91,21 +85,6 @@ class EdifactJobTest {
     verify(jobExecutionService, times(0)).sendJobCommand(any());
   }
 
-
-  /*@Test
-  void testExecuteFailureWhenNoJobPassed() {
-    when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetailWithNoJobParam());
-    verifyExceptionThrownAndJobNotExecuted(IllegalArgumentException.class,
-      "'job' param is missing in the jobExecutionContext", jobExecutionContext);
-  }
-
-  @Test
-  void testExecuteFailureWhenJobWithoutTenantIdPassed() {
-    when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetailWithJobParamWithoutTenant());
-    verifyExceptionThrownAndJobNotExecuted(IllegalArgumentException.class,
-      "'job' param is missing a required 'tenant' field", jobExecutionContext);
-  }*/
-
   @Test
   void testExecuteFailureWhenNoTenantIdPassed() {
     JobDetail jobDetail = getJobDetail();
@@ -127,16 +106,9 @@ class EdifactJobTest {
       "'exportConfigId' param is missing in the jobExecutionContext", jobExecutionContext);
   }
 
-  /*@Test
-  void testExecuteFailureWhenInvalidJobParamPassed() {
-    when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetailWithInvalidJobParam());
-    verifyExceptionThrownAndJobNotExecuted(IllegalArgumentException.class,
-      "Unable to map passed 'job' parameter to Job object", jobExecutionContext);
-  }*/
-
   private void verifyExceptionThrownAndJobNotExecuted(Class exceptionClass, String exceptionMessage,
                                                       JobExecutionContext jobExecutionContext) {
-    Throwable ex = assertThrows(exceptionClass,  () -> edifactJob.execute(jobExecutionContext));
+    Throwable ex = assertThrows(exceptionClass, () -> edifactJob.execute(jobExecutionContext));
     assertEquals(exceptionMessage, ex.getMessage());
     verify(jobService, times(0)).upsertAndSendToKafka(any(), anyBoolean());
     verify(jobSchedulerCommandBuilder, times(0)).buildJobCommand(any());
@@ -145,58 +117,21 @@ class EdifactJobTest {
 
   private JobDetail getJobDetail() {
     var jobDetail = new JobDetailImpl();
-    /*jobDetail.getJobDataMap().put("job", """
-       {
-      	"tenant": "some_test_tenant",
-      	"type": "EDIFACT_ORDERS_EXPORT"
-      }""");*/
     var jobDataMap = jobDetail.getJobDataMap();
     jobDataMap.put("tenantId", TENANT_ID);
     jobDataMap.put("exportConfigId", EXPORT_CONFIG_ID);
     return jobDetail;
   }
 
-  private JobDetail getJobDetailWithNoJobParam() {
-    return new JobDetailImpl();
-  }
-
-  /*private JobDetail getJobDetailWithNoTenantIdParam() {
-    JobDetail jobDetail = new JobDetailImpl();
-    jobDetail.getJobDataMap().put("exportConfigId", EXPORT_CONFIG_ID);
-    return jobDetail;
-  }
-
-  private JobDetail getJobDetailWithNoExportConfigIdParam() {
-    JobDetail jobDetail = new JobDetailImpl();
-    jobDetail.getJobDataMap().put("tenantId", TENANT_ID);
-    return jobDetail;
-  }*/
-
-  private JobDetail getJobDetailWithJobParamWithoutTenant() {
-    JobDetail jobDetail = new JobDetailImpl();
-    jobDetail.getJobDataMap().put("job", """
-       {
-      	"type": "EDIFACT_ORDERS_EXPORT"
-      }""");
-    return jobDetail;
-  }
-
-  private JobDetail getJobDetailWithInvalidJobParam() {
-    JobDetail jobDetail = new JobDetailImpl();
-    jobDetail.getJobDataMap().put("job", "some job");
-    return jobDetail;
-  }
-
-  private ExportConfig getExportConfig(){
-      //ExportTypeSpecificParameters params = new ExportTypeSpecificParameters().vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig().)
-      ExportConfig exportConfig = new ExportConfig()
-        .id(EXPORT_CONFIG_ID)
-        .type(EXPORT_TYPE)
-        .tenant(TENANT_ID)
-        .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
-          .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
-            .ediSchedule(new EdiSchedule()
-              .scheduleParameters(new ScheduleParameters().id(UUID.randomUUID())))));
-      return exportConfig;
+  private ExportConfig getExportConfig() {
+    ExportConfig exportConfig = new ExportConfig()
+      .id(EXPORT_CONFIG_ID)
+      .type(EXPORT_TYPE)
+      .tenant(TENANT_ID)
+      .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
+        .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
+          .ediSchedule(new EdiSchedule()
+            .scheduleParameters(new ScheduleParameters().id(UUID.randomUUID())))));
+    return exportConfig;
   }
 }

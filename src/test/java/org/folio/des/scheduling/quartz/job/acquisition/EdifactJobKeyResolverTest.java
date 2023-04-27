@@ -21,14 +21,14 @@ class EdifactJobKeyResolverTest {
   private static final String SCHEDULE_ID = "8d9626bb-b507-4aeb-a115-8b3d26bbc221";
   private static final ExportType EXPORT_TYPE = ExportType.EDIFACT_ORDERS_EXPORT;
   private static final String TENANT = "some_test_tenant";
-  private static final String EDIFACT_ORDERS_EXPORT = "edifact_orders_export";
+  private static final String EDIFACT_ORDERS_EXPORT_JOB_GROUP = TENANT + "_" + "edifactOrdersExport";
   private final EdifactJobKeyResolver edifactJobKeyResolver = new EdifactJobKeyResolver();
 
   @Test
   void testResolveReturnsKeyFromScheduleId() {
     JobKey jobKey = edifactJobKeyResolver.resolve(buildExportConfig());
     assertNotNull(jobKey);
-    assertEquals(JobKey.jobKey(SCHEDULE_ID, EDIFACT_ORDERS_EXPORT), jobKey);
+    assertEquals(JobKey.jobKey(SCHEDULE_ID, EDIFACT_ORDERS_EXPORT_JOB_GROUP), jobKey);
   }
 
   @Test
@@ -41,7 +41,7 @@ class EdifactJobKeyResolverTest {
     JobKey jobKey = edifactJobKeyResolver.resolve(exportConfig);
 
     assertNotNull(jobKey);
-    assertEquals(JobKey.jobKey(EXPORT_CONFIG_ID, EDIFACT_ORDERS_EXPORT), jobKey);
+    assertEquals(JobKey.jobKey(EXPORT_CONFIG_ID, EDIFACT_ORDERS_EXPORT_JOB_GROUP), jobKey);
   }
 
   @Test

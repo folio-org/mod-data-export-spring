@@ -209,7 +209,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(2, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersInitialCount + jobTriggersRescheduleCount, schedulerListener.getJobsScheduledCount());
     assertEquals(1, schedulerListener.getJobsDeletedCount());
-    // assertEquals(1, schedulerListener.getJobsUnscheduledCount());
   }
 
   @Test
@@ -256,14 +255,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
           .startAt(Date.from(Instant.now().plus(2, ChronoUnit.SECONDS)))
           .build());
       }
-     /* Trigger trigger = TriggerBuilder
-        .newTrigger()
-        .withIdentity(UUID.randomUUID().toString())
-        .withSchedule(SimpleScheduleBuilder
-          .simpleSchedule()
-          .withRepeatCount(0))
-        .startAt(Date.from(Instant.now().plus(2, ChronoUnit.SECONDS)))
-        .build();*/
       return new ExportTrigger(exportConfig.getSchedulePeriod() == SchedulePeriodEnum.NONE, triggers);
     }
   }
@@ -313,17 +304,11 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   private static class TestingSchedulerListener extends SchedulerListenerSupport {
     private final AtomicInteger jobsAddedCount = new AtomicInteger();
     private final AtomicInteger jobsDeletedCount = new AtomicInteger();
-    private final AtomicInteger jobsUnscheduledCount = new AtomicInteger();
     private final AtomicInteger jobsScheduledCount = new AtomicInteger();
 
     @Override
     public void jobDeleted(JobKey jobKey) {
       jobsDeletedCount.incrementAndGet();
-    }
-
-    @Override
-    public void jobUnscheduled(TriggerKey triggerKey) {
-      jobsUnscheduledCount.incrementAndGet();
     }
 
     @Override
@@ -342,10 +327,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     public int getJobsDeletedCount() {
       return jobsDeletedCount.get();
-    }
-
-    public int getJobsUnscheduledCount() {
-      return jobsUnscheduledCount.get();
     }
 
     public int getJobsScheduledCount() {

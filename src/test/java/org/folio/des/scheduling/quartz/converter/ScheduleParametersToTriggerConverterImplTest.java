@@ -81,8 +81,6 @@ class ScheduleParametersToTriggerConverterImplTest {
     int scheduleFrequency = 13;
     ZonedDateTime expectedStartDateTime = ZonedDateTime.of(LocalDate.now(ASIA_SHANGHAI_ZONE_ID),
       LocalTime.of(16, 40, 59), ASIA_SHANGHAI_ZONE_ID);
-    /*ZonedDateTime expectedSecondFireTime = expectedStartDateTime.plusDays(scheduleFrequency);
-    ZonedDateTime expectedThirdFireTime = expectedSecondFireTime.plusDays(scheduleFrequency);*/
 
     ScheduleParameters scheduleParameters = new ScheduleParameters()
       .id(UUID.randomUUID())
@@ -97,7 +95,6 @@ class ScheduleParametersToTriggerConverterImplTest {
 
     var trigger = triggers.iterator().next();
     validateTriggerWithFirstFirings(trigger, expectedStartDateTime, ChronoUnit.DAYS, scheduleFrequency);
-    //validateTriggerWithFirstFirings(trigger, expectedStartDateTime, expectedSecondFireTime, expectedThirdFireTime);
   }
 
   @Test
@@ -106,9 +103,6 @@ class ScheduleParametersToTriggerConverterImplTest {
     ZonedDateTime expectedStartDateTime = ZonedDateTime.of(
       LocalDate.now(ASIA_SHANGHAI_ZONE_ID).with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY)),
       LocalTime.of(6, 30, 0), ASIA_SHANGHAI_ZONE_ID);
-    System.out.println(expectedStartDateTime);
-    /*ZonedDateTime expectedSecondFireTime = expectedStartDateTime.plusWeeks(scheduleFrequency);
-    ZonedDateTime expectedThirdFireTime = expectedSecondFireTime.plusWeeks(scheduleFrequency);*/
 
     ScheduleParameters scheduleParameters = new ScheduleParameters()
       .id(UUID.randomUUID())
@@ -123,12 +117,11 @@ class ScheduleParametersToTriggerConverterImplTest {
     assertEquals(1, triggers.size());
 
     var trigger = triggers.iterator().next();
-    //validateTriggerWithFirstFirings(trigger, expectedStartDateTime, expectedSecondFireTime, expectedThirdFireTime);
     validateTriggerWithFirstFirings(trigger, expectedStartDateTime, ChronoUnit.WEEKS, scheduleFrequency);
   }
 
   @Test
-  void  testConvertToWeeklyTriggerForSeveralDays() {
+  void testConvertToWeeklyTriggerForSeveralDays() {
     int scheduleFrequency = 2;
     ZonedDateTime expectedStartDateTimeTrigger1 = ZonedDateTime.of(
       LocalDate.now(ASIA_SHANGHAI_ZONE_ID).with(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY)),
@@ -139,10 +132,6 @@ class ScheduleParametersToTriggerConverterImplTest {
     ZonedDateTime expectedStartDateTimeTrigger3 = ZonedDateTime.of(
       LocalDate.now(ASIA_SHANGHAI_ZONE_ID).with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)),
       LocalTime.of(8, 15, 0), ASIA_SHANGHAI_ZONE_ID);
-    System.out.println(expectedStartDateTimeTrigger1);
-    System.out.println(expectedStartDateTimeTrigger2);
-    /*ZonedDateTime expectedSecondFireTime = expectedStartDateTime.plusWeeks(scheduleFrequency);
-    ZonedDateTime expectedThirdFireTime = expectedSecondFireTime.plusWeeks(scheduleFrequency);*/
 
     ScheduleParameters scheduleParameters = new ScheduleParameters()
       .id(UUID.randomUUID())
@@ -163,13 +152,13 @@ class ScheduleParametersToTriggerConverterImplTest {
     var trigger3 = findTriggerWithDayOfWeek(triggers, DayOfWeek.SATURDAY);
     assertNotNull(trigger3);
 
-    //validateTriggerWithFirstFirings(trigger, expectedStartDateTime, expectedSecondFireTime, expectedThirdFireTime);
     validateTriggerWithFirstFirings(trigger1, expectedStartDateTimeTrigger1, ChronoUnit.WEEKS, scheduleFrequency);
     validateTriggerWithFirstFirings(trigger2, expectedStartDateTimeTrigger2, ChronoUnit.WEEKS, scheduleFrequency);
     validateTriggerWithFirstFirings(trigger3, expectedStartDateTimeTrigger3, ChronoUnit.WEEKS, scheduleFrequency);
   }
+
   @Test
-  void testConvertToWeeklyTriggerShouldSkipDuplicateDays(){
+  void testConvertToWeeklyTriggerShouldSkipDuplicateDays() {
     int scheduleFrequency = 3;
     ZonedDateTime expectedStartDateTimeTrigger1 = ZonedDateTime.of(
       LocalDate.now(ASIA_SHANGHAI_ZONE_ID).with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY)),
@@ -177,10 +166,6 @@ class ScheduleParametersToTriggerConverterImplTest {
     ZonedDateTime expectedStartDateTimeTrigger2 = ZonedDateTime.of(
       LocalDate.now(ASIA_SHANGHAI_ZONE_ID).with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)),
       LocalTime.of(8, 15, 0), ASIA_SHANGHAI_ZONE_ID);
-    System.out.println(expectedStartDateTimeTrigger1);
-    System.out.println(expectedStartDateTimeTrigger2);
-    /*ZonedDateTime expectedSecondFireTime = expectedStartDateTime.plusWeeks(scheduleFrequency);
-    ZonedDateTime expectedThirdFireTime = expectedSecondFireTime.plusWeeks(scheduleFrequency);*/
 
     ScheduleParameters scheduleParameters = new ScheduleParameters()
       .id(UUID.randomUUID())
@@ -211,29 +196,6 @@ class ScheduleParametersToTriggerConverterImplTest {
       .schedulePeriod(ScheduleParameters.SchedulePeriodEnum.HOUR)
       .scheduleFrequency(2);
   }
-
-  /*private void validateTriggerWithFirstFirings(Trigger trigger, ZonedDateTime firstFiringTimeExpected,
-                                               ZonedDateTime secondFiringTimeExpected,
-                                               ZonedDateTime thirdFiringTimeExpected)
-  {
-    assertEquals(TRIGGER_ID, trigger.getKey().getName());
-    assertEquals(CalendarIntervalTrigger.MISFIRE_INSTRUCTION_DO_NOTHING, trigger.getMisfireInstruction());
-
-    ZonedDateTime triggerStartDateTime = (trigger.getStartTime().toInstant().atZone(ASIA_SHANGHAI_ZONE_ID));
-    assertEquals(firstFiringTimeExpected, triggerStartDateTime);
-
-    ZonedDateTime firstTriggerFireTime = trigger.getFireTimeAfter(Date
-      .from(firstFiringTimeExpected.minusSeconds(1).toInstant())).toInstant().atZone(ASIA_SHANGHAI_ZONE_ID);
-    assertEquals(firstFiringTimeExpected, firstTriggerFireTime);
-
-    ZonedDateTime secondTriggerFireTime = trigger.getFireTimeAfter(Date.from(firstFiringTimeExpected.toInstant()))
-      .toInstant().atZone(ASIA_SHANGHAI_ZONE_ID);
-    assertEquals(secondFiringTimeExpected, secondTriggerFireTime);
-
-    ZonedDateTime thirdTriggerFireTime = trigger.getFireTimeAfter(Date.from(secondFiringTimeExpected.toInstant()))
-      .toInstant().atZone(ASIA_SHANGHAI_ZONE_ID);
-    assertEquals(thirdFiringTimeExpected, thirdTriggerFireTime);
-  }*/
 
   private void validateTriggerWithFirstFirings(Trigger trigger, ZonedDateTime firstFiringTimeExpected,
                                                TemporalUnit scheduleUnit, int frequency) {

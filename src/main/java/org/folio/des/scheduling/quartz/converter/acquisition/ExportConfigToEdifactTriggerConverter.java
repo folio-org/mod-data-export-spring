@@ -41,7 +41,7 @@ public class ExportConfigToEdifactTriggerConverter implements Converter<ExportCo
         .map(VendorEdiOrdersExportConfig::getEdiSchedule)
         .map(EdiSchedule::getScheduleParameters).orElse(null);
       return new ExportTrigger(false, scheduleParametersToTriggerConverter
-        .convert(scheduleParameters, QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME));
+        .convert(scheduleParameters, getTriggerGroup(exportConfig)));
     }
   }
 
@@ -56,5 +56,9 @@ public class ExportConfigToEdifactTriggerConverter implements Converter<ExportCo
       .map(ScheduleParameters::getSchedulePeriod)
       .map(ScheduleParameters.SchedulePeriodEnum.NONE::equals)
       .orElse(false);
+  }
+
+  private String getTriggerGroup(ExportConfig exportConfig) {
+    return exportConfig.getTenant() + "_" + QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME;
   }
 }

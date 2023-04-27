@@ -32,6 +32,10 @@ public class EdifactJobKeyResolver implements JobKeyResolver {
     if (jobId == null) {
       throw new IllegalArgumentException("Export config does not contain schedule id or export config id");
     }
-    return JobKey.jobKey(jobId, QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME);
+    return JobKey.jobKey(jobId, getJobGroup(exportConfig));
+  }
+
+  private String getJobGroup(ExportConfig exportConfig) {
+    return exportConfig.getTenant() + "_" + QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME;
   }
 }
