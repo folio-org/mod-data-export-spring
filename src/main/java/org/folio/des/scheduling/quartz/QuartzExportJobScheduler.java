@@ -54,6 +54,10 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
 
   private List<Job> scheduleJob(JobKey jobKey, ExportConfig exportConfig) throws SchedulerException {
     ExportTrigger exportTrigger = triggerConverter.convert(exportConfig);
+    if (exportTrigger == null) {
+      log.warn("scheduleJob:: null trigger created for config id  {}", exportConfig.getId());
+      return Collections.emptyList();
+    }
     if (!exportTrigger.isDisabled()) {
       var jobs = scheduleJob(jobKey, exportTrigger, exportConfig);
       log.info("scheduleJob:: job {} scheduled for config id {}", jobKey, exportConfig.getId());
@@ -66,6 +70,10 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
 
   private List<Job> rescheduleJob(JobKey jobKey, ExportConfig exportConfig) throws SchedulerException {
     ExportTrigger exportTrigger = triggerConverter.convert(exportConfig);
+    if (exportTrigger == null) {
+      log.warn("rescheduleJob:: null trigger created for config id  {}", exportConfig.getId());
+      return Collections.emptyList();
+    }
     if (exportTrigger.isDisabled()) {
       scheduler.deleteJob(jobKey);
       log.info("rescheduleJob:: job {} deleted for config id {}", jobKey, exportConfig.getId());

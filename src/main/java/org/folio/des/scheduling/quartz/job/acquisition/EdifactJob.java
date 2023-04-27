@@ -40,7 +40,6 @@ public class EdifactJob implements org.quartz.Job {
         }
       }
     } catch (Exception e) {
-      // TODO probably just log?
       log.error("execute:: exception caught during edifact job execution", e);
       throw e;
     }
