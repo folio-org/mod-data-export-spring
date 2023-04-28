@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
-import org.folio.des.domain.dto.Job;
 import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverter;
 import org.folio.des.scheduling.quartz.job.JobKeyResolver;
 import org.folio.des.scheduling.quartz.trigger.ExportTrigger;
@@ -55,7 +53,7 @@ import lombok.extern.log4j.Log4j2;
 class QuartzExportJobSchedulerTest extends BaseTest {
 
   private static final String SCHEDULE_ID = "scheduleId_" + UUID.randomUUID();
-  private static final Job job = new Job();
+
   @Autowired
   private Scheduler scheduler;
   private QuartzExportJobScheduler quartzExportJobScheduler;

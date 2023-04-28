@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
+import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverter;
 import org.folio.des.scheduling.quartz.job.JobKeyResolver;
@@ -21,11 +22,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 /**
- * Quartz {@link ExportJobScheduler} implementation
+ * {@link ExportJobScheduler} quartz implementation
  */
 @RequiredArgsConstructor
 @Log4j2
@@ -36,21 +36,25 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
   private final JobKeyResolver jobKeyResolver;
 
   @Override
-  @SneakyThrows
   @Transactional
   public List<Job> scheduleExportJob(ExportConfig exportConfig) {
     if (exportConfig == null) {
       return Collections.emptyList();
     }
 
-    JobKey jobKey = jobKeyResolver.resolve(exportConfig);
-    if (scheduleExists(jobKey)) {
-      rescheduleJob(jobKey, exportConfig);
-    } else {
-      scheduleJob(jobKey, exportConfig);
+    try {
+      JobKey jobKey = jobKeyResolver.resolve(exportConfig);
+      if (scheduleExists(jobKey)) {
+        rescheduleJob(jobKey, exportConfig);
+      } else {
+        scheduleJob(jobKey, exportConfig);
+      }
+      // job creation does not happen on quartz scheduling, so just return empty list
+      return Collections.emptyList();
+    } catch (Exception e) {
+      log.error("Error during scheduling for config id {}", exportConfig.getId(), e);
+      throw new SchedulingException("Error during scheduling", e);
     }
-    // job creation does not happen on quartz scheduling, so just return empty list
-    return Collections.emptyList();
   }
 
   private void scheduleJob(JobKey jobKey, ExportConfig exportConfig) throws SchedulerException {

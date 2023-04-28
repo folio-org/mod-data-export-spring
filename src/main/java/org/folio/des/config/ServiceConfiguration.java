@@ -122,8 +122,8 @@ public class ServiceConfiguration {
 
   @Bean
   EdifactScheduledJobInitializer edifactScheduledJobInitializer(ExportTypeBasedConfigManager exportTypeBasedConfigManager,
-                          FolioExecutionContextHelper contextHelper,
-                          SchedulingConfig schedulingConfig) {
+                    FolioExecutionContextHelper contextHelper,
+                    SchedulingConfig schedulingConfig) {
     return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper,
       schedulingConfig.acqSchedulingProperties(), schedulingConfig.initEdifactOrdersExportJobScheduler());
   }

@@ -82,7 +82,6 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
       .stream()
       .map(weekDaysEnum -> DayOfWeek.valueOf(weekDaysEnum.toString()))
       .distinct()
-      //.sorted()
       .toList();
   }
 }
