@@ -52,7 +52,7 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
       // job creation does not happen on quartz scheduling, so just return empty list
       return Collections.emptyList();
     } catch (Exception e) {
-      log.error("Error during scheduling for config id {}", exportConfig.getId(), e);
+      log.warn("Error during scheduling for config id {}", exportConfig.getId(), e);
       throw new SchedulingException("Error during scheduling", e);
     }
   }
