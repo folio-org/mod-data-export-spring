@@ -61,7 +61,6 @@ public final class ScheduleDateTimeUtil {
       ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
       LocalDate nowDate = startZoneDate.toLocalDate();
       return Date.from(nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS).toInstant());
-
     } else {
       return Date.from(getUtcDateTime().truncatedTo(ChronoUnit.SECONDS).toInstant());
     }
