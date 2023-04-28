@@ -33,7 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(properties = {
   "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
   "folio.quartz.enabled=true"})
-public class EdifactExportJobSchedulerTest extends BaseTest {
+class EdifactExportJobSchedulerTest extends BaseTest {
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();
   private static final String SCHEDULE_ID = UUID.randomUUID().toString();
   private static final String ACC_TIME = "17:08:39";
@@ -63,7 +63,7 @@ public class EdifactExportJobSchedulerTest extends BaseTest {
   }
 
   @Test
-  public void testUnschedule() throws SchedulerException {
+  void testUnschedule() throws SchedulerException {
     ExportConfig config = getExportConfig();
     edifactExportJobScheduler.scheduleExportJob(config);
 
@@ -80,7 +80,7 @@ public class EdifactExportJobSchedulerTest extends BaseTest {
   }
 
   @Test
-  public void testReschedule() throws SchedulerException {
+  void testReschedule() throws SchedulerException {
     ExportConfig config = getExportConfig();
     edifactExportJobScheduler.scheduleExportJob(config);
 
