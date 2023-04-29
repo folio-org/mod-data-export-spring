@@ -20,10 +20,13 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +34,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.impl.JobDetailImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,23 +55,25 @@ class EdifactJobTest {
   private EdifactJob edifactJob;
   @Mock
   private JobExecutionContext jobExecutionContext;
-  private FolioExecutionContext folioExecutionContext = new FolioExecutionContext() {
-  };
+  @Mock
+  private Scheduler scheduler;
+  private FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";
   private static final ExportType EXPORT_TYPE = ExportType.EDIFACT_ORDERS_EXPORT;
+  private static final JobKey JOB_KEY = JobKey.jobKey("testJobKey", "testJobGroup");
 
   @Test
   void testExecuteSuccessful() {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
-    when(jobService.upsertAndSendToKafka(any(), eq(false))).thenReturn(new Job().id(UUID.randomUUID()));
+    when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job().id(UUID.randomUUID()));
 
     edifactJob.execute(jobExecutionContext);
 
     verify(contextHelper).getFolioExecutionContext(TENANT_ID);
-    verify(jobService).upsertAndSendToKafka(any(), eq(false));
+    verify(jobService).upsertAndSendToKafka(any(), eq(false), eq(false));
     verify(jobSchedulerCommandBuilder).buildJobCommand(any());
     verify(jobExecutionService).sendJobCommand(any());
   }
@@ -75,12 +83,12 @@ class EdifactJobTest {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
-    when(jobService.upsertAndSendToKafka(any(), eq(false))).thenReturn(new Job());
+    when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job());
 
     edifactJob.execute(jobExecutionContext);
 
     verify(contextHelper).getFolioExecutionContext(TENANT_ID);
-    verify(jobService).upsertAndSendToKafka(any(), eq(false));
+    verify(jobService).upsertAndSendToKafka(any(), eq(false), eq(false));
     verify(jobSchedulerCommandBuilder, times(0)).buildJobCommand(any());
     verify(jobExecutionService, times(0)).sendJobCommand(any());
   }
@@ -106,6 +114,20 @@ class EdifactJobTest {
       "'exportConfigId' param is missing in the jobExecutionContext", jobExecutionContext);
   }
 
+  @Test
+  void testExecuteFailureWhenExportConfigNotFound() throws SchedulerException {
+    when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
+    when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
+    when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))
+      .thenThrow(new NotFoundException("config not found"));
+
+    verifyExceptionThrownAndJobNotExecuted(SchedulingException.class,
+      "Configuration id 'some_test_export_config_id' could not be found. The job was unscheduled",
+      jobExecutionContext);
+    verify(scheduler).deleteJob(JOB_KEY);
+  }
+
   private void verifyExceptionThrownAndJobNotExecuted(Class exceptionClass, String exceptionMessage,
                                                       JobExecutionContext jobExecutionContext) {
     Throwable ex = assertThrows(exceptionClass, () -> edifactJob.execute(jobExecutionContext));
@@ -120,6 +142,7 @@ class EdifactJobTest {
     var jobDataMap = jobDetail.getJobDataMap();
     jobDataMap.put("tenantId", TENANT_ID);
     jobDataMap.put("exportConfigId", EXPORT_CONFIG_ID);
+    jobDetail.setKey(JOB_KEY);
     return jobDetail;
   }
 
@@ -133,5 +156,22 @@ class EdifactJobTest {
           .ediSchedule(new EdiSchedule()
             .scheduleParameters(new ScheduleParameters().id(UUID.randomUUID())))));
     return exportConfig;
+  }
+
+  private static class TestFolioExecutionContext implements org.folio.spring.FolioExecutionContext {
+    @Override
+    public FolioModuleMetadata getFolioModuleMetadata() {
+      return new FolioModuleMetadata() {
+        @Override
+        public String getModuleName() {
+          return "moduleName";
+        }
+
+        @Override
+        public String getDBSchemaName(String tenantId) {
+          return "dbSchemaName";
+        }
+      };
+    }
   }
 }
