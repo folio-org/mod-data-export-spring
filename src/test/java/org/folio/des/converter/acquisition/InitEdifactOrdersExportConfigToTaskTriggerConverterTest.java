@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.converter.aqcuisition.InitEdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.domain.dto.EdiConfig;
@@ -32,16 +33,16 @@ import org.folio.des.service.JobService;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class,
                             EdifactOrdersExportConfigToTaskTriggerConverter.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class InitEdifactOrdersExportConfigToTaskTriggerConverterTest {
   @Autowired
   private InitEdifactOrdersExportConfigToTaskTriggerConverter converter;
@@ -51,6 +52,10 @@ class InitEdifactOrdersExportConfigToTaskTriggerConverterTest {
   private EdifactOrdersExportParametersValidator validator;
   @MockBean
   private JobService jobService;
+  @MockBean
+  private Scheduler scheduler;
+  @MockBean
+  private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @Test
   void shouldCreateTriggerIfExportConfigIsValid() {

@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.domain.dto.EdiConfig;
 import org.folio.des.domain.dto.EdiFtp;
@@ -23,16 +24,16 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.scheduling.base.ExportTaskTrigger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(classes = { JacksonConfiguration.class, ServiceConfiguration.class,
                             EdifactOrdersExportConfigToTaskTriggerConverter.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   private static final String ACC_TIME = "17:08:39";
 
@@ -40,6 +41,10 @@ class EdifactOrdersExportConfigToTaskTriggerConverterTest {
   EdifactOrdersExportConfigToTaskTriggerConverter converter;
   @MockBean
   private ConfigurationClient client;
+  @MockBean
+  private Scheduler scheduler;
+  @MockBean
+  private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @Test
   void shouldCreateTriggerIfExportConfigIsValid() {
