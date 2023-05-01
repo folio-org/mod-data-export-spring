@@ -3,10 +3,10 @@ package org.folio.des.scheduling.quartz;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import java.time.LocalTime;
@@ -30,6 +30,7 @@ import org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.support.BaseTest;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobKey;
@@ -63,7 +64,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     edifactExportJobScheduler.scheduleExportJob(getExportConfig());
 
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
-    assertThat(jobKeys, is(Set.of(JobKey.jobKey(SCHEDULE_ID, EXPORT_GROUP))));
+    MatcherAssert.assertThat(jobKeys, is(Set.of(JobKey.jobKey(SCHEDULE_ID, EXPORT_GROUP))));
 
     var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
     assertEquals(1, triggers.size());
