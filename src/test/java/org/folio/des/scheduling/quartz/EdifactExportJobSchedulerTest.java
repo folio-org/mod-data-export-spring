@@ -38,7 +38,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
   private static final String SCHEDULE_ID = UUID.randomUUID().toString();
   private static final String ACC_TIME = "17:08:39";
   private static final String TENANT = "some_tenant";
-  private static final String EXPORT_GROUP = TENANT + "_" + "edifactOrdersExport";
+  private static final String EXPORT_GROUP = TENANT + "_edifactOrdersExport";
 
   @Autowired
   private ExportJobScheduler edifactExportJobScheduler;

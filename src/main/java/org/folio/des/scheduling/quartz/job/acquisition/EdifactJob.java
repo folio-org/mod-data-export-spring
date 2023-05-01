@@ -22,6 +22,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RequiredArgsConstructor
 public class EdifactJob implements org.quartz.Job {
+  private static final String PARAM_NOT_FOUND_MESSAGE = "'%s' param is missing in the jobExecutionContext";
   private final ExportTypeBasedConfigManager exportTypeBasedConfigManager;
   private final JobExecutionService jobExecutionService;
   private final JobService jobService;
@@ -51,7 +52,7 @@ public class EdifactJob implements org.quartz.Job {
   private String getTenantId(JobExecutionContext jobExecutionContext) {
     String tenantId = jobExecutionContext.getJobDetail().getJobDataMap().getString(TENANT_ID_PARAM);
     if (tenantId == null) {
-      throw new IllegalArgumentException("'tenantId' param is missing in the jobExecutionContext");
+      throw new IllegalArgumentException(String.format(PARAM_NOT_FOUND_MESSAGE, TENANT_ID_PARAM));
     }
     return tenantId;
   }
@@ -59,7 +60,7 @@ public class EdifactJob implements org.quartz.Job {
   private Job getJob(JobExecutionContext jobExecutionContext) {
     String exportConfigId = jobExecutionContext.getJobDetail().getJobDataMap().getString(EXPORT_CONFIG_ID_PARAM);
     if (exportConfigId == null) {
-      throw new IllegalArgumentException("'exportConfigId' param is missing in the jobExecutionContext");
+      throw new IllegalArgumentException(String.format(PARAM_NOT_FOUND_MESSAGE, EXPORT_CONFIG_ID_PARAM));
     }
     try {
       ExportConfig exportConfig = exportTypeBasedConfigManager.getConfigById(exportConfigId);

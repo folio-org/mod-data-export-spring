@@ -115,7 +115,7 @@ class EdifactJobTest {
   }
 
   @Test
-  void testExecuteFailureWhenExportConfigNotFound() throws SchedulerException {
+  void testExecuteFailureAndJobDeletedWhenExportConfigNotFound() throws SchedulerException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
     when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
