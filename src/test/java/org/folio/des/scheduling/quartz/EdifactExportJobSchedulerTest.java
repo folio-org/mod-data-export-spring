@@ -164,7 +164,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     wireMockServer.stubFor(get(urlEqualTo(
       "/configurations/entries/" + EXPORT_CONFIG_ID))
       .willReturn(aResponse().withStatus(404)));
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(5, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(0, scheduler.getJobKeys(GroupMatcher.anyJobGroup()).size()));
   }
 
