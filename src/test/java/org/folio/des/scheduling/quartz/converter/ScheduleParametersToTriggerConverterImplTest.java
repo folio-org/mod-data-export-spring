@@ -30,7 +30,7 @@ import lombok.extern.log4j.Log4j2;
 class ScheduleParametersToTriggerConverterImplTest {
   private static final String ASIA_SHANGHAI_ZONE = "Asia/Shanghai";
   private static final ZoneId ASIA_SHANGHAI_ZONE_ID = ZoneId.of(ASIA_SHANGHAI_ZONE);
-  private static final String EDIFACT_ORDERS_EXPORT = "edifact_orders_export";
+  private static final String EDIFACT_ORDERS_EXPORT = "edifactOrdersExport";
   private final ScheduleParametersToTriggerConverter triggerConverter = new ScheduleParametersToTriggerConverterImpl();
 
   @Test

@@ -1,13 +1,21 @@
 package org.folio.des.scheduling.quartz;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.domain.dto.EdiConfig;
@@ -17,6 +25,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
 import org.folio.des.domain.dto.ScheduleParameters.WeekDaysEnum;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.scheduling.ExportJobScheduler;
@@ -37,7 +46,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();
   private static final String SCHEDULE_ID = UUID.randomUUID().toString();
   private static final String ACC_TIME = "17:08:39";
-  private static final String TENANT = "some_tenant";
+  // private static final String TENANT = "some_tenant";
   private static final String EXPORT_GROUP = TENANT + "_edifactOrdersExport";
 
   @Autowired
@@ -133,6 +142,33 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     assertEquals(EXPORT_GROUP, triggers.get(0).getKey().getGroup());
   }
 
+  @Test
+  void testJobRemovedForRemovedConfiguration() throws SchedulerException {
+    ExportConfig config = getExportConfig();
+    LocalTime scheduleStartTime = LocalTime.now(ZoneId.systemDefault()).plusSeconds(5);
+    config.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .getScheduleParameters()
+      .scheduleTime(scheduleStartTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+      .schedulePeriod(SchedulePeriodEnum.DAY)
+      .scheduleFrequency(1)
+      .timeZone(ZoneId.systemDefault().getId());
+
+    edifactExportJobScheduler.scheduleExportJob(config);
+    // job should be scheduled
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+    assertThat(jobKeys, is(Set.of(JobKey.jobKey(SCHEDULE_ID, EXPORT_GROUP))));
+
+    // during job execution it's found that configuration does not exist anymore and
+    // job needs to be removed as well (removed integration case)
+    wireMockServer.stubFor(get(urlEqualTo(
+      "/configurations/entries/" + EXPORT_CONFIG_ID))
+      .willReturn(aResponse().withStatus(404)));
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(5, TimeUnit.SECONDS).untilAsserted(
+      () -> assertEquals(0, scheduler.getJobKeys(GroupMatcher.anyJobGroup()).size()));
+  }
+
   private ExportConfig getExportConfig() {
     UUID vendorId = UUID.randomUUID();
     ExportConfig exportConfig = new ExportConfig();
@@ -150,7 +186,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     accountEdiSchedule.enableScheduledExport(true);
     ScheduleParameters accScheduledParameters = new ScheduleParameters();
     accScheduledParameters.setId(UUID.fromString(SCHEDULE_ID));
-    accScheduledParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.WEEK);
+    accScheduledParameters.setSchedulePeriod(SchedulePeriodEnum.WEEK);
     accScheduledParameters.setWeekDays(List.of(WeekDaysEnum.THURSDAY));
     accScheduledParameters.setScheduleFrequency(7);
     accScheduledParameters.setScheduleTime(ACC_TIME);
