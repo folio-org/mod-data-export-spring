@@ -3,11 +3,11 @@ package org.folio.des.config;
 import static java.util.Objects.nonNull;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class FolioExecutionContextHelper {
   }
 
   public FolioExecutionContext getFolioExecutionContext(String tenantId) {
-    Map<String, Collection<String>> tenantOkapiHeaders = new ConcurrentHashMap<>();
+    Map<String, Collection<String>> tenantOkapiHeaders = new HashMap<>();
     tenantOkapiHeaders.put(XOkapiHeaders.TENANT, List.of(tenantId));
     tenantOkapiHeaders.put(XOkapiHeaders.URL, List.of(okapiUrl));
 
