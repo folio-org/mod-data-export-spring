@@ -7,7 +7,7 @@ folio:
   schedule:
     acquisition:
       poolSize: 10
-      runOnlyIfModuleRegistered: true
+      runOnlyIfModuleRegistered: false
   quartz:
     enabled: false
     schemaName: mod_data_export_spring_quartz
