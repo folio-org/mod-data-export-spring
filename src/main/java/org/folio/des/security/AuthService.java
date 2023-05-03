@@ -54,6 +54,7 @@ public class AuthService {
 
     if(optionalUser.isEmpty()) {
       log.error("Can't find user id by username {}.", username);
+      return null;
     }
     return optionalUser.get().getId();
   }

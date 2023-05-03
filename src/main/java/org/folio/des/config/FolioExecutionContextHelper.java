@@ -44,18 +44,19 @@ public class FolioExecutionContextHelper {
   }
 
   public FolioExecutionContext getFolioExecutionContext(String tenantId) {
-    Map<String, Collection<String>> tenantOkapiHeaders = new HashMap<>();
-    tenantOkapiHeaders.put(XOkapiHeaders.TENANT, List.of(tenantId));
-    tenantOkapiHeaders.put(XOkapiHeaders.URL, List.of(okapiUrl));
+    Map<String, Collection<String>> tenantOkapiHeaders = new HashMap<>() {{
+      put(XOkapiHeaders.TENANT, List.of(tenantId));
+      put(XOkapiHeaders.URL, List.of(okapiUrl));
+    }};
 
-    String token = authService.getTokenForSystemUser(tenantId, okapiUrl);
-    if (StringUtils.isNotBlank(token)) {
-      tenantOkapiHeaders.put(XOkapiHeaders.TOKEN, List.of(token));
+    String systemUserToken = authService.getTokenForSystemUser(tenantId, okapiUrl);
+    if (StringUtils.isNotBlank(systemUserToken)) {
+      tenantOkapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserToken));
 
       try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
-        String userId = authService.getSystemUserId();
-        if (nonNull(userId)) {
-          tenantOkapiHeaders.put(XOkapiHeaders.USER_ID, List.of(userId));
+        String systemUserId = authService.getSystemUserId();
+        if (nonNull(systemUserId)) {
+          tenantOkapiHeaders.put(XOkapiHeaders.USER_ID, List.of(systemUserId));
         }
       }
       return new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders);
