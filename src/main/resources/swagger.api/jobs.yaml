@@ -195,6 +195,10 @@ components:
       $ref: "../../../../folio-export-common/schemas/exportFilePresignedUrl.json#/PresignedUrl"
     job:
       $ref: "../../../../folio-export-common/schemas/job.json#/Job"
+    LegacyJob:
+      $ref: "../../../../folio-export-common/schemas/bursar-export/legacy/legacyJob.json#/LegacyJob"
+    LegacyJobCollection:
+      $ref: "../../../../folio-export-common/schemas/bursar-export/legacy/legacyJobCollection.json#/LegacyJobCollection"
     jobCollection:
       $ref: "../../../../folio-export-common/schemas/jobCollection.json#/JobCollection"
     userdataCollection:
