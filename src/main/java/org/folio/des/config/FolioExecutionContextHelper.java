@@ -49,20 +49,22 @@ public class FolioExecutionContextHelper {
       put(XOkapiHeaders.URL, List.of(okapiUrl));
     }};
 
-    String systemUserToken = authService.getTokenForSystemUser(tenantId, okapiUrl);
-    if (StringUtils.isNotBlank(systemUserToken)) {
-      tenantOkapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserToken));
-
-      try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
-        String systemUserId = authService.getSystemUserId();
-        if (nonNull(systemUserId)) {
-          tenantOkapiHeaders.put(XOkapiHeaders.USER_ID, List.of(systemUserId));
-        }
+    try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
+      String systemUserToken = authService.getTokenForSystemUser(tenantId, okapiUrl);
+      if (StringUtils.isNotBlank(systemUserToken)) {
+        tenantOkapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserToken));
+      } else {
+        throw new IllegalStateException(String.format("Cannot create FolioExecutionContext for Tenant: %s because of absent token", tenantId));
       }
-      return new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders);
-    } else {
-      throw new IllegalStateException(String.format("Cannot create FolioExecutionContext for Tenant: %s because of absent token", tenantId));
     }
+
+    try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
+      String systemUserId = authService.getSystemUserId();
+      if (nonNull(systemUserId)) {
+        tenantOkapiHeaders.put(XOkapiHeaders.USER_ID, List.of(systemUserId));
+      }
+    }
+    return new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders);
   }
 
   public static String getUserName(FolioExecutionContext context) {
