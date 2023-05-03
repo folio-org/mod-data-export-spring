@@ -19,6 +19,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.scope.FolioExecutionContextSetter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,8 +32,8 @@ public class FolioExecutionContextHelper {
   private final AuthService authService;
   private final SecurityManagerService securityManagerService;
   private boolean registered = false;
-  // TODO find a way to get current 'x-okapi-url', might be list of urls
-  private final String okapiUrl = "http://10.0.2.15:9130";
+  @Value("${OKAPI_URL}")
+  private String okapiUrl;
 
   public void registerTenant() {
     securityManagerService.prepareSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
