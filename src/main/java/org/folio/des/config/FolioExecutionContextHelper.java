@@ -32,8 +32,8 @@ public class FolioExecutionContextHelper {
   private final AuthService authService;
   private final SecurityManagerService securityManagerService;
   private boolean registered = false;
-  @Value("${OKAPI_URL}")
-  private String okapiUrl;
+//  @Value("${OKAPI_URL}")
+  private String okapiUrl = "http://10.0.2.15:9130";
 
   public void registerTenant() {
     securityManagerService.prepareSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());

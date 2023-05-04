@@ -52,7 +52,7 @@ public class FolioExecutionContextHelperTest extends BaseTest {
   void shouldGetFolioExecutionContextHelper() {
 
     wireMockServer.stubFor(
-      post(anyUrl())
+      post(urlEqualTo("/authn/login"))
         .willReturn(aResponse()
           .withHeader(XOkapiHeaders.TOKEN, TOKEN)));
 
