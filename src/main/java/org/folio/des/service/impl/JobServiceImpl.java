@@ -105,7 +105,6 @@ public class JobServiceImpl implements JobService {
     return result;
   }
 
-  @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
     return upsertAndSendToKafka(jobDto, withJobCommandSend, true);
