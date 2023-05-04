@@ -1,6 +1,8 @@
 folio:
   system:
     username: data-export-system-user
+  okapi:
+    url: ${OKAPI_URL}
   tenant:
     validation:
       enabled: true
