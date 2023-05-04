@@ -11,7 +11,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.scheduling.acquisition.EdifactOrdersExportJobScheduler;
+import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
@@ -20,13 +20,13 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class EdifactOrdersExportService extends BaseExportConfigService {
 
-  private final EdifactOrdersExportJobScheduler exportJobScheduler;
+  private final ExportJobScheduler exportJobScheduler;
 
   public EdifactOrdersExportService(ConfigurationClient client,
                                     DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                                     ExportConfigConverterResolver exportConfigConverterResolver,
                                     ExportConfigValidatorResolver exportConfigValidatorResolver,
-                                    EdifactOrdersExportJobScheduler exportJobScheduler) {
+                                    ExportJobScheduler exportJobScheduler) {
     super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
     this.exportJobScheduler = exportJobScheduler;
   }

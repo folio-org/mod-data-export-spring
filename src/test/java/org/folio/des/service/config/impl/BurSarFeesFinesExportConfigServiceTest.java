@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
@@ -25,10 +26,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -37,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
                   ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class BurSarFeesFinesExportConfigServiceTest {
 
   public static final String CONFIG_RESPONSE =
@@ -78,6 +79,10 @@ class BurSarFeesFinesExportConfigServiceTest {
   private ObjectMapper objectMapper;
   @MockBean
   private ConfigurationClient client;
+  @MockBean
+  private Scheduler scheduler;
+  @MockBean
+  private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @Test
   @DisplayName("Set new configuration")

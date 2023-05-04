@@ -1,4 +1,4 @@
-package org.folio.des.config.quartz;
+package org.folio.des.config.scheduling;
 
 import org.folio.spring.config.DataSourceFolioWrapper;
 import org.springframework.boot.autoconfigure.quartz.SchedulerFactoryBeanCustomizer;

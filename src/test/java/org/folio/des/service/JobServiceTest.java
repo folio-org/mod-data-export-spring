@@ -17,8 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
@@ -41,16 +39,17 @@ import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.SneakyThrows;
+
+@ExtendWith(MockitoExtension.class)
 class JobServiceTest {
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
   private static final int DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD = 14;
