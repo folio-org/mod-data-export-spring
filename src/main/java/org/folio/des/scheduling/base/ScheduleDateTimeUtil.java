@@ -5,6 +5,7 @@ import org.folio.des.domain.dto.ScheduleParameters;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,6 +13,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Date;
 import java.util.TimeZone;
 
 public final class ScheduleDateTimeUtil {
@@ -48,6 +51,31 @@ public final class ScheduleDateTimeUtil {
 
     } else {
       return getUtcDateTime().truncatedTo(ChronoUnit.SECONDS);
+    }
+  }
+
+  public static Date convertScheduleTimeToDate(ScheduleParameters scheduleParameters) {
+    if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
+      LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
+      ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
+      ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
+      LocalDate nowDate = startZoneDate.toLocalDate();
+      return Date.from(nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS).toInstant());
+    } else {
+      return Date.from(getUtcDateTime().truncatedTo(ChronoUnit.SECONDS).toInstant());
+    }
+  }
+
+  public static Date convertScheduleTimeForWeekDayToDate(ScheduleParameters scheduleParameters, DayOfWeek dayOfWeek) {
+    if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
+      LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
+      ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
+      LocalDate localDate = LocalDate.now(zoneId).with(TemporalAdjusters.nextOrSame(dayOfWeek));
+      ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, zoneId);
+      return Date.from(zonedDateTime.toInstant());
+    } else {
+      return Date.from(getUtcDateTime().with(TemporalAdjusters.nextOrSame(dayOfWeek))
+        .truncatedTo(ChronoUnit.SECONDS).toInstant());
     }
   }
 

@@ -9,6 +9,7 @@ import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.Job;
+import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class EdifactScheduledJobInitializer {
   private final ExportTypeBasedConfigManager basedConfigManager;
   private final FolioExecutionContextHelper contextHelper;
   private final AcqSchedulingProperties acqSchedulingProperties;
-  private final EdifactOrdersExportJobScheduler exportJobScheduler;
+  private final ExportJobScheduler exportJobScheduler;
 
   public void initAllScheduledJob() {
     log.info("Initialize EDIFACT scheduled job: is module registered: {} ", contextHelper.isModuleRegistered());

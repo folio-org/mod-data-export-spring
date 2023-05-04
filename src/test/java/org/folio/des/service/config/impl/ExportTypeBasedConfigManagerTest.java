@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
@@ -29,10 +30,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -40,7 +41,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = { ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class ExportTypeBasedConfigManagerTest {
 
   public static final String CONFIG_RESPONSE =
@@ -79,6 +80,10 @@ class ExportTypeBasedConfigManagerTest {
   private ObjectMapper objectMapper;
   @MockBean
   private ConfigurationClient client;
+  @MockBean
+  private Scheduler scheduler;
+  @MockBean
+  private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @ParameterizedTest
   @CsvSource({

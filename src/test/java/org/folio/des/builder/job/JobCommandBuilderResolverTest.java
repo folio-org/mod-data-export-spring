@@ -8,10 +8,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.folio.de.entity.Job;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.domain.dto.AuthorityControlExportConfig;
 import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.EHoldingsExportConfig;
@@ -23,22 +25,26 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.quartz.Scheduler;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class, QuartzAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class JobCommandBuilderResolverTest {
 
   @Autowired
   private JobCommandBuilderResolver resolver;
   @MockBean
   private ConfigurationClient client;
+  @MockBean
+  private Scheduler scheduler;
+  @MockBean
+  private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @ParameterizedTest
   @DisplayName("Should retrieve builder for specific export type if builder is registered in the resolver")
