@@ -3,7 +3,6 @@ package org.folio.des.config;
 import org.folio.des.support.BaseTest;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -12,6 +11,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FolioExecutionContextHelperTest extends BaseTest {
 
@@ -48,7 +49,7 @@ public class FolioExecutionContextHelperTest extends BaseTest {
     """;
 
   @Test
-  void shouldGetFolioExecutionContextHelper() {
+  void shouldGetFolioExecutionContext() {
     // request to get token for 'data-export-system-user'
     wireMockServer.stubFor(
       post(urlEqualTo("/authn/login"))
@@ -65,10 +66,10 @@ public class FolioExecutionContextHelperTest extends BaseTest {
     // 'execution context' should be created according to 'data-export-system-user' headers
     FolioExecutionContext executionContext = contextHelper.getFolioExecutionContext(TENANT);
 
-    Assertions.assertEquals(executionContext.getTenantId(), TENANT);
-    Assertions.assertEquals(executionContext.getOkapiUrl(), wireMockServer.baseUrl());
-    Assertions.assertEquals(executionContext.getToken(), TOKEN);
-    Assertions.assertEquals(executionContext.getUserId().toString(), "a85c45b7-d427-4122-8532-5570219c5e59");
+    assertEquals(executionContext.getTenantId(), TENANT);
+    assertEquals(executionContext.getOkapiUrl(), wireMockServer.baseUrl());
+    assertEquals(executionContext.getToken(), TOKEN);
+    assertEquals(executionContext.getUserId().toString(), "a85c45b7-d427-4122-8532-5570219c5e59");
   }
 
   @Test
@@ -78,7 +79,8 @@ public class FolioExecutionContextHelperTest extends BaseTest {
       post(urlEqualTo("/authn/login"))
         .willReturn(aResponse()));
 
-    // should get exception because of missing token
-    Assertions.assertThrows(IllegalStateException.class, () -> contextHelper.getFolioExecutionContext(TENANT));
+    // should get exception: verify exception type and message
+    Exception exception = assertThrows(IllegalStateException.class, () -> contextHelper.getFolioExecutionContext(TENANT));
+    assertEquals(String.format("Cannot create FolioExecutionContext for Tenant: %s because of absent token", TENANT), exception.getMessage());
   }
 }

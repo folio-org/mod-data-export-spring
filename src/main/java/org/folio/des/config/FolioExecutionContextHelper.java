@@ -50,11 +50,16 @@ public class FolioExecutionContextHelper {
       put(XOkapiHeaders.URL, List.of(okapiUrl));
     }};
 
+    // We only have headers['tenant', 'url'] to set up 'execution context' with minimum headers['tenant', 'url', 'token', 'user'].
+    // We will do it in two steps: Calling 'auth/login' does not require any permission, so in first one we create 'execution context' with headers['tenant', 'url']
+    // and should be able to get a 'token' with required permissions. And then we start second 'execution context' with headers['tenant', 'url', 'token']
+    // to get 'system-user-id', at this point we already have 'token' so request is authorized. ('system-user' is created when 'tenant' is registered)
     try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
       String systemUserToken = authService.getTokenForSystemUser(tenantId, okapiUrl);
       if (StringUtils.isNotBlank(systemUserToken)) {
         tenantOkapiHeaders.put(XOkapiHeaders.TOKEN, List.of(systemUserToken));
       } else {
+        // If we do not get a 'token' we will not have required permissions to do further requests so stop the process
         throw new IllegalStateException(String.format("Cannot create FolioExecutionContext for Tenant: %s because of absent token", tenantId));
       }
     }

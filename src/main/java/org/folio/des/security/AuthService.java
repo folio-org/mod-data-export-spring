@@ -52,7 +52,7 @@ public class AuthService {
   public String getSystemUserId() {
     Optional<User> optionalUser = usersClient.getUsersByQuery("username==" + username).getUsers().stream().findFirst();
 
-    if(optionalUser.isEmpty()) {
+    if (optionalUser.isEmpty()) {
       log.error("Can't find user id by username {}.", username);
       return null;
     }
@@ -68,5 +68,4 @@ public class AuthService {
 
     log.info("Saved credentials for user {}.", systemUserParameters.getUsername());
   }
-
 }
