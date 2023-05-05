@@ -19,6 +19,7 @@ API for Data Export Spring module.
 | DB_DATABASE                   | okapi_modules             | Postgres database name                                            |
 | KAFKA_HOST                    | kafka                     | Kafka broker hostname                                             |
 | KAFKA_PORT                    | 9092                      | Kafka broker port                                                 |
+| OKAPI_URL                     | http://okapi:9130         | Okapi url                                                         |
 | ENV                           | folio                     | Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed|
 
 
