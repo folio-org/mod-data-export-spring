@@ -48,7 +48,7 @@ public class FolioTenantController extends TenantController {
         contextHelper.registerTenant();
         scheduler.initScheduleConfiguration();
         bulkEditConfigService.checkBulkEditConfiguration();
-        edifactScheduledJobInitializer.initAllScheduledJob();
+        edifactScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
         kafka.createKafkaTopics();
         kafka.restartEventListeners();
       } catch (Exception e) {
