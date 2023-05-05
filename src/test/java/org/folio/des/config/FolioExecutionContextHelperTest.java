@@ -14,7 +14,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class FolioExecutionContextHelperTest extends BaseTest {
+class FolioExecutionContextHelperTest extends BaseTest {
 
   @Autowired
   private FolioExecutionContextHelper contextHelper;
@@ -66,10 +66,10 @@ public class FolioExecutionContextHelperTest extends BaseTest {
     // 'execution context' should be created according to 'data-export-system-user' headers
     FolioExecutionContext executionContext = contextHelper.getFolioExecutionContext(TENANT);
 
-    assertEquals(executionContext.getTenantId(), TENANT);
-    assertEquals(executionContext.getOkapiUrl(), wireMockServer.baseUrl());
-    assertEquals(executionContext.getToken(), TOKEN);
-    assertEquals(executionContext.getUserId().toString(), "a85c45b7-d427-4122-8532-5570219c5e59");
+    assertEquals(TENANT, executionContext.getTenantId());
+    assertEquals(wireMockServer.baseUrl(), executionContext.getOkapiUrl());
+    assertEquals(TOKEN, executionContext.getToken());
+    assertEquals("a85c45b7-d427-4122-8532-5570219c5e59", executionContext.getUserId().toString());
   }
 
   @Test
