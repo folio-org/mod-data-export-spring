@@ -12,7 +12,7 @@ folio:
       runOnlyIfModuleRegistered: true
   quartz:
     edifact:
-      enabled: false
+      enabled: true
     schemaName: mod_data_export_spring_quartz
     changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
