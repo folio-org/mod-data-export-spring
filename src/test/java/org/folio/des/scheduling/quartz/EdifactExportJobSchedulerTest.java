@@ -31,10 +31,8 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.support.BaseTest;
 import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,13 +49,6 @@ class EdifactExportJobSchedulerTest extends BaseTest {
 
   @Autowired
   private ExportJobScheduler edifactExportJobScheduler;
-  @Autowired
-  private Scheduler scheduler;
-
-  @AfterEach
-  void afterEach() throws SchedulerException {
-    scheduler.clear();
-  }
 
   @Test
   void testSchedule() throws SchedulerException {

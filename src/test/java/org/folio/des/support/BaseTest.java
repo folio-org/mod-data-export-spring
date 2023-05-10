@@ -14,7 +14,10 @@ import org.folio.des.scheduling.ExportTrigger;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,6 +55,8 @@ public abstract class BaseTest {
 
   @Autowired
   protected MockMvc mockMvc;
+  @Autowired
+  protected Scheduler scheduler;
   @MockBean
   protected ExportTrigger trigger;
 
@@ -103,6 +108,13 @@ public abstract class BaseTest {
     httpHeaders.add(XOkapiHeaders.TOKEN, TOKEN);
 
     return httpHeaders;
+  }
+
+  @AfterEach
+  void afterEach() throws SchedulerException {
+    if (!scheduler.isInStandbyMode()) {
+      scheduler.clear();
+    }
   }
 
   @AfterAll
