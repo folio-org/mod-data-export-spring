@@ -17,7 +17,7 @@ public class QuartzSchemaInitializer implements InitializingBean {
   private final LiquibaseProperties liquibaseProperties;
   private final FolioSpringLiquibase folioSpringLiquibase;
 
-  @Value("${folio.quartz.enabled}")
+  @Value("${folio.quartz.edifact.enabled}")
   private boolean quartzEnabled;
 
   @Value("${folio.quartz.schemaName}")

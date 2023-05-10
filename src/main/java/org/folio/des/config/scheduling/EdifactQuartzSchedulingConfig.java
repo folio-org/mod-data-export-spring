@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@ConditionalOnProperty(prefix = "folio.quartz", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "folio.quartz.edifact", name = "enabled", havingValue = "true")
 @RequiredArgsConstructor
-public class QuartzSchedulingConfig implements SchedulingConfig {
+public class EdifactQuartzSchedulingConfig implements EdifactSchedulingConfig {
   private final Scheduler scheduler;
   private final ExportConfigToEdifactTriggerConverter edifactTriggerConverter;
   private final ExportConfigToEdifactJobDetailConverter edifactJobDetailConverter;

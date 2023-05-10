@@ -42,7 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
   "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  "folio.quartz.enabled=true"})
+  "folio.quartz.edifact.enabled=true"})
 class EdifactExportJobSchedulerTest extends BaseTest {
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();
   private static final String SCHEDULE_ID = UUID.randomUUID().toString();
