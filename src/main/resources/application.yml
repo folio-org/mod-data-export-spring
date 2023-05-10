@@ -11,7 +11,8 @@ folio:
       poolSize: 10
       runOnlyIfModuleRegistered: true
   quartz:
-    enabled: false
+    edifact:
+      enabled: false
     schemaName: mod_data_export_spring_quartz
     changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
@@ -52,7 +53,7 @@ spring:
   jackson:
     default-property-inclusion: non_null
   quartz:
-    auto-startup: ${folio.quartz.enabled}
+    auto-startup: ${folio.quartz.edifact.enabled}
     job-store-type: jdbc
     jdbc:
       initialize-schema: never

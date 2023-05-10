@@ -12,7 +12,7 @@ import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
-import org.folio.des.config.scheduling.SchedulingConfig;
+import org.folio.des.config.scheduling.EdifactSchedulingConfig;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
@@ -81,9 +81,9 @@ public class ServiceConfiguration {
   EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
            ExportConfigConverterResolver  exportConfigConverterResolver,
-           SchedulingConfig schedulingConfig) {
+           EdifactSchedulingConfig edifactSchedulingConfig) {
     return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, schedulingConfig.edifactOrdersExportJobScheduler());
+      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler());
   }
 
   @Bean
@@ -123,8 +123,8 @@ public class ServiceConfiguration {
   @Bean
   EdifactScheduledJobInitializer edifactScheduledJobInitializer(ExportTypeBasedConfigManager exportTypeBasedConfigManager,
                     FolioExecutionContextHelper contextHelper,
-                    SchedulingConfig schedulingConfig) {
+                    EdifactSchedulingConfig edifactSchedulingConfig) {
     return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper,
-      schedulingConfig.acqSchedulingProperties(), schedulingConfig.initEdifactOrdersExportJobScheduler());
+      edifactSchedulingConfig.acqSchedulingProperties(), edifactSchedulingConfig.initEdifactOrdersExportJobScheduler());
   }
 }

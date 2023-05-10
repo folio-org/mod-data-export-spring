@@ -46,7 +46,7 @@ import lombok.extern.log4j.Log4j2;
 
 @SpringBootTest(properties = {
   "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  "folio.quartz.enabled=true"})
+  "folio.quartz.edifact.enabled=true"})
 class QuartzExportJobSchedulerTest extends BaseTest {
 
   private static final String SCHEDULE_ID = "scheduleId_" + UUID.randomUUID();

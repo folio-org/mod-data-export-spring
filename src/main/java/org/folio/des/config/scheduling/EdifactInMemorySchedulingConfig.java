@@ -20,9 +20,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@ConditionalOnProperty(prefix = "folio.quartz", name = "enabled", havingValue = "false")
+@ConditionalOnProperty(prefix = "folio.quartz.edifact", name = "enabled", havingValue = "false")
 @RequiredArgsConstructor
-public class InMemorySchedulingConfig implements SchedulingConfig {
+public class EdifactInMemorySchedulingConfig implements EdifactSchedulingConfig {
   private final JobService jobService;
   private final JobExecutionService jobExecutionService;
   private final EdifactOrdersJobCommandSchedulerBuilder jobSchedulerCommandBuilder;
