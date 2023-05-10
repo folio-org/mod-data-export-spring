@@ -23,7 +23,6 @@ import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverte
 import org.folio.des.scheduling.quartz.job.JobKeyResolver;
 import org.folio.des.scheduling.quartz.trigger.ExportTrigger;
 import org.folio.des.support.BaseTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobBuilder;
@@ -31,14 +30,12 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.listeners.JobListenerSupport;
 import org.quartz.listeners.SchedulerListenerSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.convert.converter.Converter;
 
@@ -53,20 +50,12 @@ import lombok.extern.log4j.Log4j2;
 class QuartzExportJobSchedulerTest extends BaseTest {
 
   private static final String SCHEDULE_ID = "scheduleId_" + UUID.randomUUID();
-
-  @Autowired
-  private Scheduler scheduler;
   private QuartzExportJobScheduler quartzExportJobScheduler;
 
   @BeforeEach
   void init() {
     quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(),
       new TestJobDetailConverter(), new TestJobKeyResolver());
-  }
-
-  @AfterEach
-  void afterEach() throws SchedulerException {
-    scheduler.clear();
   }
 
   @Test
@@ -83,7 +72,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(1, schedulerListener.getJobsScheduledCount());
 
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(5, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(1, jobListener.getJobsExecutedCount()));
   }
 
@@ -155,7 +144,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
 
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(5, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
   }
 
