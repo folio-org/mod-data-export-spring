@@ -55,8 +55,8 @@ public final class ScheduleUtil {
       return false;
     }
 
-    boolean shouldLoadScheduleConfigs = isReloadNeededForVersions(moduleFrom, moduleTo, minQuartzSupportVersion);
-    if (shouldLoadScheduleConfigs) {
+    boolean shouldMigrateSchedulesToQuartz = isMigrationNeededForVersions(moduleFrom, moduleTo, minQuartzSupportVersion);
+    if (shouldMigrateSchedulesToQuartz) {
       log.info("shouldMigrateSchedulesToQuartz:: upgrade from version='{}' to version='{}' requires migration " +
           "from in-memory to quartz scheduling. Existing schedules will be loaded from the configuration",
         moduleFrom, moduleTo);
@@ -64,10 +64,10 @@ public final class ScheduleUtil {
       log.info("shouldMigrateSchedulesToQuartz:: upgrade from version='{}' to version='{}' does not require " +
         "schedules migration", moduleFrom, moduleTo);
     }
-    return shouldLoadScheduleConfigs;
+    return shouldMigrateSchedulesToQuartz;
   }
 
-  private static boolean isReloadNeededForVersions(String moduleFrom, String moduleTo, SemVer minQuartzSupportVersion) {
+  private static boolean isMigrationNeededForVersions(String moduleFrom, String moduleTo, SemVer minQuartzSupportVersion) {
     SemVer moduleFromSemVer = moduleFrom != null ? moduleVersionToSemVer(moduleFrom) : null;
     SemVer moduleToSemVer = moduleVersionToSemVer(moduleTo);
 
