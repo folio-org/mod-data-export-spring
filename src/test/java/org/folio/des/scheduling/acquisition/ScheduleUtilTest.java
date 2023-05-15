@@ -28,20 +28,9 @@ class ScheduleUtilTest {
     "mod-3.0.0-SNAPSHOT.1, mod-3.0.0-SNAPSHOT.2, false",
     "mod-3.0.0-SNAPSHOT,   mod-2.1.0,            false",
   })
-  void shouldLoadScheduleConfigsOnUpgradeWhenQuartzEnabled(String moduleFrom, String moduleTo, boolean expected) {
+  void shouldLoadScheduleConfigsOnUpgrade(String moduleFrom, String moduleTo, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom).moduleTo(moduleTo);
-    assertEquals(expected, ScheduleUtil.shouldLoadScheduleConfigs(tenantAttributes, true, sinceVersion));
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-    "mod-2.1.0,            mod-3.0.0,            true",
-    "mod-3.0.0,            mod-4.0.0,            true",
-    "mod-2.1.0,            mod-2.1.1,            true",
-  })
-  void shouldAlwaysLoadScheduleConfigsWhenQuartzDisabled(String moduleFrom, String moduleTo, boolean expected) {
-    TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom).moduleTo(moduleTo);
-    assertEquals(expected, ScheduleUtil.shouldLoadScheduleConfigs(tenantAttributes, false, sinceVersion));
+    assertEquals(expected, ScheduleUtil.shouldMigrateSchedulesToQuartz(tenantAttributes, sinceVersion));
   }
 
   @ParameterizedTest
@@ -53,7 +42,7 @@ class ScheduleUtilTest {
   void shouldAlwaysLoadScheduleConfigsWhenForceParamSetToTrue(String moduleFrom, String moduleTo, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom).moduleTo(moduleTo)
       .parameters(List.of(new Parameter().key("forceSchedulesReload").value("true")));
-    assertEquals(expected, ScheduleUtil.shouldLoadScheduleConfigs(tenantAttributes, true, sinceVersion));
+    assertEquals(expected, ScheduleUtil.shouldMigrateSchedulesToQuartz(tenantAttributes, sinceVersion));
   }
 
   @ParameterizedTest
@@ -65,7 +54,7 @@ class ScheduleUtilTest {
   void shouldLoadScheduleConfigsOnUpgradeWhenWhenForceParamSetToFalse(String moduleFrom, String moduleTo, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom).moduleTo(moduleTo)
       .parameters(List.of(new Parameter().key("forceSchedulesReload").value("false")));
-    assertEquals(expected, ScheduleUtil.shouldLoadScheduleConfigs(tenantAttributes, true, sinceVersion));
+    assertEquals(expected, ScheduleUtil.shouldMigrateSchedulesToQuartz(tenantAttributes, sinceVersion));
   }
 
   @ParameterizedTest
@@ -77,7 +66,7 @@ class ScheduleUtilTest {
   })
   void shouldLoadScheduleConfigsWhenModuleFromNotDefined(String moduleTo, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(null).moduleTo(moduleTo);
-    assertEquals(expected, ScheduleUtil.shouldLoadScheduleConfigs(tenantAttributes, true, sinceVersion));
+    assertEquals(expected, ScheduleUtil.shouldMigrateSchedulesToQuartz(tenantAttributes, sinceVersion));
   }
 
   @ParameterizedTest
@@ -89,6 +78,6 @@ class ScheduleUtilTest {
   })
   void shouldNotLoadScheduleConfigsWhenModuleToNotDefined(String moduleFrom, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom).moduleTo(null);
-    assertEquals(expected, ScheduleUtil.shouldLoadScheduleConfigs(tenantAttributes, true, sinceVersion));
+    assertEquals(expected, ScheduleUtil.shouldMigrateSchedulesToQuartz(tenantAttributes, sinceVersion));
   }
 }

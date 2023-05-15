@@ -74,7 +74,6 @@ class EdifactScheduledJobInitializerTest {
   @Test
   void shouldScheduleJobsIfUpgradeToQuartzEnabledVersion() {
     doReturn(false).when(contextHelper).isModuleRegistered();
-    doReturn(false).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
     mockConfigCollection();
 
     initializerWithQuartzEnabled.initAllScheduledJob(tenantAttributes);
@@ -86,7 +85,6 @@ class EdifactScheduledJobInitializerTest {
   @Test
   void shouldSkipScheduleJobsIfUpgradeFromQuartzEnabledVersion() {
     doReturn(false).when(contextHelper).isModuleRegistered();
-    doReturn(false).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
 
     initializerWithQuartzEnabled.initAllScheduledJob(new TenantAttributes().moduleFrom("3.0.0").moduleTo("4.0.0"));
 
@@ -97,7 +95,6 @@ class EdifactScheduledJobInitializerTest {
   @Test
   void shouldScheduleJobsIfUpgradeWithForceSchedulesReload() {
     doReturn(false).when(contextHelper).isModuleRegistered();
-    doReturn(false).when(acqSchedulingProperties).isRunOnlyIfModuleRegistered();
     mockConfigCollection();
 
     initializerWithQuartzEnabled.initAllScheduledJob(new TenantAttributes().moduleFrom("3.0.0").moduleTo("4.0.0")

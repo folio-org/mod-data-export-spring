@@ -1,7 +1,7 @@
 package org.folio.des.scheduling.acquisition;
 
 import static org.folio.des.scheduling.acquisition.ScheduleUtil.isJobScheduleAllowed;
-import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldLoadScheduleConfigs;
+import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSchedulesToQuartz;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +35,10 @@ public class EdifactScheduledJobInitializer {
         "tenantAttributes: {}", contextHelper.isModuleRegistered(), tenantAttributes);
     List<ExportConfig> exportConfigs = new ArrayList<>();
     try {
-      boolean isJobScheduleAllowed = shouldLoadScheduleConfigs(tenantAttributes, isQuartzEdifactEnabled,
-        quartzEdifactMinVersion) && isJobScheduleAllowed(acqSchedulingProperties.isRunOnlyIfModuleRegistered(),
-        contextHelper.isModuleRegistered());
-      if (isJobScheduleAllowed) {
+      boolean shouldScheduleInitialConfigs = (isQuartzEdifactEnabled && shouldMigrateSchedulesToQuartz(tenantAttributes,
+        quartzEdifactMinVersion)) || (!isQuartzEdifactEnabled && isJobScheduleAllowed(
+        acqSchedulingProperties.isRunOnlyIfModuleRegistered(), contextHelper.isModuleRegistered()));
+      if (shouldScheduleInitialConfigs) {
         ExportConfigCollection exportConfigCol = basedConfigManager.getConfigCollection(ALL_EDIFACT_ORDERS_CONFIG_QUERY, Integer.MAX_VALUE);
         exportConfigs = exportConfigCol.getConfigs();
         for (ExportConfig exportConfig : exportConfigs) {
