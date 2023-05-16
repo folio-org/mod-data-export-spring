@@ -31,6 +31,7 @@ import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -123,8 +124,10 @@ public class ServiceConfiguration {
   @Bean
   EdifactScheduledJobInitializer edifactScheduledJobInitializer(ExportTypeBasedConfigManager exportTypeBasedConfigManager,
                     FolioExecutionContextHelper contextHelper,
-                    EdifactSchedulingConfig edifactSchedulingConfig) {
+                    EdifactSchedulingConfig edifactSchedulingConfig,
+                    @Value("${folio.quartz.edifact.enabled}") boolean isQuartzEdifactEnabled) {
     return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper,
-      edifactSchedulingConfig.acqSchedulingProperties(), edifactSchedulingConfig.initEdifactOrdersExportJobScheduler());
+      edifactSchedulingConfig.acqSchedulingProperties(), edifactSchedulingConfig.initEdifactOrdersExportJobScheduler(),
+      isQuartzEdifactEnabled);
   }
 }
