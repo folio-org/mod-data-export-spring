@@ -1,5 +1,6 @@
 package org.folio.des.scheduling.base;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ScheduleParameters;
 
@@ -17,6 +18,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 import java.util.TimeZone;
 
+@Log4j2
 public final class ScheduleDateTimeUtil {
 
   private ScheduleDateTimeUtil() {
@@ -60,6 +62,7 @@ public final class ScheduleDateTimeUtil {
       ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
       ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
       LocalDate nowDate = startZoneDate.toLocalDate();
+      log.info("time calculated: {}",Date.from(nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS).toInstant()).toString());
       return Date.from(nowDate.atTime(localTime).atZone(zoneId).truncatedTo(ChronoUnit.SECONDS).toInstant());
     } else {
       return Date.from(getUtcDateTime().truncatedTo(ChronoUnit.SECONDS).toInstant());

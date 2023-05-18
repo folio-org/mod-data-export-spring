@@ -14,7 +14,11 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
@@ -40,10 +44,11 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
     ScheduleParameters scheduleParameters = new ScheduleParameters();
 
     if(exportConfig.getScheduleTime()==null || exportConfig.getScheduleTime().isEmpty()) {
-      Calendar cal1 =new GregorianCalendar();
-      SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-      scheduleParameters.setScheduleTime(dateFormat.format(cal1.getTime()));
-      log.info("HOUR Unit with time:{} ",dateFormat.format(cal1.getTime()).toString());
+      final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone));
+      String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(now);
+      String today = LocalDate.now().format(DateTimeFormatter.ofPattern(format));
+      scheduleParameters.setScheduleTime(today);
+      log.info("HOUR Unit with time:{} ",today);
     }
     else {
       scheduleParameters.setScheduleTime( OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
