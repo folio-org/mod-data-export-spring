@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.base.ScheduleDateTimeUtil;
 import org.quartz.CalendarIntervalScheduleBuilder;
@@ -20,6 +21,7 @@ import org.quartz.TriggerBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
+@Log4j2
 public class ScheduleParametersToTriggerConverterImpl implements ScheduleParametersToTriggerConverter {
   @Override
   public Set<Trigger> convert(ScheduleParameters scheduleParameters, String triggerGroup) {
@@ -65,6 +67,7 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
 
   private Trigger buildTrigger(ScheduleParameters parameters, Date startTime, IntervalUnit intervalUnit,
                                String triggerGroup) {
+    log.info("Start Time is:{}",startTime.toString());
     return TriggerBuilder.newTrigger()
       .withSchedule(CalendarIntervalScheduleBuilder.calendarIntervalSchedule()
         .withInterval(parameters.getScheduleFrequency(), intervalUnit)

@@ -43,6 +43,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
       Calendar cal1 =new GregorianCalendar();
       SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
       scheduleParameters.setScheduleTime(dateFormat.format(cal1.getTime()));
+      log.info("HOUR Unit with time:{} ",dateFormat.format(cal1.getTime()).toString());
     }
     else {
       scheduleParameters.setScheduleTime( OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
