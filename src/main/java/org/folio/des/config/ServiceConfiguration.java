@@ -21,6 +21,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
@@ -73,26 +74,26 @@ public class ServiceConfiguration {
   @Bean
   BurSarFeesFinesExportConfigService burSarExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-            ExportConfigConverterResolver  exportConfigConverterResolver) {
+            ExportConfigConverterResolver  exportConfigConverterResolver,BursarExportScheduler bursarExportScheduler) {
     return new BurSarFeesFinesExportConfigService(client, defaultModelConfigToExportConfigConverter,
-            exportConfigConverterResolver, exportConfigValidatorResolver);
+            exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
   }
 
   @Bean
   EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
            ExportConfigConverterResolver  exportConfigConverterResolver,
-           EdifactSchedulingConfig edifactSchedulingConfig) {
+           EdifactSchedulingConfig edifactSchedulingConfig,BursarExportScheduler bursarExportScheduler) {
     return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler());
+      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler(),bursarExportScheduler);
   }
 
   @Bean
   BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
-                        DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                        ExportConfigConverterResolver exportConfigConverterResolver) {
+                                                  DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+                                                  ExportConfigConverterResolver exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
     return new BaseExportConfigService(client, defaultModelConfigToExportConfigConverter,
-                        exportConfigConverterResolver, exportConfigValidatorResolver);
+                        exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
   }
 
 

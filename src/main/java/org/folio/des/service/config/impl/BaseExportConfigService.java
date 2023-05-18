@@ -11,6 +11,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,6 +29,8 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final ExportConfigConverterResolver exportConfigConverterResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
+  private final BursarExportScheduler bursarExportScheduler;
+
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("Putting {} {}.", configId, exportConfig);
@@ -35,6 +38,7 @@ public class BaseExportConfigService implements ExportConfigService {
     var config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
     log.info("Put {} {}.", configId, config);
+    bursarExportScheduler.scheduleBursarJob(exportConfig);
   }
 
   @Override

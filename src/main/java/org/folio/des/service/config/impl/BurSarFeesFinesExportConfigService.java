@@ -10,6 +10,7 @@ import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
 import lombok.extern.log4j.Log4j2;
@@ -18,10 +19,10 @@ import lombok.extern.log4j.Log4j2;
 public class BurSarFeesFinesExportConfigService extends BaseExportConfigService {
 
   public BurSarFeesFinesExportConfigService(ConfigurationClient client,
-                                  DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                  ExportConfigConverterResolver exportConfigConverterResolver,
-                                  ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
+                                            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+                                            ExportConfigConverterResolver exportConfigConverterResolver,
+                                            ExportConfigValidatorResolver exportConfigValidatorResolver, BursarExportScheduler bursarExportScheduler) {
+    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
   }
 
   @Override
