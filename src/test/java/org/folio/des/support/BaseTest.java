@@ -85,7 +85,7 @@ public abstract class BaseTest {
 
   @SneakyThrows
   protected static void setUpTenant(MockMvc mockMvc) {
-    mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-data-export-spring")))
+    mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-data-export-spring-3.0.0")))
         .headers(defaultHeaders())
         .contentType(APPLICATION_JSON)).andExpect(status().isNoContent());
   }
