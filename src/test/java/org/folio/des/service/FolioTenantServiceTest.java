@@ -51,7 +51,7 @@ class FolioTenantServiceTest {
     doNothing().when(contextHelper).registerTenant();
     doNothing().when(scheduler).initScheduleConfiguration();
     doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
-    doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob();
+    doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka).createKafkaTopics();
     doNothing().when(kafka).restartEventListeners();
 
@@ -60,7 +60,7 @@ class FolioTenantServiceTest {
     verify(contextHelper, times(1)).registerTenant();
     verify(scheduler, times(1)).initScheduleConfiguration();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
-    verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob();
+    verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
   }
