@@ -63,7 +63,7 @@ class FolioTenantServiceTest {
 
   @Test
   void shouldDeleteJob() {
-    String tenantId = "tenant1";
+    String tenantId = "tenantA";
     TenantAttributes tenantAttributes = createTenantAttributes();
     tenantAttributes.setPurge(true);
 
