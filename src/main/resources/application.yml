@@ -65,7 +65,7 @@ spring:
         jobStore:
           driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
           tablePrefix: ${folio.quartz.schemaName}.QRTZ_
-          #misfireThreshold: 10000
+          misfireThreshold: 60000
           isClustered: true
           clusterCheckinInterval: 15000
 management:
