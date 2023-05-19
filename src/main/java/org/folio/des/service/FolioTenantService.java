@@ -3,6 +3,7 @@ package org.folio.des.service;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.ExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
@@ -62,8 +63,8 @@ public class FolioTenantService extends TenantService {
       String tenantId = context.getTenantId();
       exportJobScheduler.deleteJobGroup(tenantId);
     } catch (SchedulerException e) {
-      log.error(e.getMessage(), e);
-      throw new IllegalStateException(e);
+      log.error("Error while deleting job for tenant={}, {}", context.getTenantId(), e.getMessage());
+      throw new SchedulingException("Error during deleting job", e);
     }
   }
 }

@@ -168,8 +168,18 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     edifactExportJobScheduler.deleteJobGroup(TENANT);
 
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
-
     assertEquals(0, jobKeys.size());
+  }
+
+  @Test
+  void testNotDeleteIfJobDontExists() throws SchedulerException {
+    ExportConfig config = getExportConfig();
+    edifactExportJobScheduler.scheduleExportJob(config);
+
+    edifactExportJobScheduler.deleteJobGroup("");
+
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+    assertEquals(1, jobKeys.size());
   }
 
   private ExportConfig getExportConfig() {

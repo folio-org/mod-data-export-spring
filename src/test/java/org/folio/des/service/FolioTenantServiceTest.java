@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.ExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.SchedulerException;
 
 @ExtendWith(MockitoExtension.class)
 class FolioTenantServiceTest {
@@ -87,7 +87,7 @@ class FolioTenantServiceTest {
     tenantAttributes.setPurge(true);
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    doThrow(SchedulingException.class).when(exportJobScheduler).deleteJobGroup(tenantId);
+    doThrow(SchedulerException.class).when(exportJobScheduler).deleteJobGroup(tenantId);
 
     Assertions.assertThrows(org.folio.des.exceptions.SchedulingException.class,
       () -> folioTenantService.afterTenantDeletion(tenantAttributes));
