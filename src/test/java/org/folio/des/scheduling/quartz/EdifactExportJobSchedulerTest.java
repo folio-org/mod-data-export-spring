@@ -160,6 +160,18 @@ class EdifactExportJobSchedulerTest extends BaseTest {
       () -> assertEquals(0, scheduler.getJobKeys(GroupMatcher.anyJobGroup()).size()));
   }
 
+  @Test
+  void testDeleteJobGroup() throws SchedulerException {
+    ExportConfig config = getExportConfig();
+    edifactExportJobScheduler.scheduleExportJob(config);
+
+    edifactExportJobScheduler.deleteJobGroup(TENANT);
+
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+
+    assertEquals(0, jobKeys.size());
+  }
+
   private ExportConfig getExportConfig() {
     UUID vendorId = UUID.randomUUID();
     ExportConfig exportConfig = new ExportConfig();

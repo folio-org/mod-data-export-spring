@@ -18,6 +18,7 @@ import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.scheduling.ExportJobScheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -58,6 +59,11 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
       }
     }
     return scheduledJobs;
+  }
+
+  @Override
+  public void deleteJobGroup(String tenantId) {
+    throw new UnsupportedOperationException("Not implemented yet");
   }
 
   @Override
