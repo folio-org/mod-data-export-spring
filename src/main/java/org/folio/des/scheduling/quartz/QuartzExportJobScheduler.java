@@ -20,7 +20,6 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,25 +54,6 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
       log.warn("Error during scheduling for config id {}", exportConfig.getId(), e);
       throw new SchedulingException("Error during scheduling", e);
     }
-  }
-
-  @Override
-  public void deleteJobGroup(String tenantId) throws SchedulerException {
-    try {
-      String ediJobName = getJobGroup(tenantId);
-      Set<JobKey> jobKeySet = scheduler.getJobKeys(GroupMatcher.groupEquals(ediJobName));
-      for (JobKey jobKey : jobKeySet) {
-        scheduler.deleteJob(jobKey);
-      }
-      log.info("deleteJobGroup:: Scheduled Job Keys with size={} deleted", jobKeySet.size());
-    } catch (SchedulerException e) {
-      log.error(e.getMessage(), e);
-      throw e;
-    }
-  }
-
-  private String getJobGroup(String tenantName) {
-    return tenantName + "_" + QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME;
   }
 
   private void scheduleJob(JobKey jobKey, ExportConfig exportConfig) throws SchedulerException {

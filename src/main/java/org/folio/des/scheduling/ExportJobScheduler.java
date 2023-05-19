@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
-import org.quartz.SchedulerException;
 
 public interface ExportJobScheduler {
   /**
@@ -15,11 +14,4 @@ public interface ExportJobScheduler {
    */
   List<Job> scheduleExportJob(ExportConfig exportConfig);
 
-  /**
-   * Delete Jobs based on tenant name
-   *
-   * @param tenantId id of tenant in current context
-   * @throws SchedulerException if error occurs during job deletion
-   */
-  void deleteJobGroup(String tenantId) throws SchedulerException;
 }

@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,12 +19,9 @@ import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.scheduling.ScheduledTask;
 import org.folio.des.scheduling.ExportJobScheduler;
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class BaseExportJobScheduler implements DisposableBean, ExportJobScheduler {
@@ -33,7 +31,7 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
   protected final ScheduledTaskBuilder scheduledTaskBuilder;
 
   public BaseExportJobScheduler(ThreadPoolTaskScheduler taskScheduler,
-    Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter, ScheduledTaskBuilder scheduledTaskBuilder, int poolSize) {
+                                Converter<ExportConfig, List<ExportTaskTrigger>> triggerConverter, ScheduledTaskBuilder scheduledTaskBuilder, int poolSize) {
     this.taskScheduler = taskScheduler;
     this.triggerConverter = triggerConverter;
     this.scheduledTaskBuilder = scheduledTaskBuilder;
@@ -59,11 +57,6 @@ public class BaseExportJobScheduler implements DisposableBean, ExportJobSchedule
       }
     }
     return scheduledJobs;
-  }
-
-  @Override
-  public void deleteJobGroup(String tenantId) {
-    throw new UnsupportedOperationException("Not implemented yet");
   }
 
   @Override

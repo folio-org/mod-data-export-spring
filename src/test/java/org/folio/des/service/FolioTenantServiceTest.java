@@ -1,26 +1,23 @@
 package org.folio.des.service;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.ExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
+import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.tenant.domain.dto.TenantAttributes;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.SchedulerException;
 
 @ExtendWith(MockitoExtension.class)
 class FolioTenantServiceTest {
@@ -39,13 +36,12 @@ class FolioTenantServiceTest {
   @Mock
   EdifactScheduledJobInitializer edifactScheduledJobInitializer;
   @Mock
-  ExportJobScheduler exportJobScheduler;
-  @Mock
   FolioExecutionContext folioExecutionContext;
-
+  @Mock
+  ScheduledJobsRemover scheduledJobsRemover;
 
   @Test
-  void shouldDoProcessAfterTenantUpdating() throws Exception {
+  void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
 
     doNothing().when(contextHelper).registerTenant();
@@ -66,31 +62,17 @@ class FolioTenantServiceTest {
   }
 
   @Test
-  void shouldDeleteJobGroup() throws Exception {
+  void shouldDeleteJob() {
     String tenantId = "tenant1";
     TenantAttributes tenantAttributes = createTenantAttributes();
     tenantAttributes.setPurge(true);
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    doNothing().when(exportJobScheduler).deleteJobGroup(tenantId);
+    doNothing().when(scheduledJobsRemover).deleteJob(tenantId);
 
     folioTenantService.afterTenantDeletion(tenantAttributes);
 
-    verify(exportJobScheduler, times(1)).deleteJobGroup(tenantId);
-  }
-
-
-  @Test
-  void shouldThrowSchedulerExceptionWhenDeletingJobs() throws Exception {
-    String tenantId = "tenant1";
-    TenantAttributes tenantAttributes = createTenantAttributes();
-    tenantAttributes.setPurge(true);
-
-    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    doThrow(SchedulerException.class).when(exportJobScheduler).deleteJobGroup(tenantId);
-
-    Assertions.assertThrows(org.folio.des.exceptions.SchedulingException.class,
-      () -> folioTenantService.afterTenantDeletion(tenantAttributes));
+    verify(scheduledJobsRemover, times(1)).deleteJob(tenantId);
   }
 
   private TenantAttributes createTenantAttributes() {

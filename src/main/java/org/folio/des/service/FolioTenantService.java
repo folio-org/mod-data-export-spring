@@ -3,16 +3,14 @@ package org.folio.des.service;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.exceptions.SchedulingException;
-import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.ExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
+import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
-import org.quartz.SchedulerException;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -27,19 +25,19 @@ public class FolioTenantService extends TenantService {
   private final KafkaService kafka;
   private final BulkEditConfigService bulkEditConfigService;
   private final EdifactScheduledJobInitializer edifactScheduledJobInitializer;
-  private final ExportJobScheduler exportJobScheduler;
+  private final ScheduledJobsRemover scheduledJobsRemover;
 
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                             FolioExecutionContextHelper contextHelper, ExportScheduler scheduler, KafkaService kafka,
                             BulkEditConfigService bulkEditConfigService, EdifactScheduledJobInitializer edifactScheduledJobInitializer,
-                            ExportJobScheduler exportJobScheduler) {
+                            ScheduledJobsRemover scheduledJobsRemover) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.contextHelper = contextHelper;
     this.scheduler = scheduler;
     this.kafka = kafka;
     this.bulkEditConfigService = bulkEditConfigService;
     this.edifactScheduledJobInitializer = edifactScheduledJobInitializer;
-    this.exportJobScheduler = exportJobScheduler;
+    this.scheduledJobsRemover = scheduledJobsRemover;
   }
 
   @Override
@@ -59,12 +57,7 @@ public class FolioTenantService extends TenantService {
 
   @Override
   protected void afterTenantDeletion(TenantAttributes tenantAttributes) {
-    try {
-      String tenantId = context.getTenantId();
-      exportJobScheduler.deleteJobGroup(tenantId);
-    } catch (SchedulerException e) {
-      log.error("Error while deleting job for tenant={}, {}", context.getTenantId(), e.getMessage());
-      throw new SchedulingException("Error during deleting job", e);
-    }
+    String tenantId = context.getTenantId();
+    scheduledJobsRemover.deleteJob(tenantId);
   }
 }
