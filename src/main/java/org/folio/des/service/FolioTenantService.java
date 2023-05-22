@@ -1,6 +1,5 @@
 package org.folio.des.service;
 
-import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.ExportScheduler;
@@ -14,6 +13,8 @@ import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
