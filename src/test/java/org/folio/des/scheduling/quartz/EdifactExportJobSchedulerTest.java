@@ -188,8 +188,6 @@ class EdifactExportJobSchedulerTest extends BaseTest {
   void testNotDeleteOtherJobGroup() throws SchedulerException {
     ExportConfig otherConfig = getExportConfig();
     otherConfig.setTenant("tenant-other");
-    ExportConfig otherConfig2 = getExportConfig();
-    otherConfig2.setTenant("tenant-other-2");
     ExportConfig config = getExportConfig();
     config.setTenant("diku");
     ExportConfig config2 = getExportConfig();
@@ -203,12 +201,14 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     edifactExportJobScheduler.scheduleExportJob(config);
     edifactExportJobScheduler.scheduleExportJob(config2);
     edifactExportJobScheduler.scheduleExportJob(otherConfig);
-    edifactExportJobScheduler.scheduleExportJob(otherConfig2);
 
     scheduledJobsRemover.deleteJob("diku");
 
-    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
-    assertEquals(2, jobKeys.size());
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("tenant-other"+"_"));
+    assertEquals(1, jobKeys.size());
+
+    var deletedJobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("diku"+"_"));
+    assertEquals(0, deletedJobKeys.size());
   }
 
   private ExportConfig getExportConfig() {
