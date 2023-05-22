@@ -19,6 +19,10 @@ public class ScheduledJobsRemover {
   private final List<String> exportTypes;
 
   public void deleteJob(String tenantId) {
+    if (this.exportTypes == null || this.exportTypes.isEmpty()) {
+      log.info("deleteJob:: No export types found to delete");
+      return;
+    }
     // to delete all different export type relate to tenant id.
     for (String exportType : this.exportTypes) {
       deleteJobGroup(tenantId, exportType);
