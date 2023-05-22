@@ -136,7 +136,7 @@ public class ServiceConfiguration {
   }
 
   @Bean
-  ScheduledJobsRemover schedulerRemover(Scheduler scheduler) {
-    return new ScheduledJobsRemover(List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME), scheduler);
+  ScheduledJobsRemover scheduledJobsRemover(Scheduler scheduler) {
+    return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME));
   }
 }

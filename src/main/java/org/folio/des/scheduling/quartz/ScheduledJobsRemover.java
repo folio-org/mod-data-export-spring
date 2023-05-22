@@ -16,12 +16,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 @RequiredArgsConstructor
 public class ScheduledJobsRemover {
   private final Scheduler scheduler;
-  private List<String> exportTypes;
-
-  public ScheduledJobsRemover(List<String> exportTypes, Scheduler scheduler) {
-    this.exportTypes = exportTypes;
-    this.scheduler = scheduler;
-  }
+  private final List<String> exportTypes;
 
   public void deleteJob(String tenantId) {
     // to delete all different export type relate to tenant id.
@@ -31,14 +26,14 @@ public class ScheduledJobsRemover {
   }
 
   private void deleteJobGroup(String tenantId, String exportType) {
-    String ediJobGroup = getJobGroup(tenantId, exportType);
-    log.info("deleteJobGroup:: Trying to delete job group '{}'", ediJobGroup);
+    String jobGroup = getJobGroup(tenantId, exportType);
+    log.info("deleteJobGroup:: Trying to delete job group '{}'", jobGroup);
     try {
-      Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(ediJobGroup));
+      Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(jobGroup));
       scheduler.deleteJobs(new ArrayList<>(jobKeys));
       log.info("deleteJobGroup:: Scheduled Job Keys with size={} deleted", jobKeys.size());
     } catch (SchedulerException e) {
-      log.error("Error during job group '{}' deletion", ediJobGroup, e);
+      log.error("deleteJobGroup:: Error during job group '{}' deletion", jobGroup, e);
       throw new SchedulingException("Error during deleting job", e);
     }
   }

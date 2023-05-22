@@ -5,8 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
@@ -22,6 +20,9 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * {@link ExportJobScheduler} quartz implementation
