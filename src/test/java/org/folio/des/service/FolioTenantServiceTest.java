@@ -68,11 +68,11 @@ class FolioTenantServiceTest {
     tenantAttributes.setPurge(true);
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    doNothing().when(scheduledJobsRemover).deleteJob(tenantId);
+    doNothing().when(scheduledJobsRemover).deleteJobs(tenantId);
 
     folioTenantService.afterTenantDeletion(tenantAttributes);
 
-    verify(scheduledJobsRemover, times(1)).deleteJob(tenantId);
+    verify(scheduledJobsRemover, times(1)).deleteJobs(tenantId);
   }
 
   private TenantAttributes createTenantAttributes() {

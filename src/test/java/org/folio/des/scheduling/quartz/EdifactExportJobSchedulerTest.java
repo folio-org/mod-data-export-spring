@@ -167,7 +167,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     ExportConfig config = getExportConfig();
     edifactExportJobScheduler.scheduleExportJob(config);
 
-    scheduledJobsRemover.deleteJob(TENANT);
+    scheduledJobsRemover.deleteJobs(TENANT);
 
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
     assertEquals(0, jobKeys.size());
@@ -178,7 +178,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     ExportConfig config = getExportConfig();
     edifactExportJobScheduler.scheduleExportJob(config);
 
-    scheduledJobsRemover.deleteJob("");
+    scheduledJobsRemover.deleteJobs("");
 
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
     assertEquals(1, jobKeys.size());
@@ -202,7 +202,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     edifactExportJobScheduler.scheduleExportJob(config2);
     edifactExportJobScheduler.scheduleExportJob(otherConfig);
 
-    scheduledJobsRemover.deleteJob("diku");
+    scheduledJobsRemover.deleteJobs("diku");
 
     var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("tenant-other"+"_"));
     assertEquals(1, jobKeys.size());

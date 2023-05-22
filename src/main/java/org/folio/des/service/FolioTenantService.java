@@ -59,6 +59,6 @@ public class FolioTenantService extends TenantService {
   @Override
   protected void afterTenantDeletion(TenantAttributes tenantAttributes) {
     String tenantId = context.getTenantId();
-    scheduledJobsRemover.deleteJob(tenantId);
+    scheduledJobsRemover.deleteJobs(tenantId);
   }
 }

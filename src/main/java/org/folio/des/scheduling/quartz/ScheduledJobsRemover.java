@@ -20,7 +20,7 @@ public class ScheduledJobsRemover {
   private final Scheduler scheduler;
   private final List<String> exportTypes;
 
-  public void deleteJob(String tenantId) {
+  public void deleteJobs(String tenantId) {
     if (CollectionUtils.isNotEmpty(exportTypes)) {
       // to delete all different export type relate to tenant id.
       for (String exportType : exportTypes) {
