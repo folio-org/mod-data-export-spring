@@ -16,7 +16,7 @@ folio:
     schemaName: mod_data_export_spring_quartz
     changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
-  port: 8082
+  port: 8081
 logging:
   level:
     liquibase: debug
@@ -42,7 +42,7 @@ spring:
   datasource:
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:okapi_modules}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_DATABASE:okapi_modules}
   cloud:
     openfeign:
       okhttp:
