@@ -191,7 +191,9 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     ExportConfig otherConfig2 = getExportConfig();
     otherConfig2.setTenant("tenant-other-2");
     ExportConfig config = getExportConfig();
+    config.setTenant("diku");
     ExportConfig config2 = getExportConfig();
+    config2.setTenant("diku");
     config2.getExportTypeSpecificParameters()
       .getVendorEdiOrdersExportConfig()
       .getEdiSchedule()
@@ -203,7 +205,7 @@ class EdifactExportJobSchedulerTest extends BaseTest {
     edifactExportJobScheduler.scheduleExportJob(otherConfig);
     edifactExportJobScheduler.scheduleExportJob(otherConfig2);
 
-    scheduledJobsRemover.deleteJob(TENANT);
+    scheduledJobsRemover.deleteJob("diku");
 
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
     assertEquals(2, jobKeys.size());
