@@ -49,6 +49,8 @@ class EdifactExportJobSchedulerTest extends BaseTest {
 
   @Autowired
   private ExportJobScheduler edifactExportJobScheduler;
+  @Autowired
+  private ScheduledJobsRemover scheduledJobsRemover;
 
   @Test
   void testSchedule() throws SchedulerException {
@@ -158,6 +160,55 @@ class EdifactExportJobSchedulerTest extends BaseTest {
       .willReturn(aResponse().withStatus(404)));
     await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(0, scheduler.getJobKeys(GroupMatcher.anyJobGroup()).size()));
+  }
+
+  @Test
+  void testDeleteJobGroup() throws SchedulerException {
+    ExportConfig config = getExportConfig();
+    edifactExportJobScheduler.scheduleExportJob(config);
+
+    scheduledJobsRemover.deleteJobs(TENANT);
+
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+    assertEquals(0, jobKeys.size());
+  }
+
+  @Test
+  void testNotDeleteIfJobDontExists() throws SchedulerException {
+    ExportConfig config = getExportConfig();
+    edifactExportJobScheduler.scheduleExportJob(config);
+
+    scheduledJobsRemover.deleteJobs("");
+
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+    assertEquals(1, jobKeys.size());
+  }
+
+  @Test
+  void testNotDeleteOtherJobGroup() throws SchedulerException {
+    ExportConfig otherConfig = getExportConfig();
+    otherConfig.setTenant("tenant-other");
+    ExportConfig config = getExportConfig();
+    config.setTenant("diku");
+    ExportConfig config2 = getExportConfig();
+    config2.setTenant("diku");
+    config2.getExportTypeSpecificParameters()
+      .getVendorEdiOrdersExportConfig()
+      .getEdiSchedule()
+      .getScheduleParameters()
+      .setId(UUID.randomUUID());
+
+    edifactExportJobScheduler.scheduleExportJob(config);
+    edifactExportJobScheduler.scheduleExportJob(config2);
+    edifactExportJobScheduler.scheduleExportJob(otherConfig);
+
+    scheduledJobsRemover.deleteJobs("diku");
+
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("tenant-other"+"_"));
+    assertEquals(1, jobKeys.size());
+
+    var deletedJobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("diku"+"_"));
+    assertEquals(0, deletedJobKeys.size());
   }
 
   private ExportConfig getExportConfig() {
