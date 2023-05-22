@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.exceptions.SchedulingException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -19,13 +21,13 @@ public class ScheduledJobsRemover {
   private final List<String> exportTypes;
 
   public void deleteJob(String tenantId) {
-    if (this.exportTypes == null || this.exportTypes.isEmpty()) {
-      log.info("deleteJob:: No export types found to delete");
-      return;
-    }
-    // to delete all different export type relate to tenant id.
-    for (String exportType : this.exportTypes) {
-      deleteJobGroup(tenantId, exportType);
+    if (CollectionUtils.isNotEmpty(this.exportTypes)) {
+      // to delete all different export type relate to tenant id.
+      for (String exportType : this.exportTypes) {
+        deleteJobGroup(tenantId, exportType);
+      }
+    } else {
+      log.info("deleteJob:: No export types found to delete for tenant '{}'", tenantId);
     }
   }
 
