@@ -21,9 +21,9 @@ public class ScheduledJobsRemover {
   private final List<String> exportTypes;
 
   public void deleteJob(String tenantId) {
-    if (CollectionUtils.isNotEmpty(this.exportTypes)) {
+    if (CollectionUtils.isNotEmpty(exportTypes)) {
       // to delete all different export type relate to tenant id.
-      for (String exportType : this.exportTypes) {
+      for (String exportType : exportTypes) {
         deleteJobGroup(tenantId, exportType);
       }
     } else {
