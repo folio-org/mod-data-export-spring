@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +44,7 @@ public class BursarExportJobSchedulerTest extends BaseTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = ExportConfig.SchedulePeriodEnum.class, names = {"HOUR","DAY"})
+  @EnumSource(value = ExportConfig.SchedulePeriodEnum.class, names = {"HOUR","DAY","WEEK"})
   void testBursarTrigger(ExportConfig.SchedulePeriodEnum schedulePeriodEnum) throws SchedulerException {
     String startTime = null;
     if(!schedulePeriodEnum.equals(ExportConfig.SchedulePeriodEnum.HOUR)) {
@@ -67,6 +68,9 @@ public class BursarExportJobSchedulerTest extends BaseTest {
     exportConfig.setScheduleTime(scheduledTime);
     exportConfig.setSchedulePeriod(schedulePeriodEnum);
     exportConfig.setScheduleFrequency(1);
+    if(ExportConfig.SchedulePeriodEnum.WEEK.equals(schedulePeriodEnum)) {
+      exportConfig.setWeekDays(List.of(ExportConfig.WeekDaysEnum.TUESDAY));
+    }
     return exportConfig;
   }
 }

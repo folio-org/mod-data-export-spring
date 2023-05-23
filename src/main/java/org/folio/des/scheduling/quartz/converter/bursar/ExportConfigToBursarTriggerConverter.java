@@ -58,9 +58,8 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
     if(exportConfig.getSchedulePeriod().equals(ExportConfig.SchedulePeriodEnum.WEEK)) {
       scheduleParameters.setWeekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
     }
-    else {
-      scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
-    }
+    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+
     return scheduleParameters;
   }
 
