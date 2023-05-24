@@ -12,6 +12,7 @@ import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 
 import java.util.Date;
 
@@ -50,10 +51,9 @@ public class BursarJob implements org.quartz.Job {
       return createScheduledJob(exportConfig);
 
     } catch (NotFoundException e) {
-      // TODO delete the job
       log.warn("getJob:: configuration id '{}' does not exist anymore. The job will be unscheduled",
         exportConfigId);
-
+      deleteJob(jobExecutionContext);
       throw new SchedulingException(String.format(
         "Configuration id '%s' could not be found. The job was unscheduled", exportConfigId), e);
     }
@@ -75,5 +75,15 @@ public class BursarJob implements org.quartz.Job {
     scheduledJob.setTenant(exportConfig.getTenant());
     log.info("Scheduled job assigned {}.", scheduledJob);
     return scheduledJob;
+  }
+
+  private void deleteJob(JobExecutionContext jobExecutionContext) {
+    JobKey jobKey = jobExecutionContext.getJobDetail().getKey();
+    try {
+      jobExecutionContext.getScheduler().deleteJob(jobKey);
+      log.info("deleteJob:: bursarJob '{}' was deleted from scheduler", jobKey);
+    } catch (Exception e) {
+      log.warn("deleteJob:: exception deleting job '{}'", jobKey, e);
+    }
   }
 }

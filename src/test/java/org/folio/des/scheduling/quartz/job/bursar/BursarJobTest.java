@@ -21,6 +21,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.impl.JobDetailImpl;
 
 import java.util.UUID;
@@ -91,13 +92,15 @@ public class BursarJobTest {
   }
 
   @Test
-  void testExecuteFailureWhenWhenConfigIdNotFoundInSettings() {
+  void testExecuteFailureWhenWhenConfigIdNotFoundInSettings() throws SchedulerException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
+    when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))
       .thenThrow(new NotFoundException("config not found"));
     String message = assertThrows(SchedulingException.class, () -> bursarJob.execute(jobExecutionContext)).getMessage();
     assertEquals("Configuration id 'some_test_export_config_id' could not be found. The job was unscheduled",message);
+    verify(scheduler).deleteJob(JOB_KEY);
   }
 
   private JobDetail getJobDetail() {

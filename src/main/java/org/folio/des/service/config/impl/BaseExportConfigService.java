@@ -48,6 +48,7 @@ public class BaseExportConfigService implements ExportConfigService {
     var preparedConfig = createConfigModel(exportConfig);
     ModelConfiguration config = client.postConfiguration(preparedConfig);
     log.info("Posted {}.", config);
+    bursarExportScheduler.scheduleBursarJob(exportConfig);
     return config;
   }
 

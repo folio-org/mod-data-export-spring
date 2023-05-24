@@ -43,6 +43,10 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   private ScheduleParameters createBursarScheduleParameters(ExportConfig exportConfig) {
     ScheduleParameters scheduleParameters = new ScheduleParameters();
 
+    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
+    scheduleParameters.setTimeZone(timeZone);
+    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+
     if(exportConfig.getScheduleTime()==null || exportConfig.getScheduleTime().isEmpty()) {
       final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone));
       String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(now);
@@ -53,12 +57,9 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
     else {
       scheduleParameters.setScheduleTime( OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
     }
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
     if(exportConfig.getSchedulePeriod().equals(ExportConfig.SchedulePeriodEnum.WEEK)) {
       scheduleParameters.setWeekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
     }
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
 
     return scheduleParameters;
   }
