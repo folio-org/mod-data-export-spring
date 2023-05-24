@@ -27,6 +27,7 @@ class ScheduleUtilTest {
     "mod-3.0.0-SNAPSHOT,   mod-3.0.0-SNAPSHOT,   false",
     "mod-3.0.0-SNAPSHOT.1, mod-3.0.0-SNAPSHOT.2, false",
     "mod-3.0.0-SNAPSHOT,   mod-2.1.0,            false",
+    ",   mod-3.0.0-SNAPSHOT,            true"
   })
   void shouldLoadScheduleConfigsOnUpgrade(String moduleFrom, String moduleTo, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom).moduleTo(moduleTo);

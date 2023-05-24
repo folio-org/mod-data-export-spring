@@ -26,10 +26,10 @@ public class BursarScheduledJobInitializer {
   public void initAllScheduledJob(TenantAttributes tenantAttributes) {
     log.info("initiating scheduled job of type Bursar");
     try{
-      boolean shouldScheduleInitialConfigs = shouldMigrateSchedulesToQuartz(tenantAttributes,
-        quartzEdifactMinVersion);
+
       Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
-      if (savedConfig.isPresent() && shouldScheduleInitialConfigs) {
+      if (savedConfig.isPresent() && shouldMigrateSchedulesToQuartz(tenantAttributes,
+        quartzEdifactMinVersion)) { // check it first time module enable ??
         bursarExportScheduler.scheduleBursarJob(savedConfig.get());
       }
       else {
