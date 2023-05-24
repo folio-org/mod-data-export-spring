@@ -53,7 +53,7 @@ public class FolioTenantController extends TenantController {
         scheduler.initScheduleConfiguration();
         bulkEditConfigService.checkBulkEditConfiguration();
         edifactScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
-        bursarScheduledJobInitializer.initAllScheduledJob();
+        bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
         kafka.createKafkaTopics();
         kafka.restartEventListeners();
       } catch (Exception e) {
