@@ -27,8 +27,8 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
                                     DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                                     ExportConfigConverterResolver exportConfigConverterResolver,
                                     ExportConfigValidatorResolver exportConfigValidatorResolver,
-                                    ExportJobScheduler exportJobScheduler, BursarExportScheduler bursarExportScheduler) {
-    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
+                                    ExportJobScheduler exportJobScheduler) {
+    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
     this.exportJobScheduler = exportJobScheduler;
   }
 

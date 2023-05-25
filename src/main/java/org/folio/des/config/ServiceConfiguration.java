@@ -83,17 +83,17 @@ public class ServiceConfiguration {
   EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
            ExportConfigConverterResolver  exportConfigConverterResolver,
-           EdifactSchedulingConfig edifactSchedulingConfig,BursarExportScheduler bursarExportScheduler) {
+           EdifactSchedulingConfig edifactSchedulingConfig) {
     return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler(),bursarExportScheduler);
+      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler());
   }
 
   @Bean
   BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
                                                   DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                                  ExportConfigConverterResolver exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
+                                                  ExportConfigConverterResolver exportConfigConverterResolver) {
     return new BaseExportConfigService(client, defaultModelConfigToExportConfigConverter,
-                        exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
+                        exportConfigConverterResolver, exportConfigValidatorResolver);
   }
 
 

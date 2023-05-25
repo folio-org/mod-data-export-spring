@@ -18,12 +18,23 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BurSarFeesFinesExportConfigService extends BaseExportConfigService {
 
+  private final BursarExportScheduler bursarExportScheduler;
+
   public BurSarFeesFinesExportConfigService(ConfigurationClient client,
                                             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                                             ExportConfigConverterResolver exportConfigConverterResolver,
                                             ExportConfigValidatorResolver exportConfigValidatorResolver, BursarExportScheduler bursarExportScheduler) {
-    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
+    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
+    this.bursarExportScheduler = bursarExportScheduler;
   }
+
+  @Override
+  public void updateConfig(String configId, ExportConfig exportConfig) {
+    log.info("Inside Bursar UpdateConfig");
+    super.updateConfig(configId,exportConfig);
+    bursarExportScheduler.scheduleBursarJob(exportConfig);
+  }
+
 
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
