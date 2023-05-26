@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BursarJobTest {
+class BursarJobTest {
 
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";

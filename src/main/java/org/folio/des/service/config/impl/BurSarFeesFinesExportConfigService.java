@@ -10,6 +10,7 @@ import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
+import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
@@ -33,6 +34,14 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
     log.info("Inside Bursar UpdateConfig");
     super.updateConfig(configId,exportConfig);
     bursarExportScheduler.scheduleBursarJob(exportConfig);
+  }
+
+  @Override
+  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+    log.info("Inside Bursar postConfig");
+    ModelConfiguration modelConfiguration = super.postConfig(exportConfig);
+    bursarExportScheduler.scheduleBursarJob(exportConfig);
+    return modelConfiguration;
   }
 
 

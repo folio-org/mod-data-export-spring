@@ -27,6 +27,8 @@ class BursarExportJobSchedulerTest extends BaseTest {
 
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();
   public static final String SCHEDULE_TIME = "20:59:00.000Z";
+
+  private static final String EXPORT_GROUP = TENANT + "_" + QuartzConstants.BURSAR_EXPORT_GROUP_NAME;
   @Autowired
   ExportConfigToBursarTriggerConverter exportConfigToBursarTriggerConverter;
 
@@ -54,7 +56,7 @@ class BursarExportJobSchedulerTest extends BaseTest {
 
     var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
     assertEquals(1, triggers.size());
-
+    assertEquals(EXPORT_GROUP, triggers.get(0).getKey().getGroup());
   }
 
   @Test
@@ -64,6 +66,33 @@ class BursarExportJobSchedulerTest extends BaseTest {
     quartzExportJobScheduler.scheduleExportJob(testConfig);
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
     assertTrue(jobKeys.isEmpty());
+  }
+
+  @Test
+  void testMultipleTriggerForWeekDays() throws SchedulerException {
+    var testConfig = createConfig(ExportConfig.SchedulePeriodEnum.WEEK);
+    testConfig.setWeekDays(List.of(ExportConfig.WeekDaysEnum.TUESDAY,
+      ExportConfig.WeekDaysEnum.WEDNESDAY,ExportConfig.WeekDaysEnum.FRIDAY));
+    quartzExportJobScheduler.scheduleExportJob(testConfig);
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+
+    var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
+    assertEquals(3, triggers.size());
+    assertEquals(3, triggers.stream().filter(t -> EXPORT_GROUP.equals(t.getKey().getGroup())).count());
+  }
+
+  @Test
+  void testRescheduleBursarTrigger() throws SchedulerException {
+    var testConfig = createConfig(ExportConfig.SchedulePeriodEnum.DAY);
+    quartzExportJobScheduler.scheduleExportJob(testConfig);
+
+    testConfig.setScheduleFrequency(5);
+    quartzExportJobScheduler.scheduleExportJob(testConfig);
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+
+    var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
+    assertEquals(1, triggers.size());
+    assertEquals(EXPORT_GROUP, triggers.get(0).getKey().getGroup());
   }
 
   private ExportConfig createConfig(ExportConfig.SchedulePeriodEnum schedulePeriodEnum) {
