@@ -43,6 +43,7 @@ Institutional users should be granted the following permissions in order to use 
 - data-export.job.all
 
 ### Deployment information
+#### Before Poppy release
 ![](https://img.shields.io/static/v1?label=&message=!WARNING&color=orange)
  Only ONE instance should be running until the issues described below are fixed: 
 
@@ -59,14 +60,25 @@ will not be stored in memory in a FolioExecutionContext.
 More details:
 [Export scheduling doesn't support work in the cluster and after restarting docker container](https://issues.folio.org/browse/MODEXPS-81)
 
-#### Short overview
+##### Short overview
 Before running scheduled task(job) there is check, that module is registered for the Okapi tenant.
 
 Tenant information need to define DB schema for storing information about Job and etc.
 
 In the post tenant API controller specific user (`data-export-system-user`) is created for running scheduled export tasks. Permissions are defined in `src/main/resources/permissions/system-user-permissions.csv`.
 
-Also Okapi headers, system user, tenant information are stored in memory in a FolioExecutionContext.
+Also Okapi headers, system user, tenant information are s-tored in memory in a FolioExecutionContext.
+
+#### Since Poppy release
+Scheduling was changed to quartz: [Quartz Scheduling Implementation](https://wiki.folio.org/display/DD/Quartz+Scheduling+Implementation+in+mod-data-export-spring).
+The issues above were fixed, there's no need to reenable module after restarts and it can be scaled.
+##### Migration to quartz scheduling
+1. Migration is done once automatically on module upgrade from version which does not support quartz to version supporting quartz (based on `moduleFrom` and `moduleTo` versions in TenantAttributes).
+2. In case reloading of existing schedules needs to be forced, it can be done with setting `forceSchedulesReload=true` parameter in TenantAttributes in module enable request. [Example](https://wiki.folio.org/display/DD/Quartz+Scheduling+Implementation+in+mod-data-export-spring#QuartzSchedulingImplementationinmoddataexportspring-Migrationtoquartz) 
+3. After new version supporting quartz is deployed and enabled for tenants, old module version has to be stopped, otherwise jobs will be executed by both old version with spring scheduler and new version with quartz.
+##### Module disabling for tenant
+Tenant's schedules deletion is done in scope of [module disable with purge](https://github.com/folio-org/okapi/blob/master/doc/guide.md#purge-module-data).
+If disabling with purge is not invoked for mod-data-export-spring, tenant's scheduled jobs will continue to run in the background even after tenant itself is deleted. [Details](https://wiki.folio.org/display/DD/Quartz+Scheduling+Implementation+in+mod-data-export-spring)
 
 ### Issue tracker
 See project [MODEXPS](https://issues.folio.org/browse/MODEXPS)
