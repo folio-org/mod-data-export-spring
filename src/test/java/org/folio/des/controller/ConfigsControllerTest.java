@@ -25,7 +25,7 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.scheduling.RefreshConfigAspect;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,12 +52,13 @@ class ConfigsControllerTest extends BaseTest {
 
 
   @Autowired private MockMvc mockMvc;
-  @SpyBean private RefreshConfigAspect configAspect;
+
+  @SpyBean private BursarExportScheduler bursarExportScheduler;
   @SpyBean private ConfigurationClient configurationClient;
 
   @AfterEach
   void clear(){
-    reset(configAspect, configurationClient);
+    reset(bursarExportScheduler, configurationClient);
   }
 
   @ParameterizedTest
@@ -103,7 +104,7 @@ class ConfigsControllerTest extends BaseTest {
                 status().isCreated(),
                 content().contentType("text/plain;charset=UTF-8")));
 
-    verify(configAspect).refreshAfterPost(any(ExportConfig.class));
+    verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
   }
 
   @Test
@@ -120,7 +121,6 @@ class ConfigsControllerTest extends BaseTest {
           status().isCreated(),
           content().contentType("text/plain;charset=UTF-8")));
 
-    verify(configAspect).refreshAfterPost(any(ExportConfig.class));
   }
 
   @Test
@@ -139,7 +139,7 @@ class ConfigsControllerTest extends BaseTest {
                 .content(UPDATE_CONFIG_REQUEST))
         .andExpect(matchAll(status().isNoContent()));
 
-    verify(configAspect).refreshAfterUpdate(any(ExportConfig.class));
+    verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
   }
 
   @Test
@@ -201,7 +201,6 @@ class ConfigsControllerTest extends BaseTest {
         content().contentType(MediaType.APPLICATION_JSON_VALUE),
         jsonPath("$.id", is("c8303ff3-7dec-49a1-acc8-7ce4f311fe21"))));
 
-    verify(configAspect, times(0)).refreshAfterUpdate(any(ExportConfig.class));
   }
 
   @Test
@@ -222,8 +221,6 @@ class ConfigsControllerTest extends BaseTest {
         status().isNotFound(),
         content().contentType(MediaType.APPLICATION_JSON_VALUE),
         jsonPath("$.errors[0].type", is("NotFoundException"))));
-
-    verify(configAspect, times(0)).refreshAfterUpdate(any(ExportConfig.class));
   }
 
   @Test
@@ -243,8 +240,6 @@ class ConfigsControllerTest extends BaseTest {
         status().isNotFound(),
         content().contentType(MediaType.APPLICATION_JSON_VALUE),
         jsonPath("$.errors[0].type", is("NotFoundException"))));
-
-    verify(configAspect, times(0)).refreshAfterUpdate(any(ExportConfig.class));
   }
 
   @Test
@@ -260,8 +255,6 @@ class ConfigsControllerTest extends BaseTest {
           .accept(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders()))
       .andExpect(matchAll(status().isNoContent()));
-
-    verify(configAspect, times(0)).refreshAfterUpdate(any(ExportConfig.class));
   }
 
   @Test
@@ -281,7 +274,5 @@ class ConfigsControllerTest extends BaseTest {
         status().isNotFound(),
         content().contentType(MediaType.APPLICATION_JSON_VALUE),
         jsonPath("$.errors[0].type", is("NotFoundException"))));
-
-    verify(configAspect, times(0)).refreshAfterUpdate(any(ExportConfig.class));
   }
 }

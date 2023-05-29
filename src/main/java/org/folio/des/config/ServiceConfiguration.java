@@ -1,6 +1,7 @@
 package org.folio.des.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.folio.des.builder.job.AuthorityControlJobCommandBuilder;
@@ -23,6 +24,8 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
+import org.folio.des.scheduling.quartz.QuartzConstants;
+import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
@@ -32,6 +35,7 @@ import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -83,17 +87,17 @@ public class ServiceConfiguration {
   EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
            ExportConfigConverterResolver  exportConfigConverterResolver,
-           EdifactSchedulingConfig edifactSchedulingConfig,BursarExportScheduler bursarExportScheduler) {
+           EdifactSchedulingConfig edifactSchedulingConfig) {
     return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler(),bursarExportScheduler);
+      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler());
   }
 
   @Bean
   BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
                                                   DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                                  ExportConfigConverterResolver exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
+                                                  ExportConfigConverterResolver exportConfigConverterResolver) {
     return new BaseExportConfigService(client, defaultModelConfigToExportConfigConverter,
-                        exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
+                        exportConfigConverterResolver, exportConfigValidatorResolver);
   }
 
 
@@ -130,5 +134,10 @@ public class ServiceConfiguration {
     return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper,
       edifactSchedulingConfig.acqSchedulingProperties(), edifactSchedulingConfig.initEdifactOrdersExportJobScheduler(),
       isQuartzEdifactEnabled);
+  }
+
+  @Bean
+  ScheduledJobsRemover scheduledJobsRemover(Scheduler scheduler) {
+    return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME));
   }
 }

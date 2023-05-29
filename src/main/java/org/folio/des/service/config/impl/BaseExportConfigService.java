@@ -29,8 +29,6 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final ExportConfigConverterResolver exportConfigConverterResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
-  private final BursarExportScheduler bursarExportScheduler;
-
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("Putting {} {}.", configId, exportConfig);
@@ -38,7 +36,6 @@ public class BaseExportConfigService implements ExportConfigService {
     var config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
     log.info("Put {} {}.", configId, config);
-    bursarExportScheduler.scheduleBursarJob(exportConfig);
   }
 
   @Override

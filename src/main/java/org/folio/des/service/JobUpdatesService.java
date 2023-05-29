@@ -12,7 +12,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.folio.de.entity.Job;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.repository.JobDataExportRepository;
-import org.folio.des.scheduling.ExportScheduler;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +35,6 @@ public class JobUpdatesService {
   }
 
   private final JobDataExportRepository repository;
-  private final ExportScheduler exportScheduler;
 
   @Transactional
   public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
@@ -104,9 +102,6 @@ public class JobUpdatesService {
         job.setStatus(jobStatus);
 
         // Execute next job only after the previous one is completed.
-        if (jobStatus == JobStatus.SUCCESSFUL || jobStatus == JobStatus.FAILED) {
-          exportScheduler.nextJob();
-        }
       }
     }
     if (nonNull(jobExecutionUpdate.getProgress())) {
