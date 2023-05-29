@@ -27,7 +27,6 @@ public class BursarExportScheduler {
       log.error("exportConfig is null");
       return;
     }
-
     try {
       QuartzExportJobScheduler quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
         exportConfigToBursarTriggerConverter,exportConfigToBursarJobDetailConverter,bursarJobKeyResolver);
@@ -37,7 +36,5 @@ public class BursarExportScheduler {
     } catch (Exception e) {
       log.error("Error while scheduling BursarJob: ",e);
     }
-
   }
-
 }
