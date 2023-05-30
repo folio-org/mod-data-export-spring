@@ -45,7 +45,7 @@ public class FolioTenantService extends TenantService {
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
     try {
       contextHelper.registerTenant();
-      bursarScheduledJobInitializer.initAllScheduledJob();
+      bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
       bulkEditConfigService.checkBulkEditConfiguration();
       edifactScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
       kafka.createKafkaTopics();

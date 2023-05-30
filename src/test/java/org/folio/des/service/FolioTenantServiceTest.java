@@ -50,14 +50,14 @@ class FolioTenantServiceTest {
     doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka).createKafkaTopics();
     doNothing().when(kafka).restartEventListeners();
-    doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob();
+    doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
     verify(contextHelper, times(1)).registerTenant();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
-    verify(bursarScheduledJobInitializer,times(1)).initAllScheduledJob();
+    verify(bursarScheduledJobInitializer,times(1)).initAllScheduledJob(tenantAttributes);
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
   }

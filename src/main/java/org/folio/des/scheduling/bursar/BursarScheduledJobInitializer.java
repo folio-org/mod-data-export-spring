@@ -29,7 +29,7 @@ public class BursarScheduledJobInitializer {
 
       Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
       if (savedConfig.isPresent() && shouldMigrateSchedulesToQuartz(tenantAttributes,
-        quartzEdifactMinVersion)) { // check it first time module enable ??
+        quartzEdifactMinVersion)) {
         bursarExportScheduler.scheduleBursarJob(savedConfig.get());
       }
       else {
