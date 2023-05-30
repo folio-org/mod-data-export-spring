@@ -78,9 +78,9 @@ public class ServiceConfiguration {
   @Bean
   BurSarFeesFinesExportConfigService burSarExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-            ExportConfigConverterResolver  exportConfigConverterResolver,BursarExportScheduler bursarExportScheduler) {
+            ExportConfigConverterResolver  exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
     return new BurSarFeesFinesExportConfigService(client, defaultModelConfigToExportConfigConverter,
-            exportConfigConverterResolver, exportConfigValidatorResolver,bursarExportScheduler);
+            exportConfigConverterResolver, exportConfigValidatorResolver, bursarExportScheduler);
   }
 
   @Bean

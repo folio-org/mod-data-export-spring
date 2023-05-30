@@ -85,14 +85,10 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
     return scheduleParameters;
   }
 
-  @NotNull
-  private String setHourlyScheduledTime(ScheduleParameters scheduleParameters) {
+  private void setHourlyScheduledTime(ScheduleParameters scheduleParameters) {
     final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone));
     String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(now);
-    String today = LocalDate.now().format(DateTimeFormatter.ofPattern(format));
-    log.info("HOUR Unit with time:{} ",today);
-    scheduleParameters.setScheduleTime(today);
-    return today;
+    scheduleParameters.setScheduleTime(LocalDate.now().format(DateTimeFormatter.ofPattern(format)));
   }
 
   private List<ScheduleParameters.WeekDaysEnum> createWeekDaysEnum(List<ExportConfig.WeekDaysEnum> weekDays) {
