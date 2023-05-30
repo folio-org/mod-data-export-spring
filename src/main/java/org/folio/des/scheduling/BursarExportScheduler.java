@@ -14,18 +14,12 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @Log4j2
 public class BursarExportScheduler {
-  private final ExportConfigToBursarTriggerConverter exportConfigToBursarTriggerConverter;
-  private final BursarJobKeyResolver bursarJobKeyResolver;
-  private final ExportConfigToBursarJobDetailConverter exportConfigToBursarJobDetailConverter;
-  private final Scheduler scheduler;
-  private QuartzExportJobScheduler quartzExportJobScheduler;
+  private final QuartzExportJobScheduler quartzExportJobScheduler;
 
   public BursarExportScheduler(ExportConfigToBursarTriggerConverter exportConfigToBursarTriggerConverter, BursarJobKeyResolver bursarJobKeyResolver, ExportConfigToBursarJobDetailConverter exportConfigToBursarJobDetailConverter, Scheduler scheduler) {
-    this.exportConfigToBursarTriggerConverter = exportConfigToBursarTriggerConverter;
-    this.bursarJobKeyResolver = bursarJobKeyResolver;
-    this.exportConfigToBursarJobDetailConverter = exportConfigToBursarJobDetailConverter;
-    this.scheduler = scheduler;
-    initializeQuartzExportJobScheduler();
+
+    this.quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
+      exportConfigToBursarTriggerConverter, exportConfigToBursarJobDetailConverter, bursarJobKeyResolver);
   }
 
   public void scheduleBursarJob(ExportConfig exportConfig) {
@@ -39,10 +33,5 @@ public class BursarExportScheduler {
       log.warn("scheduleBursarJob::scheduleBursarJob::Error while scheduling BursarJob: ", e);
       throw new SchedulingException("Error during Bursar scheduling", e);
     }
-  }
-
-  private void initializeQuartzExportJobScheduler() {
-    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
-      exportConfigToBursarTriggerConverter, exportConfigToBursarJobDetailConverter, bursarJobKeyResolver);
   }
 }
