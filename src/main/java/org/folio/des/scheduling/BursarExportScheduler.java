@@ -1,7 +1,5 @@
 package org.folio.des.scheduling;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.scheduling.quartz.QuartzExportJobScheduler;
 import org.folio.des.scheduling.quartz.converter.bursar.ExportConfigToBursarJobDetailConverter;
@@ -9,6 +7,9 @@ import org.folio.des.scheduling.quartz.converter.bursar.ExportConfigToBursarTrig
 import org.folio.des.scheduling.quartz.job.bursar.BursarJobKeyResolver;
 import org.quartz.Scheduler;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @RequiredArgsConstructor
@@ -23,18 +24,18 @@ public class BursarExportScheduler {
 
 
   public void scheduleBursarJob(ExportConfig exportConfig) {
-    if(exportConfig == null) {
+    if (exportConfig == null) {
       log.error("exportConfig is null");
       return;
     }
     try {
       QuartzExportJobScheduler quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
-        exportConfigToBursarTriggerConverter,exportConfigToBursarJobDetailConverter,bursarJobKeyResolver);
+        exportConfigToBursarTriggerConverter, exportConfigToBursarJobDetailConverter, bursarJobKeyResolver);
 
-        quartzExportJobScheduler.scheduleExportJob(exportConfig);
+      quartzExportJobScheduler.scheduleExportJob(exportConfig);
 
     } catch (Exception e) {
-      log.error("Error while scheduling BursarJob: ",e);
+      log.error("Error while scheduling BursarJob: ", e);
     }
   }
 }

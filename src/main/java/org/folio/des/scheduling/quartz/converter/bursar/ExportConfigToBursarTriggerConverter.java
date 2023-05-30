@@ -1,7 +1,13 @@
 package org.folio.des.scheduling.quartz.converter.bursar;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.time.LocalDate;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.quartz.QuartzConstants;
@@ -11,13 +17,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import java.time.LocalDate;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.ArrayList;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
@@ -42,7 +44,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
 
     ExportConfig.SchedulePeriodEnum schedulePeriod = exportConfig.getSchedulePeriod();
 
-    if(ExportConfig.SchedulePeriodEnum.NONE.equals(schedulePeriod)) return null;
+    if (ExportConfig.SchedulePeriodEnum.NONE.equals(schedulePeriod)) return null;
 
     return switch (schedulePeriod) {
       case HOUR -> buildHourlyScheduleParam(exportConfig);
@@ -58,7 +60,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
     scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
     scheduleParameters.setTimeZone(timeZone);
     scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
-    scheduleParameters.setScheduleTime( OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
+    scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
     scheduleParameters.setWeekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
 
     return scheduleParameters;

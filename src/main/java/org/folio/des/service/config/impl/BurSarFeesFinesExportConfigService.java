@@ -32,7 +32,7 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("Inside Bursar UpdateConfig");
-    super.updateConfig(configId,exportConfig);
+    super.updateConfig(configId, exportConfig);
     bursarExportScheduler.scheduleBursarJob(exportConfig);
   }
 

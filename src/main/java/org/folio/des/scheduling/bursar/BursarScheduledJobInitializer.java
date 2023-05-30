@@ -1,13 +1,14 @@
 package org.folio.des.scheduling.bursar;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.util.Optional;
+
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.service.config.ExportConfigService;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Component
 @RequiredArgsConstructor
@@ -19,16 +20,14 @@ public class BursarScheduledJobInitializer {
 
   public void initAllScheduledJob() {
     log.info("initiating scheduled job of type Bursar");
-    try{
+    try {
       Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
       if (savedConfig.isPresent()) {
         bursarExportScheduler.scheduleBursarJob(savedConfig.get());
-      }
-      else {
+      } else {
         log.info("No export schedules found.");
       }
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       log.error("get configuration failed for type BURSAR");
     }
   }

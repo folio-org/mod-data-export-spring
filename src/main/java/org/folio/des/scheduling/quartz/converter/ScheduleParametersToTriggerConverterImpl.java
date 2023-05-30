@@ -67,7 +67,7 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
 
   private Trigger buildTrigger(ScheduleParameters parameters, Date startTime, IntervalUnit intervalUnit,
                                String triggerGroup) {
-    log.info("Start Time is:{}",startTime.toString());
+    log.info("Start Time is:{}", startTime.toString());
     return TriggerBuilder.newTrigger()
       .withSchedule(CalendarIntervalScheduleBuilder.calendarIntervalSchedule()
         .withInterval(parameters.getScheduleFrequency(), intervalUnit)

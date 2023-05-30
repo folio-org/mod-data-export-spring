@@ -1,7 +1,8 @@
 package org.folio.des.scheduling.quartz.converter.bursar;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import static org.folio.des.scheduling.quartz.QuartzConstants.EXPORT_CONFIG_ID_PARAM;
+import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
+
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverter;
 import org.folio.des.scheduling.quartz.job.bursar.BursarJob;
@@ -10,8 +11,8 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.springframework.stereotype.Component;
 
-import static org.folio.des.scheduling.quartz.QuartzConstants.EXPORT_CONFIG_ID_PARAM;
-import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2

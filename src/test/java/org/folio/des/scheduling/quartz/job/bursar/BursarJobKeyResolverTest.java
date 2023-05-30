@@ -1,14 +1,14 @@
 package org.folio.des.scheduling.quartz.job.bursar;
 
-import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
-import org.junit.jupiter.api.Test;
-import org.quartz.JobKey;
-
 import static org.folio.des.scheduling.quartz.QuartzConstants.BURSAR_EXPORT_GROUP_NAME;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportType;
+import org.junit.jupiter.api.Test;
+import org.quartz.JobKey;
 
 class BursarJobKeyResolverTest {
 
@@ -23,7 +23,7 @@ class BursarJobKeyResolverTest {
   void testResolveJobJey() {
     JobKey jobKey = bursarJobKeyResolver.resolve(buildExportConfig());
     assertNotNull(jobKey);
-    assertEquals(JobKey.jobKey(EXPORT_CONFIG_ID, EXPORT_GROUP),jobKey);
+    assertEquals(JobKey.jobKey(EXPORT_CONFIG_ID, EXPORT_GROUP), jobKey);
   }
 
   @Test

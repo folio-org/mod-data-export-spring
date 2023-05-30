@@ -1,5 +1,13 @@
 package org.folio.des.scheduling.quartz;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.PostConstruct;
+
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.scheduling.quartz.converter.bursar.ExportConfigToBursarJobDetailConverter;
@@ -14,15 +22,9 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(properties = {
   "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  "folio.quartz.edifact.enabled=true","folio.quartz.bursar.timeZone=Asia/Calcutta"})
+  "folio.quartz.edifact.enabled=true", "folio.quartz.bursar.timeZone=Asia/Calcutta"})
 class BursarExportJobSchedulerTest extends BaseTest {
 
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();
@@ -43,11 +45,11 @@ class BursarExportJobSchedulerTest extends BaseTest {
   @PostConstruct
   public void setUpBursar() {
     quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
-      exportConfigToBursarTriggerConverter,exportConfigToBursarJobDetailConverter,bursarJobKeyResolver);
+      exportConfigToBursarTriggerConverter, exportConfigToBursarJobDetailConverter, bursarJobKeyResolver);
   }
 
   @ParameterizedTest
-  @EnumSource(value = ExportConfig.SchedulePeriodEnum.class, names = {"HOUR","DAY","WEEK"})
+  @EnumSource(value = ExportConfig.SchedulePeriodEnum.class, names = {"HOUR", "DAY", "WEEK"})
   void testBursarTrigger(ExportConfig.SchedulePeriodEnum schedulePeriodEnum) throws SchedulerException {
     var testConfig = createConfig(schedulePeriodEnum);
 
@@ -72,7 +74,7 @@ class BursarExportJobSchedulerTest extends BaseTest {
   void testMultipleTriggerForWeekDays() throws SchedulerException {
     var testConfig = createConfig(ExportConfig.SchedulePeriodEnum.WEEK);
     testConfig.setWeekDays(List.of(ExportConfig.WeekDaysEnum.TUESDAY,
-      ExportConfig.WeekDaysEnum.WEDNESDAY,ExportConfig.WeekDaysEnum.FRIDAY));
+      ExportConfig.WeekDaysEnum.WEDNESDAY, ExportConfig.WeekDaysEnum.FRIDAY));
     quartzExportJobScheduler.scheduleExportJob(testConfig);
     var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
 
@@ -103,7 +105,7 @@ class BursarExportJobSchedulerTest extends BaseTest {
     exportConfig.setScheduleTime(SCHEDULE_TIME);
     exportConfig.setSchedulePeriod(schedulePeriodEnum);
     exportConfig.setScheduleFrequency(1);
-    if(ExportConfig.SchedulePeriodEnum.WEEK.equals(schedulePeriodEnum)) {
+    if (ExportConfig.SchedulePeriodEnum.WEEK.equals(schedulePeriodEnum)) {
       exportConfig.setWeekDays(List.of(ExportConfig.WeekDaysEnum.TUESDAY));
     }
     return exportConfig;
