@@ -55,7 +55,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildWeeklyScheduleParam(ExportConfig exportConfig) {
-    log.info("Inside buildWeeklyScheduleParam");
+    log.info("buildWeeklyScheduleParam::Inside buildWeeklyScheduleParam");
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
     scheduleParameters.setTimeZone(timeZone);
@@ -67,7 +67,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildDailyScheduleParam(ExportConfig exportConfig) {
-    log.info("Inside buildDailyScheduleParam");
+    log.info("buildDailyScheduleParam::Inside buildDailyScheduleParam");
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
     scheduleParameters.setTimeZone(timeZone);
@@ -77,7 +77,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildHourlyScheduleParam(ExportConfig exportConfig) {
-    log.info("Inside buildHourlyScheduleParam");
+    log.info("buildHourlyScheduleParam::Inside buildHourlyScheduleParam");
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
     scheduleParameters.setTimeZone(timeZone);
@@ -88,7 +88,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private void setHourlyScheduledTime(ScheduleParameters scheduleParameters) {
-    final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone));
+    final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone)).plusHours(1L);
     String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(now);
     scheduleParameters.setScheduleTime(LocalDate.now().format(DateTimeFormatter.ofPattern(format)));
   }

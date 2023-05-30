@@ -97,7 +97,7 @@ public class ServiceConfiguration {
                                                   DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                                                   ExportConfigConverterResolver exportConfigConverterResolver) {
     return new BaseExportConfigService(client, defaultModelConfigToExportConfigConverter,
-                        exportConfigConverterResolver, exportConfigValidatorResolver);
+      exportConfigConverterResolver, exportConfigValidatorResolver);
   }
 
 
@@ -138,6 +138,6 @@ public class ServiceConfiguration {
 
   @Bean
   ScheduledJobsRemover scheduledJobsRemover(Scheduler scheduler) {
-    return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME));
+    return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME, QuartzConstants.BURSAR_EXPORT_GROUP_NAME));
   }
 }
