@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.folio.des.domain.dto.ExportConfig;
@@ -18,21 +19,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-@RequiredArgsConstructor
 public class ExportConfigToBursarTriggerConverter implements Converter<ExportConfig, ExportTrigger> {
 
   private final ScheduleParametersToTriggerConverter scheduleParametersToTriggerConverter;
+  private final String timeZone;
 
-  @Value("${folio.quartz.bursar.timeZone}")
-  private String timeZone;
+  public ExportConfigToBursarTriggerConverter(ScheduleParametersToTriggerConverter scheduleParametersToTriggerConverter,
+                                              @Value("${folio.quartz.bursar.timeZone}") String timeZone) {
+    this.scheduleParametersToTriggerConverter = scheduleParametersToTriggerConverter;
+    this.timeZone = timeZone;
+  }
 
   @Override
   public ExportTrigger convert(@NotNull ExportConfig exportConfig) {
+
+    if (ExportConfig.SchedulePeriodEnum.NONE.equals(exportConfig.getSchedulePeriod())) {
+      return new ExportTrigger(true, Collections.emptySet());
+    }
 
     ScheduleParameters scheduleParameters = createBursarScheduleParameters(exportConfig);
 
@@ -43,8 +50,6 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   private ScheduleParameters createBursarScheduleParameters(ExportConfig exportConfig) {
 
     ExportConfig.SchedulePeriodEnum schedulePeriod = exportConfig.getSchedulePeriod();
-
-    if (ExportConfig.SchedulePeriodEnum.NONE.equals(schedulePeriod)) return null;
 
     return switch (schedulePeriod) {
       case HOUR -> buildHourlyScheduleParam(exportConfig);
