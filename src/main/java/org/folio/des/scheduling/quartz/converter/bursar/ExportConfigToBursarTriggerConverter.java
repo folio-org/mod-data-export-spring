@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
@@ -37,14 +38,19 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   @Override
   public ExportTrigger convert(@NotNull ExportConfig exportConfig) {
 
-    if (ExportConfig.SchedulePeriodEnum.NONE.equals(exportConfig.getSchedulePeriod())) {
+    if (isDisabledSchedule(exportConfig)) {
       return new ExportTrigger(true, Collections.emptySet());
     }
-
     ScheduleParameters scheduleParameters = createBursarScheduleParameters(exportConfig);
 
     return new ExportTrigger(false, scheduleParametersToTriggerConverter
       .convert(scheduleParameters, getTriggerGroup(exportConfig)));
+  }
+
+  private boolean isDisabledSchedule(ExportConfig exportConfig) {
+    return Optional.ofNullable(exportConfig.getSchedulePeriod())
+      .map(ExportConfig.SchedulePeriodEnum.NONE::equals)
+      .orElse(true);
   }
 
   private ScheduleParameters createBursarScheduleParameters(ExportConfig exportConfig) {

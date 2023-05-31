@@ -52,6 +52,15 @@ class ExportConfigToBursarTriggerConverterTest {
     assertTrue(CollectionUtils.isEmpty(exportTrigger.triggers()));
   }
 
+  @Test
+  void shouldCreateExportTriggerIfScheduledParameterTypeIsNull() {
+    ExportConfig config = createConfig(null);
+    ExportTrigger exportTrigger = converter.convert(config);
+    assertNotNull(exportTrigger);
+    assertTrue(exportTrigger.isDisabled());
+    assertTrue(CollectionUtils.isEmpty(exportTrigger.triggers()));
+  }
+
   private ExportConfig createConfig(ExportConfig.SchedulePeriodEnum schedulePeriodEnum) {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(EXPORT_CONFIG_ID);
