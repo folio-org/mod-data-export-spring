@@ -66,11 +66,9 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildWeeklyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildWeeklyScheduleParam::Inside buildWeeklyScheduleParam");
+    log.info("buildWeeklyScheduleParam::starting buildWeeklyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+    buildCommonScheduleParam(exportConfig, scheduleParameters);
     scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
     scheduleParameters.setWeekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
 
@@ -78,24 +76,26 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildDailyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildDailyScheduleParam::Inside buildDailyScheduleParam");
+    log.info("buildDailyScheduleParam::starting buildDailyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+    buildCommonScheduleParam(exportConfig, scheduleParameters);
     scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
     return scheduleParameters;
   }
 
   private ScheduleParameters buildHourlyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildHourlyScheduleParam::Inside buildHourlyScheduleParam");
+    log.info("buildHourlyScheduleParam::starting buildHourlyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+    buildCommonScheduleParam(exportConfig, scheduleParameters);
     setHourlyScheduledTime(scheduleParameters);
 
     return scheduleParameters;
+  }
+
+  private void buildCommonScheduleParam(ExportConfig exportConfig, ScheduleParameters scheduleParameters) {
+    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
+    scheduleParameters.setTimeZone(timeZone);
+    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
   }
 
   private void setHourlyScheduledTime(ScheduleParameters scheduleParameters) {

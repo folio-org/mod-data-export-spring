@@ -8,11 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -20,14 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
-import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.EdiSchedule;
@@ -57,7 +51,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,20 +60,34 @@ class ExportTriggerTest {
 
   private final int A_BIT_MORE_THAN_1_MINUTE = 65_000;
 
-  @Autowired private ExportTrigger trigger;
-  @MockBean private ExportConfigService bursarExportConfigService;
-  @MockBean private FolioModuleMetadata folioModuleMetadata;
-  @MockBean private AuthService authService;
-  @MockBean private SecurityManagerService securityManagerService;
-  @MockBean private ExportConfigValidatorResolver exportConfigValidatorResolver;
-  @MockBean private JobCommandBuilderResolver jobCommandBuilderResolver;
-  @MockBean private KafkaService kafka;
-  @MockBean private ConfigurationClient client;
-  @MockBean private JobServiceImpl jobService;
-  @MockBean private ExportConfigServiceResolver exportConfigServiceResolver;
-  @MockBean private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
-  @MockBean private ObjectMapper objectMapper;
-  @MockBean private ExportWorkerClient exportWorkerClient;
+  @Autowired
+  private ExportTrigger trigger;
+  @MockBean
+  private ExportConfigService bursarExportConfigService;
+  @MockBean
+  private FolioModuleMetadata folioModuleMetadata;
+  @MockBean
+  private AuthService authService;
+  @MockBean
+  private SecurityManagerService securityManagerService;
+  @MockBean
+  private ExportConfigValidatorResolver exportConfigValidatorResolver;
+  @MockBean
+  private JobCommandBuilderResolver jobCommandBuilderResolver;
+  @MockBean
+  private KafkaService kafka;
+  @MockBean
+  private ConfigurationClient client;
+  @MockBean
+  private JobServiceImpl jobService;
+  @MockBean
+  private ExportConfigServiceResolver exportConfigServiceResolver;
+  @MockBean
+  private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+  @MockBean
+  private ObjectMapper objectMapper;
+  @MockBean
+  private ExportWorkerClient exportWorkerClient;
 
 
   @Test
@@ -146,7 +153,7 @@ class ExportTriggerTest {
     config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
     trigger.setConfig(config);
 
-    final Instant now =  DateUtils.addHours(new Date(), scheduleFrequency).toInstant();
+    final Instant now = DateUtils.addHours(new Date(), scheduleFrequency).toInstant();
     final Instant instant = trigger.nextExecution(new SimpleTriggerContext(now, now, now));
 
     assertNotNull(instant);
@@ -242,7 +249,7 @@ class ExportTriggerTest {
     Calendar actCal = Calendar.getInstance();
     actCal.setTimeInMillis(instant.toEpochMilli());
     int actLastHour = actCal.get(Calendar.HOUR_OF_DAY);
-     assertEquals(adjustExpected(currHour + addHours + 1), actLastHour);
+    assertEquals(adjustExpected(currHour + addHours + 1), actLastHour);
   }
 
   @DisplayName("Job scheduled for specific hour, when last time plus frequency equal to current time")
@@ -301,41 +308,6 @@ class ExportTriggerTest {
     assertEquals(adjustExpected(currHour + frequency), actLastHour);
   }
 
-  /* Should be removed as ExportScheduler does not exist
-
-  @Test
-  void dailySchedulePlusOneMinuteWithExportScheduler() throws InterruptedException {
-    var repository = mock(JobDataExportRepository.class);
-    Job job = new Job();
-    job.setId(UUID.randomUUID());
-    when(repository.save(any(Job.class))).thenReturn(job);
-    Map<String, Collection<String>> okapiHeaders = new HashMap<>();
-    okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
-    var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
-    var jobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, null, client);
-    var folioExecutionContextHelper =
-      new FolioExecutionContextHelper(folioModuleMetadata, folioExecutionContext, authService, securityManagerService);
-    folioExecutionContextHelper.registerTenant();
-    var exportScheduler = new ExportScheduler(
-      trigger, jobService, bursarExportConfigService, folioExecutionContextHelper, folioExecutionContext);
-    var config = new ExportConfig();
-    config.setSchedulePeriod(SchedulePeriodEnum.DAY);
-    config.setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
-    var now = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(1);
-    config.setScheduleTime(adjustHourOrMinute(now.getHour()) + ":" + adjustHourOrMinute(now.getMinute()) + ":00.000Z");
-    config.setScheduleFrequency(1);
-    config.setTenant("diku");
-    trigger.setConfig(config);
-    var scheduledTaskRegistrar = new ScheduledTaskRegistrar();
-    exportScheduler.configureTasks(scheduledTaskRegistrar);
-    exportScheduler.updateTasks(config);
-    await().pollDelay(A_BIT_MORE_THAN_1_MINUTE, TimeUnit.MILLISECONDS)
-      .timeout(A_BIT_MORE_THAN_1_MINUTE + 1, TimeUnit.MILLISECONDS).untilAsserted(() ->
-      assertEquals(1, scheduledTaskRegistrar.getScheduledTasks().size()));
-  }
-
-   */
   @Test
   void disableScheduleForDeletedIntegration() {
 
@@ -347,7 +319,7 @@ class ExportTriggerTest {
     var jobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, null, client);
     var config = new ExportConfig();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig= new VendorEdiOrdersExportConfig();
+    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setExportConfigId(UUID.randomUUID());
     vendorEdiOrdersExportConfig.setConfigName("Test");
     exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
@@ -363,9 +335,9 @@ class ExportTriggerTest {
 
     when(client.getConfigById(any())).thenThrow(new NotFoundException("Not Found"));
 
-    assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto,true));
-    assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE,jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
-     .getEdiSchedule().getScheduleParameters().getSchedulePeriod());
+    assertThrows(NotFoundException.class, () -> jobService.upsertAndSendToKafka(jobDto, true));
+    assertEquals(ScheduleParameters.SchedulePeriodEnum.NONE, jobDto.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()
+      .getEdiSchedule().getScheduleParameters().getSchedulePeriod());
   }
 
   private int adjustExpected(int expected) {

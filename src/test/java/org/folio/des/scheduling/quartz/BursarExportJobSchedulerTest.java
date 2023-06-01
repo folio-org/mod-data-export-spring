@@ -97,6 +97,23 @@ class BursarExportJobSchedulerTest extends BaseTest {
     assertEquals(EXPORT_GROUP, triggers.get(0).getKey().getGroup());
   }
 
+  @Test
+  void testRescheduleWithDisablingBursarTrigger() throws SchedulerException {
+    var testConfig = createConfig(ExportConfig.SchedulePeriodEnum.DAY);
+    quartzExportJobScheduler.scheduleExportJob(testConfig);
+
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+
+    var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
+    assertEquals(1, triggers.size());
+    assertEquals(EXPORT_GROUP, triggers.get(0).getKey().getGroup());
+
+    testConfig.setSchedulePeriod(ExportConfig.SchedulePeriodEnum.NONE);
+    quartzExportJobScheduler.scheduleExportJob(testConfig);
+    var rescheduleJobKeys = scheduler.getJobKeys(GroupMatcher.anyJobGroup());
+    assertTrue(rescheduleJobKeys.isEmpty());
+  }
+
   private ExportConfig createConfig(ExportConfig.SchedulePeriodEnum schedulePeriodEnum) {
     ExportConfig exportConfig = new ExportConfig();
     exportConfig.setId(EXPORT_CONFIG_ID);

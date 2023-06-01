@@ -30,7 +30,7 @@ public class BursarExportScheduler {
     try {
       quartzExportJobScheduler.scheduleExportJob(exportConfig);
     } catch (Exception e) {
-      log.warn("scheduleBursarJob::scheduleBursarJob::Error while scheduling BursarJob: ", e);
+      log.warn("scheduleBursarJob::Error while scheduling BursarJob: ", e);
       throw new SchedulingException("Error during Bursar scheduling", e);
     }
   }
