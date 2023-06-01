@@ -49,7 +49,7 @@ public class KafkaConfiguration {
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
     props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-    //    props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, KafkaConsumerInterceptor.class.getName());
+//    props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, KafkaConsumerInterceptor.class.getName());
     props.put("folioModuleMetadata", folioModuleMetadata);
     return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
   }

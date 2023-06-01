@@ -14,7 +14,7 @@ paths:
       operationId: getExportConfigs
       responses:
         '200':
-          description: ""
+          description: ''
           content:
             application/json:
               schema:
@@ -44,7 +44,7 @@ paths:
             type: string
       responses:
         '201':
-          description: ""
+          description: ''
           content:
             text/plain:
               schema:
@@ -78,13 +78,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Export configuration successfully retrieved
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/exportConfig"
-        '400':
+        "400":
           description:
             Bad request, e.g. malformed request body or query parameter.
             Details of the errors (e.g. name of the parameter or line/character number
@@ -95,7 +95,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '404':
+        "404":
           description: Export configuration with a given ID not found
           content:
             application/json:
@@ -103,7 +103,7 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
-        '500':
+        "500":
           description: Internal server errors, e.g. due to misconfiguration
           content:
             application/json:
@@ -219,4 +219,4 @@ components:
   examples:
     errors:
       value:
-        $ref: './../../../folio-export-common/examples/errors.sample'
+        $ref: '../../../../folio-export-common/examples/errors.sample'
