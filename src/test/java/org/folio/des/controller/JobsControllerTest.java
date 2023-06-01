@@ -51,10 +51,17 @@ class JobsControllerTest extends BaseTest {
         "type": "BURSAR_FEES_FINES",
         "exportTypeSpecificParameters" : {
           "bursarFeeFines": {
-              "daysOutstanding": 10,
-              "patronGroups": ["3684a786-6671-4268-8ed0-9db82ebca60b"]
+            "filter": { "type": "Pass" },
+            "groupByPatron": false,
+            "header": [],
+            "data": [],
+            "footer": [],
+            "transferInfo": {
+              "conditions": [],
+              "else": { "account": "90c1820f-60bf-4b9a-99f5-d677ea78ddca" }
+            }
           }
-      }
+        }
       }""";
 
   private static final String JOB_CIRCULATION_REQUEST =
