@@ -19,16 +19,16 @@ public class BursarScheduledJobInitializer {
   private final BursarExportScheduler bursarExportScheduler;
 
   public void initAllScheduledJob() {
-    log.info("initAllScheduledJob::initiating scheduled job of type Bursar");
+    log.info("initAllScheduledJob:: initiating scheduled job of type Bursar");
     try {
       Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
       if (savedConfig.isPresent()) {
         bursarExportScheduler.scheduleBursarJob(savedConfig.get());
       } else {
-        log.info("initAllScheduledJob::No export schedules found.");
+        log.info("initAllScheduledJob:: No export schedules found.");
       }
     } catch (Exception e) {
-      log.warn("initAllScheduledJob::get configuration failed for type BURSAR");
+      log.warn("scheduling failure", e);
     }
   }
 }

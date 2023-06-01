@@ -94,10 +94,10 @@ public class ServiceConfiguration {
 
   @Bean
   BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
-                                                  DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                                  ExportConfigConverterResolver exportConfigConverterResolver) {
+                        DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+                        ExportConfigConverterResolver exportConfigConverterResolver) {
     return new BaseExportConfigService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver);
+                        exportConfigConverterResolver, exportConfigValidatorResolver);
   }
 
 

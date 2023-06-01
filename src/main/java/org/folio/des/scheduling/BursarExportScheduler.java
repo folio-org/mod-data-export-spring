@@ -24,13 +24,13 @@ public class BursarExportScheduler {
 
   public void scheduleBursarJob(ExportConfig exportConfig) {
     if (exportConfig == null) {
-      log.warn("scheduleBursarJob::exportConfig is null");
+      log.warn("scheduleBursarJob:: exportConfig is null");
       return;
     }
     try {
       quartzExportJobScheduler.scheduleExportJob(exportConfig);
     } catch (Exception e) {
-      log.warn("scheduleBursarJob::Error while scheduling BursarJob: ", e);
+      log.warn("scheduleBursarJob:: Error while scheduling BursarJob: ", e);
       throw new SchedulingException("Error during Bursar scheduling", e);
     }
   }

@@ -37,7 +37,7 @@ public class BursarJob implements org.quartz.Job {
     try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(tenantId))) {
       Job scheduledJob = getJob(jobExecutionContext);
       Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
-      log.info("configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
+      log.info("execute:: configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
     }
   }
 
@@ -74,7 +74,7 @@ public class BursarJob implements org.quartz.Job {
     scheduledJob.setIsSystemSource(true);
     scheduledJob.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
     scheduledJob.setTenant(exportConfig.getTenant());
-    log.info("Scheduled job assigned {}.", scheduledJob);
+    log.info("createScheduledJob:: Scheduled job assigned {}", scheduledJob);
     return scheduledJob;
   }
 

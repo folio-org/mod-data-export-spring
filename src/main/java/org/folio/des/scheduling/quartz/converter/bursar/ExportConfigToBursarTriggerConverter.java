@@ -66,7 +66,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildWeeklyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildWeeklyScheduleParam::starting buildWeeklyScheduleParam with configId:{}", exportConfig.getId());
+    log.info("buildWeeklyScheduleParam:: starting buildWeeklyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     buildCommonScheduleParam(exportConfig, scheduleParameters);
     scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
@@ -76,7 +76,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildDailyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildDailyScheduleParam::starting buildDailyScheduleParam with configId:{}", exportConfig.getId());
+    log.info("buildDailyScheduleParam:: starting buildDailyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     buildCommonScheduleParam(exportConfig, scheduleParameters);
     scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
@@ -84,7 +84,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildHourlyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildHourlyScheduleParam::starting buildHourlyScheduleParam with configId:{}", exportConfig.getId());
+    log.info("buildHourlyScheduleParam:: starting buildHourlyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
     buildCommonScheduleParam(exportConfig, scheduleParameters);
     setHourlyScheduledTime(scheduleParameters);
@@ -99,8 +99,8 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private void setHourlyScheduledTime(ScheduleParameters scheduleParameters) {
-    final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone)).plusHours(1L);
-    String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(now);
+    final ZonedDateTime nextHour = ZonedDateTime.now(ZoneId.of(timeZone)).plusHours(1L);
+    String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(nextHour);
     scheduleParameters.setScheduleTime(LocalDate.now().format(DateTimeFormatter.ofPattern(format)));
   }
 
