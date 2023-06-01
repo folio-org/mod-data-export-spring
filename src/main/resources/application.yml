@@ -13,6 +13,8 @@ folio:
   quartz:
     edifact:
       enabled: true
+    bursar:
+      timeZone: ${TIME_ZONE:UTC}
     schemaName: mod_data_export_spring_quartz
     changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
@@ -53,7 +55,7 @@ spring:
   jackson:
     default-property-inclusion: non_null
   quartz:
-    auto-startup: ${folio.quartz.edifact.enabled}
+    auto-startup: true
     job-store-type: jdbc
     jdbc:
       initialize-schema: never

@@ -10,6 +10,8 @@ import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
+import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
 import lombok.extern.log4j.Log4j2;
@@ -17,12 +19,31 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BurSarFeesFinesExportConfigService extends BaseExportConfigService {
 
+  private final BursarExportScheduler bursarExportScheduler;
+
   public BurSarFeesFinesExportConfigService(ConfigurationClient client,
-                                  DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                  ExportConfigConverterResolver exportConfigConverterResolver,
-                                  ExportConfigValidatorResolver exportConfigValidatorResolver) {
+                                            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+                                            ExportConfigConverterResolver exportConfigConverterResolver,
+                                            ExportConfigValidatorResolver exportConfigValidatorResolver, BursarExportScheduler bursarExportScheduler) {
     super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
+    this.bursarExportScheduler = bursarExportScheduler;
   }
+
+  @Override
+  public void updateConfig(String configId, ExportConfig exportConfig) {
+    log.info("updateConfig:: starting Bursar updateConfig with configId:{}", configId);
+    super.updateConfig(configId, exportConfig);
+    bursarExportScheduler.scheduleBursarJob(exportConfig);
+  }
+
+  @Override
+  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+    log.info("postConfig:: starting Bursar postConfig with configId:{}", exportConfig.getId());
+    ModelConfiguration modelConfiguration = super.postConfig(exportConfig);
+    bursarExportScheduler.scheduleBursarJob(exportConfig);
+    return modelConfiguration;
+  }
+
 
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {

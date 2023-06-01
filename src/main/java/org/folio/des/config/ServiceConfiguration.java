@@ -22,6 +22,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.QuartzConstants;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
@@ -77,9 +78,9 @@ public class ServiceConfiguration {
   @Bean
   BurSarFeesFinesExportConfigService burSarExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-            ExportConfigConverterResolver  exportConfigConverterResolver) {
+            ExportConfigConverterResolver  exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
     return new BurSarFeesFinesExportConfigService(client, defaultModelConfigToExportConfigConverter,
-            exportConfigConverterResolver, exportConfigValidatorResolver);
+            exportConfigConverterResolver, exportConfigValidatorResolver, bursarExportScheduler);
   }
 
   @Bean
@@ -137,6 +138,6 @@ public class ServiceConfiguration {
 
   @Bean
   ScheduledJobsRemover scheduledJobsRemover(Scheduler scheduler) {
-    return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME));
+    return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME, QuartzConstants.BURSAR_EXPORT_GROUP_NAME));
   }
 }

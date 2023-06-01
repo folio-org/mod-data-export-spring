@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.scheduling.ExportScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
+import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
@@ -28,8 +28,6 @@ class FolioTenantServiceTest {
   @Mock
   FolioExecutionContextHelper contextHelper;
   @Mock
-  ExportScheduler scheduler;
-  @Mock
   KafkaService kafka;
   @Mock
   BulkEditConfigService bulkEditConfigService;
@@ -40,23 +38,26 @@ class FolioTenantServiceTest {
   @Mock
   ScheduledJobsRemover scheduledJobsRemover;
 
+  @Mock
+  BursarScheduledJobInitializer bursarScheduledJobInitializer;
+
   @Test
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
 
     doNothing().when(contextHelper).registerTenant();
-    doNothing().when(scheduler).initScheduleConfiguration();
     doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
     doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka).createKafkaTopics();
     doNothing().when(kafka).restartEventListeners();
+    doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob();
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
     verify(contextHelper, times(1)).registerTenant();
-    verify(scheduler, times(1)).initScheduleConfiguration();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
+    verify(bursarScheduledJobInitializer,times(1)).initAllScheduledJob();
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
   }
