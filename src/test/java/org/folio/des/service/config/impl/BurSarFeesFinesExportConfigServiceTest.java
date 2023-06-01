@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,11 +17,16 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-// import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.BursarExportFilter;
+import org.folio.des.domain.dto.BursarExportFilterAge;
+import org.folio.des.domain.dto.BursarExportFilterCondition;
+import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
+import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.BursarExportFilterCondition.OperationEnum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,10 +89,20 @@ class BurSarFeesFinesExportConfigServiceTest {
   void addConfig() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    // bursarFeeFines.setDaysOutstanding(9);
-    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    // parameters.setBursarFeeFines(bursarFeeFines);
+
+    BursarExportJob bursarFeeFines = new BursarExportJob();
+    BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
+    bursarExportFilterAge.setNumDays(1);
+    BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
+    List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
+    bursarExportFilters.add(bursarExportFilterPatronGroup);
+    bursarExportFilters.add(bursarExportFilterAge);
+    BursarExportFilterCondition bursarExportFilterCondition = new BursarExportFilterCondition();
+    bursarExportFilterCondition.setCriteria(bursarExportFilters);
+    bursarExportFilterCondition.setOperation(OperationEnum.AND);
+    bursarFeeFines.setFilter(bursarExportFilterCondition);
+    parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);

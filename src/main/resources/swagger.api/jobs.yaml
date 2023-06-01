@@ -226,9 +226,7 @@ components:
     trait_pageable_offset:
       name: offset
       in: query
-      description:
-        Skip over a number of elements by specifying an offset value for
-        the query
+      description: Skip over a number of elements by specifying an offset value for the query
       schema:
         default: 0
         minimum: 0
