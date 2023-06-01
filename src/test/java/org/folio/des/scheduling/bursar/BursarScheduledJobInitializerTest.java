@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,7 @@ class BursarScheduledJobInitializerTest {
   void shouldInitiateBursarJob() {
     when(burSarExportConfigService.getFirstConfig())
       .thenReturn(Optional.of(new ExportConfig()));
-    bursarScheduledJobInitializer.initAllScheduledJob();
+    bursarScheduledJobInitializer.initAllScheduledJob(new TenantAttributes().moduleTo("3.0.0"));
     verify(bursarExportScheduler, times(1)).scheduleBursarJob(any());
   }
 
@@ -39,7 +40,7 @@ class BursarScheduledJobInitializerTest {
   void shouldNotInitiateBursarJob() {
     when(burSarExportConfigService.getFirstConfig())
       .thenReturn(Optional.empty());
-    bursarScheduledJobInitializer.initAllScheduledJob();
+    bursarScheduledJobInitializer.initAllScheduledJob(new TenantAttributes().moduleTo("3.0.0"));
     verify(bursarExportScheduler, times(0)).scheduleBursarJob(any());
   }
 }
