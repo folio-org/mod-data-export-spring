@@ -32,75 +32,43 @@ public class KafkaConfiguration {
   private final KafkaProperties kafkaProperties;
 
   @Bean
-  public <
-    V
-  > ConcurrentKafkaListenerContainerFactory<String, V> kafkaListenerContainerFactory(
-    ConsumerFactory<String, V> cf,
-    RecordInterceptor<String, V> recordInterceptor
-  ) {
+  public <V> ConcurrentKafkaListenerContainerFactory<String, V> kafkaListenerContainerFactory(ConsumerFactory<String, V> cf, RecordInterceptor<String, V> recordInterceptor) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, V>();
     factory.setConsumerFactory(cf);
     factory.setRecordInterceptor(recordInterceptor);
     if (kafkaProperties.getListener().getAckMode() != null) {
-      factory
-        .getContainerProperties()
-        .setAckMode(kafkaProperties.getListener().getAckMode());
+      factory.getContainerProperties().setAckMode(kafkaProperties.getListener().getAckMode());
     }
     return factory;
   }
 
   @Bean
-  public <V> ConsumerFactory<String, V> consumerFactory(
-    ObjectMapper objectMapper,
-    FolioModuleMetadata folioModuleMetadata
-  ) {
-    Map<String, Object> props = new HashMap<>(
-      kafkaProperties.buildConsumerProperties()
-    );
-    var deserializer = new JsonDeserializer<V>(objectMapper)
-      .trustedPackages("*");
-    props.put(
-      ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-      StringDeserializer.class
-    );
+  public <V> ConsumerFactory<String, V> consumerFactory(ObjectMapper objectMapper, FolioModuleMetadata folioModuleMetadata) {
+    Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
+    var deserializer = new JsonDeserializer<V>(objectMapper).trustedPackages("*");
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
     props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
     //    props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, KafkaConsumerInterceptor.class.getName());
     props.put("folioModuleMetadata", folioModuleMetadata);
-    return new DefaultKafkaConsumerFactory<>(
-      props,
-      new StringDeserializer(),
-      deserializer
-    );
+    return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
   }
 
   @Bean
   public <V> ProducerFactory<String, V> producerFactory(
     FolioExecutionContext folioExecutionContext
   ) {
-    Map<String, Object> props = new HashMap<>(
-      kafkaProperties.buildProducerProperties()
+    Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties());
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class
     );
-    props.put(
-      ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-      StringSerializer.class
-    );
-    props.put(
-      ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-      JsonSerializer.class
-    );
-    props.put(
-      ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-      KafkaProducerInterceptor.class.getName()
-    );
+    props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, KafkaProducerInterceptor.class.getName());
     props.put("folioExecutionContext", folioExecutionContext);
     return new DefaultKafkaProducerFactory<>(props);
   }
 
   @Bean
-  public <V> KafkaTemplate<String, V> kafkaTemplate(
-    ProducerFactory<String, V> pf
-  ) {
+  public <V> KafkaTemplate<String, V> kafkaTemplate(ProducerFactory<String, V> pf) {
     return new KafkaTemplate<>(pf);
   }
 }
