@@ -34,27 +34,17 @@ public class JobsController implements JobsApi {
   }
 
   @Override
-  public ResponseEntity<JobCollection> getJobs(
-    Integer offset,
-    Integer limit,
-    String query
-  ) {
+  public ResponseEntity<JobCollection> getJobs(Integer offset, Integer limit, String query) {
     return ResponseEntity.ok(service.get(offset, limit, query));
   }
 
   @Override
-  public ResponseEntity<Job> upsertJob(
-    @RequestHeader("X-Okapi-Tenant") String tenantId,
-    Job job
-  ) {
+  public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, Job job) {
     job.setTenant(tenantId);
     if (isMissingRequiredParameters(job)) {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-    return new ResponseEntity<>(
-      service.upsertAndSendToKafka(job, true),
-      job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK
-    );
+    return new ResponseEntity<>(service.upsertAndSendToKafka(job, true), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
   }
 
   @Override
@@ -65,38 +55,19 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
-    return ResponseEntity.ok(
-      new InputStreamResource(service.downloadExportedFile(id))
-    );
+    return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
   }
 
   private boolean isMissingRequiredParameters(Job job) {
     var exportTypeParameters = job.getExportTypeSpecificParameters();
-    return (
-      (
-        BULK_EDIT_QUERY == job.getType() &&
-        (
-          isNull(job.getEntityType()) ||
-          isBlank(exportTypeParameters.getQuery())
-        )
-      ) ||
-      (
-        BULK_EDIT_IDENTIFIERS == job.getType() &&
-        (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))
-      ) ||
-      invalidAuthorityControlJob(job, exportTypeParameters)
-    );
+    return ((BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(exportTypeParameters.getQuery()))) ||
+      (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) ||
+      invalidAuthorityControlJob(job, exportTypeParameters));
   }
 
-  private boolean invalidAuthorityControlJob(
-    Job job,
-    ExportTypeSpecificParameters exportTypeParameters
-  ) {
+  private boolean invalidAuthorityControlJob(Job job, ExportTypeSpecificParameters exportTypeParameters) {
     var acConfig = exportTypeParameters.getAuthorityControlExportConfig();
 
-    return (
-      AUTH_HEADINGS_UPDATES == job.getType() &&
-      acConfig.getFromDate().isAfter(acConfig.getToDate())
-    );
+    return (AUTH_HEADINGS_UPDATES == job.getType() && acConfig.getFromDate().isAfter(acConfig.getToDate()));
   }
 }
