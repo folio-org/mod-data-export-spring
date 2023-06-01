@@ -81,7 +81,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   private ScheduleParameters buildHourlyScheduleParam(ExportConfig exportConfig) {
     log.info("buildHourlyScheduleParam:: configId:{}", exportConfig.getId());
     return buildCommonScheduleParam(exportConfig)
-      .scheduleTime(setHourlyScheduledTime());
+      .scheduleTime(calculateHourlyScheduledTime());
   }
 
   private ScheduleParameters buildCommonScheduleParam(ExportConfig exportConfig) {
@@ -91,7 +91,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
       .schedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
   }
 
-  private String setHourlyScheduledTime() {
+  private String calculateHourlyScheduledTime() {
     final ZonedDateTime nextHour = ZonedDateTime.now(ZoneId.of(timeZone)).plusHours(1L);
     String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(nextHour);
     return LocalDate.now().format(DateTimeFormatter.ofPattern(format));
