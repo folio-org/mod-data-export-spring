@@ -55,7 +55,7 @@ spring:
   jackson:
     default-property-inclusion: non_null
   quartz:
-    auto-startup: ${folio.quartz.edifact.enabled}
+    auto-startup: true
     job-store-type: jdbc
     jdbc:
       initialize-schema: never

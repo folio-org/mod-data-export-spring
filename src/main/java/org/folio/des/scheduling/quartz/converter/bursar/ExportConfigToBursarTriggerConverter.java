@@ -1,7 +1,15 @@
 package org.folio.des.scheduling.quartz.converter.bursar;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import java.time.LocalDate;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.quartz.QuartzConstants;
@@ -11,38 +19,43 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import java.time.LocalDate;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.ArrayList;
+
+import lombok.extern.log4j.Log4j2;
 
 @Component
 @Log4j2
-@RequiredArgsConstructor
 public class ExportConfigToBursarTriggerConverter implements Converter<ExportConfig, ExportTrigger> {
 
   private final ScheduleParametersToTriggerConverter scheduleParametersToTriggerConverter;
+  private final String timeZone;
 
-  @Value("${folio.quartz.bursar.timeZone}")
-  private String timeZone;
+  public ExportConfigToBursarTriggerConverter(ScheduleParametersToTriggerConverter scheduleParametersToTriggerConverter,
+                                              @Value("${folio.quartz.bursar.timeZone}") String timeZone) {
+    this.scheduleParametersToTriggerConverter = scheduleParametersToTriggerConverter;
+    this.timeZone = timeZone;
+  }
 
   @Override
   public ExportTrigger convert(@NotNull ExportConfig exportConfig) {
 
+    if (isDisabledSchedule(exportConfig)) {
+      return new ExportTrigger(true, Collections.emptySet());
+    }
     ScheduleParameters scheduleParameters = createBursarScheduleParameters(exportConfig);
 
     return new ExportTrigger(false, scheduleParametersToTriggerConverter
       .convert(scheduleParameters, getTriggerGroup(exportConfig)));
   }
 
+  private boolean isDisabledSchedule(ExportConfig exportConfig) {
+    return Optional.ofNullable(exportConfig.getSchedulePeriod())
+      .map(ExportConfig.SchedulePeriodEnum.NONE::equals)
+      .orElse(true);
+  }
+
   private ScheduleParameters createBursarScheduleParameters(ExportConfig exportConfig) {
 
     ExportConfig.SchedulePeriodEnum schedulePeriod = exportConfig.getSchedulePeriod();
-
-    if(ExportConfig.SchedulePeriodEnum.NONE.equals(schedulePeriod)) return null;
 
     return switch (schedulePeriod) {
       case HOUR -> buildHourlyScheduleParam(exportConfig);
@@ -53,41 +66,41 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildWeeklyScheduleParam(ExportConfig exportConfig) {
-    log.info("Inside buildWeeklyScheduleParam");
+    log.info("buildWeeklyScheduleParam:: starting buildWeeklyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
-    scheduleParameters.setScheduleTime( OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
+    buildCommonScheduleParam(exportConfig, scheduleParameters);
+    scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
     scheduleParameters.setWeekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
 
     return scheduleParameters;
   }
 
   private ScheduleParameters buildDailyScheduleParam(ExportConfig exportConfig) {
-    log.info("Inside buildDailyScheduleParam");
+    log.info("buildDailyScheduleParam:: starting buildDailyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+    buildCommonScheduleParam(exportConfig, scheduleParameters);
     scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
     return scheduleParameters;
   }
 
   private ScheduleParameters buildHourlyScheduleParam(ExportConfig exportConfig) {
-    log.info("Inside buildHourlyScheduleParam");
+    log.info("buildHourlyScheduleParam:: starting buildHourlyScheduleParam with configId:{}", exportConfig.getId());
     ScheduleParameters scheduleParameters = new ScheduleParameters();
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+    buildCommonScheduleParam(exportConfig, scheduleParameters);
     setHourlyScheduledTime(scheduleParameters);
 
     return scheduleParameters;
   }
 
+  private void buildCommonScheduleParam(ExportConfig exportConfig, ScheduleParameters scheduleParameters) {
+    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
+    scheduleParameters.setTimeZone(timeZone);
+    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+  }
+
   private void setHourlyScheduledTime(ScheduleParameters scheduleParameters) {
-    final ZonedDateTime now = ZonedDateTime.now(ZoneId.of(timeZone));
-    String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(now);
+    final ZonedDateTime nextHour = ZonedDateTime.now(ZoneId.of(timeZone)).plusHours(1L);
+    String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(nextHour);
     scheduleParameters.setScheduleTime(LocalDate.now().format(DateTimeFormatter.ofPattern(format)));
   }
 

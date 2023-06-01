@@ -31,14 +31,14 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
 
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
-    log.info("Inside Bursar UpdateConfig");
-    super.updateConfig(configId,exportConfig);
+    log.info("updateConfig:: starting Bursar updateConfig with configId:{}", configId);
+    super.updateConfig(configId, exportConfig);
     bursarExportScheduler.scheduleBursarJob(exportConfig);
   }
 
   @Override
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
-    log.info("Inside Bursar postConfig");
+    log.info("postConfig:: starting Bursar postConfig with configId:{}", exportConfig.getId());
     ModelConfiguration modelConfiguration = super.postConfig(exportConfig);
     bursarExportScheduler.scheduleBursarJob(exportConfig);
     return modelConfiguration;

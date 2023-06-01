@@ -11,7 +11,6 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;

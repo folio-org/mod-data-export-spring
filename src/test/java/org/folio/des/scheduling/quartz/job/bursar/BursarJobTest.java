@@ -1,9 +1,23 @@
 package org.folio.des.scheduling.quartz.job.bursar;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.*;
+import org.folio.des.domain.dto.EdiSchedule;
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
+import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
@@ -16,22 +30,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
-import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.JobDetailImpl;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BursarJobTest {
@@ -77,7 +82,7 @@ class BursarJobTest {
     when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
 
     String message = assertThrows(IllegalArgumentException.class, () -> bursarJob.execute(jobExecutionContext)).getMessage();
-    assertEquals("'tenantId' param is missing in the jobExecutionContext",message);
+    assertEquals("'tenantId' param is missing in the jobExecutionContext", message);
   }
 
   @Test
@@ -88,7 +93,7 @@ class BursarJobTest {
     when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
 
     String message = assertThrows(IllegalArgumentException.class, () -> bursarJob.execute(jobExecutionContext)).getMessage();
-    assertEquals("'exportConfigId' param is missing in the jobExecutionContext",message);
+    assertEquals("'exportConfigId' param is missing in the jobExecutionContext", message);
   }
 
   @Test
@@ -99,7 +104,7 @@ class BursarJobTest {
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))
       .thenThrow(new NotFoundException("config not found"));
     String message = assertThrows(SchedulingException.class, () -> bursarJob.execute(jobExecutionContext)).getMessage();
-    assertEquals("Configuration id 'some_test_export_config_id' could not be found. The job was unscheduled",message);
+    assertEquals("Configuration id 'some_test_export_config_id' could not be found. The job was unscheduled", message);
     verify(scheduler).deleteJob(JOB_KEY);
   }
 

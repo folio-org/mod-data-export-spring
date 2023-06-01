@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,7 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.exception.RequestValidationException;
+import org.folio.des.scheduling.BursarExportScheduler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,6 +86,8 @@ class ExportTypeBasedConfigManagerTest {
   private Scheduler scheduler;
   @MockBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
+  @MockBean
+  private BursarExportScheduler bursarExportScheduler;
 
   @ParameterizedTest
   @CsvSource({
@@ -102,6 +106,7 @@ class ExportTypeBasedConfigManagerTest {
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig, exportName);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
+    doNothing().when(bursarExportScheduler).scheduleBursarJob(any());
 
     var response = service.postConfig(bursarExportConfig);
 

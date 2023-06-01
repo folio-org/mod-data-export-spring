@@ -77,15 +77,15 @@ class ConfigsControllerTest extends BaseTest {
         .withStatus(200)));
 
     mockMvc
-        .perform(
-            get(exportConfigQuery)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
-                status().isOk(),
-                content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(0))));
+      .perform(
+        get(exportConfigQuery)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpect(
+        matchAll(
+          status().isOk(),
+          content().contentType(MediaType.APPLICATION_JSON_VALUE),
+          jsonPath("$.totalRecords", is(0))));
 
     verify(configurationClient, times(1)).getConfigurations(eq(modConfigQuery), any());
   }
@@ -94,15 +94,15 @@ class ConfigsControllerTest extends BaseTest {
   @DisplayName("Can not post duplicable config")
   void postConfig() throws Exception {
     mockMvc
-        .perform(
-            post("/data-export-spring/configs")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .headers(defaultHeaders())
-                .content(NEW_CONFIG_REQUEST))
-        .andExpect(
-            matchAll(
-                status().isCreated(),
-                content().contentType("text/plain;charset=UTF-8")));
+      .perform(
+        post("/data-export-spring/configs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(NEW_CONFIG_REQUEST))
+      .andExpect(
+        matchAll(
+          status().isCreated(),
+          content().contentType("text/plain;charset=UTF-8")));
 
     verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
   }
