@@ -5,6 +5,7 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
