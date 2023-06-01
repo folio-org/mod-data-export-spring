@@ -4,15 +4,22 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.folio.des.config.JacksonConfiguration;
+import org.folio.des.domain.dto.BursarExportFilter;
+import org.folio.des.domain.dto.BursarExportFilterAge;
+import org.folio.des.domain.dto.BursarExportFilterCondition;
+import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
+import org.folio.des.domain.dto.BursarExportJob;
 // import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.domain.dto.BursarExportFilterCondition.OperationEnum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,10 +38,21 @@ class DefaultExportConfigToModelConfigConverterTest {
     ExportConfig bursarExportConfig = new ExportConfig();
     bursarExportConfig.setId(expId);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    // bursarFeeFines.setDaysOutstanding(9);
-    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    // parameters.setBursarFeeFines(bursarFeeFines);
+
+    BursarExportJob bursarFeeFines = new BursarExportJob();
+    BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
+    bursarExportFilterAge.setNumDays(1);
+    BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
+    List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
+    bursarExportFilters.add(bursarExportFilterPatronGroup);
+    bursarExportFilters.add(bursarExportFilterAge);
+    BursarExportFilterCondition bursarExportFilterCondition = new BursarExportFilterCondition();
+    bursarExportFilterCondition.setCriteria(bursarExportFilters);
+    bursarExportFilterCondition.setOperation(OperationEnum.AND);
+    bursarFeeFines.setFilter(bursarExportFilterCondition);
+    parameters.setBursarFeeFines(bursarFeeFines);
+
     bursarExportConfig.exportTypeSpecificParameters(parameters);
 
     ModelConfiguration actConfig = converter.convert(bursarExportConfig);
@@ -59,10 +77,20 @@ class DefaultExportConfigToModelConfigConverterTest {
     bursarExportConfig.setType(exportType);
     bursarExportConfig.setId(expId);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    // BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    // bursarFeeFines.setDaysOutstanding(9);
-    // bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
-    // parameters.setBursarFeeFines(bursarFeeFines);
+
+    BursarExportJob bursarFeeFines = new BursarExportJob();
+    BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
+    bursarExportFilterAge.setNumDays(1);
+    BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
+    List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
+    bursarExportFilters.add(bursarExportFilterPatronGroup);
+    bursarExportFilters.add(bursarExportFilterAge);
+    BursarExportFilterCondition bursarExportFilterCondition = new BursarExportFilterCondition();
+    bursarExportFilterCondition.setCriteria(bursarExportFilters);
+    bursarExportFilterCondition.setOperation(OperationEnum.AND);
+    bursarFeeFines.setFilter(bursarExportFilterCondition);
+    parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
 
     ModelConfiguration actConfig = converter.convert(bursarExportConfig);
