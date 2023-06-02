@@ -1,5 +1,7 @@
 package org.folio.des.scheduling.bursar;
 
+import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSchedulesToQuartz;
+
 import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSchedulesToQuartz;
 
 @Component
 @RequiredArgsConstructor
