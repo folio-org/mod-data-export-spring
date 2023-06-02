@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
 import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSchedulesToQuartz;
 
 @Component
@@ -21,6 +20,7 @@ public class BursarScheduledJobInitializer {
 
   private final ExportConfigService burSarExportConfigService;
   private final BursarExportScheduler bursarExportScheduler;
+
 
   private final SemVer quartzEdifactMinVersion = new SemVer("3.0.0-SNAPSHOT");
 

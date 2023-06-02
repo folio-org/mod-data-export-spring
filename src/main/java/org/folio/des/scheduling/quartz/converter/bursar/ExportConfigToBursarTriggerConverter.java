@@ -66,51 +66,43 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private ScheduleParameters buildWeeklyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildWeeklyScheduleParam:: starting buildWeeklyScheduleParam with configId:{}", exportConfig.getId());
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
-    buildCommonScheduleParam(exportConfig, scheduleParameters);
-    scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
-    scheduleParameters.setWeekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
-
-    return scheduleParameters;
+    log.info("buildWeeklyScheduleParam:: configId:{}", exportConfig.getId());
+    return buildCommonScheduleParam(exportConfig)
+      .scheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString())
+      .weekDays(createWeekDaysEnum(exportConfig.getWeekDays()));
   }
 
   private ScheduleParameters buildDailyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildDailyScheduleParam:: starting buildDailyScheduleParam with configId:{}", exportConfig.getId());
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
-    buildCommonScheduleParam(exportConfig, scheduleParameters);
-    scheduleParameters.setScheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
-    return scheduleParameters;
+    log.info("buildDailyScheduleParam:: configId:{}", exportConfig.getId());
+    return buildCommonScheduleParam(exportConfig)
+      .scheduleTime(OffsetTime.parse(exportConfig.getScheduleTime()).toLocalTime().toString());
   }
 
   private ScheduleParameters buildHourlyScheduleParam(ExportConfig exportConfig) {
-    log.info("buildHourlyScheduleParam:: starting buildHourlyScheduleParam with configId:{}", exportConfig.getId());
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
-    buildCommonScheduleParam(exportConfig, scheduleParameters);
-    setHourlyScheduledTime(scheduleParameters);
-
-    return scheduleParameters;
+    log.info("buildHourlyScheduleParam:: configId:{}", exportConfig.getId());
+    return buildCommonScheduleParam(exportConfig)
+      .scheduleTime(calculateHourlyScheduledTime());
   }
 
-  private void buildCommonScheduleParam(ExportConfig exportConfig, ScheduleParameters scheduleParameters) {
-    scheduleParameters.setScheduleFrequency(exportConfig.getScheduleFrequency());
-    scheduleParameters.setTimeZone(timeZone);
-    scheduleParameters.setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
+  private ScheduleParameters buildCommonScheduleParam(ExportConfig exportConfig) {
+    return new ScheduleParameters()
+      .scheduleFrequency(exportConfig.getScheduleFrequency())
+      .timeZone(timeZone)
+      .schedulePeriod(ScheduleParameters.SchedulePeriodEnum.valueOf(exportConfig.getSchedulePeriod().name()));
   }
 
-  private void setHourlyScheduledTime(ScheduleParameters scheduleParameters) {
+  private String calculateHourlyScheduledTime() {
     final ZonedDateTime nextHour = ZonedDateTime.now(ZoneId.of(timeZone)).plusHours(1L);
     String format = DateTimeFormatter.ofPattern("HH:mm:ss").format(nextHour);
-    scheduleParameters.setScheduleTime(LocalDate.now().format(DateTimeFormatter.ofPattern(format)));
+    return LocalDate.now().format(DateTimeFormatter.ofPattern(format));
   }
 
   private List<ScheduleParameters.WeekDaysEnum> createWeekDaysEnum(List<ExportConfig.WeekDaysEnum> weekDays) {
-
-    List<ScheduleParameters.WeekDaysEnum> weekDaysEnums = new ArrayList<>();
+    List<ScheduleParameters.WeekDaysEnum> weekDaysEnum = new ArrayList<>();
     weekDays.forEach(exportConfigWeekDaysEnum ->
-      weekDaysEnums.add(ScheduleParameters.WeekDaysEnum.valueOf(exportConfigWeekDaysEnum.name())));
+      weekDaysEnum.add(ScheduleParameters.WeekDaysEnum.valueOf(exportConfigWeekDaysEnum.name())));
 
-    return weekDaysEnums;
+    return weekDaysEnum;
   }
 
   private String getTriggerGroup(ExportConfig exportConfig) {

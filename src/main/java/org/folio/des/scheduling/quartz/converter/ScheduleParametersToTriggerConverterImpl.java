@@ -20,6 +20,8 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.log4j.Log4j2;
+
 @Component
 @Log4j2
 public class ScheduleParametersToTriggerConverterImpl implements ScheduleParametersToTriggerConverter {
@@ -67,7 +69,8 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
 
   private Trigger buildTrigger(ScheduleParameters parameters, Date startTime, IntervalUnit intervalUnit,
                                String triggerGroup) {
-    log.info("buildTrigger::Start Time is:{}", startTime);
+    log.info("buildTrigger:: Start Time is:{}", startTime);
+
     return TriggerBuilder.newTrigger()
       .withSchedule(CalendarIntervalScheduleBuilder.calendarIntervalSchedule()
         .withInterval(parameters.getScheduleFrequency(), intervalUnit)
