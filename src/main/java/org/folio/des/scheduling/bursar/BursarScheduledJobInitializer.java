@@ -23,17 +23,19 @@ public class BursarScheduledJobInitializer {
   private final BursarExportScheduler bursarExportScheduler;
 
 
-  private final SemVer quartzEdifactMinVersion = new SemVer("3.0.0-SNAPSHOT");
+  private final SemVer quartzBursarMinVersion = new SemVer("3.0.0-SNAPSHOT");
 
   public void initAllScheduledJob(TenantAttributes tenantAttributes) {
     log.info("initAllScheduledJob:: initiating scheduled job of type Bursar");
     try {
-      Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
-      if (savedConfig.isPresent() && shouldMigrateSchedulesToQuartz(tenantAttributes,
-        quartzEdifactMinVersion)) {
-        bursarExportScheduler.scheduleBursarJob(savedConfig.get());
-      } else {
-        log.info("initAllScheduledJob:: No export schedules found.");
+      if (shouldMigrateSchedulesToQuartz(tenantAttributes,
+        quartzBursarMinVersion)) {
+        Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
+        if (savedConfig.isPresent()) {
+          bursarExportScheduler.scheduleBursarJob(savedConfig.get());
+        } else {
+          log.info("initAllScheduledJob:: No export schedules found.");
+        }
       }
     } catch (Exception e) {
       log.warn("scheduling failure", e);
