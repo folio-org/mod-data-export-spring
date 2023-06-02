@@ -26,7 +26,6 @@ public class SystemUserParameters {
   @JsonIgnore
   private String okapiUrl;
 
-  @JsonIgnore
   private String tenant;
 
   @JsonIgnore
