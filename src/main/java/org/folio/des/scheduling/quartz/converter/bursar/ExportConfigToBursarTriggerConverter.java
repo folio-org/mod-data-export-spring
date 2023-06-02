@@ -98,6 +98,7 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
   }
 
   private List<ScheduleParameters.WeekDaysEnum> createWeekDaysEnum(List<ExportConfig.WeekDaysEnum> weekDays) {
+
     List<ScheduleParameters.WeekDaysEnum> weekDaysEnum = new ArrayList<>();
     weekDays.forEach(exportConfigWeekDaysEnum ->
       weekDaysEnum.add(ScheduleParameters.WeekDaysEnum.valueOf(exportConfigWeekDaysEnum.name())));
