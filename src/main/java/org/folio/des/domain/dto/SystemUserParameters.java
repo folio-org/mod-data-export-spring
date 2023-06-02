@@ -27,7 +27,7 @@ public class SystemUserParameters {
   private String okapiUrl;
 
   @JsonIgnore
-  private String tenantId;
+  private String tenant;
 
   @JsonIgnore
   private String userId;

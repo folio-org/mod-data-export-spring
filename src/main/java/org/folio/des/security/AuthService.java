@@ -30,7 +30,7 @@ public class AuthService {
     SystemUserParameters userParameters =
         SystemUserParameters.builder()
             .okapiUrl(url)
-            .tenantId(tenant)
+            .tenant(tenant)
             .username(username)
             .password(username)
             .build();
