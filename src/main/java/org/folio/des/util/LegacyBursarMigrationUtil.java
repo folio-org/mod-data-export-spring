@@ -3,6 +3,7 @@ package org.folio.des.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
@@ -116,9 +117,9 @@ public class LegacyBursarMigrationUtil {
         BursarExportFilterCondition filterBase = new BursarExportFilterCondition();
         filterBase.setOperation(BursarExportFilterCondition.OperationEnum.AND);
         List<BursarExportFilter> filterConditions = new ArrayList<>();
-        BursarExportFilterAge ageFilter = new BursarExportFilterAge(); // outstandingDays => ageFilter
+        BursarExportFilterAge ageFilter = new BursarExportFilterAge();
         ageFilter.setNumDays(legacyBursarParams.getDaysOutstanding());
-        BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition(); // patronGroups => patronGroupListFilter
+        BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition();
         patronGroupListFilter.setOperation(
           BursarExportFilterCondition.OperationEnum.OR
         );
@@ -208,10 +209,10 @@ public class LegacyBursarMigrationUtil {
 
     List<BursarExportFilter> filterConditions = new ArrayList<>();
 
-    BursarExportFilterAge ageFilter = new BursarExportFilterAge(); // outstandingDays => ageFilter
+    BursarExportFilterAge ageFilter = new BursarExportFilterAge();
     ageFilter.setNumDays(null);
 
-    BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition(); // patronGroups => patronGroupListFilter
+    BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition();
     patronGroupListFilter.setOperation(
       BursarExportFilterCondition.OperationEnum.OR
     );
@@ -250,7 +251,7 @@ public class LegacyBursarMigrationUtil {
     userIDToken.setLengthControl(userIDTokenLengthControl);
 
     BursarExportTokenConstant userIdPadding = new BursarExportTokenConstant();
-    userIdPadding.setValue("    "); // 4 blanks
+    userIdPadding.setValue("    ");
 
     // fee amount token
     BursarExportTokenFeeAmount feeAmountToken = new BursarExportTokenFeeAmount();
@@ -299,7 +300,7 @@ public class LegacyBursarMigrationUtil {
 
     // Term token
     BursarExportTokenConstant termToken = new BursarExportTokenConstant();
-    termToken.setValue("    "); // 4 blanks
+    termToken.setValue("    ");
 
     // item type token and description token
     BursarExportTokenConditional itemTypeToken = new BursarExportTokenConditional();
@@ -377,10 +378,10 @@ public class LegacyBursarMigrationUtil {
     descriptionToken.setConditions(descriptionConditions);
 
     if (typeMappings != null) {
-      for (String ownerID : typeMappings.keySet()) {
-        for (LegacyBursarFeeFinesTypeMapping typeMapping : (List<LegacyBursarFeeFinesTypeMapping>) typeMappings.get(
-          ownerID
-        )) {
+      for (Map.Entry<String, List> entry : typeMappings.entrySet()) {
+        String ownerID = entry.getKey();
+        List<LegacyBursarFeeFinesTypeMapping> typeMappingList = entry.getValue();
+        for (LegacyBursarFeeFinesTypeMapping typeMapping : typeMappingList) {
           BursarExportTokenConditionalConditionsInner itemTypeConditionalConditionsInner = new BursarExportTokenConditionalConditionsInner();
           BursarExportTokenConditionalConditionsInner descriptionTokenConditionalConditionsInner = new BursarExportTokenConditionalConditionsInner();
 
@@ -435,10 +436,6 @@ public class LegacyBursarMigrationUtil {
     feeFineTypeToken.setValue(BursarExportTokenFeeMetadata.ValueEnum.NAME);
     descriptionToken.setElse(feeFineTypeToken);
 
-    List<BursarExportTokenConditional> dataTokens = new ArrayList<>(
-      Arrays.asList(itemTypeToken, descriptionToken)
-    );
-
-    return dataTokens;
+    return new ArrayList<>(Arrays.asList(itemTypeToken, descriptionToken));
   }
 }
