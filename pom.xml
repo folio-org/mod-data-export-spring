@@ -13,7 +13,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export-spring</artifactId>
   <description>Data Export Spring module</description>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -51,6 +51,8 @@
     <copy-rename-maven-plugin>1.0.1</copy-rename-maven-plugin>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+
 
     <sonar.exclusions>
       **/src/main/java/org/folio/des/ModDataExportSpringApplication.java,
@@ -450,6 +452,28 @@
           <localCheckout>true</localCheckout>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+                <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
