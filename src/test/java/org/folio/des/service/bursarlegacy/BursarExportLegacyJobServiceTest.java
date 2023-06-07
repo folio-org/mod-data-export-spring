@@ -31,11 +31,13 @@ class BursarExportLegacyJobServiceTest {
   @Test
   void testGetBlankQuery() {
     List<LegacyJob> legacyJobs = new ArrayList<>();
-    LegacyJob legacyJob = new LegacyJob();
-    legacyJob.setId(UUID.fromString("0000-00-00-00-000000"));
-    legacyJobs.add(legacyJob);
-    legacyJob.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-    legacyJobs.add(legacyJob);
+    LegacyJob legacyJob1 = new LegacyJob();
+    legacyJob1.setId(UUID.fromString("0000-00-00-00-000000"));
+    legacyJobs.add(legacyJob1);
+    LegacyJob legacyJob2 = new LegacyJob();
+    legacyJob2.setId(UUID.fromString("0000-00-00-00-000001"));
+    legacyJob2.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    legacyJobs.add(legacyJob2);
 
     Page<LegacyJob> page = new PageImpl<LegacyJob>(
       legacyJobs,
