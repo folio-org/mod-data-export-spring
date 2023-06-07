@@ -11,7 +11,6 @@ import org.folio.des.domain.dto.LegacyJobCollection;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.bursarlegacy.BursarExportLegacyJobRepository;
 import org.folio.spring.data.OffsetRequest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -49,13 +48,10 @@ class BursarExportLegacyJobServiceTest {
 
     LegacyJobCollection legacyJobCollection = service.get(0, 1, "");
 
-    Assertions.assertAll(
-      () -> assertEquals(1, legacyJobCollection.getJobRecords().size()),
-      () ->
-        assertEquals(
-          UUID.fromString("0000-00-00-00-000000"),
-          legacyJobCollection.getJobRecords().get(0).getId()
-        )
+    assertEquals(1, legacyJobCollection.getJobRecords().size());
+    assertEquals(
+      UUID.fromString("0000-00-00-00-000000"),
+      legacyJobCollection.getJobRecords().get(0).getId()
     );
   }
 }
