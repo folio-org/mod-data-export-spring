@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.folio.de.entity.bursarlegacy.LegacyJob;
+import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.LegacyJobCollection;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.bursarlegacy.BursarExportLegacyJobRepository;
@@ -33,6 +34,8 @@ class BursarExportLegacyJobServiceTest {
     LegacyJob legacyJob = new LegacyJob();
     legacyJob.setId(UUID.fromString("0000-00-00-00-000000"));
     legacyJobs.add(legacyJob);
+    legacyJob.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    legacyJobs.add(legacyJob);
 
     Page<LegacyJob> page = new PageImpl<LegacyJob>(
       legacyJobs,
@@ -40,15 +43,15 @@ class BursarExportLegacyJobServiceTest {
       1L
     );
 
-    when(repository.findAll(new OffsetRequest(0, 1))).thenReturn(page);
+    when(repository.findAll(new OffsetRequest(0, 2))).thenReturn(page);
     BursarExportLegacyJobService service = new BursarExportLegacyJobService(
       repository,
       cqlService
     );
 
-    LegacyJobCollection legacyJobCollection = service.get(0, 1, "");
+    LegacyJobCollection legacyJobCollection = service.get(0, 2, "");
 
-    assertEquals(1, legacyJobCollection.getJobRecords().size());
+    assertEquals(2, legacyJobCollection.getJobRecords().size());
     assertEquals(
       UUID.fromString("0000-00-00-00-000000"),
       legacyJobCollection.getJobRecords().get(0).getId()
