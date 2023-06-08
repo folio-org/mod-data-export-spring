@@ -220,3 +220,4 @@ components:
     errors:
       value:
         $ref: '../../../../folio-export-common/examples/errors.sample'
+
