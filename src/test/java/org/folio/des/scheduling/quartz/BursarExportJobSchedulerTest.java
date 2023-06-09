@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
   "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  "folio.quartz.edifact.enabled=true", "folio.quartz.bursar.timeZone=Asia/Calcutta"})
+  "folio.quartz.bursar.timeZone=Asia/Calcutta"})
 class BursarExportJobSchedulerTest extends BaseTest {
 
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();

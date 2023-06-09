@@ -36,11 +36,7 @@ import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {
-  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  "folio.quartz.edifact.enabled=true"})
 class EdifactExportJobSchedulerTest extends BaseTest {
   private static final String EXPORT_CONFIG_ID = UUID.randomUUID().toString();
   private static final String SCHEDULE_ID = UUID.randomUUID().toString();

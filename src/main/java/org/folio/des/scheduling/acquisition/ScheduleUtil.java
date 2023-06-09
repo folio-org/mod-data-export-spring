@@ -17,13 +17,6 @@ public final class ScheduleUtil {
 
   }
 
-  public static boolean isJobScheduleAllowed(boolean isRunOnlyIfModuleRegistered, boolean isModuleRegistered) {
-    if (isRunOnlyIfModuleRegistered) {
-      return isModuleRegistered;
-    }
-    return true;
-  }
-
   /**
    * For quartz scheduling (with db store) schedule configs are stored to the quartz tables when scheduled,
    * so on module upgrade schedule information is not lost and it's not needed to reload it each time.

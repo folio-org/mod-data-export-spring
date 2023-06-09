@@ -13,7 +13,6 @@ import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
-import org.folio.des.config.scheduling.EdifactSchedulingConfig;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
@@ -23,9 +22,14 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.BursarExportScheduler;
+import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.QuartzConstants;
+import org.folio.des.scheduling.quartz.QuartzExportJobScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
+import org.folio.des.scheduling.quartz.converter.acquisition.ExportConfigToEdifactJobDetailConverter;
+import org.folio.des.scheduling.quartz.converter.acquisition.ExportConfigToEdifactTriggerConverter;
+import org.folio.des.scheduling.quartz.job.acquisition.EdifactJobKeyResolver;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
@@ -36,7 +40,6 @@ import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.quartz.Scheduler;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -87,9 +90,9 @@ public class ServiceConfiguration {
   EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
            ExportConfigConverterResolver  exportConfigConverterResolver,
-           EdifactSchedulingConfig edifactSchedulingConfig) {
+           ExportJobScheduler exportJobScheduler) {
     return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, edifactSchedulingConfig.edifactOrdersExportJobScheduler());
+      exportConfigConverterResolver, exportConfigValidatorResolver, exportJobScheduler);
   }
 
   @Bean
@@ -128,12 +131,17 @@ public class ServiceConfiguration {
 
   @Bean
   EdifactScheduledJobInitializer edifactScheduledJobInitializer(ExportTypeBasedConfigManager exportTypeBasedConfigManager,
-                    FolioExecutionContextHelper contextHelper,
-                    EdifactSchedulingConfig edifactSchedulingConfig,
-                    @Value("${folio.quartz.edifact.enabled}") boolean isQuartzEdifactEnabled) {
-    return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, contextHelper,
-      edifactSchedulingConfig.acqSchedulingProperties(), edifactSchedulingConfig.initEdifactOrdersExportJobScheduler(),
-      isQuartzEdifactEnabled);
+                          ExportJobScheduler exportJobScheduler) {
+    return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, exportJobScheduler);
+  }
+
+  @Bean
+  public ExportJobScheduler edifactOrdersExportJobScheduler(Scheduler scheduler,
+                          ExportConfigToEdifactTriggerConverter edifactTriggerConverter,
+                          ExportConfigToEdifactJobDetailConverter edifactJobDetailConverter,
+                          EdifactJobKeyResolver edifactJobKeyResolver) {
+    return new QuartzExportJobScheduler(scheduler, edifactTriggerConverter, edifactJobDetailConverter,
+      edifactJobKeyResolver);
   }
 
   @Bean

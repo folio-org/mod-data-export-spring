@@ -17,9 +17,6 @@ public class QuartzSchemaInitializer implements InitializingBean {
   private final LiquibaseProperties liquibaseProperties;
   private final FolioSpringLiquibase folioSpringLiquibase;
 
-  @Value("${folio.quartz.edifact.enabled}")
-  private boolean quartzEnabled;
-
   @Value("${folio.quartz.schemaName}")
   private String quartzSchemaName;
 
@@ -33,10 +30,8 @@ public class QuartzSchemaInitializer implements InitializingBean {
    */
   @Override
   public void afterPropertiesSet() throws LiquibaseException {
-    if (!quartzEnabled) {
-      log.info("Quartz scheduling is disabled. Schema liquibase initialization for quartz is skipped");
-      return;
-    }
+    log.info("Starting liquibase update for quartz");
+
     folioSpringLiquibase.setChangeLog(quartzChangeLog);
     folioSpringLiquibase.setDefaultSchema(quartzSchemaName);
 
@@ -44,5 +39,7 @@ public class QuartzSchemaInitializer implements InitializingBean {
 
     folioSpringLiquibase.setChangeLog(liquibaseProperties.getChangeLog());
     folioSpringLiquibase.setDefaultSchema(liquibaseProperties.getDefaultSchema());
+
+    log.info("Completed liquibase update for quartz");
   }
 }
