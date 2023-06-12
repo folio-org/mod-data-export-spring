@@ -5,6 +5,7 @@ import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSch
 import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.scheduling.BursarExportDeleteScheduler;
 import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.okapi.common.SemVer;
@@ -21,6 +22,7 @@ public class BursarScheduledJobInitializer {
 
   private final ExportConfigService burSarExportConfigService;
   private final BursarExportScheduler bursarExportScheduler;
+  private final BursarExportDeleteScheduler bursarExportDeleteScheduler;
 
 
   private final SemVer quartzBursarMinVersion = new SemVer("3.0.0-SNAPSHOT");
@@ -32,6 +34,7 @@ public class BursarScheduledJobInitializer {
         Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
         if (savedConfig.isPresent()) {
           bursarExportScheduler.scheduleBursarJob(savedConfig.get());
+          bursarExportDeleteScheduler.scheduleBursarDeleteJob(savedConfig.get());
         } else {
           log.info("initAllScheduledJob:: No export schedules found.");
         }
