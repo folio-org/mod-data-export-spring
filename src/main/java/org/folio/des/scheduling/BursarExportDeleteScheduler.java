@@ -23,10 +23,6 @@ public class BursarExportDeleteScheduler {
   }
 
   public void scheduleBursarDeleteJob(ExportConfig exportConfig) {
-    if (exportConfig == null) {
-      log.warn("scheduleBursarDeleteJob:: exportConfig is null");
-      return;
-    }
     try {
       quartzExportJobScheduler.scheduleExportJob(exportConfig);
     } catch (Exception e) {
