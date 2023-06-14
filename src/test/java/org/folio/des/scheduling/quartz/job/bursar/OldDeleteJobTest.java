@@ -31,7 +31,7 @@ import org.quartz.JobKey;
 import org.quartz.impl.JobDetailImpl;
 
 @ExtendWith(MockitoExtension.class)
-class BursarDeleteJobTest {
+class OldDeleteJobTest {
 
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";
@@ -42,7 +42,7 @@ class BursarDeleteJobTest {
   @Mock
   private FolioExecutionContextHelper contextHelper;
   @InjectMocks
-  private BursarDeleteJob bursarDeleteJob;
+  private OldDeleteJob oldDeleteJob;
   @Mock
   private JobExecutionContext jobExecutionContext;
   private final FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
@@ -52,7 +52,7 @@ class BursarDeleteJobTest {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     doNothing().when(jobService).deleteOldJobs();
-    bursarDeleteJob.execute(jobExecutionContext);
+    oldDeleteJob.execute(jobExecutionContext);
     verify(contextHelper).getFolioExecutionContext(TENANT_ID);
   }
 
@@ -62,7 +62,7 @@ class BursarDeleteJobTest {
     jobDetail.getJobDataMap().remove("tenantId");
     when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
 
-    String message = assertThrows(IllegalArgumentException.class, () -> bursarDeleteJob.execute(jobExecutionContext)).getMessage();
+    String message = assertThrows(IllegalArgumentException.class, () -> oldDeleteJob.execute(jobExecutionContext)).getMessage();
     assertEquals("'tenantId' param is missing in the jobExecutionContext", message);
   }
 

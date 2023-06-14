@@ -15,7 +15,7 @@ import lombok.extern.log4j.Log4j2;
 
 @RequiredArgsConstructor
 @Log4j2
-public class BursarDeleteJob implements org.quartz.Job {
+public class OldDeleteJob implements org.quartz.Job {
 
   private final JobService jobService;
   private final FolioExecutionContextHelper contextHelper;

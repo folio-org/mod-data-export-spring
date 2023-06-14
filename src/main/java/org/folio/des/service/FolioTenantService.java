@@ -4,6 +4,7 @@ import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
+import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
@@ -27,11 +28,12 @@ public class FolioTenantService extends TenantService {
   private final EdifactScheduledJobInitializer edifactScheduledJobInitializer;
   private final ScheduledJobsRemover scheduledJobsRemover;
   private final BursarScheduledJobInitializer bursarScheduledJobInitializer;
+  private final OldJobDeleteScheduler oldJobDeleteScheduler;
 
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                             FolioExecutionContextHelper contextHelper, KafkaService kafka,
                             BulkEditConfigService bulkEditConfigService, EdifactScheduledJobInitializer edifactScheduledJobInitializer,
-                            ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer) {
+                            ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.contextHelper = contextHelper;
     this.kafka = kafka;
@@ -39,6 +41,7 @@ public class FolioTenantService extends TenantService {
     this.edifactScheduledJobInitializer = edifactScheduledJobInitializer;
     this.scheduledJobsRemover = scheduledJobsRemover;
     this.bursarScheduledJobInitializer = bursarScheduledJobInitializer;
+    this.oldJobDeleteScheduler = oldJobDeleteScheduler;
   }
 
   @Override
@@ -48,6 +51,7 @@ public class FolioTenantService extends TenantService {
       bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
       bulkEditConfigService.checkBulkEditConfiguration();
       edifactScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
+      oldJobDeleteScheduler.scheduleOldJobDeletion(context.getTenantId());
       kafka.createKafkaTopics();
       kafka.restartEventListeners();
     } catch (Exception e) {

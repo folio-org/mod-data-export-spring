@@ -31,6 +31,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.support.BaseTest;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
@@ -51,6 +52,11 @@ class EdifactExportJobSchedulerTest extends BaseTest {
   private ExportJobScheduler edifactExportJobScheduler;
   @Autowired
   private ScheduledJobsRemover scheduledJobsRemover;
+
+  @BeforeEach
+  void clearData() throws SchedulerException {
+    scheduler.clear();
+  }
 
   @Test
   void testSchedule() throws SchedulerException {
@@ -204,10 +210,10 @@ class EdifactExportJobSchedulerTest extends BaseTest {
 
     scheduledJobsRemover.deleteJobs("diku");
 
-    var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("tenant-other"+"_"));
+    var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("tenant-other" + "_"));
     assertEquals(1, jobKeys.size());
 
-    var deletedJobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("diku"+"_"));
+    var deletedJobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith("diku" + "_"));
     assertEquals(0, deletedJobKeys.size());
   }
 
