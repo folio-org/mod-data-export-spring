@@ -77,6 +77,7 @@ class FolioTenantServiceTest {
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     doNothing().when(scheduledJobsRemover).deleteJobs(tenantId);
+    doNothing().when(oldJobDeleteScheduler).removeOldJobDeletionScheduler(tenantId);
 
     folioTenantService.afterTenantDeletion(tenantAttributes);
 

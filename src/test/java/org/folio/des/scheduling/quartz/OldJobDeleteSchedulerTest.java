@@ -1,11 +1,11 @@
 package org.folio.des.scheduling.quartz;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.annotation.PostConstruct;
 
 import org.folio.des.support.BaseTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -27,11 +27,6 @@ class OldJobDeleteSchedulerTest extends BaseTest {
     oldJobDeleteScheduler = new OldJobDeleteScheduler(scheduler, "UTC");
   }
 
-  @BeforeEach
-  void clearData() throws SchedulerException {
-    scheduler.clear();
-  }
-
   @Test
   void testOldJobDeleteTrigger() throws SchedulerException {
 
@@ -43,14 +38,11 @@ class OldJobDeleteSchedulerTest extends BaseTest {
   }
 
   @Test
-  void testRescheduleDeleteTrigger() throws SchedulerException {
+  void testDeleteOldJobDeleteScheduler() throws SchedulerException {
 
     oldJobDeleteScheduler.scheduleOldJobDeletion(TENANT);
-    oldJobDeleteScheduler.scheduleOldJobDeletion(TENANT);
+    oldJobDeleteScheduler.removeOldJobDeletionScheduler(TENANT);
     var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupContains(EXPORT_GROUP));
-
-    var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
-    assertEquals(1, triggers.size());
-    assertEquals(EXPORT_GROUP, triggers.get(0).getKey().getGroup());
+    assertTrue(jobKeys.isEmpty());
   }
 }

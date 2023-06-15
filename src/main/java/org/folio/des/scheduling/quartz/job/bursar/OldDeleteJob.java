@@ -2,8 +2,6 @@ package org.folio.des.scheduling.quartz.job.bursar;
 
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
-import java.util.Date;
-
 import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.service.JobService;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -24,11 +22,10 @@ public class OldDeleteJob implements org.quartz.Job {
   @Override
   public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
     String tenantId = getTenantId(jobExecutionContext);
-    var current = new Date();
     try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(tenantId))) {
       jobService.deleteOldJobs();
     }
-    log.info("execute:: deleteOldJobs executed at: {}", current);
+    log.info("execute:: deleteOldJobs executed");
   }
 
   private String getTenantId(JobExecutionContext jobExecutionContext) {

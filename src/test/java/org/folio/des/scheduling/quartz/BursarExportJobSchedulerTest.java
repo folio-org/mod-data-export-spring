@@ -14,7 +14,6 @@ import org.folio.des.scheduling.quartz.converter.bursar.ExportConfigToBursarJobD
 import org.folio.des.scheduling.quartz.converter.bursar.ExportConfigToBursarTriggerConverter;
 import org.folio.des.scheduling.quartz.job.bursar.BursarJobKeyResolver;
 import org.folio.des.support.BaseTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -47,11 +46,6 @@ class BursarExportJobSchedulerTest extends BaseTest {
   public void setUpBursar() {
     quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler,
       exportConfigToBursarTriggerConverter, exportConfigToBursarJobDetailConverter, bursarJobKeyResolver);
-  }
-
-  @BeforeEach
-  void clearData() throws SchedulerException {
-    scheduler.clear();
   }
 
   @ParameterizedTest

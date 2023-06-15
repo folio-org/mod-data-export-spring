@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 class BursarScheduledJobInitializerTest {
   private ExportConfigService burSarExportConfigService = mock(ExportConfigService.class);
   private BursarExportScheduler bursarExportScheduler = mock(BursarExportScheduler.class);
+
   private BursarScheduledJobInitializer bursarScheduledJobInitializer;
 
   @BeforeEach

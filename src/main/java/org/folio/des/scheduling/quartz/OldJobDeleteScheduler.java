@@ -2,7 +2,6 @@ package org.folio.des.scheduling.quartz;
 
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -12,6 +11,7 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,15 +36,29 @@ public class OldJobDeleteScheduler {
     JobKey jobKey = getDeleteJobKey(tenantId);
     JobDetail jobDetail = getDeleteJobDetail(tenantId, jobKey);
     try {
-      if (scheduler.checkExists(jobKey)) {
-        scheduler.deleteJob(jobKey);
-        scheduler.scheduleJob(jobDetail, Set.of(getDeleteJobTrigger(tenantId)), false);
-      } else {
-        scheduler.scheduleJob(jobDetail, Set.of(getDeleteJobTrigger(tenantId)), false);
+      if (!checkIfExists(jobKey)) {
+        scheduler.scheduleJob(jobDetail, getDeleteJobTrigger(tenantId));
+        log.info("scheduleOldJobDeletion:: Delete Old Job scheduled successfully");
       }
     } catch (Exception e) {
       log.warn("scheduleOldJobDeletion:: scheduling failure", e);
     }
+  }
+
+  public void removeOldJobDeletionScheduler(String tenantId) {
+    JobKey jobKey = getDeleteJobKey(tenantId);
+    try {
+      if (checkIfExists(jobKey)) {
+        scheduler.deleteJob(jobKey);
+        log.info("deleteOldJobDeletionScheduler:: Old Job scheduler deleted successfully");
+      }
+    } catch (SchedulerException e) {
+      log.warn("deleteOldJobDeletionScheduler:: scheduling failure", e);
+    }
+  }
+
+  private boolean checkIfExists(JobKey jobKey) throws SchedulerException {
+    return scheduler.checkExists(jobKey);
   }
 
   private Trigger getDeleteJobTrigger(String tenantId) {
@@ -59,14 +73,14 @@ public class OldJobDeleteScheduler {
       .build();
   }
 
-  public JobDetail getDeleteJobDetail(String tenantId, JobKey jobKey) {
+  private JobDetail getDeleteJobDetail(String tenantId, JobKey jobKey) {
     return JobBuilder.newJob(OldDeleteJob.class)
       .usingJobData(TENANT_ID_PARAM, tenantId)
       .withIdentity(jobKey)
       .build();
   }
 
-  public JobKey getDeleteJobKey(String tenantId) {
+  private JobKey getDeleteJobKey(String tenantId) {
     return JobKey.jobKey(tenantId, getGroup(tenantId));
   }
 

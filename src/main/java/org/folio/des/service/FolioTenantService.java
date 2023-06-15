@@ -33,7 +33,8 @@ public class FolioTenantService extends TenantService {
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                             FolioExecutionContextHelper contextHelper, KafkaService kafka,
                             BulkEditConfigService bulkEditConfigService, EdifactScheduledJobInitializer edifactScheduledJobInitializer,
-                            ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler) {
+                            ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer,
+                            OldJobDeleteScheduler oldJobDeleteScheduler) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.contextHelper = contextHelper;
     this.kafka = kafka;
@@ -64,5 +65,6 @@ public class FolioTenantService extends TenantService {
   protected void afterTenantDeletion(TenantAttributes tenantAttributes) {
     String tenantId = context.getTenantId();
     scheduledJobsRemover.deleteJobs(tenantId);
+    oldJobDeleteScheduler.removeOldJobDeletionScheduler(tenantId);
   }
 }

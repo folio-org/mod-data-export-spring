@@ -16,6 +16,7 @@ import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +82,11 @@ public abstract class BaseTest {
     wireMockServer.start();
 
     setUpTenant(mockMvc);
+  }
+
+  @BeforeEach
+  void beforeEach() throws SchedulerException {
+    scheduler.clear();
   }
 
   @SneakyThrows

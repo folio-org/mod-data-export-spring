@@ -7,15 +7,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.UUID;
-
 import org.folio.des.config.FolioExecutionContextHelper;
-import org.folio.des.domain.dto.EdiSchedule;
-import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ScheduleParameters;
-import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.service.JobService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -36,7 +28,6 @@ class OldDeleteJobTest {
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";
   private static final JobKey JOB_KEY = JobKey.jobKey("testJobKey", "testJobGroup");
-  private static final ExportType EXPORT_TYPE = ExportType.BURSAR_FEES_FINES;
   @Mock
   private JobService jobService;
   @Mock
@@ -73,18 +64,6 @@ class OldDeleteJobTest {
     jobDataMap.put("exportConfigId", EXPORT_CONFIG_ID);
     jobDetail.setKey(JOB_KEY);
     return jobDetail;
-  }
-
-  private ExportConfig getExportConfig() {
-    ExportConfig exportConfig = new ExportConfig()
-      .id(EXPORT_CONFIG_ID)
-      .type(EXPORT_TYPE)
-      .tenant(TENANT_ID)
-      .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
-        .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
-          .ediSchedule(new EdiSchedule()
-            .scheduleParameters(new ScheduleParameters().id(UUID.randomUUID())))));
-    return exportConfig;
   }
 
   private static class TestFolioExecutionContext implements FolioExecutionContext {
