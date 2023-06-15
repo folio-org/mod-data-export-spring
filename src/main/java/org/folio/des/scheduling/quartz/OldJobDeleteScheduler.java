@@ -14,7 +14,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +23,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class OldJobDeleteScheduler {
   private final Scheduler scheduler;
-  private final String timeZone;
 
-  public OldJobDeleteScheduler(Scheduler scheduler, @Value("${folio.quartz.bursar.timeZone}") String timeZone) {
+  public OldJobDeleteScheduler(Scheduler scheduler) {
     this.scheduler = scheduler;
-    this.timeZone = timeZone;
   }
 
   @Transactional
@@ -65,7 +62,7 @@ public class OldJobDeleteScheduler {
     return TriggerBuilder.newTrigger()
       .withSchedule(CalendarIntervalScheduleBuilder.calendarIntervalSchedule()
         .withIntervalInDays(1)
-        .inTimeZone(TimeZone.getTimeZone(timeZone))
+        .inTimeZone(TimeZone.getTimeZone("UTC"))
         .preserveHourOfDayAcrossDaylightSavings(true)
         .withMisfireHandlingInstructionDoNothing())
       .withIdentity(UUID.randomUUID().toString(), getGroup(tenantId))

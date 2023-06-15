@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(properties = {
-  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", "folio.quartz.bursar.timeZone=Asia/Calcutta"})
+  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"})
 class OldJobDeleteSchedulerTest extends BaseTest {
   private static final String EXPORT_GROUP = TENANT + "_" + QuartzConstants.EXPORT_DELETE_GROUP_NAME;
 
@@ -24,7 +24,7 @@ class OldJobDeleteSchedulerTest extends BaseTest {
 
   @PostConstruct
   public void setUpOldJobDeleteScheduler() {
-    oldJobDeleteScheduler = new OldJobDeleteScheduler(scheduler, "UTC");
+    oldJobDeleteScheduler = new OldJobDeleteScheduler(scheduler);
   }
 
   @Test
