@@ -8,5 +8,5 @@ public final class QuartzConstants {
   public static final String EXPORT_CONFIG_ID_PARAM = "exportConfigId";
   public static final String EDIFACT_ORDERS_EXPORT_GROUP_NAME = "edifactOrdersExport";
   public static final String BURSAR_EXPORT_GROUP_NAME = "bursarExport";
-  public static final String EXPORT_DELETE_GROUP_NAME = "oldJobDelete";
+  public static final String EXPORT_DELETE_GROUP_NAME = "exportDelete";
 }

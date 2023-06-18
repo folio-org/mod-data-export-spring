@@ -43,13 +43,11 @@ public class OldJobDeleteScheduler {
   }
 
   @Transactional
-  public void removeOldJobDeletionScheduler(String tenantId) {
+  public void removeJobs(String tenantId) {
     JobKey jobKey = getDeleteJobKey(tenantId);
     try {
-      if (checkIfExists(jobKey)) {
-        scheduler.deleteJob(jobKey);
-        log.info("deleteOldJobDeletionScheduler:: Old Job scheduler deleted successfully");
-      }
+      scheduler.deleteJob(jobKey);
+      log.info("deleteOldJobDeletionScheduler:: Old Job scheduler deleted successfully");
     } catch (SchedulerException e) {
       log.warn("removeOldJobDeletionScheduler:: scheduling failure", e);
     }
