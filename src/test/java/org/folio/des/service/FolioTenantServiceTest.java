@@ -1,5 +1,6 @@
 package org.folio.des.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,7 @@ import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
+import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
@@ -41,6 +43,9 @@ class FolioTenantServiceTest {
   @Mock
   BursarScheduledJobInitializer bursarScheduledJobInitializer;
 
+  @Mock
+  OldJobDeleteScheduler oldJobDeleteScheduler;
+
   @Test
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
@@ -51,6 +56,7 @@ class FolioTenantServiceTest {
     doNothing().when(kafka).createKafkaTopics();
     doNothing().when(kafka).restartEventListeners();
     doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
+    doNothing().when(oldJobDeleteScheduler).scheduleOldJobDeletion(any());
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
@@ -58,6 +64,7 @@ class FolioTenantServiceTest {
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
+    verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
   }
@@ -70,6 +77,7 @@ class FolioTenantServiceTest {
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     doNothing().when(scheduledJobsRemover).deleteJobs(tenantId);
+    doNothing().when(oldJobDeleteScheduler).removeJobs(tenantId);
 
     folioTenantService.afterTenantDeletion(tenantAttributes);
 
