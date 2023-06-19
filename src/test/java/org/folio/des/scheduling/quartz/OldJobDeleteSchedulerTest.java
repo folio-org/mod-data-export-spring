@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(properties = {
   "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"})
 class OldJobDeleteSchedulerTest extends BaseTest {
-  private static final String EXPORT_DELETE_GROUP = TENANT + "_" + QuartzConstants.EXPORT_DELETE_GROUP_NAME;
+  private static final String EXPORT_DELETE_GROUP = TENANT + "_" + QuartzConstants.OLD_JOB_DELETE_GROUP_NAME;
 
   @Autowired
   private Scheduler scheduler;

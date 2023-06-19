@@ -81,6 +81,6 @@ public class OldJobDeleteScheduler {
   }
 
   private String getGroup(String tenantId) {
-    return tenantId + "_" + QuartzConstants.EXPORT_DELETE_GROUP_NAME;
+    return tenantId + "_" + QuartzConstants.OLD_JOB_DELETE_GROUP_NAME;
   }
 }
