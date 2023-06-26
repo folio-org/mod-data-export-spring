@@ -50,8 +50,6 @@ class EdifactOrdersExportServiceTest {
   private ConfigurationClient client;
   @Autowired
   private ObjectMapper objectMapper;
- /*@MockBean
-  private EdifactOrdersExportConfigToTaskTriggerConverter converter;*/
   @MockBean
   @Qualifier("edifactOrdersExportJobScheduler")
   private ExportJobScheduler exportJobScheduler;
