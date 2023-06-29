@@ -45,7 +45,7 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
     setExportConfigId(exportConfig);
     ModelConfiguration result = super.postConfig(exportConfig);
     exportJobScheduler.scheduleExportJob(exportConfig);
-    log.info("postConfig:: initial jobs prepared for export config id='{}'", exportConfig.getId());
+    log.info("postConfig:: initial jobs prepared for export config id '{}'", exportConfig.getId());
     return result;
   }
 
