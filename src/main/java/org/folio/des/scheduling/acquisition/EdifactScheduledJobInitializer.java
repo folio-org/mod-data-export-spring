@@ -1,13 +1,12 @@
 package org.folio.des.scheduling.acquisition;
 
-import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSchedulesToQuartz;
+import static org.folio.des.scheduling.util.ScheduleUtil.shouldMigrateSchedulesToQuartz;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
-import org.folio.des.domain.dto.Job;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.okapi.common.SemVer;
@@ -34,8 +33,8 @@ public class EdifactScheduledJobInitializer {
         ExportConfigCollection exportConfigCol = basedConfigManager.getConfigCollection(ALL_EDIFACT_ORDERS_CONFIG_QUERY, Integer.MAX_VALUE);
         exportConfigs = exportConfigCol.getConfigs();
         for (ExportConfig exportConfig : exportConfigs) {
-          List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);
-          scheduledJobs.forEach(scheduledJob -> log.info("InitialJob scheduled: {}", scheduledJob.getId()));
+          exportJobScheduler.scheduleExportJob(exportConfig);
+          log.info("initAllScheduledJob:: initial jobs scheduled for export config id='{}'", exportConfig.getId());
         }
         log.info("initAllScheduledJob:: scheduling configurations loaded and jobs scheduled successfully");
       }

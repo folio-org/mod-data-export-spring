@@ -1,13 +1,10 @@
 package org.folio.des.scheduling.quartz;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.Job;
 import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverter;
@@ -37,9 +34,9 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
 
   @Override
   @Transactional
-  public List<Job> scheduleExportJob(ExportConfig exportConfig) {
+  public void scheduleExportJob(ExportConfig exportConfig) {
     if (exportConfig == null) {
-      return Collections.emptyList();
+      return;
     }
 
     try {
@@ -49,8 +46,6 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
       } else {
         scheduleJob(jobKey, exportConfig);
       }
-      // job creation does not happen on quartz scheduling, so just return empty list
-      return Collections.emptyList();
     } catch (Exception e) {
       log.warn("Error during scheduling for config id {}", exportConfig.getId(), e);
       throw new SchedulingException("Error during scheduling", e);

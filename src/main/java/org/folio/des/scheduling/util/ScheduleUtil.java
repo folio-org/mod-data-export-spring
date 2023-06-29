@@ -1,4 +1,4 @@
-package org.folio.des.scheduling.acquisition;
+package org.folio.des.scheduling.util;
 
 import java.util.Collection;
 import java.util.stream.Stream;

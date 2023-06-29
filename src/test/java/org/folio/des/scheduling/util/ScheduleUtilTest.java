@@ -1,4 +1,4 @@
-package org.folio.des.scheduling.acquisition;
+package org.folio.des.scheduling.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

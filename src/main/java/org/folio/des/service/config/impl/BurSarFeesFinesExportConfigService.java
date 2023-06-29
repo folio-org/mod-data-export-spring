@@ -11,7 +11,7 @@ import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.scheduling.BursarExportScheduler;
+import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
 import lombok.extern.log4j.Log4j2;

@@ -1,6 +1,5 @@
 package org.folio.des.service.config.acquisition;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,7 +8,6 @@ import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.BaseExportConfigService;
@@ -35,8 +33,8 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
   public void updateConfig(String configId, ExportConfig exportConfig) {
     setExportConfigId(exportConfig);
     super.updateConfig(configId, exportConfig);
-    List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);
-    scheduledJobs.forEach(scheduledJob -> log.info("Job re-scheduled: {}", scheduledJob.getId()));
+    exportJobScheduler.scheduleExportJob(exportConfig);
+    log.info("updateConfig:: jobs rescheduled for export config id='{}'", exportConfig.getId());
   }
 
   @Override
@@ -46,8 +44,8 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
     }
     setExportConfigId(exportConfig);
     ModelConfiguration result = super.postConfig(exportConfig);
-    List<Job> scheduledJobs = exportJobScheduler.scheduleExportJob(exportConfig);
-    scheduledJobs.forEach(scheduledJob -> log.info("InitialJob prepared: {}", scheduledJob));
+    exportJobScheduler.scheduleExportJob(exportConfig);
+    log.info("postConfig:: initial jobs prepared for export config id='{}'", exportConfig.getId());
     return result;
   }
 
