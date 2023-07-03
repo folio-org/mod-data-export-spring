@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ScheduleParameters;
-import org.folio.des.scheduling.base.ScheduleDateTimeUtil;
+import org.folio.des.scheduling.util.ScheduleDateTimeUtil;
 import org.quartz.CalendarIntervalScheduleBuilder;
 import org.quartz.DateBuilder;
 import org.quartz.DateBuilder.IntervalUnit;
@@ -68,7 +68,7 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
 
   private Trigger buildTrigger(ScheduleParameters parameters, Date startTime, IntervalUnit intervalUnit,
                                String triggerGroup) {
-    log.info("buildTrigger:: Start Time is:{}", startTime);
+    log.debug("buildTrigger:: Start Time is:{}", startTime);
     return TriggerBuilder.newTrigger()
       .withSchedule(CalendarIntervalScheduleBuilder.calendarIntervalSchedule()
         .withInterval(parameters.getScheduleFrequency(), intervalUnit)

@@ -6,13 +6,7 @@ folio:
   tenant:
     validation:
       enabled: true
-  schedule:
-    acquisition:
-      poolSize: 10
-      runOnlyIfModuleRegistered: true
   quartz:
-    edifact:
-      enabled: true
     bursar:
       timeZone: ${TIME_ZONE:UTC}
     schemaName: mod_data_export_spring_quartz

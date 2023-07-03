@@ -1,11 +1,10 @@
 package org.folio.des.scheduling.bursar;
 
-import static org.folio.des.scheduling.acquisition.ScheduleUtil.shouldMigrateSchedulesToQuartz;
+import static org.folio.des.scheduling.util.ScheduleUtil.shouldMigrateSchedulesToQuartz;
 
 import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.scheduling.BursarExportScheduler;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.okapi.common.SemVer;
 import org.folio.tenant.domain.dto.TenantAttributes;

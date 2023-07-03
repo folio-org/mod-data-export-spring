@@ -25,7 +25,7 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
-import org.folio.des.scheduling.BursarExportScheduler;
+import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

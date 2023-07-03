@@ -34,6 +34,7 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.listeners.JobListenerSupport;
 import org.quartz.listeners.SchedulerListenerSupport;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,8 +46,8 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 @SpringBootTest(properties = {
-  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  "folio.quartz.edifact.enabled=true"})
+  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"
+})
 class QuartzExportJobSchedulerTest extends BaseTest {
 
   private static final String SCHEDULE_ID = "scheduleId_" + UUID.randomUUID();
@@ -64,9 +65,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(config);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(config);
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -85,9 +84,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     // scheduleExportJob with disabled scheduling for existing id should result in job unscheduling
     ExportConfig disabledConfig = buildExportConfig(SCHEDULE_ID, false);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(disabledConfig);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(disabledConfig);
 
     assertFalse(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -104,9 +101,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     // scheduleExportJob with enabled scheduling for existing id should result in job rescheduling
     ExportConfig reschedulingConfig = buildExportConfig(SCHEDULE_ID, true);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(2, schedulerListener.getJobsAddedCount());
@@ -119,9 +114,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, false);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(config);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(config);
 
     assertFalse(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(0, schedulerListener.getJobsScheduledCount());
@@ -136,9 +129,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(config);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(config);
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -160,9 +151,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     // scheduleExportJob with disabled scheduling for existing id should result in job unscheduling
     ExportConfig disabledConfig = buildExportConfig(SCHEDULE_ID, false);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(disabledConfig);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(disabledConfig);
 
     assertFalse(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
@@ -185,9 +174,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     // scheduleExportJob with enabled scheduling for existing id should result in job rescheduling
     ExportConfig reschedulingConfig = buildExportConfig(SCHEDULE_ID, true);
     testTriggerConverter.setTriggerAmount(jobTriggersRescheduleCount);
-    var jobs = quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
-
-    assertThat(jobs, is(Collections.emptyList()));
+    quartzExportJobScheduler.scheduleExportJob(reschedulingConfig);
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(2, schedulerListener.getJobsAddedCount());
@@ -196,9 +183,9 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   }
 
   @Test
-  void testScheduleNullExportConfig() {
-    var jobs = quartzExportJobScheduler.scheduleExportJob(null);
-    assertThat(jobs, is(Collections.emptyList()));
+  void testScheduleNullExportConfig() throws SchedulerException {
+    quartzExportJobScheduler.scheduleExportJob(null);
+    assertThat(scheduler.getJobKeys(GroupMatcher.anyJobGroup()), is(Collections.emptySet()));
   }
 
   private ExportConfig buildExportConfig(String configId, boolean isEnabled) {

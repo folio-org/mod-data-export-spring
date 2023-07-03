@@ -25,7 +25,7 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.exception.RequestValidationException;
-import org.folio.des.scheduling.BursarExportScheduler;
+import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

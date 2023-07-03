@@ -1,4 +1,4 @@
-package org.folio.des.scheduling.quartz.job.bursar;
+package org.folio.des.scheduling.quartz.job;
 
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 

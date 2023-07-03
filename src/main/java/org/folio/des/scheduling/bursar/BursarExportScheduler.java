@@ -1,4 +1,4 @@
-package org.folio.des.scheduling;
+package org.folio.des.scheduling.bursar;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.exceptions.SchedulingException;

@@ -1,4 +1,4 @@
-package org.folio.des.scheduling.acquisition;
+package org.folio.des.scheduling.util;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -15,13 +15,6 @@ public final class ScheduleUtil {
 
   private ScheduleUtil() {
 
-  }
-
-  public static boolean isJobScheduleAllowed(boolean isRunOnlyIfModuleRegistered, boolean isModuleRegistered) {
-    if (isRunOnlyIfModuleRegistered) {
-      return isModuleRegistered;
-    }
-    return true;
   }
 
   /**

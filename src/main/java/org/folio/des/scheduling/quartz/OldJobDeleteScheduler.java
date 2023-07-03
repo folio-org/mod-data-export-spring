@@ -5,7 +5,7 @@ import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.folio.des.scheduling.quartz.job.bursar.OldDeleteJob;
+import org.folio.des.scheduling.quartz.job.OldDeleteJob;
 import org.quartz.CalendarIntervalScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;

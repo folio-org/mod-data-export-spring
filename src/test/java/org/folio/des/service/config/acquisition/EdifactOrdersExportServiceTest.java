@@ -13,7 +13,6 @@ import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.converter.aqcuisition.EdifactOrdersExportConfigToTaskTriggerConverter;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
@@ -51,8 +50,6 @@ class EdifactOrdersExportServiceTest {
   private ConfigurationClient client;
   @Autowired
   private ObjectMapper objectMapper;
-  @MockBean
-  private EdifactOrdersExportConfigToTaskTriggerConverter converter;
   @MockBean
   @Qualifier("edifactOrdersExportJobScheduler")
   private ExportJobScheduler exportJobScheduler;

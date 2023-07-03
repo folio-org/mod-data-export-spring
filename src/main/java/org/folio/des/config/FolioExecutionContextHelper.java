@@ -31,17 +31,11 @@ public class FolioExecutionContextHelper {
   private final FolioExecutionContext folioExecutionContext;
   private final AuthService authService;
   private final SecurityManagerService securityManagerService;
-  private boolean registered = false;
   @Value("${folio.okapi.url}")
   private String okapiUrl;
 
   public void registerTenant() {
     securityManagerService.prepareSystemUser(folioExecutionContext.getOkapiUrl(), folioExecutionContext.getTenantId());
-    registered = true;
-  }
-
-  public boolean isModuleRegistered() {
-    return registered;
   }
 
   public FolioExecutionContext getFolioExecutionContext(String tenantId) {
