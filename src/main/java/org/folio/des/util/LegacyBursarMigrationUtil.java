@@ -25,6 +25,7 @@ import org.folio.des.domain.dto.BursarExportTokenFeeDate;
 import org.folio.des.domain.dto.BursarExportTokenFeeMetadata;
 import org.folio.des.domain.dto.BursarExportTokenLengthControl;
 import org.folio.des.domain.dto.BursarExportTokenUserData;
+import org.folio.des.domain.dto.BursarExportTokenUserDataOptional;
 import org.folio.des.domain.dto.BursarExportTransferCriteria;
 import org.folio.des.domain.dto.BursarExportTransferCriteriaConditionsInner;
 import org.folio.des.domain.dto.BursarExportTransferCriteriaElse;
@@ -236,9 +237,9 @@ public class LegacyBursarMigrationUtil {
 
     //data
     //user's external id token
-    BursarExportTokenUserData userIDToken = new BursarExportTokenUserData();
+    BursarExportTokenUserDataOptional userIDToken = new BursarExportTokenUserDataOptional();
     userIDToken.setValue(
-      BursarExportTokenUserData.ValueEnum.EXTERNAL_SYSTEM_ID
+      BursarExportTokenUserDataOptional.ValueEnum.EXTERNAL_SYSTEM_ID
     );
 
     BursarExportTokenLengthControl userIDTokenLengthControl = new BursarExportTokenLengthControl();
