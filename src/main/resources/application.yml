@@ -1,7 +1,7 @@
 folio:
   system:
     username: ${SYSTEM_USER_NAME:data-export-system-user}
-    password: ${SYSTEM_USER_PASSWORD:data-export-system-user}
+    password: ${SYSTEM_USER_PASSWORD}
   okapi:
     url: ${OKAPI_URL:http://okapi:9130}
   tenant:
