@@ -35,6 +35,8 @@ public class SecurityManagerService {
 
   @Value("${folio.system.username}")
   private String username;
+  @Value("${folio.system.password}")
+  private String password;
 
   public void prepareSystemUser(String okapiUrl, String tenantId) {
     Optional<User> userOptional = getUser(username);
@@ -48,7 +50,7 @@ public class SecurityManagerService {
       authService.saveCredentials(SystemUserParameters.builder()
           .id(UUID.randomUUID())
           .username(username)
-          .password(username)
+          .password(password)
           .okapiUrl(okapiUrl)
           .tenantId(tenantId)
           .build());
