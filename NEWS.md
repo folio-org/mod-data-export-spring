@@ -2,7 +2,7 @@
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.3...v2.0.0)
 
-### Technical tasks
+### Technical tasks 
 * [MODEXPS-187](https://issues.folio.org/browse/MODEXPS-187) Authority control: add new export type
 * [MODEXPS-181](https://issues.folio.org/browse/MODEXPS-181) mockserver 5.14.0 for arm64 support
 * [MODEXPS-177](https://issues.folio.org/browse/MODEXPS-177) Update the module to Spring boot v3.0.0 and identify issues.
