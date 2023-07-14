@@ -25,6 +25,8 @@ public class AuthService {
 
   @Value("${folio.system.username}")
   private String username;
+  @Value("${folio.system.password}")
+  private String password;
 
   public String getTokenForSystemUser(String tenant, String url) {
     SystemUserParameters userParameters =
@@ -32,7 +34,7 @@ public class AuthService {
             .okapiUrl(url)
             .tenantId(tenant)
             .username(username)
-            .password(username)
+            .password(password)
             .build();
 
     log.info("Attempt login with url={} tenant={} username={}.", url, tenant, username);
