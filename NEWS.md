@@ -104,6 +104,9 @@ No module code changes. The base Docker container has been fixed.
 * [MODEXPS-67](https://issues.folio.org/browse/MODEXPS-67) Missing require on circulation-logs
 
 ## 2021-11-10 v1.2.0
+
+### Stories
+
 * [MODEXPS-26](https://issues.folio.org/browse/MODEXPS-26) Scheduling export job doesn't work anymore
 * [MODEXPS-29](https://issues.folio.org/browse/MODEXPS-29) mod-data-export-spring: folio-spring-base v2 update
 * [MODEXPS-34](https://issues.folio.org/browse/MODEXPS-34) Rename JobRepository to avoid conflicts with springframework
