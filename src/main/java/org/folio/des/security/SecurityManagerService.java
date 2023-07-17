@@ -47,14 +47,15 @@ public class SecurityManagerService {
       updateUser(user);
     } else {
       user = createUser(username);
-      authService.saveCredentials(SystemUserParameters.builder()
-          .id(UUID.randomUUID())
-          .username(username)
-          .password(password)
-          .okapiUrl(okapiUrl)
-          .tenantId(tenantId)
-          .build());
     }
+
+    authService.setCredentials(SystemUserParameters.builder()
+        .id(UUID.randomUUID())
+        .username(username)
+        .password(password)
+        .okapiUrl(okapiUrl)
+        .tenantId(tenantId)
+        .build());
 
     Optional<PermissionUser> permissionUserOptional = permissionsClient.get("userId==" + user.getId())
         .getPermissionUsers()
