@@ -45,11 +45,15 @@ public class SecurityManagerService {
     if (userOptional.isPresent()) {
       user = userOptional.get();
       updateUser(user);
-      authService.deleteCredentials(user.getId());
     } else {
       user = createUser(username);
     }
 
+    try {
+      authService.deleteCredentials(user.getId());
+    } catch (feign.FeignException.NotFound e) {
+      // ignore if not exist
+    }
     authService.saveCredentials(SystemUserParameters.builder()
         .id(UUID.randomUUID())
         .username(username)
