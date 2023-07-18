@@ -1,6 +1,7 @@
 package org.folio.des.security;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
@@ -14,8 +15,10 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+import java.net.http.HttpResponse;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +77,12 @@ class SecurityManagerServiceTest extends BaseTest {
                 aResponse()
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBody(USER_PERMS_RESPONSE)));
+
+    wireMockServer.stubFor(
+      delete(urlEqualTo("/authn/credentials?userId=a85c45b7-d427-4122-8532-5570219c5e59"))
+        .willReturn(
+          aResponse()
+            .withStatus(HttpStatus.NO_CONTENT.value())));
 
     Map<String, Collection<String>> tenantOkapiHeaders = new HashMap<>() {{
       put(XOkapiHeaders.TENANT, List.of(TENANT));
