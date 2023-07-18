@@ -65,10 +65,13 @@ public class AuthService {
     return CollectionUtils.isNotEmpty(token) && StringUtils.isNotBlank(token.get(0));
   }
 
-  public void setCredentials(SystemUserParameters systemUserParameters) {
-    // Changing a passwort via /authn/update is possible but requires the old password we no longer have
-    // therefore delete the old password.
-    authClient.deleteCredentials(systemUserParameters.getUserId());
+  public void deleteCredentials(String userId) {
+    authClient.deleteCredentials(userId);
+
+    log.info("Removed credentials for user {}.", userId);
+  }
+
+  public void saveCredentials(SystemUserParameters systemUserParameters) {
     authClient.saveCredentials(systemUserParameters);
 
     log.info("Saved credentials for user {}.", systemUserParameters.getUsername());

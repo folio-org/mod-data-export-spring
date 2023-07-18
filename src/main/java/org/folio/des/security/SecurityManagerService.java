@@ -45,11 +45,12 @@ public class SecurityManagerService {
     if (userOptional.isPresent()) {
       user = userOptional.get();
       updateUser(user);
+      authService.deleteCredentials(user.getId());
     } else {
       user = createUser(username);
     }
 
-    authService.setCredentials(SystemUserParameters.builder()
+    authService.saveCredentials(SystemUserParameters.builder()
         .id(UUID.randomUUID())
         .username(username)
         .password(password)
