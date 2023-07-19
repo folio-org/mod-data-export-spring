@@ -27,6 +27,15 @@
     },
     {
       "request": {
+        "method": "DELETE",
+        "url": "/authn/credentials"
+      },
+      "response": {
+        "status": 204
+      }
+    },
+    {
+      "request": {
         "method": "POST",
         "url": "/authn/credentials"
       },
