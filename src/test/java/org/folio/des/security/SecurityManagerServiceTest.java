@@ -1,8 +1,11 @@
 package org.folio.des.security;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
@@ -14,6 +17,7 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import java.util.Collection;
@@ -75,6 +79,12 @@ class SecurityManagerServiceTest extends BaseTest {
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBody(USER_PERMS_RESPONSE)));
 
+    wireMockServer.stubFor(
+      delete(urlEqualTo("/authn/credentials?userId=a85c45b7-d427-4122-8532-5570219c5e59"))
+        .willReturn(
+          aResponse()
+            .withStatus(HttpStatus.NO_CONTENT.value())));
+
     Map<String, Collection<String>> tenantOkapiHeaders = new HashMap<>() {{
       put(XOkapiHeaders.TENANT, List.of(TENANT));
       put(XOkapiHeaders.URL, List.of(wireMockServer.baseUrl()));
@@ -89,5 +99,53 @@ class SecurityManagerServiceTest extends BaseTest {
         getRequestedFor(urlEqualTo("/users?query=username%3D%3Ddata-export-system-user")));
     wireMockServer.verify(
         putRequestedFor(urlEqualTo("/users/a85c45b7-d427-4122-8532-5570219c5e59")));
+    wireMockServer.verify(
+        deleteRequestedFor(urlEqualTo("/authn/credentials?userId=a85c45b7-d427-4122-8532-5570219c5e59")));
+    wireMockServer.verify(
+        postRequestedFor(urlEqualTo("/authn/credentials")));
+  }
+
+  @Test
+  @DisplayName("Update user without previous password")
+  void prepareSystemUserWithoutPreviousPassword() {
+
+    wireMockServer.stubFor(
+        get(urlEqualTo("/users?query=username%3D%3Ddata-export-system-user"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(SYS_USER_EXIST_RESPONSE)));
+
+    wireMockServer.stubFor(
+        get(urlEqualTo("/perms/users?query=userId%3D%3Da85c45b7-d427-4122-8532-5570219c5e59"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(USER_PERMS_RESPONSE)));
+
+    wireMockServer.stubFor(
+      delete(urlEqualTo("/authn/credentials?userId=a85c45b7-d427-4122-8532-5570219c5e59"))
+        .willReturn(
+          aResponse()
+            .withStatus(HttpStatus.NOT_FOUND.value())));
+
+    Map<String, Collection<String>> tenantOkapiHeaders = new HashMap<>() {{
+      put(XOkapiHeaders.TENANT, List.of(TENANT));
+      put(XOkapiHeaders.URL, List.of(wireMockServer.baseUrl()));
+      put(XOkapiHeaders.TOKEN, List.of(TOKEN));
+    }};
+
+    try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
+      securityManagerService.prepareSystemUser(wireMockServer.baseUrl(), TENANT);
+    }
+
+    wireMockServer.verify(
+        getRequestedFor(urlEqualTo("/users?query=username%3D%3Ddata-export-system-user")));
+    wireMockServer.verify(
+        putRequestedFor(urlEqualTo("/users/a85c45b7-d427-4122-8532-5570219c5e59")));
+    wireMockServer.verify(
+        deleteRequestedFor(urlEqualTo("/authn/credentials?userId=a85c45b7-d427-4122-8532-5570219c5e59")));
+    wireMockServer.verify(
+        postRequestedFor(urlEqualTo("/authn/credentials")));
   }
 }

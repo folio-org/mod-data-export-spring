@@ -20,6 +20,8 @@ API for Data Export Spring module.
 | KAFKA_HOST                    | kafka                     | Kafka broker hostname                                             |
 | KAFKA_PORT                    | 9092                      | Kafka broker port                                                 |
 | OKAPI_URL                     | http://okapi:9130         | Okapi url                                                         |
+| SYSTEM\_USER\_NAME            | data-export-system-user   | Username of the system user                                       |
+| SYSTEM\_USER\_PASSWORD        | -                         | Password of the system user                                       |
 | ENV                           | folio                     | Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed|
 
 
@@ -65,7 +67,7 @@ Before running scheduled task(job) there is check, that module is registered for
 
 Tenant information need to define DB schema for storing information about Job and etc.
 
-In the post tenant API controller specific user (`data-export-system-user`) is created for running scheduled export tasks. Permissions are defined in `src/main/resources/permissions/system-user-permissions.csv`.
+The `data-export-system-user` system user for running scheduled export tasks is created in the post tenant API controller. The password must be set using the `SYSTEM_USER_PASSWORD` environment variable. Permissions are defined in `src/main/resources/permissions/system-user-permissions.csv`.
 
 Also Okapi headers, system user, tenant information are s-tored in memory in a FolioExecutionContext.
 

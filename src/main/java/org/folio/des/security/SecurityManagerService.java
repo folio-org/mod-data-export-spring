@@ -35,6 +35,8 @@ public class SecurityManagerService {
 
   @Value("${folio.system.username}")
   private String username;
+  @Value("${folio.system.password}")
+  private String password;
 
   public void prepareSystemUser(String okapiUrl, String tenantId) {
     Optional<User> userOptional = getUser(username);
@@ -45,14 +47,20 @@ public class SecurityManagerService {
       updateUser(user);
     } else {
       user = createUser(username);
-      authService.saveCredentials(SystemUserParameters.builder()
-          .id(UUID.randomUUID())
-          .username(username)
-          .password(username)
-          .okapiUrl(okapiUrl)
-          .tenantId(tenantId)
-          .build());
     }
+
+    try {
+      authService.deleteCredentials(user.getId());
+    } catch (feign.FeignException.NotFound e) {
+      // ignore if not exist
+    }
+    authService.saveCredentials(SystemUserParameters.builder()
+        .id(UUID.randomUUID())
+        .username(username)
+        .password(password)
+        .okapiUrl(okapiUrl)
+        .tenantId(tenantId)
+        .build());
 
     Optional<PermissionUser> permissionUserOptional = permissionsClient.get("userId==" + user.getId())
         .getPermissionUsers()

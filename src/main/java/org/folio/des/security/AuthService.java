@@ -25,6 +25,8 @@ public class AuthService {
 
   @Value("${folio.system.username}")
   private String username;
+  @Value("${folio.system.password}")
+  private String password;
 
   public String getTokenForSystemUser(String tenant, String url) {
     SystemUserParameters userParameters =
@@ -32,7 +34,7 @@ public class AuthService {
             .okapiUrl(url)
             .tenantId(tenant)
             .username(username)
-            .password(username)
+            .password(password)
             .build();
 
     log.info("Attempt login with url={} tenant={} username={}.", url, tenant, username);
@@ -61,6 +63,12 @@ public class AuthService {
 
   private boolean isNotEmpty(java.util.List<String> token) {
     return CollectionUtils.isNotEmpty(token) && StringUtils.isNotBlank(token.get(0));
+  }
+
+  public void deleteCredentials(String userId) {
+    authClient.deleteCredentials(userId);
+
+    log.info("Removed credentials for user {}.", userId);
   }
 
   public void saveCredentials(SystemUserParameters systemUserParameters) {
