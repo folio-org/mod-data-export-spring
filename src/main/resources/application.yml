@@ -1,6 +1,7 @@
 folio:
   system:
-    username: data-export-system-user
+    username: ${SYSTEM_USER_NAME:data-export-system-user}
+    password: ${SYSTEM_USER_PASSWORD}
   tenant:
     validation:
       enabled: true

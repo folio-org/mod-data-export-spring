@@ -167,6 +167,7 @@
             "users.item.post",
             "users.item.put",
             "login.item.post",
+            "login.item.delete",
             "perms.users.item.post",
             "perms.users.get",
             "configuration.entries.collection.get",
