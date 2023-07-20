@@ -1,3 +1,10 @@
+## 2022-07-20 v1.5.4
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.3...v1.5.4)
+
+### Bug fixes
+* MODEXPS-226 Security Remediation
+
 ## 2022-12-02 v1.5.3
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.2...v1.5.3)
