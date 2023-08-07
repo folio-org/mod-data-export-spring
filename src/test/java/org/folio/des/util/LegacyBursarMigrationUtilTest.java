@@ -106,7 +106,9 @@ class LegacyBursarMigrationUtilTest {
     List<BursarExportFilter> filterConditions = new ArrayList<>();
     BursarExportFilterAge ageFilter = new BursarExportFilterAge();
     ageFilter.setNumDays(1);
-    ageFilter.setCondition(BursarExportFilterAge.ConditionEnum.GREATER_THAN);
+    ageFilter.setCondition(
+      BursarExportFilterAge.ConditionEnum.GREATER_THAN_EQUAL
+    );
     BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition(); // patronGroups => patronGroupListFilter
     patronGroupListFilter.setOperation(
       BursarExportFilterCondition.OperationEnum.OR
@@ -159,7 +161,9 @@ class LegacyBursarMigrationUtilTest {
     List<BursarExportFilter> filterConditions = new ArrayList<>();
     BursarExportFilterAge ageFilter = new BursarExportFilterAge(); // outstandingDays => ageFilter
     ageFilter.setNumDays(1);
-    ageFilter.setCondition(BursarExportFilterAge.ConditionEnum.GREATER_THAN);
+    ageFilter.setCondition(
+      BursarExportFilterAge.ConditionEnum.GREATER_THAN_EQUAL
+    );
     BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition(); // patronGroups => patronGroupListFilter
     patronGroupListFilter.setOperation(
       BursarExportFilterCondition.OperationEnum.OR
