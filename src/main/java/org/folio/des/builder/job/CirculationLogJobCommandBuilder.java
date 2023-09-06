@@ -14,8 +14,11 @@ import lombok.extern.log4j.Log4j2;
 public class CirculationLogJobCommandBuilder implements JobCommandBuilder {
   @Override
   public JobParameters buildJobCommand(Job job) {
+    log.debug("Build job command by job={}", job);
     var paramsBuilder = new JobParametersBuilder();
     paramsBuilder.addString("query", job.getExportTypeSpecificParameters().getQuery());
-    return paramsBuilder.toJobParameters();
+    JobParameters jobParameters = paramsBuilder.toJobParameters();
+    log.debug("Job params: {}", jobParameters);
+    return jobParameters;
   }
 }

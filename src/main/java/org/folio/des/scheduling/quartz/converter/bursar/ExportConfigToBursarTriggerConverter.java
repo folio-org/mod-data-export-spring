@@ -37,8 +37,10 @@ public class ExportConfigToBursarTriggerConverter implements Converter<ExportCon
 
   @Override
   public ExportTrigger convert(@NotNull ExportConfig exportConfig) {
+    log.debug("ExportConfigToBursarTriggerConverter:: converts from {}",  exportConfig);
 
     if (isDisabledSchedule(exportConfig)) {
+      log.debug("convert:: schedule is disabled");
       return new ExportTrigger(true, Collections.emptySet());
     }
     ScheduleParameters scheduleParameters = createBursarScheduleParameters(exportConfig);

@@ -17,6 +17,7 @@ public class ExportConfigConverterResolver {
   private final Converter<ExportConfig, ModelConfiguration> defaultConverter;
 
   public Converter<ExportConfig, ModelConfiguration> resolve(ExportType exportType) {
+    log.debug("ExportType={}",  exportType);
     return converters.getOrDefault(exportType, defaultConverter);
   }
 }

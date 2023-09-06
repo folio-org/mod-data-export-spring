@@ -48,6 +48,7 @@ public class  JobExecutionService {
   public static final String FILE_NAME_KEY = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
+    log.debug("prepareStartJobCommand:: job={}", job);
     validateIncomingExportConfig(job);
 
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.START);
@@ -57,10 +58,12 @@ public class  JobExecutionService {
         jobCommand.setJobParameters(jobParameters);
       },
       () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
+    log.debug("prepareStartJobCommand:: result={}", jobCommand);
     return jobCommand;
   }
 
   public JobCommand prepareResendJobCommand(Job job) {
+    log.debug("prepareResendJobCommand:: job={}", job);
     validateIncomingExportConfig(job);
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
 
@@ -80,6 +83,7 @@ public class  JobExecutionService {
 
     jobCommand.setJobParameters(paramsBuilder.toJobParameters());
 
+    log.debug("prepareResendJobCommand:: result={}", jobCommand);
    return jobCommand;
   }
 
@@ -89,10 +93,12 @@ public class  JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
+    log.debug("sendJobCommand:: jobCommand={}", jobCommand);
     kafka.send(KafkaService.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
 
   public void deleteJobs(List<Job> jobs) {
+    log.debug("deleteJobs:: jobs={}", jobs);
     List<String> files = jobs.stream()
         .map(Job::getFiles)
         .filter(CollectionUtils::isNotEmpty)
@@ -111,6 +117,7 @@ public class  JobExecutionService {
   }
 
   protected void validateIncomingExportConfig(Job job) {
+    log.debug("validateIncomingExportConfig:: job={}", job);
     exportConfigValidatorResolver.resolve(job.getType(), ExportTypeSpecificParameters.class).ifPresent(validator -> {
       Errors errors = new BeanPropertyBindingResult(job.getExportTypeSpecificParameters(), "specificParameters");
       validator.validate(job.getExportTypeSpecificParameters(), errors);

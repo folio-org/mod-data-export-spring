@@ -38,6 +38,7 @@ public final class DefaultExportConfigToModelConfigConverter implements Converte
     config.setEnabled(true);
     config.setDefault(true);
     config.setValue(objectMapper.writeValueAsString(source));
+    log.debug("DefaultExportConfigToModelConfigConverter:: Convert process result from {} into {}", source, config);
     return config;
   }
 }

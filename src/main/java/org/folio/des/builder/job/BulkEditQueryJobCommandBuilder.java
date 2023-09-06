@@ -15,9 +15,12 @@ public class BulkEditQueryJobCommandBuilder implements JobCommandBuilder {
 
   @Override
   public JobParameters buildJobCommand(Job job) {
+    log.debug("Build job command by job={}", job);
     var paramsBuilder = new JobParametersBuilder();
     paramsBuilder.addString("entityType", job.getEntityType().getValue());
     paramsBuilder.addString("query", job.getExportTypeSpecificParameters().getQuery());
-    return paramsBuilder.toJobParameters();
+    JobParameters jobParameters = paramsBuilder.toJobParameters();
+    log.debug("Job params: {}", jobParameters);
+    return jobParameters;
   }
 }

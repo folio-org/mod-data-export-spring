@@ -26,13 +26,16 @@ import lombok.extern.log4j.Log4j2;
 public class ScheduleParametersToTriggerConverterImpl implements ScheduleParametersToTriggerConverter {
   @Override
   public Set<Trigger> convert(ScheduleParameters scheduleParameters, String triggerGroup) {
+    log.debug("convert:: scheduleParameters={}, triggerGroup={}", scheduleParameters, triggerGroup);
 
     if (scheduleParameters == null) {
+      log.debug("convert:: no schedule params provided.");
       return Collections.emptySet();
     }
 
     ScheduleParameters.SchedulePeriodEnum schedulePeriod = scheduleParameters.getSchedulePeriod();
     if (schedulePeriod == null || schedulePeriod == ScheduleParameters.SchedulePeriodEnum.NONE) {
+      log.debug("convert:: no schedule period provided.");
       return Collections.emptySet();
     }
 

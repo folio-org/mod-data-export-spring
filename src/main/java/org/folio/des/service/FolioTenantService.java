@@ -47,6 +47,7 @@ public class FolioTenantService extends TenantService {
 
   @Override
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
+    log.debug("afterTenantUpdate:: tenantAttributes={}", tenantAttributes);
     try {
       contextHelper.registerTenant();
       bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);

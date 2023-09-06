@@ -35,15 +35,19 @@ public class QuartzExportJobScheduler implements ExportJobScheduler {
   @Override
   @Transactional
   public void scheduleExportJob(ExportConfig exportConfig) {
+    log.debug("scheduleExportJob:: input param={}", exportConfig);
     if (exportConfig == null) {
+      log.debug("scheduleExportJob:: input param is null. Nothing to schedule.");
       return;
     }
 
     try {
       JobKey jobKey = jobKeyResolver.resolve(exportConfig);
       if (scheduleExists(jobKey)) {
+        log.debug("scheduleExportJob:: the schedule has been set up already.");
         rescheduleJob(jobKey, exportConfig);
       } else {
+        log.debug("scheduleExportJob:: the schedule process is in progress.");
         scheduleJob(jobKey, exportConfig);
       }
     } catch (Exception e) {

@@ -18,11 +18,14 @@ public class BurSarFeeFinesJobCommandBuilder implements JobCommandBuilder {
 
   @Override
   public JobParameters buildJobCommand(Job job) {
+    log.debug("Build job command by job={}", job);
     var paramsBuilder = new JobParametersBuilder();
     try {
       paramsBuilder.addString("bursarFeeFines",
         objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getBursarFeeFines()));
-      return paramsBuilder.toJobParameters();
+      JobParameters jobParameters = paramsBuilder.toJobParameters();
+      log.debug("Job params: {}", jobParameters);
+      return jobParameters;
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException(e);
     }

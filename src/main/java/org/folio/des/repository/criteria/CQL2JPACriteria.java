@@ -118,6 +118,7 @@ public class CQL2JPACriteria<E> {
     if (node instanceof CQLBooleanNode cqlBooleanNode) {
       return processBoolean(cqlBooleanNode);
     }
+    log.error("Unsupported CQLNode instance");
     throw createUnsupportedException(node);
   }
 
@@ -143,6 +144,7 @@ public class CQL2JPACriteria<E> {
       return builder.not(
           builder.and(process(node.getLeftOperand()), process(node.getRightOperand())));
     } else {
+      log.error("Unsupported CQLBooleanNode instance");
       throw createUnsupportedException(node);
     }
   }

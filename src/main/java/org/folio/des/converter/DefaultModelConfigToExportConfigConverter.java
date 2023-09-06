@@ -20,6 +20,7 @@ public final class DefaultModelConfigToExportConfigConverter implements Converte
   @SneakyThrows
   @Override
   public ExportConfig convert(ModelConfiguration source) {
+    log.debug("DefaultModelConfigToExportConfigConverter:: converts from {}",  source);
     final String value = source.getValue();
     var config = objectMapper.readValue(value, ExportConfig.class);
     config.setId(source.getId());

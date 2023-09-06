@@ -56,6 +56,7 @@ public final class EdifactExportConfigToModelConfigConverter implements Converte
     config.setEnabled(true);
     config.setDefault(true);
     config.setValue(objectMapper.writeValueAsString(exportConfig));
+    log.debug("EdifactExportConfigToModelConfigConverter:: Convert process result from {} into {}", exportConfig, config);
     return config;
   }
 
