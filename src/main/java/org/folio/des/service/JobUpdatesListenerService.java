@@ -27,6 +27,7 @@ public class JobUpdatesListenerService {
     topicPattern = "${application.kafka.topic-pattern}",
     groupId = "${application.kafka.group-id}")
   public void receiveJobExecutionUpdate(@Payload Job jobExecutionUpdate, @Headers Map<String, Object> messageHeaders) {
+    log.debug("receiveJobExecutionUpdate:: Payload={} ; Headers={}", jobExecutionUpdate, messageHeaders);
     var defaultFolioExecutionContext = DefaultFolioExecutionContext.fromMessageHeaders(folioModuleMetadata, messageHeaders);
     try (var context = new FolioExecutionContextSetter(defaultFolioExecutionContext)) {
       jobUpdatesService.receiveJobExecutionUpdate(jobExecutionUpdate);

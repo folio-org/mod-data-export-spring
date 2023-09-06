@@ -29,6 +29,7 @@ public class ExportConfigToEdifactTriggerConverter implements Converter<ExportCo
 
   @Override
   public ExportTrigger convert(ExportConfig exportConfig) {
+    log.debug("ExportConfigToEdifactTriggerConverter:: converts from {}",  exportConfig);
     ExportTypeSpecificParameters specificParameters = exportConfig.getExportTypeSpecificParameters();
     Errors errors = new BeanPropertyBindingResult(specificParameters, "specificParameters");
 

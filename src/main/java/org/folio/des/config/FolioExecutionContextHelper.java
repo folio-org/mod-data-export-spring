@@ -61,6 +61,7 @@ public class FolioExecutionContextHelper {
     try (var context = new FolioExecutionContextSetter(new DefaultFolioExecutionContext(folioModuleMetadata, tenantOkapiHeaders))) {
       String systemUserId = authService.getSystemUserId();
       if (nonNull(systemUserId)) {
+        log.debug("The systemUserId is non null, so user id will be added into tenantOkapiHeaders.");
         tenantOkapiHeaders.put(XOkapiHeaders.USER_ID, List.of(systemUserId));
       }
     }
@@ -81,6 +82,7 @@ public class FolioExecutionContextHelper {
         result = userIdStr;
       } catch (Exception ignore) {
         // Nothing to do
+        log.warn("Error loading userIdStr");
       }
     }
     return result;

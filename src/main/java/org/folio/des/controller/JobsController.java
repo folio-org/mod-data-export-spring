@@ -9,6 +9,7 @@ import static org.hibernate.internal.util.StringHelper.isBlank;
 
 import java.util.UUID;
 
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
@@ -27,24 +28,29 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/data-export-spring")
 @RequiredArgsConstructor
+@Log4j2
 public class JobsController implements JobsApi {
 
   private final JobService service;
 
   @Override
   public ResponseEntity<Job> getJobById(UUID id) {
+    log.debug("Get Job by id={}", id);
     return ResponseEntity.ok(service.get(id));
   }
 
   @Override
   public ResponseEntity<JobCollection> getJobs(Integer offset, Integer limit, String query) {
+    log.debug("Get Jobs by query: {}", query);
     return ResponseEntity.ok(service.get(offset, limit, query));
   }
 
   @Override
   public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, Job job) {
+    log.debug("Upsert the Job wit id={} and tenant id={}", job.getId(), tenantId);
     job.setTenant(tenantId);
     if (isMissingRequiredParameters(job)) {
+      log.warn("Upsert the Job wit id={} and tenant id={} failed because of missing required params.", job.getId(), tenantId);
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(service.upsertAndSendToKafka(job, true), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
@@ -52,12 +58,14 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity resendExportedFile(UUID jobId) {
+    log.debug("Resend exported file for job id={}", jobId);
     service.resendExportedFile(jobId);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
+    log.debug("Download exported file by job id={}", id);
     return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
   }
 

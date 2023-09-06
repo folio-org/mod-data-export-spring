@@ -18,12 +18,14 @@ public class EdifactOrdersJobCommandSchedulerBuilder implements JobCommandSchedu
 
   @Override
   public JobCommand buildJobCommand(org.folio.des.domain.dto.Job job) {
+    log.debug("Build job command by job={}", job);
     JobCommand jobCommand = buildBaseJobCommand(job);
     var paramsBuilder = new JobParametersBuilder();
     try {
       paramsBuilder.addString("edifactOrdersExport",
         objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()));
       jobCommand.setJobParameters(paramsBuilder.toJobParameters());
+      log.debug("Job command: {}", jobCommand);
       return jobCommand;
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException(e);

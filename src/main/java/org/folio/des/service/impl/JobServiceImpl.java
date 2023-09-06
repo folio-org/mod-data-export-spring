@@ -90,8 +90,10 @@ public class JobServiceImpl implements JobService {
   @Transactional(readOnly = true)
   @Override
   public JobCollection get(Integer offset, Integer limit, String query) {
+    log.debug("get JobCollection by query: {}.", query);
     var result = new JobCollection();
     if (StringUtils.isBlank(query)) {
+      log.debug("The query is empty. Getting all.");
       Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
       result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
       result.setTotalRecords((int) page.getTotalElements());
@@ -102,6 +104,7 @@ public class JobServiceImpl implements JobService {
           .toList());
       result.setTotalRecords(cqlService.countByCQL(Job.class, query));
     }
+    log.debug("get:: result={}.", result);
     return result;
   }
 

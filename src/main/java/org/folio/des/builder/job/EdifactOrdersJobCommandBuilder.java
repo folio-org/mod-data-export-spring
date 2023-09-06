@@ -17,11 +17,14 @@ public class EdifactOrdersJobCommandBuilder implements JobCommandBuilder {
 
   @Override
   public JobParameters buildJobCommand(Job job) {
+    log.debug("Build job command by job={}", job);
     var paramsBuilder = new JobParametersBuilder();
     try {
       paramsBuilder.addString("edifactOrdersExport",
         objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()));
-      return paramsBuilder.toJobParameters();
+      JobParameters jobParameters = paramsBuilder.toJobParameters();
+      log.debug("Job params: {}", jobParameters);
+      return jobParameters;
     } catch (JsonProcessingException e) {
       throw new IllegalArgumentException(e);
     }

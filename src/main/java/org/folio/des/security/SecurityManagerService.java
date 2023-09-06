@@ -53,6 +53,7 @@ public class SecurityManagerService {
       authService.deleteCredentials(user.getId());
     } catch (feign.FeignException.NotFound e) {
       // ignore if not exist
+      log.warn("User with id={} really doesn't exist.", user.getId());
     }
     authService.saveCredentials(SystemUserParameters.builder()
         .id(UUID.randomUUID())
