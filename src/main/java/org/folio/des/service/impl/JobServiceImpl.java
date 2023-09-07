@@ -80,18 +80,22 @@ public class JobServiceImpl implements JobService {
   @Transactional(readOnly = true)
   @Override
   public org.folio.des.domain.dto.Job get(UUID id) {
+    log.debug("get:: by id={}.", id);
     return entityToDto(getJobEntity(id));
   }
 
   public Job getJobEntity(UUID id) {
+    log.debug("getJobEntity:: by id={}.", id);
     return repository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Job %s not found", id)));
   }
 
   @Transactional(readOnly = true)
   @Override
   public JobCollection get(Integer offset, Integer limit, String query) {
+    log.debug("get:: by query={} with offset={} and limit={}.", query, offset, limit);
     var result = new JobCollection();
     if (StringUtils.isBlank(query)) {
+      log.debug("get:: get all since query is absent.");
       Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
       result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
       result.setTotalRecords((int) page.getTotalElements());
@@ -102,6 +106,7 @@ public class JobServiceImpl implements JobService {
           .toList());
       result.setTotalRecords(cqlService.countByCQL(Job.class, query));
     }
+    log.debug("get:: result={}", result);
     return result;
   }
 
@@ -115,7 +120,11 @@ public class JobServiceImpl implements JobService {
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend,
                                                            boolean validateConfigPresence) {
+    log.debug("upsertAndSendToKafka:: with jobDto={} and withJobCommandSend={} and validateConfigPresence={}.",
+                                                          jobDto, withJobCommandSend, validateConfigPresence);
+
     if (validateConfigPresence) {
+      log.debug("upsertAndSendToKafka:: validateConfigPresence");
       Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
         .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
@@ -178,10 +187,12 @@ public class JobServiceImpl implements JobService {
     log.info("Upserted {}.", result);
 
     if (withJobCommandSend) {
+      log.debug("upsertAndSendToKafka:: withJobCommandSend");
       var jobCommand = jobExecutionService.prepareStartJobCommand(result);
       jobExecutionService.sendJobCommand(jobCommand);
     }
 
+    log.debug("upsertAndSendToKafka:: result={}.", result);
     return entityToDto(result);
   }
 
@@ -202,8 +213,10 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void resendExportedFile(UUID jobId) {
+    log.debug("resendExportedFile:: with jobId={}.", jobId);
     org.folio.des.domain.dto.Job job = get(jobId);
     if (CollectionUtils.isEmpty(job.getFileNames())) {
+      log.error("The exported file is missing for jobId={}.", job.getId());
       throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
     }
     var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(job));
@@ -240,8 +253,10 @@ public class JobServiceImpl implements JobService {
 
   @Override
   public InputStream downloadExportedFile(UUID jobId) {
+    log.debug("downloadExportedFile:: for jobId={}.", jobId);
     Job job = getJobEntity(jobId);
     if (CollectionUtils.isEmpty(job.getFileNames())) {
+      log.error("The URL of the exported file is missing for jobId={}.", job.getId());
       throw new NotFoundException(String.format("The URL of the exported file is missing for jobId: %s", job.getId()));
     }
     log.debug("Refreshing download url for jobId: {}", job.getId());

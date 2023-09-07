@@ -1,6 +1,7 @@
 package org.folio.des.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportType;
@@ -19,18 +20,21 @@ import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 @RestController
 @RequestMapping("/data-export-spring")
 @RequiredArgsConstructor
+@Log4j2
 public class ConfigsController implements ConfigsApi {
   private final EnumSet<ExportType> applyAspectExportTypes = EnumSet.of(EDIFACT_ORDERS_EXPORT);
   private final ExportTypeBasedConfigManager manager;
 
   @Override
   public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
+      log.debug("getExportConfigs:: by query={} with limit={}", query, limit);
       return ResponseEntity.ok(manager.getConfigCollection(query, limit));
   }
 
   @Override
   public ResponseEntity<String> postExportConfig(@RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
     exportConfig.setTenant(tenantId);
+    log.debug("postExportConfig:: by exportConfig={}", exportConfig);
     manager.postConfig(exportConfig);
     if (applyAspectExportTypes.contains(exportConfig.getType())) {
       String config = exportConfig.toString();
@@ -41,6 +45,7 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<Void> putExportConfig(String configId, @RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
+    log.debug("putExportConfig:: configId={}.", configId);
     exportConfig.setTenant(tenantId);
     manager.updateConfig(configId, exportConfig);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -48,11 +53,13 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<ExportConfig> getConfigById(String exportConfigId) {
+    log.debug("getConfigById:: by exportConfigId={}.", exportConfigId);
     return ResponseEntity.ok(manager.getConfigById(exportConfigId));
   }
 
   @Override
   public ResponseEntity<Void> deleteExportConfigById(String exportConfigId) {
+    log.debug("deleteExportConfigById:: by exportConfigId={}.", exportConfigId);
     manager.deleteConfigById(exportConfigId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
