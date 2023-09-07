@@ -49,7 +49,7 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
-    log.debug("getConfigCollection:: by query={} with limit={}.", query, limit);
+    log.info("getConfigCollection:: by query={} with limit={}.", query, limit);
     ConfigurationCollection configurationCollection = client.getConfigurations(query, limit);
     if (configurationCollection.getTotalRecords() > 0) {
       var exportConfigCollection = new ExportConfigCollection();
@@ -57,7 +57,7 @@ public class BaseExportConfigService implements ExportConfigService {
         .addConfigsItem(defaultModelConfigToExportConfigConverter.convert(modelConfig))
       );
       ExportConfigCollection totalRecords = exportConfigCollection.totalRecords(exportConfigCollection.getConfigs().size());
-      log.debug("getConfigCollection:: totalRecords={}.", totalRecords);
+      log.info("getConfigCollection:: totalRecords={}.", totalRecords);
       return totalRecords;
     }
     log.info("getConfigCollection:: returned empty result set.");

@@ -32,6 +32,7 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
     setExportConfigId(exportConfig);
+    log.debug("updateConfig:: by exportConfig={}", exportConfig);
     super.updateConfig(configId, exportConfig);
     exportJobScheduler.scheduleExportJob(exportConfig);
     log.info("updateConfig:: jobs rescheduled for export config id='{}'", exportConfig.getId());
@@ -43,6 +44,7 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
       exportConfig.setId(UUID.randomUUID().toString());
     }
     setExportConfigId(exportConfig);
+    log.debug("postConfig:: by exportConfig={}", exportConfig);
     ModelConfiguration result = super.postConfig(exportConfig);
     exportJobScheduler.scheduleExportJob(exportConfig);
     log.info("postConfig:: initial jobs prepared for export config id '{}'", exportConfig.getId());

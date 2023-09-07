@@ -95,7 +95,7 @@ public class JobServiceImpl implements JobService {
     log.debug("get:: by query={} with offset={} and limit={}.", query, offset, limit);
     var result = new JobCollection();
     if (StringUtils.isBlank(query)) {
-      log.debug("get:: get all since query is absent.");
+      log.info("get:: get all since query is absent.");
       Page<Job> page = repository.findAll(new OffsetRequest(offset, limit));
       result.setJobRecords(page.map(JobServiceImpl::entityToDto).getContent());
       result.setTotalRecords((int) page.getTotalElements());
@@ -106,7 +106,7 @@ public class JobServiceImpl implements JobService {
           .toList());
       result.setTotalRecords(cqlService.countByCQL(Job.class, query));
     }
-    log.debug("get:: result={}", result);
+    log.info("get:: result={}", result);
     return result;
   }
 
@@ -124,7 +124,7 @@ public class JobServiceImpl implements JobService {
                                                           jobDto, withJobCommandSend, validateConfigPresence);
 
     if (validateConfigPresence) {
-      log.debug("upsertAndSendToKafka:: validateConfigPresence");
+      log.info("upsertAndSendToKafka:: validateConfigPresence");
       Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
         .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
@@ -184,15 +184,14 @@ public class JobServiceImpl implements JobService {
 
     log.info("Upserting {}.", result);
     result = repository.save(result);
-    log.info("Upserted {}.", result);
+    log.info("upsertAndSendToKafka:: Upserted {}.", result);
 
     if (withJobCommandSend) {
-      log.debug("upsertAndSendToKafka:: withJobCommandSend");
+      log.info("upsertAndSendToKafka:: withJobCommandSend");
       var jobCommand = jobExecutionService.prepareStartJobCommand(result);
       jobExecutionService.sendJobCommand(jobCommand);
     }
 
-    log.debug("upsertAndSendToKafka:: result={}.", result);
     return entityToDto(result);
   }
 
@@ -220,6 +219,7 @@ public class JobServiceImpl implements JobService {
       throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
     }
     var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(job));
+    log.info("resendExportedFile:: with jobCommand={}.", jobCommand);
     jobExecutionService.sendJobCommand(jobCommand);
   }
 

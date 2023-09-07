@@ -51,10 +51,10 @@ public class ExportTypeBasedConfigManager {
   }
 
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
-    log.debug("postConfig:: by exportConfig={}", exportConfig);
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
+    log.debug("postConfig:: by exportConfig={}", exportConfig);
     Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportConfig.getType());
     if (exportConfigService.isPresent()) {
       return exportConfigService.get().postConfig(exportConfig);
@@ -66,15 +66,15 @@ public class ExportTypeBasedConfigManager {
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     Optional<ExportType> exportTypeOpt = extractExportType(query);
     String normalizedQuery = normalizeQuery(exportTypeOpt, query);
-    log.debug("getConfigCollection:: by normalizedQuery: {} with limit={}", normalizedQuery, limit);
+    log.info("getConfigCollection:: by normalizedQuery: {} with limit={}", normalizedQuery, limit);
     if (exportTypeOpt.isPresent()) {
-      log.debug("getConfigCollection:: exportTypeOpt.isPresent");
+      log.info("getConfigCollection:: exportTypeOpt.isPresent");
       Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportTypeOpt.get());
       if (exportConfigService.isPresent()) {
         return exportConfigService.get().getConfigCollection(normalizedQuery, limit);
       }
     }
-    log.debug("getConfigCollection:: defaultExportConfigService.getConfigCollection flow's working.");
+    log.info("getConfigCollection:: defaultExportConfigService.getConfigCollection flow's working.");
     return defaultExportConfigService.getConfigCollection(normalizedQuery, limit);
   }
 
@@ -87,7 +87,7 @@ public class ExportTypeBasedConfigManager {
       throw new NotFoundException(String.format(EXPORT_CONFIGURATION_NOT_FOUND, exportConfigId));
     }
     ExportConfig exportConfig = defaultModelConfigToExportConfigConverter.convert(configuration);
-    log.debug("getConfigById:: result={}.", exportConfigId);
+    log.info("getConfigById:: result={}.", exportConfigId);
     return exportConfig;
   }
 

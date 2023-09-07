@@ -47,7 +47,7 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
 
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
-    log.debug("getConfigCollection:: the result doesn't base on a query.");
+    log.info("getConfigCollection:: the result doesn't base on a query.");
     return getFirstConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());
   }
 
@@ -65,7 +65,7 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
     var configCollection = new ExportConfigCollection();
     configCollection.addConfigsItem(exportConfig);
     configCollection.setTotalRecords(1);
-    log.debug("createExportConfigCollection:: configCollection={}.", configCollection);
+    log.info("createExportConfigCollection:: configCollection={}.", configCollection);
     return configCollection;
   }
 

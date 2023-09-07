@@ -58,7 +58,7 @@ public class  JobExecutionService {
         jobCommand.setJobParameters(jobParameters);
       },
       () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
-    log.debug("prepareStartJobCommand:: jobCommand={}.", jobCommand);
+    log.info("prepareStartJobCommand:: jobCommand={}.", jobCommand);
     return jobCommand;
   }
 
@@ -93,7 +93,7 @@ public class  JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
-    log.debug("sendJobCommand:: jobCommand={}.", jobCommand);
+    log.info("sendJobCommand:: jobCommand={}.", jobCommand);
     kafka.send(KafkaService.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
 

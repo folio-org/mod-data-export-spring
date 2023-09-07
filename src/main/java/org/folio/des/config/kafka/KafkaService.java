@@ -97,6 +97,7 @@ public class KafkaService {
     log.info("Sending {}.", data);
     String tenant = folioExecutionContext.getTenantId();
     if (StringUtils.isBlank(tenant)) {
+      log.error("The tenant is blank.");
       throw new IllegalStateException("Can't send to Kafka because tenant is blank");
     }
     kafkaTemplate.send(getTenantTopicName(topic.getTopicName(), tenant), key, data);

@@ -27,14 +27,14 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
-      log.debug("getExportConfigs:: by query={} with limit={}", query, limit);
+      log.info("getExportConfigs:: by query={} with limit={}", query, limit);
       return ResponseEntity.ok(manager.getConfigCollection(query, limit));
   }
 
   @Override
   public ResponseEntity<String> postExportConfig(@RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
     exportConfig.setTenant(tenantId);
-    log.debug("postExportConfig:: by exportConfig={}", exportConfig);
+    log.info("postExportConfig:: by exportConfig={}", exportConfig);
     manager.postConfig(exportConfig);
     if (applyAspectExportTypes.contains(exportConfig.getType())) {
       String config = exportConfig.toString();
@@ -45,7 +45,7 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<Void> putExportConfig(String configId, @RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
-    log.debug("putExportConfig:: configId={}.", configId);
+    log.info("putExportConfig:: configId={}.", configId);
     exportConfig.setTenant(tenantId);
     manager.updateConfig(configId, exportConfig);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -53,13 +53,13 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<ExportConfig> getConfigById(String exportConfigId) {
-    log.debug("getConfigById:: by exportConfigId={}.", exportConfigId);
+    log.info("getConfigById:: by exportConfigId={}.", exportConfigId);
     return ResponseEntity.ok(manager.getConfigById(exportConfigId));
   }
 
   @Override
   public ResponseEntity<Void> deleteExportConfigById(String exportConfigId) {
-    log.debug("deleteExportConfigById:: by exportConfigId={}.", exportConfigId);
+    log.info("deleteExportConfigById:: by exportConfigId={}.", exportConfigId);
     manager.deleteConfigById(exportConfigId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }

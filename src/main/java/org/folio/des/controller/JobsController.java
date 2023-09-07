@@ -35,20 +35,20 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity<Job> getJobById(UUID id) {
-    log.debug("getJobById:: by id={}.", id);
+    log.info("getJobById:: by id={}.", id);
     return ResponseEntity.ok(service.get(id));
   }
 
   @Override
   public ResponseEntity<JobCollection> getJobs(Integer offset, Integer limit, String query) {
-    log.debug("getJobs:: by query={} with offset={} and limit={}.", query, offset, limit);
+    log.info("getJobs:: by query={} with offset={} and limit={}.", query, offset, limit);
     return ResponseEntity.ok(service.get(offset, limit, query));
   }
 
   @Override
   public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, Job job) {
     job.setTenant(tenantId);
-    log.debug("upsertJob:: with job={}.", job);
+    log.info("upsertJob:: with job={}.", job);
     if (isMissingRequiredParameters(job)) {
       log.warn("upsertJob: Missing Required Parameters.");
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -58,14 +58,14 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity resendExportedFile(UUID jobId) {
-    log.debug("resendExportedFile:: with jobId={}.", jobId);
+    log.info("resendExportedFile:: with jobId={}.", jobId);
     service.resendExportedFile(jobId);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
-    log.debug("downloadExportedFileByJobId:: with id={}.", id);
+    log.info("downloadExportedFileByJobId:: with id={}.", id);
     return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
   }
 
