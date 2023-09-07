@@ -60,7 +60,7 @@ public class BaseExportConfigService implements ExportConfigService {
       log.info("getConfigCollection:: totalRecords={}.", totalRecords);
       return totalRecords;
     }
-    log.info("getConfigCollection:: returned empty result set.");
+    log.debug("getConfigCollection:: returned empty result set.");
     return new ExportConfigCollection().totalRecords(0);
   }
 

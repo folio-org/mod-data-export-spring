@@ -70,7 +70,7 @@ public class BurSarFeesFinesExportConfigService extends BaseExportConfigService 
   }
 
   private ExportConfigCollection emptyExportConfigCollection() {
-    log.info("emptyExportConfigCollection:: ");
+    log.debug("emptyExportConfigCollection:: ");
     var configCollection = new ExportConfigCollection();
     configCollection.setTotalRecords(0);
     return configCollection;
