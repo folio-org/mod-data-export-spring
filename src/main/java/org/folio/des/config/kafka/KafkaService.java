@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.tools.kafka.KafkaUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -90,7 +91,7 @@ public class KafkaService {
    * @return topic name as {@link String} object
    */
   private String getTenantTopicName(String topicName, String tenantId) {
-    return String.format("%s.%s.%s", environment, tenantId, topicName);
+    return KafkaUtils.getTenantTopicName(topicName, environment, tenantId);
   }
 
   public void send(Topic topic, String key, Object data) {
