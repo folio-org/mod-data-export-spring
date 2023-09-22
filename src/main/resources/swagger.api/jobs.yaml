@@ -3,7 +3,7 @@ info:
   title: Data Export Spring Jobs
   version: v1
 servers:
-  - url: https://localhost/data-export-spring/
+  - url: /data-export-spring/
 paths:
   /jobs:
     get:

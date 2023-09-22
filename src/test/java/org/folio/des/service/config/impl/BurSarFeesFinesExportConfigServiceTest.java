@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
+import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.BursarExportFilter;
 import org.folio.des.domain.dto.BursarExportFilterAge;
@@ -28,10 +30,12 @@ import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
@@ -90,6 +94,12 @@ class BurSarFeesFinesExportConfigServiceTest {
 
   @MockBean
   private ConfigurationClient client;
+  @MockBean
+  private Scheduler scheduler;
+  @MockBean
+  private QuartzSchemaInitializer quartzSchemaInitializer;
+  @MockBean
+  private BursarExportScheduler bursarExportScheduler;
 
   @Test
   @DisplayName("Set new configuration")
@@ -118,6 +128,7 @@ class BurSarFeesFinesExportConfigServiceTest {
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
+    doNothing().when(bursarExportScheduler).scheduleBursarJob(any());
 
     var response = service.postConfig(bursarExportConfig);
 

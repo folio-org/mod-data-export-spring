@@ -10,11 +10,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.AfterEach;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.MediaType;
+import org.mockserver.verify.VerificationTimes;
 import org.mockserver.verify.VerificationTimes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,8 +97,8 @@ class InstallUpgradeIT {
     .withEnv("DB_PASSWORD", "password")
     .withEnv("DB_DATABASE", "postgres")
     .withEnv("KAFKA_HOST", "mykafka")
-    .withEnv("KAFKA_PORT", "9092");
-    // .withEnv("SYSTEM_USER_PASSWORD", "password");
+    .withEnv("KAFKA_PORT", "9092")
+    .withEnv("SYSTEM_USER_PASSWORD", "password");
 
   private static void mockPath(MockServerClient mockServerClient, String path, String jsonBody) {
     mockServerClient.when(request(path))

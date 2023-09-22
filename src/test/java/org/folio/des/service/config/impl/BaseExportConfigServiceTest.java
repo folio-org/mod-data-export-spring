@@ -42,14 +42,12 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-@SpringBootTest(
-  classes = {
-    DefaultModelConfigToExportConfigConverter.class,
-    JacksonConfiguration.class,
-    ServiceConfiguration.class,
-  }
-)
-@EnableAutoConfiguration(exclude = { BatchAutoConfiguration.class })
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
+                  ServiceConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class BaseExportConfigServiceTest {
 
   public static final String CONFIG_RESPONSE =
@@ -94,13 +92,10 @@ class BaseExportConfigServiceTest {
 
   @MockBean
   private ConfigurationClient client;
-
   @MockBean
   private Scheduler scheduler;
-
   @MockBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
-
   @MockBean
   private BursarExportScheduler bursarExportScheduler;
 

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doNothing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,12 +34,14 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.scheduling.bursar.BursarExportScheduler;
+import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
+import org.quartz.Scheduler;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -134,6 +137,7 @@ class ExportTypeBasedConfigManagerTest {
       exportName
     );
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
+    doNothing().when(bursarExportScheduler).scheduleBursarJob(any());
     doNothing().when(bursarExportScheduler).scheduleBursarJob(any());
 
     var response = service.postConfig(bursarExportConfig);

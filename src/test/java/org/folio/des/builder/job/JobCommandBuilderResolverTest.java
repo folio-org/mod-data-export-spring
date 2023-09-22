@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.folio.de.entity.Job;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
@@ -49,10 +50,8 @@ class JobCommandBuilderResolverTest {
 
   @MockBean
   private ConfigurationClient client;
-
   @MockBean
   private Scheduler scheduler;
-
   @MockBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
 
