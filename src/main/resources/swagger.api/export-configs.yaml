@@ -3,7 +3,7 @@ info:
   title: Data Export Spring Configurations
   version: v1
 servers:
-  - url: /data-export-spring/
+  - url: https://localhost/data-export-spring/
 paths:
   /configs:
     get:

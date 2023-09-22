@@ -8,6 +8,7 @@ import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.Test;
 
 class FolioTenantControllerTest extends BaseTest {
+
   @Test
   void shouldPostDefaultBulkEditConfigurationUponPostTenant() {
     var expectedBody = "{" +

@@ -4,33 +4,40 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import java.util.List;
-import lombok.SneakyThrows;
-import org.folio.des.scheduling.ExportTrigger;
+
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.util.TestSocketUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+
+import lombok.SneakyThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -50,8 +57,8 @@ public abstract class BaseTest {
 
   @Autowired
   protected MockMvc mockMvc;
-  @MockBean
-  protected ExportTrigger trigger;
+  @Autowired
+  protected Scheduler scheduler;
 
   static {
     postgreDBContainer.start();
@@ -76,9 +83,14 @@ public abstract class BaseTest {
     setUpTenant(mockMvc);
   }
 
+  @BeforeEach
+  void beforeEach() throws SchedulerException {
+    scheduler.clear();
+  }
+
   @SneakyThrows
   protected static void setUpTenant(MockMvc mockMvc) {
-    mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-data-export-spring")))
+    mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-data-export-spring-3.0.0")))
         .headers(defaultHeaders())
         .contentType(APPLICATION_JSON)).andExpect(status().isNoContent());
   }
@@ -103,9 +115,20 @@ public abstract class BaseTest {
     return httpHeaders;
   }
 
+  @AfterEach
+  void afterEach() throws SchedulerException {
+    if (!scheduler.isInStandbyMode()) {
+      scheduler.clear();
+    }
+  }
+
   @AfterAll
   static void tearDown() {
     wireMockServer.stop();
   }
 
+  @DynamicPropertySource
+  static void setFolioOkapiUrl(DynamicPropertyRegistry registry) {
+    registry.add("folio.okapi.url", () -> "http://localhost:" + WIRE_MOCK_PORT);
+  }
 }

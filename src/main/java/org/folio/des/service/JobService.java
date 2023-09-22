@@ -27,13 +27,23 @@ public interface JobService {
   JobCollection get(Integer offset, Integer limit, String query);
 
   /**
-   * Inserts or updates job, if @withJobCommandSend enabled - send job to kafka
+   * Inserts or updates job, validates job's config presence, if @withJobCommandSend enabled - send job to kafka
    *
    * @param job the job to upsert
    * @param withJobCommandSend if true - job will be send to kafka or false otherwise
    * @return updated job
    */
   Job upsertAndSendToKafka(Job job, boolean withJobCommandSend);
+
+  /**
+   * Inserts or updates job, validates job's config presence, if @withJobCommandSend enabled - send job to kafka
+   *
+   * @param job the job to upsert
+   * @param withJobCommandSend if true - job will be send to kafka or false otherwise
+   * @param validateConfigPresence if true - checks that job's config is present
+   * @return updated job
+   */
+  Job upsertAndSendToKafka(Job job, boolean withJobCommandSend, boolean validateConfigPresence);
 
   /**
    * Deletes old jobs.

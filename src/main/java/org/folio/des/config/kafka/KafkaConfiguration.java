@@ -19,7 +19,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.listener.RecordInterceptor;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.stereotype.Component;
@@ -32,10 +31,9 @@ public class KafkaConfiguration {
   private final KafkaProperties kafkaProperties;
 
   @Bean
-  public <V> ConcurrentKafkaListenerContainerFactory<String, V> kafkaListenerContainerFactory(ConsumerFactory<String, V> cf, RecordInterceptor<String, V> recordInterceptor) {
+  public <V> ConcurrentKafkaListenerContainerFactory<String, V> kafkaListenerContainerFactory(ConsumerFactory<String, V> cf) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, V>();
     factory.setConsumerFactory(cf);
-    factory.setRecordInterceptor(recordInterceptor);
     if (kafkaProperties.getListener().getAckMode() != null) {
       factory.getContainerProperties().setAckMode(kafkaProperties.getListener().getAckMode());
     }

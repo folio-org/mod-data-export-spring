@@ -108,8 +108,16 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend) {
-    Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
-      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+    return upsertAndSendToKafka(jobDto, withJobCommandSend, true);
+  }
+
+  @Transactional
+  @Override
+  public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend,
+                                                           boolean validateConfigPresence) {
+    if (validateConfigPresence) {
+      Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
+        .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
           try {
             client.getConfigById(configId.toString());
@@ -122,8 +130,9 @@ public class JobServiceImpl implements JobService {
               .setSchedulePeriod(ScheduleParameters.SchedulePeriodEnum.NONE);
 
             throw e;
-          }});
-
+          }
+        });
+    }
     log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 

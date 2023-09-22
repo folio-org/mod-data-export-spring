@@ -1,5 +1,7 @@
 package org.folio.des.service;
 
+import static java.util.Objects.nonNull;
+
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
@@ -7,17 +9,12 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.domain.dto.JobStatus;
 import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.repository.JobDataExportRepository;
-import org.folio.des.scheduling.ExportScheduler;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.util.Objects.nonNull;
 
 @Service
 @Log4j2
@@ -38,14 +35,8 @@ public class JobUpdatesService {
   }
 
   private final JobDataExportRepository repository;
-  private final ExportScheduler exportScheduler;
 
   @Transactional
-  @KafkaListener(
-      id = KafkaService.EVENT_LISTENER_ID,
-      containerFactory = "kafkaListenerContainerFactory",
-      topicPattern = "${application.kafka.topic-pattern}",
-      groupId = "${application.kafka.group-id}")
   public void receiveJobExecutionUpdate(Job jobExecutionUpdate) {
     log.info("Received {}.", jobExecutionUpdate);
 
@@ -71,7 +62,7 @@ public class JobUpdatesService {
       result = true;
     }
     if (jobExecutionUpdate.getFiles() != null && (job.getFiles() == null || !CollectionUtils.isEqualCollection(
-        jobExecutionUpdate.getFiles(), job.getFiles()))) {
+      jobExecutionUpdate.getFiles(), job.getFiles()))) {
       job.setFiles(jobExecutionUpdate.getFiles());
       result = true;
     }
@@ -97,8 +88,8 @@ public class JobUpdatesService {
       result = true;
     }
     if (jobExecutionUpdate.getErrorDetails() == null &&
-            jobExecutionUpdate.getExportTypeSpecificParameters() != null &&
-            jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig() != null) {
+      jobExecutionUpdate.getExportTypeSpecificParameters() != null &&
+      jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig() != null) {
       job.getExportTypeSpecificParameters().setVendorEdiOrdersExportConfig(jobExecutionUpdate.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig());
       result = true;
     }
@@ -111,9 +102,6 @@ public class JobUpdatesService {
         job.setStatus(jobStatus);
 
         // Execute next job only after the previous one is completed.
-        if (jobStatus == JobStatus.SUCCESSFUL || jobStatus == JobStatus.FAILED) {
-          exportScheduler.nextJob();
-        }
       }
     }
     if (nonNull(jobExecutionUpdate.getProgress())) {

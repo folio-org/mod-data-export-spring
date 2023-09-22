@@ -1,15 +1,19 @@
 folio:
   system:
-    username: data-export-system-user
+    username: ${SYSTEM_USER_NAME:data-export-system-user}
+    password: ${SYSTEM_USER_PASSWORD}
+  okapi:
+    url: ${OKAPI_URL:http://okapi:9130}
   tenant:
     validation:
       enabled: true
-  schedule:
-    acquisition:
-      poolSize: 10
-      runOnlyIfModuleRegistered: true
+  quartz:
+    bursar:
+      timeZone: ${TIME_ZONE:UTC}
+    schemaName: mod_data_export_spring_quartz
+    changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
-  port: 8081
+  port: 8082
 logging:
   level:
     liquibase: debug
@@ -33,9 +37,9 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
   datasource:
-    username: ${DB_USERNAME:folio_admin}
-    password: ${DB_PASSWORD:folio_admin}
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_DATABASE:okapi_modules}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:heyall}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:okapi_modules}
   cloud:
     openfeign:
       okhttp:
@@ -45,6 +49,22 @@ spring:
       continue-on-error: true
   jackson:
     default-property-inclusion: non_null
+  quartz:
+    auto-startup: true
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org.quartz:
+        scheduler:
+          instanceId: AUTO
+          instanceName: ModDataExportSpringScheduler
+        jobStore:
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+          tablePrefix: ${folio.quartz.schemaName}.QRTZ_
+          misfireThreshold: 60000
+          isClustered: true
+          clusterCheckinInterval: 15000
 management:
   endpoints:
     web:
