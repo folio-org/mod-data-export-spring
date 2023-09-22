@@ -120,11 +120,11 @@ public class JobServiceImpl implements JobService {
   @Override
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend,
                                                            boolean validateConfigPresence) {
-    log.debug("upsertAndSendToKafka:: with jobDto={} and withJobCommandSend={} and validateConfigPresence={}.",
+    log.info("upsertAndSendToKafka:: with jobDto={} and withJobCommandSend={} and validateConfigPresence={}.",
                                                           jobDto, withJobCommandSend, validateConfigPresence);
 
     if (validateConfigPresence) {
-      log.info("upsertAndSendToKafka:: validateConfigPresence");
+      log.info("upsertAndSendToKafka:: validate config presence for job id {}", jobDto.getId());
       Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
         .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
@@ -142,7 +142,6 @@ public class JobServiceImpl implements JobService {
           }
         });
     }
-    log.info("Upserting DTO {}.", jobDto);
     Job result = dtoToEntity(jobDto);
 
     if (StringUtils.isBlank(result.getName())) {
@@ -182,12 +181,10 @@ public class JobServiceImpl implements JobService {
       result.setExitStatus(ExitStatus.UNKNOWN);
     }
 
-    log.info("Upserting {}.", result);
     result = repository.save(result);
-    log.info("upsertAndSendToKafka:: Upserted {}.", result);
+    log.info("upsertAndSendToKafka:: job by id  {} was upserted.", result.getId());
 
     if (withJobCommandSend) {
-      log.info("upsertAndSendToKafka:: withJobCommandSend");
       var jobCommand = jobExecutionService.prepareStartJobCommand(result);
       jobExecutionService.sendJobCommand(jobCommand);
     }
@@ -212,14 +209,13 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void resendExportedFile(UUID jobId) {
-    log.debug("resendExportedFile:: with jobId={}.", jobId);
+    log.info("resendExportedFile:: resend exported files for job with jobId={}.", jobId);
     org.folio.des.domain.dto.Job job = get(jobId);
     if (CollectionUtils.isEmpty(job.getFileNames())) {
       log.error("The exported file is missing for jobId={}.", job.getId());
       throw new NotFoundException(String.format("The exported file is missing for jobId: %s", job.getId()));
     }
     var jobCommand = jobExecutionService.prepareResendJobCommand(dtoToEntity(job));
-    log.info("resendExportedFile:: with jobCommand={}.", jobCommand);
     jobExecutionService.sendJobCommand(jobCommand);
   }
 
@@ -253,7 +249,7 @@ public class JobServiceImpl implements JobService {
 
   @Override
   public InputStream downloadExportedFile(UUID jobId) {
-    log.debug("downloadExportedFile:: for jobId={}.", jobId);
+    log.debug("downloadExportedFile:: download exported files for jobId={}.", jobId);
     Job job = getJobEntity(jobId);
     if (CollectionUtils.isEmpty(job.getFileNames())) {
       log.error("The URL of the exported file is missing for jobId={}.", job.getId());

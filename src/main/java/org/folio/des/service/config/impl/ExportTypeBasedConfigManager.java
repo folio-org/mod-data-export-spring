@@ -40,7 +40,7 @@ public class ExportTypeBasedConfigManager {
                                                                     .collect(Collectors.joining("|")) + ")");
 
   public void updateConfig(String configId, ExportConfig exportConfig) {
-    log.debug("updateConfig:: configId={}", configId);
+    log.info("updateConfig:: configId={}", configId);
     if (exportConfig.getId() == null || !exportConfig.getId().equals(configId)) {
       log.error(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY.getDescription());
       throw new RequestValidationException(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY);
@@ -54,12 +54,12 @@ public class ExportTypeBasedConfigManager {
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
-    log.debug("postConfig:: by exportConfig={}", exportConfig);
+    log.info("postConfig:: by exportConfig={}", exportConfig);
     Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportConfig.getType());
     if (exportConfigService.isPresent()) {
       return exportConfigService.get().postConfig(exportConfig);
     }
-    log.debug("postConfig:: defaultExportConfigService.postConfig flow's working.");
+    log.info("postConfig:: defaultExportConfigService.postConfig flow's working.");
     return defaultExportConfigService.postConfig(exportConfig);
   }
 
@@ -79,7 +79,6 @@ public class ExportTypeBasedConfigManager {
   }
 
   public ExportConfig getConfigById(String exportConfigId) {
-    log.debug("getConfigById:: exportConfigId={}.", exportConfigId);
     var configuration = client.getConfigById(exportConfigId);
 
     if (configuration == null) {
@@ -92,7 +91,6 @@ public class ExportTypeBasedConfigManager {
   }
 
   public void deleteConfigById(String exportConfigId) {
-    log.debug("deleteConfigById:: by exportConfigId={}.", exportConfigId);
     client.deleteConfigById(exportConfigId);
   }
 

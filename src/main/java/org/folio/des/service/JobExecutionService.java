@@ -48,7 +48,7 @@ public class  JobExecutionService {
   public static final String FILE_NAME_KEY = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
-    log.debug("prepareStartJobCommand:: job={}.", job);
+    log.info("prepareStartJobCommand:: job={}.", job);
     validateIncomingExportConfig(job);
 
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.START);
@@ -58,12 +58,11 @@ public class  JobExecutionService {
         jobCommand.setJobParameters(jobParameters);
       },
       () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
-    log.info("prepareStartJobCommand:: jobCommand={}.", jobCommand);
     return jobCommand;
   }
 
   public JobCommand prepareResendJobCommand(Job job) {
-    log.debug("prepareResendJobCommand:: for job={}.", job);
+    log.info("prepareResendJobCommand:: for job={}.", job);
 
     validateIncomingExportConfig(job);
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
@@ -83,7 +82,6 @@ public class  JobExecutionService {
           paramsBuilder.addString(FILE_NAME_KEY, fileNames.get(0)));
 
     jobCommand.setJobParameters(paramsBuilder.toJobParameters());
-    log.debug("prepareResendJobCommand:: result of jobCommand={}.", jobCommand);
    return jobCommand;
   }
 
@@ -93,7 +91,6 @@ public class  JobExecutionService {
   }
 
   public void sendJobCommand(JobCommand jobCommand) {
-    log.info("sendJobCommand:: jobCommand={}.", jobCommand);
     kafka.send(KafkaService.Topic.JOB_COMMAND, jobCommand.getId().toString(), jobCommand);
   }
 
