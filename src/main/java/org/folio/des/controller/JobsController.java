@@ -7,7 +7,9 @@ import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
@@ -24,24 +26,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/data-export-spring")
 @RequiredArgsConstructor
+@Log4j2
 public class JobsController implements JobsApi {
 
   private final JobService service;
 
   @Override
   public ResponseEntity<Job> getJobById(UUID id) {
+    log.info("getJobById:: by id={}.", id);
     return ResponseEntity.ok(service.get(id));
   }
 
   @Override
   public ResponseEntity<JobCollection> getJobs(Integer offset, Integer limit, String query) {
+    log.info("getJobs:: by query={} with offset={} and limit={}.", query, offset, limit);
     return ResponseEntity.ok(service.get(offset, limit, query));
   }
 
   @Override
   public ResponseEntity<Job> upsertJob(@RequestHeader("X-Okapi-Tenant") String tenantId, Job job) {
     job.setTenant(tenantId);
+    log.info("upsertJob:: with job={}.", job);
     if (isMissingRequiredParameters(job)) {
+      log.warn("upsertJob: Missing Required Parameters.");
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     return new ResponseEntity<>(service.upsertAndSendToKafka(job, true), job.getId() == null ? HttpStatus.CREATED : HttpStatus.OK);
@@ -49,12 +56,14 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity resendExportedFile(UUID jobId) {
+    log.info("resendExportedFile:: with jobId={}.", jobId);
     service.resendExportedFile(jobId);
     return ResponseEntity.ok(HttpStatus.OK);
   }
 
   @Override
   public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
+    log.info("downloadExportedFileByJobId:: with id={}.", id);
     return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
   }
 

@@ -17,6 +17,7 @@ public class CQLService {
   private EntityManager entityManager;
 
   public <E> List<E> getByCQL(Class<E> entityCls, String cql, int offset, int limit) {
+    log.debug("getByCQL:: by cql={} with offset={} and limit={} for {}.", cql, offset, limit, entityCls);
     try {
       final CQL2JPACriteria<E> cql2JPACriteria = new CQL2JPACriteria<>(entityCls, entityManager);
       final CriteriaQuery<E> criteria = cql2JPACriteria.toCriteria(cql);
@@ -32,6 +33,7 @@ public class CQLService {
   }
 
   public <E> Integer countByCQL(Class<E> entityCls, String cql) {
+    log.debug("countByCQL:: by cql={} for {}.", cql, entityCls);
     try {
       final CQL2JPACriteria<E> cql2JPACriteria = new CQL2JPACriteria<>(entityCls, entityManager);
       final CriteriaQuery<E> criteria = cql2JPACriteria.toCriteria(cql);

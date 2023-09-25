@@ -48,6 +48,7 @@ public class  JobExecutionService {
   public static final String FILE_NAME_KEY = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
+    log.info("prepareStartJobCommand:: job={}.", job);
     validateIncomingExportConfig(job);
 
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.START);
@@ -61,6 +62,8 @@ public class  JobExecutionService {
   }
 
   public JobCommand prepareResendJobCommand(Job job) {
+    log.info("prepareResendJobCommand:: for job={}.", job);
+
     validateIncomingExportConfig(job);
     JobCommand jobCommand = buildBaseJobCommand(job, JobCommand.Type.RESEND);
 
@@ -79,7 +82,6 @@ public class  JobExecutionService {
           paramsBuilder.addString(FILE_NAME_KEY, fileNames.get(0)));
 
     jobCommand.setJobParameters(paramsBuilder.toJobParameters());
-
    return jobCommand;
   }
 
