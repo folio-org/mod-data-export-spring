@@ -49,14 +49,18 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
+    log.info("getConfigCollection:: by query={} with limit={}.", query, limit);
     ConfigurationCollection configurationCollection = client.getConfigurations(query, limit);
     if (configurationCollection.getTotalRecords() > 0) {
       var exportConfigCollection = new ExportConfigCollection();
       configurationCollection.getConfigs().forEach(modelConfig -> exportConfigCollection
         .addConfigsItem(defaultModelConfigToExportConfigConverter.convert(modelConfig))
       );
-      return exportConfigCollection.totalRecords(exportConfigCollection.getConfigs().size());
+      ExportConfigCollection totalRecords = exportConfigCollection.totalRecords(exportConfigCollection.getConfigs().size());
+      log.info("getConfigCollection:: totalRecords={}.", totalRecords);
+      return totalRecords;
     }
+    log.debug("getConfigCollection:: returned empty result set.");
     return new ExportConfigCollection().totalRecords(0);
   }
 

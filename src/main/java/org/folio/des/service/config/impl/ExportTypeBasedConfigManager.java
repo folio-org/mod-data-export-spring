@@ -40,7 +40,9 @@ public class ExportTypeBasedConfigManager {
                                                                     .collect(Collectors.joining("|")) + ")");
 
   public void updateConfig(String configId, ExportConfig exportConfig) {
+    log.info("updateConfig:: configId={}", configId);
     if (exportConfig.getId() == null || !exportConfig.getId().equals(configId)) {
+      log.error(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY.getDescription());
       throw new RequestValidationException(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY);
     }
     exportConfigServiceResolver.resolve(exportConfig.getType())
@@ -52,22 +54,27 @@ public class ExportTypeBasedConfigManager {
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
+    log.info("postConfig:: by exportConfig={}", exportConfig);
     Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportConfig.getType());
     if (exportConfigService.isPresent()) {
       return exportConfigService.get().postConfig(exportConfig);
     }
+    log.info("postConfig:: defaultExportConfigService.postConfig flow's working.");
     return defaultExportConfigService.postConfig(exportConfig);
   }
 
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     Optional<ExportType> exportTypeOpt = extractExportType(query);
     String normalizedQuery = normalizeQuery(exportTypeOpt, query);
+    log.info("getConfigCollection:: by normalizedQuery: {} with limit={}", normalizedQuery, limit);
     if (exportTypeOpt.isPresent()) {
+      log.info("getConfigCollection:: exportTypeOpt.isPresent");
       Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportTypeOpt.get());
       if (exportConfigService.isPresent()) {
         return exportConfigService.get().getConfigCollection(normalizedQuery, limit);
       }
     }
+    log.info("getConfigCollection:: defaultExportConfigService.getConfigCollection flow's working.");
     return defaultExportConfigService.getConfigCollection(normalizedQuery, limit);
   }
 
@@ -75,9 +82,12 @@ public class ExportTypeBasedConfigManager {
     var configuration = client.getConfigById(exportConfigId);
 
     if (configuration == null) {
+      log.error("Export configuration not found or parse error : {}}", exportConfigId);
       throw new NotFoundException(String.format(EXPORT_CONFIGURATION_NOT_FOUND, exportConfigId));
     }
-    return defaultModelConfigToExportConfigConverter.convert(configuration);
+    ExportConfig exportConfig = defaultModelConfigToExportConfigConverter.convert(configuration);
+    log.info("getConfigById:: result={}.", exportConfigId);
+    return exportConfig;
   }
 
   public void deleteConfigById(String exportConfigId) {
