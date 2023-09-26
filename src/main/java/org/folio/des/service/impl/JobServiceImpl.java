@@ -1,5 +1,6 @@
 package org.folio.des.service.impl;
 
+import static java.util.Objects.nonNull;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
@@ -25,7 +26,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
-import org.folio.des.util.FolioExecutionContextHelper;
+import org.folio.des.security.JWTokenUtils;
 import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -147,7 +148,7 @@ public class JobServiceImpl implements JobService {
     if (StringUtils.isBlank(result.getName())) {
       result.setName(String.format("%06d", repository.getNextJobNumber()));
     }
-    String userName = FolioExecutionContextHelper.getUserName(context);
+    String userName = getUserName(context);
     if (StringUtils.isBlank(result.getSource())) {
       result.setSource(userName);
     }
@@ -161,7 +162,7 @@ public class JobServiceImpl implements JobService {
     if (result.getCreatedDate() == null) {
       result.setCreatedDate(now);
     }
-    UUID userId = FolioExecutionContextHelper.getUserId(context);
+    UUID userId = context.getUserId();
     if (result.getCreatedByUserId() == null) {
       result.setCreatedByUserId(userId);
     }
@@ -339,4 +340,9 @@ public class JobServiceImpl implements JobService {
     return result;
   }
 
+  private String getUserName(FolioExecutionContext context) {
+    String jwt = context.getToken();
+    Optional<JWTokenUtils.UserInfo> userInfo = StringUtils.isBlank(jwt) ? Optional.empty() : JWTokenUtils.parseToken(jwt);
+    return StringUtils.substring(userInfo.map(JWTokenUtils.UserInfo::getUserName).orElse(null), 0, 50);
+  }
 }
