@@ -25,7 +25,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
-import org.folio.des.config.FolioExecutionContextHelper;
+import org.folio.des.util.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;

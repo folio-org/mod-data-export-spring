@@ -1,19 +1,15 @@
-package org.folio.des.config;
+package org.folio.des.util;
 
 import static java.util.Objects.nonNull;
 
 import java.util.Optional;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.des.security.JWTokenUtils;
 import org.folio.spring.FolioExecutionContext;
-import org.springframework.stereotype.Component;
 
-@Component
-@Log4j2
-@RequiredArgsConstructor
+@UtilityClass
 public class FolioExecutionContextHelper {
   public static String getUserName(FolioExecutionContext context) {
     String jwt = context.getToken();

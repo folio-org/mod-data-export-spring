@@ -6,7 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.folio.des.config.FolioExecutionContextHelper;
+import org.folio.des.util.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
