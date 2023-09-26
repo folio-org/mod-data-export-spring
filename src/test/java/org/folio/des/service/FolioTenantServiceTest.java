@@ -14,6 +14,7 @@ import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,12 +46,14 @@ class FolioTenantServiceTest {
 
   @Mock
   OldJobDeleteScheduler oldJobDeleteScheduler;
+  @Mock
+  PrepareSystemUserService prepareSystemUserService;
 
   @Test
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
 
-    doNothing().when(contextHelper).registerTenant();
+    doNothing().when(prepareSystemUserService).setupSystemUser();
     doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
     doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka).createKafkaTopics();
@@ -60,7 +63,7 @@ class FolioTenantServiceTest {
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
-    verify(contextHelper, times(1)).registerTenant();
+    verify(prepareSystemUserService).setupSystemUser();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
