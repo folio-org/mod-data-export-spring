@@ -2,6 +2,7 @@ package org.folio.des.scheduling.quartz;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -147,6 +148,12 @@ class EdifactExportJobSchedulerTest extends BaseTest {
       .schedulePeriod(SchedulePeriodEnum.DAY)
       .scheduleFrequency(1)
       .timeZone(ZoneId.systemDefault().getId());
+
+    wireMockServer.stubFor(post(urlEqualTo("/authn/login-with-expiry"))
+      .willReturn(aResponse().withStatus(201)
+        .withBody("{\"accessTokenExpiration\":\"2050-01-01T23:59:59Z\", \"refreshTokenExpiration\":\"2050-01-01T23:59:59Z\"}")
+        .withHeader("Content-Type", "application/json")
+        .withHeader("Set-Cookie", "folioAccessToken=AAA-BBB-CCC; Max-Age=600; Expires=Fri, 01 Sep 2030 13:04:35 GMT; Path=/; Secure; HTTPOnly; SameSite=None")));
 
     edifactExportJobScheduler.scheduleExportJob(config);
     // job should be scheduled

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import org.folio.spring.config.properties.FolioEnvironment;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterAll;
@@ -59,6 +60,8 @@ public abstract class BaseTest {
   protected MockMvc mockMvc;
   @Autowired
   protected Scheduler scheduler;
+  @Autowired
+  private FolioEnvironment folioEnvironment;
 
   static {
     postgreDBContainer.start();
@@ -85,6 +88,7 @@ public abstract class BaseTest {
 
   @BeforeEach
   void beforeEach() throws SchedulerException {
+    folioEnvironment.setOkapiUrl(wireMockServer.baseUrl());
     scheduler.clear();
   }
 
