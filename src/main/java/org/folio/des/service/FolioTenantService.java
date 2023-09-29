@@ -1,7 +1,5 @@
 package org.folio.des.service;
 
-import lombok.extern.log4j.Log4j2;
-import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
@@ -12,6 +10,7 @@ import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.util.LegacyBursarMigrationUtil;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
+import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.context.annotation.Primary;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 @Primary
 public class FolioTenantService extends TenantService {
 
-  private final FolioExecutionContextHelper contextHelper;
   private final KafkaService kafka;
   private final BulkEditConfigService bulkEditConfigService;
   private final EdifactScheduledJobInitializer edifactScheduledJobInitializer;
@@ -32,12 +30,13 @@ public class FolioTenantService extends TenantService {
   private final OldJobDeleteScheduler oldJobDeleteScheduler;
   private final BursarExportLegacyJobService bursarExportLegacyJobService;
   private final JobService jobService;
+  private final PrepareSystemUserService prepareSystemUserService;
 
   public FolioTenantService(
     JdbcTemplate jdbcTemplate,
     FolioExecutionContext context,
     FolioSpringLiquibase folioSpringLiquibase,
-    FolioExecutionContextHelper contextHelper,
+    PrepareSystemUserService prepareSystemUserService,
     KafkaService kafka,
     BulkEditConfigService bulkEditConfigService,
     EdifactScheduledJobInitializer edifactScheduledJobInitializer,
@@ -48,7 +47,7 @@ public class FolioTenantService extends TenantService {
     JobService jobService
   ) {
     super(jdbcTemplate, context, folioSpringLiquibase);
-    this.contextHelper = contextHelper;
+    this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
     this.bulkEditConfigService = bulkEditConfigService;
     this.edifactScheduledJobInitializer = edifactScheduledJobInitializer;
@@ -62,7 +61,7 @@ public class FolioTenantService extends TenantService {
   @Override
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
     try {
-      contextHelper.registerTenant();
+      prepareSystemUserService.setupSystemUser();
       bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
       bulkEditConfigService.checkBulkEditConfiguration();
       edifactScheduledJobInitializer.initAllScheduledJob(tenantAttributes);

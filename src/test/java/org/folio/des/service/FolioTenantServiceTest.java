@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mockStatic;
 
-import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
@@ -17,6 +16,7 @@ import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.util.LegacyBursarMigrationUtil;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,8 +33,6 @@ class FolioTenantServiceTest {
   FolioTenantService folioTenantService;
 
   @Mock
-  FolioExecutionContextHelper contextHelper;
-  @Mock
   KafkaService kafka;
   @Mock
   BulkEditConfigService bulkEditConfigService;
@@ -50,6 +48,8 @@ class FolioTenantServiceTest {
 
   @Mock
   OldJobDeleteScheduler oldJobDeleteScheduler;
+  @Mock
+  PrepareSystemUserService prepareSystemUserService;
 
   @Mock
   BursarExportLegacyJobService bursarExportLegacyJobService;
@@ -58,7 +58,7 @@ class FolioTenantServiceTest {
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
 
-    doNothing().when(contextHelper).registerTenant();
+    doNothing().when(prepareSystemUserService).setupSystemUser();
     doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
     doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka).createKafkaTopics();
@@ -74,7 +74,7 @@ class FolioTenantServiceTest {
     }
 
 
-    verify(contextHelper, times(1)).registerTenant();
+    verify(prepareSystemUserService).setupSystemUser();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
