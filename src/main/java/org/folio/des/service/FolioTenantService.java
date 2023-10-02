@@ -1,5 +1,6 @@
 package org.folio.des.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
