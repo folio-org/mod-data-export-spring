@@ -4,15 +4,17 @@ import static org.folio.des.scheduling.quartz.QuartzConstants.EXPORT_CONFIG_ID_P
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
-import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.scope.FolioExecutionContextSetter;
+import org.folio.spring.service.SystemUserService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 
@@ -27,13 +29,14 @@ public class EdifactJob implements org.quartz.Job {
   private final JobExecutionService jobExecutionService;
   private final JobService jobService;
   private final JobCommandSchedulerBuilder jobSchedulerCommandBuilder;
-  private final FolioExecutionContextHelper contextHelper;
+  private final ExecutionContextBuilder contextBuilder;
+  private final SystemUserService systemUserService;
 
   @Override
   public void execute(JobExecutionContext jobExecutionContext) {
     try {
       String tenantId = getTenantId(jobExecutionContext);
-      try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(tenantId))) {
+      try (var context = new FolioExecutionContextSetter(folioExecutionContext(tenantId))) {
         Job job = getJob(jobExecutionContext);
         Job resultJob = jobService.upsertAndSendToKafka(job, false, false);
         log.info("execute:: configured task saved in DB jobId: {}", resultJob.getId());
@@ -94,5 +97,9 @@ public class EdifactJob implements org.quartz.Job {
     } catch (Exception e) {
       log.warn("deleteJob:: exception deleting job '{}'", jobKey, e);
     }
+  }
+
+  private FolioExecutionContext folioExecutionContext(String tenantId) {
+    return contextBuilder.forSystemUser(systemUserService.getAuthedSystemUser(tenantId));
   }
 }

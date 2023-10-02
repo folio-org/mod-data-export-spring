@@ -31,8 +31,7 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>7.0.0</folio-spring-base.version>
-    <folio-spring-cql.version>7.0.0</folio-spring-cql.version>
+    <folio-spring-base.version>7.2.0-SNAPSHOT</folio-spring-base.version>
     <folio-service-tools.version>3.1.0-SNAPSHOT</folio-service-tools.version>
     <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
     <commons-collections4.version>4.4</commons-collections4.version>
@@ -87,7 +86,12 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-cql</artifactId>
-      <version>${folio-spring-cql.version}</version>
+      <version>${folio-spring-base.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-system-user</artifactId>
+      <version>${folio-spring-base.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
