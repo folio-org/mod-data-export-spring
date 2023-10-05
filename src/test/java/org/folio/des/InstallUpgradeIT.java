@@ -89,7 +89,7 @@ class InstallUpgradeIT {
     new GenericContainer<>(
       new ImageFromDockerfile("mod-data-export-spring").withFileFromPath(".", Path.of(".")))
     .withNetwork(NETWORK)
-    .withExposedPorts(8082)
+    .withExposedPorts(8081)
     .withEnv("DB_HOST", "mypostgres")
     .withEnv("DB_PORT", "5432")
     .withEnv("DB_USERNAME", "username")
