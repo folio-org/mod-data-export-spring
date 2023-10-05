@@ -17,6 +17,7 @@ import org.mockserver.verify.VerificationTimes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.util.TestSocketUtils;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
@@ -25,6 +26,7 @@ import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -87,7 +89,7 @@ class InstallUpgradeIT {
     new GenericContainer<>(
       new ImageFromDockerfile("mod-data-export-spring").withFileFromPath(".", Path.of(".")))
     .withNetwork(NETWORK)
-    .withExposedPorts(8081)
+    .withExposedPorts(8082)
     .withEnv("DB_HOST", "mypostgres")
     .withEnv("DB_PORT", "5432")
     .withEnv("DB_USERNAME", "username")
