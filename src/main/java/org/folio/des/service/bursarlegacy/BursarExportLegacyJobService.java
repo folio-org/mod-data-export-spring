@@ -2,12 +2,9 @@ package org.folio.des.service.bursarlegacy;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.bursarlegacy.LegacyJob;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.LegacyJobCollection;
-import org.folio.des.domain.dto.Metadata;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.bursarlegacy.BursarExportLegacyJobRepository;
 import org.folio.des.service.util.JobMapperUtil;
