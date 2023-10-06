@@ -10,6 +10,7 @@ import org.folio.des.domain.dto.LegacyJobCollection;
 import org.folio.des.domain.dto.Metadata;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.bursarlegacy.BursarExportLegacyJobRepository;
+import org.folio.des.service.util.JobMapperUtil;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -47,42 +48,6 @@ public class BursarExportLegacyJobService {
   }
 
   private org.folio.des.domain.dto.LegacyJob entityToDto(LegacyJob entity) {
-    var result = new org.folio.des.domain.dto.LegacyJob();
-
-    result.setId(entity.getId());
-    result.setName(entity.getName());
-    result.setDescription(entity.getDescription());
-    result.setSource(entity.getSource());
-    result.setIsSystemSource(entity.getIsSystemSource());
-    result.setType(entity.getType());
-    result.setExportTypeSpecificParameters(
-      entity.getExportTypeSpecificParameters()
-    );
-    result.setStatus(entity.getStatus());
-    if (
-      ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())
-    ) {
-      result.setFiles(entity.getFiles());
-    }
-    result.setFileNames(entity.getFileNames());
-    result.setStartTime(entity.getStartTime());
-    result.setEndTime(entity.getEndTime());
-    result.setIdentifierType(entity.getIdentifierType());
-    result.setEntityType(entity.getEntityType());
-    result.setProgress(entity.getProgress());
-
-    var metadata = new Metadata();
-    metadata.setCreatedDate(entity.getCreatedDate());
-    metadata.setCreatedByUserId(entity.getCreatedByUserId());
-    metadata.setCreatedByUsername(entity.getCreatedByUsername());
-    metadata.setUpdatedDate(entity.getUpdatedDate());
-    metadata.setUpdatedByUserId(entity.getUpdatedByUserId());
-    metadata.setUpdatedByUsername(entity.getUpdatedByUsername());
-    result.setMetadata(metadata);
-
-    result.setOutputFormat(entity.getOutputFormat());
-    result.setErrorDetails(entity.getErrorDetails());
-
-    return result;
+    return JobMapperUtil.entityToDto(entity);
   }
 }
