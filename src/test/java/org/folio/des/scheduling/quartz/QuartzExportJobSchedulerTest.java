@@ -57,13 +57,8 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
   @BeforeEach
   void init() {
-    quartzExportJobScheduler =
-      new QuartzExportJobScheduler(
-        scheduler,
-        new TestTriggerConverter(),
-        new TestJobDetailConverter(),
-        new TestJobKeyResolver()
-      );
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(),
+      new TestJobDetailConverter(), new TestJobKeyResolver());
   }
 
   @Test
@@ -130,13 +125,8 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   @Test
   void testScheduleJobWithMultipleTriggers() throws SchedulerException {
     int jobTriggersCount = 3;
-    quartzExportJobScheduler =
-      new QuartzExportJobScheduler(
-        scheduler,
-        new TestTriggerConverter(jobTriggersCount),
-        new TestJobDetailConverter(),
-        new TestJobKeyResolver()
-      );
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(jobTriggersCount),
+      new TestJobDetailConverter(), new TestJobKeyResolver());
     TestingJobListener jobListener = registerTestingJobListener();
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
@@ -146,6 +136,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
+    // TODO - Should be reworked because this code leads to the test failure during jenkins build
     // await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
     //   () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
   }
@@ -153,13 +144,8 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   @Test
   void testUnscheduleJobWithMultipleTriggers() throws SchedulerException {
     int jobTriggersCount = 7;
-    quartzExportJobScheduler =
-      new QuartzExportJobScheduler(
-        scheduler,
-        new TestTriggerConverter(jobTriggersCount),
-        new TestJobDetailConverter(),
-        new TestJobKeyResolver()
-      );
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, new TestTriggerConverter(jobTriggersCount),
+      new TestJobDetailConverter(), new TestJobKeyResolver());
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
@@ -179,16 +165,9 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   void testRescheduleJobWithMultipleTriggers() throws SchedulerException {
     int jobTriggersInitialCount = 2;
     int jobTriggersRescheduleCount = 5;
-    TestTriggerConverter testTriggerConverter = new TestTriggerConverter(
-      jobTriggersInitialCount
-    );
-    quartzExportJobScheduler =
-      new QuartzExportJobScheduler(
-        scheduler,
-        testTriggerConverter,
-        new TestJobDetailConverter(),
-        new TestJobKeyResolver()
-      );
+    TestTriggerConverter testTriggerConverter = new TestTriggerConverter(jobTriggersInitialCount);
+    quartzExportJobScheduler = new QuartzExportJobScheduler(scheduler, testTriggerConverter,
+      new TestJobDetailConverter(), new TestJobKeyResolver());
     TestingSchedulerListener schedulerListener = registerTestingSchedulerListener();
 
     ExportConfig config = buildExportConfig(SCHEDULE_ID, true);
@@ -211,31 +190,24 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   @Test
   void testScheduleNullExportConfig() throws SchedulerException {
     quartzExportJobScheduler.scheduleExportJob(null);
-    assertThat(
-      scheduler.getJobKeys(GroupMatcher.anyJobGroup()),
-      is(Collections.emptySet())
-    );
+    assertThat(scheduler.getJobKeys(GroupMatcher.anyJobGroup()), is(Collections.emptySet()));
   }
 
   private ExportConfig buildExportConfig(String configId, boolean isEnabled) {
     return new ExportConfig()
       .id(configId)
       .scheduleTime("2024-04-24T11:00Z")
-      .schedulePeriod(
-        isEnabled ? SchedulePeriodEnum.DAY : SchedulePeriodEnum.NONE
-      )
+      .schedulePeriod(isEnabled ? SchedulePeriodEnum.DAY : SchedulePeriodEnum.NONE)
       .scheduleFrequency(2);
   }
 
-  private TestingSchedulerListener registerTestingSchedulerListener()
-    throws SchedulerException {
+  private TestingSchedulerListener registerTestingSchedulerListener() throws SchedulerException {
     TestingSchedulerListener schedulerListener = new TestingSchedulerListener();
     scheduler.getListenerManager().addSchedulerListener(schedulerListener);
     return schedulerListener;
   }
 
-  private TestingJobListener registerTestingJobListener()
-    throws SchedulerException {
+  private TestingJobListener registerTestingJobListener() throws SchedulerException {
     TestingJobListener jobListener = new TestingJobListener();
     scheduler.getListenerManager().addJobListener(jobListener);
     return jobListener;
@@ -253,27 +225,19 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     public ExportTrigger convert(ExportConfig exportConfig) {
       Set<Trigger> triggers = new HashSet<>();
       for (int i = 0; i < triggerAmount; i++) {
-        triggers.add(
-          TriggerBuilder
-            .newTrigger()
-            .withIdentity(UUID.randomUUID().toString())
-            .withSchedule(
-              SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0)
-            )
-            .startAt(Date.from(Instant.now().plus(2, ChronoUnit.SECONDS)))
-            .build()
-        );
+        triggers.add(TriggerBuilder
+          .newTrigger()
+          .withIdentity(UUID.randomUUID().toString())
+          .withSchedule(SimpleScheduleBuilder
+            .simpleSchedule()
+            .withRepeatCount(0))
+          .startAt(Date.from(Instant.now().plus(2, ChronoUnit.SECONDS)))
+          .build());
       }
-      return new ExportTrigger(
-        exportConfig.getSchedulePeriod() == SchedulePeriodEnum.NONE,
-        triggers
-      );
+      return new ExportTrigger(exportConfig.getSchedulePeriod() == SchedulePeriodEnum.NONE, triggers);
     }
   }
-
-  private static class TestJobDetailConverter
-    implements ExportConfigToJobDetailConverter {
-
+  private static class TestJobDetailConverter implements ExportConfigToJobDetailConverter {
     @Override
     public JobDetail convert(ExportConfig exportConfig, JobKey jobKey) {
       return JobBuilder.newJob(DraftJob.class).withIdentity(jobKey).build();
@@ -281,7 +245,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   }
 
   private static class TestJobKeyResolver implements JobKeyResolver {
-
     @Override
     public JobKey resolve(ExportConfig exportConfig) {
       return JobKey.jobKey(exportConfig.getId());
@@ -290,7 +253,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
   @Log4j2
   private static class DraftJob implements org.quartz.Job {
-
     @Override
     public void execute(JobExecutionContext context) {
       log.info("job {} is executing", context.getJobDetail().getKey());
@@ -298,7 +260,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   }
 
   private static class TestingJobListener extends JobListenerSupport {
-
     private final AtomicInteger jobsExecutedCount = new AtomicInteger();
 
     @Override
@@ -307,10 +268,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     }
 
     @Override
-    public void jobWasExecuted(
-      JobExecutionContext context,
-      JobExecutionException jobException
-    ) {
+    public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
       jobsExecutedCount.incrementAndGet();
     }
 
@@ -319,8 +277,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     }
   }
 
-  private static class TestingSchedulerListener
-    extends SchedulerListenerSupport {
+  private static class TestingSchedulerListener extends SchedulerListenerSupport {
 
     private final AtomicInteger jobsAddedCount = new AtomicInteger();
     private final AtomicInteger jobsDeletedCount = new AtomicInteger();

@@ -39,15 +39,12 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-@SpringBootTest(
-  classes = { JacksonConfiguration.class, ServiceConfiguration.class }
-)
-@EnableAutoConfiguration(exclude = { BatchAutoConfiguration.class })
+@SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class JobCommandBuilderResolverTest {
 
   @Autowired
   private JobCommandBuilderResolver resolver;
-
   @MockBean
   private ConfigurationClient client;
   @MockBean
@@ -56,58 +53,44 @@ class JobCommandBuilderResolverTest {
   private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @ParameterizedTest
-  @DisplayName(
-    "Should retrieve builder for specific export type if builder is registered in the resolver"
-  )
-  @CsvSource(
-    {
-      "BURSAR_FEES_FINES, BurSarFeeFinesJobCommandBuilder",
-      "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
-      "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
-      "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",
-      "E_HOLDINGS, EHoldingsJobCommandBuilder",
-      "AUTH_HEADINGS_UPDATES, AuthorityControlJobCommandBuilder",
-    }
-  )
-  void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver(
-    ExportType exportType,
-    String expBuilderClass
-  ) {
+  @DisplayName("Should retrieve builder for specific export type if builder is registered in the resolver")
+  @CsvSource({
+    "BURSAR_FEES_FINES, BurSarFeeFinesJobCommandBuilder",
+    "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
+    "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
+    "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",
+    "E_HOLDINGS, EHoldingsJobCommandBuilder",
+    "AUTH_HEADINGS_UPDATES, AuthorityControlJobCommandBuilder"
+  })
+  void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver(ExportType exportType,
+              String expBuilderClass) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);
     assertEquals(expBuilderClass, builder.get().getClass().getSimpleName());
   }
 
   @Test
   void shouldNotRetrieveBuilderForFailedLinkedBibUpdates() {
-    Optional<JobCommandBuilder> builder = resolver.resolve(
-      ExportType.FAILED_LINKED_BIB_UPDATES
-    );
+    Optional<JobCommandBuilder> builder = resolver.resolve(ExportType.FAILED_LINKED_BIB_UPDATES);
     assertTrue(builder.isEmpty());
   }
 
   @Test
-  @DisplayName(
-    "Should not retrieve builder for specific export type if builder is not registered in the resolver"
-  )
+  @DisplayName("Should not retrieve builder for specific export type if builder is not registered in the resolver")
   void shouldRetrieveBuilderForSpecifiedExportTypeIfBuilderIsRegisteredInTheResolver() {
-    Optional<JobCommandBuilder> builder = resolver.resolve(
-      ExportType.EDIFACT_ORDERS_EXPORT
-    );
+    Optional<JobCommandBuilder> builder = resolver.resolve(ExportType.EDIFACT_ORDERS_EXPORT);
     assertTrue(builder.isPresent());
   }
 
   @ParameterizedTest
   @DisplayName("Should be create jobParameters")
-  @CsvSource(
-    {
-      "BURSAR_FEES_FINES, bursarFeeFines",
-      "CIRCULATION_LOG, query",
-      "BULK_EDIT_QUERY, query",
-      "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
-      "E_HOLDINGS, eHoldingsExportConfig",
-      "AUTH_HEADINGS_UPDATES, authorityControlExportConfig",
-    }
-  )
+  @CsvSource({
+    "BURSAR_FEES_FINES, bursarFeeFines",
+    "CIRCULATION_LOG, query",
+    "BULK_EDIT_QUERY, query",
+    "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
+    "E_HOLDINGS, eHoldingsExportConfig",
+    "AUTH_HEADINGS_UPDATES, authorityControlExportConfig"
+  })
   void shouldBeCreateJobParameters(ExportType exportType, String paramsKey) {
     Optional<JobCommandBuilder> builder = resolver.resolve(exportType);
     Job job = new Job();
@@ -137,9 +120,7 @@ class JobCommandBuilderResolverTest {
     vendorEdiOrdersExportConfig.setConfigName("TestConfig");
 
     eHoldingsExportConfig.setRecordId("packageId");
-    eHoldingsExportConfig.setRecordType(
-      EHoldingsExportConfig.RecordTypeEnum.PACKAGE
-    );
+    eHoldingsExportConfig.setRecordType(EHoldingsExportConfig.RecordTypeEnum.PACKAGE);
     eHoldingsExportConfig.setTitleSearchFilters("titleFilters");
     eHoldingsExportConfig.setPackageFields(List.of("packageField"));
     eHoldingsExportConfig.setTitleFields(List.of("titleField"));
@@ -149,16 +130,9 @@ class JobCommandBuilderResolverTest {
 
     exportTypeSpecificParameters.setQuery("TestQuery");
     exportTypeSpecificParameters.setBursarFeeFines(bursarFeeFines);
-    exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(
-      vendorEdiOrdersExportConfig
-    );
-    exportTypeSpecificParameters.seteHoldingsExportConfig(
-      eHoldingsExportConfig
-    );
-    exportTypeSpecificParameters.setAuthorityControlExportConfig(
-      authorityControlExportConfig
-    );
-
+    exportTypeSpecificParameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
+    exportTypeSpecificParameters.seteHoldingsExportConfig(eHoldingsExportConfig);
+    exportTypeSpecificParameters.setAuthorityControlExportConfig(authorityControlExportConfig);
     job.setEntityType(EntityType.USER);
     job.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 

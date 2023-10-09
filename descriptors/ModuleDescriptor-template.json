@@ -45,64 +45,116 @@
       "version": "1.0",
       "handlers": [
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/jobs",
-          "permissionsRequired": ["data-export.job.collection.get"],
+          "permissionsRequired": [
+            "data-export.job.collection.get"
+          ],
           "modulePermissions": []
         },
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/jobs/{id}",
-          "permissionsRequired": ["data-export.job.item.get"],
+          "permissionsRequired": [
+            "data-export.job.item.get"
+          ],
           "modulePermissions": []
         },
         {
-          "methods": ["POST"],
+          "methods": [
+            "POST"
+          ],
           "pathPattern": "/data-export-spring/jobs",
-          "permissionsRequired": ["data-export.job.item.post"],
+          "permissionsRequired": [
+            "data-export.job.item.post"
+          ],
           "modulePermissions": []
         },
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/jobs/{id}/download",
-          "permissionsRequired": ["data-export.job.item.download"],
-          "modulePermissions": ["refresh-presigned-url.get"]
+          "permissionsRequired": [
+            "data-export.job.item.download"
+          ],
+          "modulePermissions": [
+            "refresh-presigned-url.get"
+          ]
         },
         {
-          "methods": ["POST"],
+          "methods": [
+            "POST"
+          ],
           "pathPattern": "/data-export-spring/jobs/{id}/resend",
-          "permissionsRequired": ["data-export.job.item.resend"],
+          "permissionsRequired": [
+            "data-export.job.item.resend"
+          ],
           "modulePermissions": []
         },
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/configs",
-          "permissionsRequired": ["data-export.config.collection.get"],
-          "modulePermissions": ["configuration.entries.collection.get"]
+          "permissionsRequired": [
+            "data-export.config.collection.get"
+          ],
+          "modulePermissions": [
+            "configuration.entries.collection.get"
+          ]
         },
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/configs/{id}",
-          "permissionsRequired": ["data-export.config.item.get"],
-          "modulePermissions": ["configuration.entries.item.get"]
+          "permissionsRequired": [
+            "data-export.config.item.get"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.get"
+          ]
         },
         {
-          "methods": ["POST"],
+          "methods": [
+            "POST"
+          ],
           "pathPattern": "/data-export-spring/configs",
-          "permissionsRequired": ["data-export.config.item.post"],
-          "modulePermissions": ["configuration.entries.item.post"]
+          "permissionsRequired": [
+            "data-export.config.item.post"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.post"
+          ]
         },
         {
-          "methods": ["PUT"],
+          "methods": [
+            "PUT"
+          ],
           "pathPattern": "/data-export-spring/configs/{id}",
-          "permissionsRequired": ["data-export.config.item.put"],
-          "modulePermissions": ["configuration.entries.item.put"]
+          "permissionsRequired": [
+            "data-export.config.item.put"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.put"
+          ]
         },
         {
-          "methods": ["DELETE"],
+          "methods": [
+            "DELETE"
+          ],
           "pathPattern": "/data-export-spring/configs/{id}",
-          "permissionsRequired": ["data-export.config.item.delete"],
-          "modulePermissions": ["configuration.entries.item.delete"]
+          "permissionsRequired": [
+            "data-export.config.item.delete"
+          ],
+          "modulePermissions": [
+            "configuration.entries.item.delete"
+          ]
         }
       ]
     },
@@ -112,7 +164,7 @@
       "interfaceType": "system",
       "handlers": [
         {
-          "methods": ["POST"],
+          "methods": [ "POST" ],
           "pathPattern": "/_/tenant",
           "modulePermissions": [
             "users.collection.get",
@@ -130,7 +182,7 @@
           ]
         },
         {
-          "methods": ["GET", "DELETE"],
+          "methods": [ "GET", "DELETE" ],
           "pathPattern": "/_/tenant/{id}",
           "modulePermissions": []
         }
@@ -142,7 +194,9 @@
       "interfaceType": "multiple",
       "handlers": [
         {
-          "methods": ["GET"],
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/_/jsonSchemas",
           "modulePermissions": []
         }

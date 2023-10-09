@@ -33,20 +33,11 @@ public class FolioTenantService extends TenantService {
   private final JobService jobService;
   private final PrepareSystemUserService prepareSystemUserService;
 
-  public FolioTenantService(
-    JdbcTemplate jdbcTemplate,
-    FolioExecutionContext context,
-    FolioSpringLiquibase folioSpringLiquibase,
-    PrepareSystemUserService prepareSystemUserService,
-    KafkaService kafka,
-    BulkEditConfigService bulkEditConfigService,
-    EdifactScheduledJobInitializer edifactScheduledJobInitializer,
-    ScheduledJobsRemover scheduledJobsRemover,
-    BursarScheduledJobInitializer bursarScheduledJobInitializer,
-    OldJobDeleteScheduler oldJobDeleteScheduler,
-    BursarExportLegacyJobService bursarExportLegacyJobService,
-    JobService jobService
-  ) {
+  public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
+                            PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
+                            BulkEditConfigService bulkEditConfigService, EdifactScheduledJobInitializer edifactScheduledJobInitializer,
+                            ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer,
+                            OldJobDeleteScheduler oldJobDeleteScheduler, BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
@@ -69,10 +60,7 @@ public class FolioTenantService extends TenantService {
       oldJobDeleteScheduler.scheduleOldJobDeletion(context.getTenantId());
       kafka.createKafkaTopics();
       kafka.restartEventListeners();
-      LegacyBursarMigrationUtil.recreateLegacyJobs(
-        bursarExportLegacyJobService,
-        jobService
-      );
+      LegacyBursarMigrationUtil.recreateLegacyJobs(bursarExportLegacyJobService, jobService);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       throw e;

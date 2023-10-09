@@ -78,8 +78,7 @@ class BaseExportConfigServiceTest {
             }
           }
       """;
-  public static final String EMPTY_CONFIG_RESPONSE =
-    "{\"configs\": [], \"totalRecords\": 0}";
+  public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
   private BurSarFeesFinesExportConfigService service;
@@ -129,47 +128,35 @@ class BaseExportConfigServiceTest {
 
     Assertions.assertAll(
       () -> assertNotNull(response.getId()),
-      () ->
-        assertEquals(mockResponse.getConfigName(), response.getConfigName()),
+      () -> assertEquals(mockResponse.getConfigName(), response.getConfigName()),
       () -> assertEquals(mockResponse.getModule(), response.getModule()),
-      () ->
-        assertEquals(mockResponse.getDescription(), response.getDescription()),
+      () -> assertEquals(mockResponse.getDescription(), response.getDescription()),
       () -> assertEquals(mockResponse.getDefault(), response.getDefault()),
       () -> assertEquals(mockResponse.getEnabled(), response.getEnabled())
     );
   }
 
   @Test
-  @DisplayName(
-    "Should not create new configuration without specific parameters"
-  )
-  void shouldNorCreateConfigurationAndThroughExceptionIfSpecificParametersIsNotSet()
-    throws JsonProcessingException {
+  @DisplayName("Should not create new configuration without specific parameters")
+  void shouldNorCreateConfigurationAndThroughExceptionIfSpecificParametersIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
 
-    assertThrows(
-      IllegalStateException.class,
-      () -> service.postConfig(bursarExportConfig)
-    );
+    assertThrows(IllegalStateException.class, () ->  service.postConfig(bursarExportConfig));
     Mockito.verify(client, Mockito.times(0)).postConfiguration(any());
   }
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet()
-    throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
 
-    assertThrows(
-      IllegalArgumentException.class,
-      () -> service.postConfig(bursarExportConfig)
-    );
+    assertThrows(IllegalArgumentException.class, () -> service.postConfig(bursarExportConfig));
     Mockito.verify(client, Mockito.times(0)).postConfiguration(any());
   }
 
@@ -205,13 +192,8 @@ class BaseExportConfigServiceTest {
   @Test
   @DisplayName("Fetch empty config collection")
   void fetchEmptyConfigCollection() throws JsonProcessingException {
-    final ConfigurationCollection mockedResponse = objectMapper.readValue(
-      EMPTY_CONFIG_RESPONSE,
-      ConfigurationCollection.class
-    );
-    Mockito
-      .when(client.getConfigurations(any(), eq(1)))
-      .thenReturn(mockedResponse);
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
     var config = service.getConfigCollection(query, 1);
@@ -225,55 +207,30 @@ class BaseExportConfigServiceTest {
   @Test
   @DisplayName("Fetch config collection")
   void fetchConfigCollection() throws JsonProcessingException {
-    final ConfigurationCollection mockedResponse = objectMapper.readValue(
-      CONFIG_RESPONSE,
-      ConfigurationCollection.class
-    );
-    Mockito
-      .when(client.getConfigurations(any(), eq(1)))
-      .thenReturn(mockedResponse);
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var query = String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME);
     var config = service.getConfigCollection(query, 1);
 
     Assertions.assertAll(
-      () -> assertEquals(1, config.getTotalRecords()),
-      () -> assertEquals(1, config.getConfigs().size())
-    );
+        () -> assertEquals(1, config.getTotalRecords()),
+        () -> assertEquals(1, config.getConfigs().size()));
 
     var exportConfig = config.getConfigs().get(0);
     Assertions.assertAll(
-      () ->
-        assertEquals(
-          "d855141f-aa62-40bb-a34b-da986b35d6d4",
-          exportConfig.getId()
-        ),
-      () ->
-        assertEquals(
-          ExportConfig.SchedulePeriodEnum.DAY,
-          exportConfig.getSchedulePeriod()
-        ),
-      () ->
-        assertEquals(
-          List.of(
-            ExportConfig.WeekDaysEnum.FRIDAY,
-            ExportConfig.WeekDaysEnum.MONDAY
-          ),
-          exportConfig.getWeekDays()
-        )
-    );
+        () -> assertEquals("d855141f-aa62-40bb-a34b-da986b35d6d4", exportConfig.getId()),
+        () -> assertEquals(ExportConfig.SchedulePeriodEnum.DAY, exportConfig.getSchedulePeriod()),
+        () ->
+            assertEquals(
+                List.of(ExportConfig.WeekDaysEnum.FRIDAY, ExportConfig.WeekDaysEnum.MONDAY), exportConfig.getWeekDays()));
   }
 
   @Test
   @DisplayName("Config exists and parsed correctly")
   void getConfig() throws JsonProcessingException {
-    final ConfigurationCollection mockedResponse = objectMapper.readValue(
-      CONFIG_RESPONSE,
-      ConfigurationCollection.class
-    );
-    Mockito
-      .when(client.getConfigurations(any(), eq(1)))
-      .thenReturn(mockedResponse);
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var config = service.getFirstConfig();
 
@@ -282,24 +239,10 @@ class BaseExportConfigServiceTest {
     final ExportConfig exportConfig = config.get();
 
     Assertions.assertAll(
-      () ->
-        assertEquals(
-          "d855141f-aa62-40bb-a34b-da986b35d6d4",
-          exportConfig.getId()
-        ),
-      () ->
-        assertEquals(
-          ExportConfig.SchedulePeriodEnum.DAY,
-          exportConfig.getSchedulePeriod()
-        ),
-      () ->
-        assertEquals(
-          List.of(
-            ExportConfig.WeekDaysEnum.FRIDAY,
-            ExportConfig.WeekDaysEnum.MONDAY
-          ),
-          exportConfig.getWeekDays()
-        )
-    );
+        () -> assertEquals("d855141f-aa62-40bb-a34b-da986b35d6d4", exportConfig.getId()),
+        () -> assertEquals(ExportConfig.SchedulePeriodEnum.DAY, exportConfig.getSchedulePeriod()),
+        () ->
+            assertEquals(
+                List.of(ExportConfig.WeekDaysEnum.FRIDAY, ExportConfig.WeekDaysEnum.MONDAY), exportConfig.getWeekDays()));
   }
 }
