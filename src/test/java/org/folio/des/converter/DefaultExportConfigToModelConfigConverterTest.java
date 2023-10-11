@@ -5,7 +5,6 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +14,6 @@ import org.folio.des.domain.dto.BursarExportFilterAge;
 import org.folio.des.domain.dto.BursarExportFilterCondition;
 import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
 import org.folio.des.domain.dto.BursarExportJob;
-// import org.folio.des.domain.dto.BursarFeeFines;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
