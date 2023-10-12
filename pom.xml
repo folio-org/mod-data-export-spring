@@ -12,7 +12,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export-spring</artifactId>
   <description>Data Export Spring module</description>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -32,7 +32,7 @@
     </export-configs.yaml.file>
 
     <folio-spring-base.version>7.2.0</folio-spring-base.version>
-    <folio-service-tools.version>3.1.0-SNAPSHOT</folio-service-tools.version>
+    <folio-service-tools.version>3.1.0</folio-service-tools.version>
     <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>

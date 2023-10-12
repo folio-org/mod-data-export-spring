@@ -1,3 +1,35 @@
+## 2023-10-12 v3.0.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v2.0.2...v3.0.0)
+
+### Technical tasks
+* [MODEXPS-224](https://issues.folio.org/browse/MODEXPS-224) Enable API-related GitHub Workflows, replace those Jenkins stages
+* [MODEXPS-218](https://issues.folio.org/browse/MODEXPS-218) Remove feature flag and old edifact scheduling code
+* [MODEXPS-211](https://issues.folio.org/browse/MODEXPS-211) Migrate to folio-spring-support v7.0.0
+* [MODEXPS-199](https://issues.folio.org/browse/MODEXPS-199) Update mod-data-export-spring to folio-spring-base v6.1.0
+* [MODEXPS-74](https://issues.folio.org/browse/MODEXPS-74) Logging improvement
+
+### Stories
+* [MODEXPS-233](https://issues.folio.org/browse/MODEXPS-233) Allow Tenant Collection Topics
+* [MODEXPS-221](https://issues.folio.org/browse/MODEXPS-221) Deletion Of Old Jobs from Job Table
+* [MODEXPS-217](https://issues.folio.org/browse/MODEXPS-217) Migration of existing jobs to quartz on module upgrade for Bursar
+* [MODEXPS-216](https://issues.folio.org/browse/MODEXPS-216) Edifact Scheduling final updates: tuning configuration, docs update
+* [MODEXPS-213](https://issues.folio.org/browse/MODEXPS-213) Reimplementation of Bursar Scheduling to use Quartz
+* [MODEXPS-210](https://issues.folio.org/browse/MODEXPS-210) Implement logic for tenant disabling for quartz scheduling
+* [MODEXPS-209](https://issues.folio.org/browse/MODEXPS-209) Edifact Orders Export quartz scheduling testing
+* [MODEXPS-205](https://issues.folio.org/browse/MODEXPS-205) Migration of existing jobs to quartz on module upgrade
+* [MODEXPS-204](https://issues.folio.org/browse/MODEXPS-204) Add possibility to run jobs without 'module enable' for tenant call
+* [MODEXPS-203](https://issues.folio.org/browse/MODEXPS-203) Reimplementation of Edifact Scheduling to use Quartz
+* [MODEXPS-185](https://issues.folio.org/browse/MODEXPS-185) Prepare initial setup for introducing Quartz as a scheduler in mod-data-export-spring
+* [MODEXPS-167](https://issues.folio.org/browse/MODEXPS-167) Implement refresh token rotation
+
+### Bug fixes
+* [MODEXPS-226](https://issues.folio.org/browse/MODEXPS-226) Invalid system user credentials usage
+* [MODEXPS-191](https://issues.folio.org/browse/MODEXPS-191) Sorting by export method resets search
+* [MODEXPS-175](https://issues.folio.org/browse/MODEXPS-175) Weekly exports are ran according to both the new and the previous (not active) schedule
+
+## 2023-07-20 v2.0.2
+
 ## 2023-02-24 v2.0.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v1.5.3...v2.0.0)
