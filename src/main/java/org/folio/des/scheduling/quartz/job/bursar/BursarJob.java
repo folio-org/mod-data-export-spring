@@ -5,16 +5,14 @@ import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
 import java.util.Date;
 
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
-import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.scope.FolioExecutionContextSetter;
-import org.folio.spring.service.SystemUserService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
@@ -25,8 +23,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @RequiredArgsConstructor
 public class BursarJob implements org.quartz.Job {
-  private final ExecutionContextBuilder contextBuilder;
-  private final SystemUserService systemUserService;
+  private final FolioExecutionContextHelper contextHelper;
   private final ExportTypeBasedConfigManager exportTypeBasedConfigManager;
   private final JobService jobService;
   private static final String PARAM_NOT_FOUND_MESSAGE = "'%s' param is missing in the jobExecutionContext";
@@ -37,7 +34,7 @@ public class BursarJob implements org.quartz.Job {
     String tenantId = getTenantId(jobExecutionContext);
     var current = new Date();
 
-    try (var context = new FolioExecutionContextSetter(folioExecutionContext(tenantId))) {
+    try (var context = new FolioExecutionContextSetter(contextHelper.getFolioExecutionContext(tenantId))) {
       Job scheduledJob = getJob(jobExecutionContext);
       Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
       log.info("execute:: configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
@@ -89,9 +86,5 @@ public class BursarJob implements org.quartz.Job {
     } catch (Exception e) {
       log.warn("deleteJob:: exception deleting job '{}'", jobKey, e);
     }
-  }
-
-  private FolioExecutionContext folioExecutionContext(String tenantId) {
-    return contextBuilder.forSystemUser(systemUserService.getAuthedSystemUser(tenantId));
   }
 }

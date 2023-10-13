@@ -3,15 +3,14 @@
     {
       "request": {
         "method": "POST",
-        "url": "/authn/login-with-expiry"
+        "url": "/authn/login"
       },
       "response": {
-        "status": 201,
+        "status": 200,
         "headers": {
           "Content-Type": "application/json",
-          "set-cookie": "folioAccessToken=AAA-BBB-CCC; Max-Age=600; Expires=Fri, 01 Sep 2030 13:04:35 GMT; Path=/; Secure; HTTPOnly; SameSite=None"
-        },
-        "body": "{ \n \"accessTokenExpiration\": \"2030-09-01T13:04:35Z\",\n \"refreshTokenExpiration\": \"2030-09-08T12:54:35Z\"\n}"
+          "x-okapi-token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs"
+        }
       }
     },
     {

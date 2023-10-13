@@ -7,12 +7,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.service.JobService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.context.ExecutionContextBuilder;
-import org.folio.spring.model.SystemUser;
-import org.folio.spring.service.SystemUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,9 +31,7 @@ class OldDeleteJobTest {
   @Mock
   private JobService jobService;
   @Mock
-  private ExecutionContextBuilder contextBuilder;
-  @Mock
-  private SystemUserService systemUserService;
+  private FolioExecutionContextHelper contextHelper;
   @InjectMocks
   private OldDeleteJob oldDeleteJob;
   @Mock
@@ -45,11 +41,10 @@ class OldDeleteJobTest {
   @Test
   void testSuccessfulExecute() throws JobExecutionException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     doNothing().when(jobService).deleteOldJobs();
     oldDeleteJob.execute(jobExecutionContext);
-    verify(jobService).deleteOldJobs();
+    verify(contextHelper).getFolioExecutionContext(TENANT_ID);
   }
 
   @Test
