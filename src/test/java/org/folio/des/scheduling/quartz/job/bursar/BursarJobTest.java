@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.UUID;
 
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -23,10 +24,7 @@ import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.spring.model.SystemUser;
-import org.folio.spring.service.SystemUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,9 +53,7 @@ class BursarJobTest {
   @Mock
   private JobCommandSchedulerBuilder jobSchedulerCommandBuilder;
   @Mock
-  private ExecutionContextBuilder contextBuilder;
-  @Mock
-  private SystemUserService systemUserService;
+  private FolioExecutionContextHelper contextHelper;
   @Mock
   private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
   @InjectMocks
@@ -72,10 +68,10 @@ class BursarJobTest {
   void testSuccessfulExecute() throws JobExecutionException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     when(jobService.upsertAndSendToKafka(any(), eq(true))).thenReturn(new Job().id(UUID.randomUUID()));
     bursarJob.execute(jobExecutionContext);
+    verify(contextHelper).getFolioExecutionContext(TENANT_ID);
     verify(jobService).upsertAndSendToKafka(any(), eq(true));
   }
 
@@ -94,8 +90,7 @@ class BursarJobTest {
     JobDetail jobDetail = getJobDetail();
     jobDetail.getJobDataMap().remove("exportConfigId");
     when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
 
     String message = assertThrows(IllegalArgumentException.class, () -> bursarJob.execute(jobExecutionContext)).getMessage();
     assertEquals("'exportConfigId' param is missing in the jobExecutionContext", message);
@@ -104,8 +99,7 @@ class BursarJobTest {
   @Test
   void testExecuteFailureWhenWhenConfigIdNotFoundInSettings() throws SchedulerException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))
       .thenThrow(new NotFoundException("config not found"));

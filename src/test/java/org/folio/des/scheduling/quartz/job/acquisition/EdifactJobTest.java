@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.UUID;
 
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
+import org.folio.des.config.FolioExecutionContextHelper;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -25,10 +26,7 @@ import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.spring.model.SystemUser;
-import org.folio.spring.service.SystemUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,9 +48,7 @@ class EdifactJobTest {
   @Mock
   private JobCommandSchedulerBuilder jobSchedulerCommandBuilder;
   @Mock
-  private ExecutionContextBuilder contextBuilder;
-  @Mock
-  private SystemUserService systemUserService;
+  private FolioExecutionContextHelper contextHelper;
   @Mock
   private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
   @InjectMocks
@@ -69,14 +65,14 @@ class EdifactJobTest {
 
   @Test
   void testExecuteSuccessful() {
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job().id(UUID.randomUUID()));
 
     edifactJob.execute(jobExecutionContext);
 
+    verify(contextHelper).getFolioExecutionContext(TENANT_ID);
     verify(jobService).upsertAndSendToKafka(any(), eq(false), eq(false));
     verify(jobSchedulerCommandBuilder).buildJobCommand(any());
     verify(jobExecutionService).sendJobCommand(any());
@@ -84,14 +80,14 @@ class EdifactJobTest {
 
   @Test
   void testExecuteSuccessfulSkipKafkaWhenNoJobId() {
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job());
 
     edifactJob.execute(jobExecutionContext);
 
+    verify(contextHelper).getFolioExecutionContext(TENANT_ID);
     verify(jobService).upsertAndSendToKafka(any(), eq(false), eq(false));
     verify(jobSchedulerCommandBuilder, times(0)).buildJobCommand(any());
     verify(jobExecutionService, times(0)).sendJobCommand(any());
@@ -109,11 +105,10 @@ class EdifactJobTest {
 
   @Test
   void testExecuteFailureWhenNoExportConfigIdPassed() {
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
     JobDetail jobDetail = getJobDetail();
     jobDetail.getJobDataMap().remove("exportConfigId");
     when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
 
     verifyExceptionThrownAndJobNotExecuted(IllegalArgumentException.class,
       "'exportConfigId' param is missing in the jobExecutionContext", jobExecutionContext);
@@ -121,10 +116,9 @@ class EdifactJobTest {
 
   @Test
   void testExecuteFailureAndJobDeletedWhenExportConfigNotFound() throws SchedulerException {
-    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
+    when(contextHelper.getFolioExecutionContext(any())).thenReturn(folioExecutionContext);
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))
       .thenThrow(new NotFoundException("config not found"));
 
