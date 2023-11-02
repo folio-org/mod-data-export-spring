@@ -10,10 +10,12 @@ import static org.hibernate.internal.util.StringHelper.isBlank;
 import java.util.UUID;
 
 import lombok.extern.log4j.Log4j2;
+import org.folio.des.builder.job.JobCommandSchedulerBuilder;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.rest.resource.JobsApi;
+import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -32,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 public class JobsController implements JobsApi {
 
   private final JobService service;
+  private final JobCommandSchedulerBuilder jobCommandSchedulerBuilder;
+  private final JobExecutionService jobExecutionService;
 
   @Override
   public ResponseEntity<Job> getJobById(UUID id) {
@@ -67,6 +71,13 @@ public class JobsController implements JobsApi {
   public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
     log.info("downloadExportedFileByJobId:: with id={}.", id);
     return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
+  }
+
+  @Override
+  public ResponseEntity<Void> sendJob(Job job) {
+    log.info("sendJob:: with job={}.", job);
+    jobExecutionService.sendJobCommand(jobCommandSchedulerBuilder.buildJobCommand(job));
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   private boolean isMissingRequiredParameters(Job job) {

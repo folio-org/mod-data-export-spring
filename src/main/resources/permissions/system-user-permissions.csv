@@ -1,3 +1,5 @@
+data-export.job.item.post
+data-export.job.item.send
 accounts.transfer.post
 accounts.collection.get
 circulation-logs.collection.get
