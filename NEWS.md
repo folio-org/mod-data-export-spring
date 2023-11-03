@@ -1,3 +1,10 @@
+## 2023-11-03 v3.0.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.0...v3.0.1)
+
+### Stories
+* [MODEXPS-167](https://issues.folio.org/browse/MODEXPS-167) Implement refresh token rotation
+
 ## 2023-10-12 v3.0.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v2.0.2...v3.0.0)
