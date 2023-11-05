@@ -22,6 +22,7 @@ API for Data Export Spring module.
 | OKAPI_URL                     | http://okapi:9130         | Okapi url                                                         |
 | SYSTEM\_USER\_NAME            | data-export-system-user   | Username of the system user                                       |
 | SYSTEM\_USER\_PASSWORD        | -                         | Password of the system user                                       |
+| SYSTEM\_USER\_ENABLED         |           true            | Defines if system user must be created at service tenant initialization or used for egress service requests |
 | ENV                           | folio                     | Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed|
 
 
