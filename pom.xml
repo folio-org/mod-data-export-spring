@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.6</version>
+    <version>3.1.4</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -43,6 +43,7 @@
     <junit-extensions.version>2.4.0</junit-extensions.version>
     <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
     <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
+    <mockito-inline.version>5.2.0</mockito-inline.version>
 
     <!--Plugin properties-->
     <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
@@ -198,6 +199,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
+      <version>${mockito-inline.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
