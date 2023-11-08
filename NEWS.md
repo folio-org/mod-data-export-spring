@@ -1,3 +1,10 @@
+## 2023-11-08 v3.0.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.1...v3.0.2)
+
+### Technical tasks
+* [MODEXPS-236](https://issues.folio.org/browse/MODEXPS-236) mod-data-export-spring: spring upgrade
+
 ## 2023-11-03 v3.0.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.0...v3.0.1)
