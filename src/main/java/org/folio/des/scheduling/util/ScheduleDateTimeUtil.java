@@ -45,6 +45,31 @@ public final class ScheduleDateTimeUtil {
     }
   }
 
+  public static Date convertScheduleTimeForMonthDayToDate(ScheduleParameters scheduleParameters) {
+
+    ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
+    LocalDate scheduleDate = getScheduleDate(scheduleParameters.getScheduleDay(), zoneId);
+    LocalTime localTime = getScheduleTimeUTC(scheduleParameters.getScheduleTime());
+
+    return Date.from(ZonedDateTime.of(scheduleDate, localTime, zoneId).toInstant());
+  }
+
+  private static LocalDate getScheduleDate(Integer scheduleDay, ZoneId zoneId) {
+    if (scheduleDay != null) {
+      return Instant.now().atZone(zoneId).toLocalDate().withDayOfMonth(scheduleDay);
+    } else {
+      return getUtcDateTime().toLocalDate();
+    }
+  }
+
+  private static LocalTime getScheduleTimeUTC(String scheduleTime) {
+    if (StringUtils.isNotEmpty(scheduleTime)) {
+      return LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
+    } else {
+      return getUtcDateTime().toLocalTime().truncatedTo(ChronoUnit.SECONDS);
+    }
+  }
+
   private static ZonedDateTime getUtcDateTime() {
     ZoneId zoneId = ZoneId.of("UTC");
     return Instant.now().atZone(zoneId);
