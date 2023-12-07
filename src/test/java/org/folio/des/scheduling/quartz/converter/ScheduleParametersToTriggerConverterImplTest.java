@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -157,7 +158,7 @@ class ScheduleParametersToTriggerConverterImplTest {
 
     var trigger = triggers.iterator().next();
     ZonedDateTime expectedStartDateTime = ZonedDateTime.of(
-      LocalDate.now(ASIA_SHANGHAI_ZONE_ID),
+      Instant.now().atZone(ZoneId.of("UTC")).toLocalDate(),
       LocalTime.of(16, 40, 59), ASIA_SHANGHAI_ZONE_ID
     );
     validateTriggerWithFirstFirings(trigger, expectedStartDateTime, ChronoUnit.MONTHS, 7);
