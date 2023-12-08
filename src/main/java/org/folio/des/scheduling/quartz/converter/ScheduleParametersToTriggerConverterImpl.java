@@ -40,6 +40,7 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
       case HOUR -> buildHourlyTrigger(scheduleParameters, triggerGroup);
       case DAY -> buildDailyTrigger(scheduleParameters, triggerGroup);
       case WEEK -> buildWeeklyTrigger(scheduleParameters, triggerGroup);
+      case MONTH -> buildMonthlyTrigger(scheduleParameters, triggerGroup);
       default -> Collections.emptySet();
     };
   }
@@ -54,16 +55,23 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
 
   private Set<Trigger> buildWeeklyTrigger(ScheduleParameters parameters, String triggerGroup) {
     return getDaysOfWeek(parameters).stream()
-      .map(dayOfWeek -> buildTrigger(parameters, ScheduleDateTimeUtil
-        .convertScheduleTimeForWeekDayToDate(parameters, dayOfWeek), IntervalUnit.WEEK, triggerGroup))
+      .map(dayOfWeek -> {
+        Date startTime = ScheduleDateTimeUtil.convertScheduleTimeForWeekDayToDate(parameters, dayOfWeek);
+        return buildTrigger(parameters, startTime, IntervalUnit.WEEK, triggerGroup);
+      })
       .collect(Collectors.toSet());
+  }
+
+  private Set<Trigger> buildMonthlyTrigger(ScheduleParameters parameters, String triggerGroup) {
+    Date startTime = ScheduleDateTimeUtil.convertScheduleTimeForMonthDayToDate(parameters);
+    return Set.of(buildTrigger(parameters, startTime, IntervalUnit.MONTH, triggerGroup));
   }
 
   private Trigger buildTrigger(ScheduleParameters parameters, DateBuilder.IntervalUnit intervalUnit,
                                String triggerGroup) {
 
-    return buildTrigger(parameters, ScheduleDateTimeUtil.convertScheduleTimeToDate(parameters),
-      intervalUnit, triggerGroup);
+    Date startTime = ScheduleDateTimeUtil.convertScheduleTimeToDate(parameters);
+    return buildTrigger(parameters, startTime, intervalUnit, triggerGroup);
   }
 
   private Trigger buildTrigger(ScheduleParameters parameters, Date startTime, IntervalUnit intervalUnit,
