@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
@@ -79,7 +80,7 @@ public class ScheduleParametersToTriggerConverterImpl implements ScheduleParamet
     log.debug("buildTrigger:: Start Time is:{}", startTime);
     return TriggerBuilder.newTrigger()
       .withSchedule(CalendarIntervalScheduleBuilder.calendarIntervalSchedule()
-        .withInterval(parameters.getScheduleFrequency(), intervalUnit)
+        .withInterval(Objects.requireNonNullElse(parameters.getScheduleFrequency(), 1), intervalUnit)
         .inTimeZone(TimeZone.getTimeZone(parameters.getTimeZone()))
         .preserveHourOfDayAcrossDaylightSavings(true)
         .withMisfireHandlingInstructionDoNothing())
