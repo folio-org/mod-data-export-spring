@@ -1,12 +1,11 @@
-package org.folio.des.util;
+package org.folio.des.service.bursarlegacy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import lombok.experimental.UtilityClass;
-import lombok.extern.log4j.Log4j2;
+
 import org.folio.des.domain.dto.BursarExportDataToken;
 import org.folio.des.domain.dto.BursarExportFilter;
 import org.folio.des.domain.dto.BursarExportFilterAge;
@@ -24,30 +23,32 @@ import org.folio.des.domain.dto.BursarExportTokenFeeAmount;
 import org.folio.des.domain.dto.BursarExportTokenFeeDate;
 import org.folio.des.domain.dto.BursarExportTokenFeeMetadata;
 import org.folio.des.domain.dto.BursarExportTokenLengthControl;
-import org.folio.des.domain.dto.BursarExportTokenUserData;
 import org.folio.des.domain.dto.BursarExportTokenUserDataOptional;
 import org.folio.des.domain.dto.BursarExportTransferCriteria;
 import org.folio.des.domain.dto.BursarExportTransferCriteriaConditionsInner;
 import org.folio.des.domain.dto.BursarExportTransferCriteriaElse;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
+import org.folio.des.domain.dto.JobWithLegacyBursarParameters;
+import org.folio.des.domain.dto.JobWithLegacyBursarParametersCollection;
 import org.folio.des.domain.dto.LegacyBursarFeeFines;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
-import org.folio.des.domain.dto.LegacyJob;
-import org.folio.des.domain.dto.LegacyJobCollection;
 import org.folio.des.service.JobService;
-import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
+import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+@Service
 @Log4j2
-@UtilityClass
-public class LegacyBursarMigrationUtil {
-
+@RequiredArgsConstructor
+public class BursarMigrationService {
   private static final Integer DEFAULT_LIMIT = 10000;
 
   private static final String BURSAR_EXPORT_MIGRATION_HEADER_CONSTANT = "LIB02";
 
-  public static boolean isLegacyJob(LegacyJob job) {
+  public static boolean isLegacyJob(JobWithLegacyBursarParameters job) {
     LegacyBursarFeeFines bursarFeeFines = job
       .getExportTypeSpecificParameters()
       .getBursarFeeFines();
@@ -55,17 +56,17 @@ public class LegacyBursarMigrationUtil {
     return bursarFeeFines.getDaysOutstanding() != null;
   }
 
-  public static void recreateLegacyJobs(
+  public void recreateLegacyJobs(
     BursarExportLegacyJobService bursarExportLegacyJobService,
     JobService jobService
   ) {
     log.info("searching for legacy jobs");
-    LegacyJobCollection response = bursarExportLegacyJobService.get(
+    JobWithLegacyBursarParametersCollection response = bursarExportLegacyJobService.get(
       0,
       DEFAULT_LIMIT,
       "status==SCHEDULED"
     );
-    List<LegacyJob> jobsToRecreate = new ArrayList<>();
+    List<JobWithLegacyBursarParameters> jobsToRecreate = new ArrayList<>();
 
     int total = response.getTotalRecords();
     jobsToRecreate.addAll(response.getJobRecords());
@@ -79,38 +80,37 @@ public class LegacyBursarMigrationUtil {
       jobsToRecreate.addAll(response.getJobRecords());
     }
 
-    for (LegacyJob legacyJob : jobsToRecreate) {
-      log.info("job to recreate: {}", legacyJob);
-
-      if (isLegacyJob(legacyJob)) {
+    for (JobWithLegacyBursarParameters jobWithLegacyBursarParameters : jobsToRecreate) {
+      log.info("job to recreate: {}", jobWithLegacyBursarParameters);
+      if (isLegacyJob(jobWithLegacyBursarParameters)) {
         Job newJob = prepareNewJob();
 
         newJob
           .getExportTypeSpecificParameters()
           .setVendorEdiOrdersExportConfig(
-            legacyJob
+            jobWithLegacyBursarParameters
               .getExportTypeSpecificParameters()
               .getVendorEdiOrdersExportConfig()
           );
         newJob
           .getExportTypeSpecificParameters()
-          .setQuery(legacyJob.getExportTypeSpecificParameters().getQuery());
+          .setQuery(jobWithLegacyBursarParameters.getExportTypeSpecificParameters().getQuery());
         newJob
           .getExportTypeSpecificParameters()
           .seteHoldingsExportConfig(
-            legacyJob
+            jobWithLegacyBursarParameters
               .getExportTypeSpecificParameters()
               .geteHoldingsExportConfig()
           );
         newJob
           .getExportTypeSpecificParameters()
           .setAuthorityControlExportConfig(
-            legacyJob
+            jobWithLegacyBursarParameters
               .getExportTypeSpecificParameters()
               .getAuthorityControlExportConfig()
           );
 
-        LegacyBursarFeeFines legacyBursarParams = legacyJob
+        LegacyBursarFeeFines legacyBursarParams = jobWithLegacyBursarParameters
           .getExportTypeSpecificParameters()
           .getBursarFeeFines();
 
@@ -175,24 +175,24 @@ public class LegacyBursarMigrationUtil {
           .getElse()
           .setAccount(legacyBursarParams.getTransferAccountId());
 
-        newJob.setId(legacyJob.getId());
-        newJob.setName(legacyJob.getName());
-        newJob.setDescription(legacyJob.getDescription());
-        newJob.setSource(legacyJob.getSource());
-        newJob.setIsSystemSource(legacyJob.getIsSystemSource());
-        newJob.setTenant(legacyJob.getTenant());
-        newJob.setType(legacyJob.getType());
-        newJob.setStatus(legacyJob.getStatus());
-        newJob.setFiles(legacyJob.getFiles());
-        newJob.setFileNames(legacyJob.getFileNames());
-        newJob.setStartTime((legacyJob.getStartTime()));
-        newJob.setEndTime(legacyJob.getEndTime());
-        newJob.setMetadata(legacyJob.getMetadata());
-        newJob.setOutputFormat(legacyJob.getOutputFormat());
-        newJob.setErrorDetails(legacyJob.getErrorDetails());
-        newJob.setIdentifierType(legacyJob.getIdentifierType());
-        newJob.setEntityType(legacyJob.getEntityType());
-        newJob.setProgress(legacyJob.getProgress());
+        newJob.setId(jobWithLegacyBursarParameters.getId());
+        newJob.setName(jobWithLegacyBursarParameters.getName());
+        newJob.setDescription(jobWithLegacyBursarParameters.getDescription());
+        newJob.setSource(jobWithLegacyBursarParameters.getSource());
+        newJob.setIsSystemSource(jobWithLegacyBursarParameters.getIsSystemSource());
+        newJob.setTenant(jobWithLegacyBursarParameters.getTenant());
+        newJob.setType(jobWithLegacyBursarParameters.getType());
+        newJob.setStatus(jobWithLegacyBursarParameters.getStatus());
+        newJob.setFiles(jobWithLegacyBursarParameters.getFiles());
+        newJob.setFileNames(jobWithLegacyBursarParameters.getFileNames());
+        newJob.setStartTime((jobWithLegacyBursarParameters.getStartTime()));
+        newJob.setEndTime(jobWithLegacyBursarParameters.getEndTime());
+        newJob.setMetadata(jobWithLegacyBursarParameters.getMetadata());
+        newJob.setOutputFormat(jobWithLegacyBursarParameters.getOutputFormat());
+        newJob.setErrorDetails(jobWithLegacyBursarParameters.getErrorDetails());
+        newJob.setIdentifierType(jobWithLegacyBursarParameters.getIdentifierType());
+        newJob.setEntityType(jobWithLegacyBursarParameters.getEntityType());
+        newJob.setProgress(jobWithLegacyBursarParameters.getProgress());
 
         // upsert recreated job
         jobService.upsertAndSendToKafka(newJob, true);
@@ -202,7 +202,7 @@ public class LegacyBursarMigrationUtil {
     log.info("recreated {} legacy jobs", jobsToRecreate.size());
   }
 
-  public static Job prepareNewJob() {
+  public Job prepareNewJob() {
     Job job = new Job();
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     BursarExportJob bursarExportJob = new BursarExportJob();
@@ -371,7 +371,7 @@ public class LegacyBursarMigrationUtil {
     return job;
   }
 
-  public static List<BursarExportTokenConditional> mapTypeMappingsToTokens(
+  public List<BursarExportTokenConditional> mapTypeMappingsToTokens(
     LegacyBursarFeeFinesTypeMappings typeMappings
   ) {
     // item type token and description token
