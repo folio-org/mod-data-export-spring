@@ -185,6 +185,35 @@ paths:
               schema:
                 type: string
                 format: binary
+  /jobs/send:
+    post:
+      description: Send job via Kafka
+      operationId: sendJob
+      responses:
+        "200":
+          description: Job was sent
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/job"
+        required: true
 components:
   schemas:
     jobStatus:
