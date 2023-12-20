@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -118,6 +119,49 @@ class ScheduleParametersToTriggerConverterImplTest {
 
     var trigger = triggers.iterator().next();
     validateTriggerWithFirstFirings(trigger, expectedStartDateTime, ChronoUnit.WEEKS, scheduleFrequency);
+  }
+
+  @Test
+  void testConvertToMonthlyTrigger() {
+    ScheduleParameters scheduleParameters = new ScheduleParameters()
+      .id(UUID.randomUUID())
+      .scheduleTime("16:40:59")
+      .timeZone(ASIA_SHANGHAI_ZONE)
+      .schedulePeriod(SchedulePeriodEnum.MONTH)
+      .scheduleDay(22)
+      .scheduleFrequency(7);
+
+    var triggers = triggerConverter.convert(scheduleParameters, EDIFACT_ORDERS_EXPORT);
+    assertNotNull(triggers);
+    assertEquals(1, triggers.size());
+
+    var trigger = triggers.iterator().next();
+    ZonedDateTime expectedStartDateTime = ZonedDateTime.of(
+      LocalDate.now(ASIA_SHANGHAI_ZONE_ID).withDayOfMonth(22),
+      LocalTime.of(16, 40, 59), ASIA_SHANGHAI_ZONE_ID
+    );
+    validateTriggerWithFirstFirings(trigger, expectedStartDateTime, ChronoUnit.MONTHS, 7);
+  }
+
+  @Test
+  void testConvertToMonthlyTriggerWithNullParams() {
+    ScheduleParameters scheduleParameters = new ScheduleParameters()
+      .id(UUID.randomUUID())
+      .scheduleTime("16:40:59")
+      .timeZone(ASIA_SHANGHAI_ZONE)
+      .schedulePeriod(SchedulePeriodEnum.MONTH)
+      .scheduleFrequency(7);
+
+    var triggers = triggerConverter.convert(scheduleParameters, EDIFACT_ORDERS_EXPORT);
+    assertNotNull(triggers);
+    assertEquals(1, triggers.size());
+
+    var trigger = triggers.iterator().next();
+    ZonedDateTime expectedStartDateTime = ZonedDateTime.of(
+      Instant.now().atZone(ZoneId.of("UTC")).toLocalDate(),
+      LocalTime.of(16, 40, 59), ASIA_SHANGHAI_ZONE_ID
+    );
+    validateTriggerWithFirstFirings(trigger, expectedStartDateTime, ChronoUnit.MONTHS, 7);
   }
 
   @Test

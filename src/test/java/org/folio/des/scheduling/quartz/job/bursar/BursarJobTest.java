@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
+import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -66,6 +68,8 @@ class BursarJobTest {
   private JobExecutionContext jobExecutionContext;
   @Mock
   private Scheduler scheduler;
+  @Mock
+  private DataExportSpringClient dataExportSpringClient;
   private final FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
 
   @Test
@@ -74,9 +78,9 @@ class BursarJobTest {
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
     when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
-    when(jobService.upsertAndSendToKafka(any(), eq(true))).thenReturn(new Job().id(UUID.randomUUID()));
+    when(dataExportSpringClient.upsertJob(any())).thenReturn(new Job().id(UUID.randomUUID()));
     bursarJob.execute(jobExecutionContext);
-    verify(jobService).upsertAndSendToKafka(any(), eq(true));
+    verify(dataExportSpringClient).upsertJob(any());
   }
 
   @Test

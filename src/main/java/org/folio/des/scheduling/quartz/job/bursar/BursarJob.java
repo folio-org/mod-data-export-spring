@@ -5,10 +5,10 @@ import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
 import java.util.Date;
 
+import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.exceptions.SchedulingException;
-import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.context.ExecutionContextBuilder;
@@ -28,7 +28,7 @@ public class BursarJob implements org.quartz.Job {
   private final ExecutionContextBuilder contextBuilder;
   private final SystemUserService systemUserService;
   private final ExportTypeBasedConfigManager exportTypeBasedConfigManager;
-  private final JobService jobService;
+  private final DataExportSpringClient dataExportSpringClient;
   private static final String PARAM_NOT_FOUND_MESSAGE = "'%s' param is missing in the jobExecutionContext";
 
   @Override
@@ -39,7 +39,7 @@ public class BursarJob implements org.quartz.Job {
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext(tenantId))) {
       Job scheduledJob = getJob(jobExecutionContext);
-      Job resultJob = jobService.upsertAndSendToKafka(scheduledJob, true);
+      Job resultJob = dataExportSpringClient.upsertJob(scheduledJob);
       log.info("execute:: configureTasks executed for jobId: {} at: {}", resultJob.getId(), current);
     }
   }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.UUID;
 
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
+import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -61,6 +63,8 @@ class EdifactJobTest {
   private JobExecutionContext jobExecutionContext;
   @Mock
   private Scheduler scheduler;
+  @Mock
+  private DataExportSpringClient dataExportSpringClient;
   private FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";
@@ -74,12 +78,12 @@ class EdifactJobTest {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job().id(UUID.randomUUID()));
+    doNothing().when(dataExportSpringClient).sendJob(any());
 
     edifactJob.execute(jobExecutionContext);
 
     verify(jobService).upsertAndSendToKafka(any(), eq(false), eq(false));
-    verify(jobSchedulerCommandBuilder).buildJobCommand(any());
-    verify(jobExecutionService).sendJobCommand(any());
+    verify(dataExportSpringClient).sendJob(any());
   }
 
   @Test
