@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
 import org.folio.de.entity.BaseJob;
-import org.folio.des.domain.dto.LegacyExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ExportTypeSpecificParametersWithLegacyBursar;
 import org.hibernate.annotations.Type;
 
 @Entity
@@ -16,5 +16,5 @@ public class JobWithLegacyBursarParameters extends BaseJob {
 
   @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
-  private LegacyExportTypeSpecificParameters exportTypeSpecificParameters;
+  private ExportTypeSpecificParametersWithLegacyBursar exportTypeSpecificParameters;
 }

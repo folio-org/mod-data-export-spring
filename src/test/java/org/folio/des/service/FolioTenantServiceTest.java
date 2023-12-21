@@ -5,16 +5,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mockStatic;
 
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
-import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
+import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.BulkEditConfigService;
-import org.folio.des.util.LegacyBursarMigrationUtil;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -22,9 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 
 @ExtendWith(MockitoExtension.class)
 class FolioTenantServiceTest {
@@ -52,7 +48,7 @@ class FolioTenantServiceTest {
   PrepareSystemUserService prepareSystemUserService;
 
   @Mock
-  BursarExportLegacyJobService bursarExportLegacyJobService;
+  BursarMigrationService bursarMigrationService;
 
   @Test
   void shouldDoProcessAfterTenantUpdating() {
@@ -65,14 +61,9 @@ class FolioTenantServiceTest {
     doNothing().when(kafka).restartEventListeners();
     doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
     doNothing().when(oldJobDeleteScheduler).scheduleOldJobDeletion(any());
+    doNothing().when(bursarMigrationService).recreateLegacyJobs(any(), any());
 
-    try (MockedStatic<LegacyBursarMigrationUtil> mockedBLegacyBursarMigrationUtil = mockStatic(LegacyBursarMigrationUtil.class)) {
-      mockedBLegacyBursarMigrationUtil.when(() -> LegacyBursarMigrationUtil.recreateLegacyJobs(any(), any()))
-        .thenAnswer((Answer<Void>) invocation -> null);
-
-      folioTenantService.afterTenantUpdate(tenantAttributes);
-    }
-
+    folioTenantService.afterTenantUpdate(tenantAttributes);
 
     verify(prepareSystemUserService).setupSystemUser();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();

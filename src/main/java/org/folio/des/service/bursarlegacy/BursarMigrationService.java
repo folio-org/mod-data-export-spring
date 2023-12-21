@@ -48,7 +48,7 @@ public class BursarMigrationService {
 
   private static final String BURSAR_EXPORT_MIGRATION_HEADER_CONSTANT = "LIB02";
 
-  public static boolean isLegacyJob(JobWithLegacyBursarParameters job) {
+  public boolean isLegacyJob(JobWithLegacyBursarParameters job) {
     LegacyBursarFeeFines bursarFeeFines = job
       .getExportTypeSpecificParameters()
       .getBursarFeeFines();

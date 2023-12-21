@@ -1,7 +1,6 @@
 package org.folio.des.service.bursarlegacy;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.bursarlegacy.JobWithLegacyBursarParameters;
 import org.folio.des.domain.dto.JobWithLegacyBursarParametersCollection;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Log4j2
 @RequiredArgsConstructor
 public class BursarExportLegacyJobService {
 
