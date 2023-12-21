@@ -12,7 +12,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "job")
 @Data
-public class LegacyJob extends BaseJob {
+public class JobWithLegacyBursarParameters extends BaseJob {
 
   @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
