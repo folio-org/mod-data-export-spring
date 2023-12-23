@@ -6,9 +6,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.folio.de.entity.bursarlegacy.LegacyJob;
+
+import org.folio.de.entity.bursarlegacy.JobWithLegacyBursarParameters;
 import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.LegacyJobCollection;
+import org.folio.des.domain.dto.JobWithLegacyBursarParametersCollection;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.bursarlegacy.BursarExportLegacyJobRepository;
 import org.folio.spring.data.OffsetRequest;
@@ -30,16 +31,16 @@ class BursarExportLegacyJobServiceTest {
 
   @Test
   void testGetBlankQuery() {
-    List<LegacyJob> legacyJobs = new ArrayList<>();
-    LegacyJob legacyJob1 = new LegacyJob();
+    List<JobWithLegacyBursarParameters> legacyJobs = new ArrayList<>();
+    JobWithLegacyBursarParameters legacyJob1 = new JobWithLegacyBursarParameters();
     legacyJob1.setId(UUID.fromString("0000-00-00-00-000000"));
     legacyJobs.add(legacyJob1);
-    LegacyJob legacyJob2 = new LegacyJob();
+    JobWithLegacyBursarParameters legacyJob2 = new JobWithLegacyBursarParameters();
     legacyJob2.setId(UUID.fromString("0000-00-00-00-000001"));
     legacyJob2.setType(ExportType.EDIFACT_ORDERS_EXPORT);
     legacyJobs.add(legacyJob2);
 
-    Page<LegacyJob> page = new PageImpl<LegacyJob>(
+    Page<JobWithLegacyBursarParameters> page = new PageImpl<JobWithLegacyBursarParameters>(
       legacyJobs,
       new OffsetRequest(0, 1),
       1L
@@ -51,7 +52,7 @@ class BursarExportLegacyJobServiceTest {
       cqlService
     );
 
-    LegacyJobCollection legacyJobCollection = service.get(0, 2, "");
+    JobWithLegacyBursarParametersCollection legacyJobCollection = service.get(0, 2, "");
 
     assertEquals(2, legacyJobCollection.getJobRecords().size());
     assertEquals(

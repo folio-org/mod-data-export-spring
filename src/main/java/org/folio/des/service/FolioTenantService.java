@@ -7,8 +7,8 @@ import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
+import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.BulkEditConfigService;
-import org.folio.des.util.LegacyBursarMigrationUtil;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -32,12 +32,14 @@ public class FolioTenantService extends TenantService {
   private final BursarExportLegacyJobService bursarExportLegacyJobService;
   private final JobService jobService;
   private final PrepareSystemUserService prepareSystemUserService;
+  private final BursarMigrationService bursarMigrationService;
 
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                             PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
                             BulkEditConfigService bulkEditConfigService, EdifactScheduledJobInitializer edifactScheduledJobInitializer,
                             ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer,
-                            OldJobDeleteScheduler oldJobDeleteScheduler, BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService) {
+                            OldJobDeleteScheduler oldJobDeleteScheduler, BursarExportLegacyJobService bursarExportLegacyJobService,
+                            JobService jobService, BursarMigrationService bursarMigrationService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
@@ -48,6 +50,7 @@ public class FolioTenantService extends TenantService {
     this.oldJobDeleteScheduler = oldJobDeleteScheduler;
     this.bursarExportLegacyJobService = bursarExportLegacyJobService;
     this.jobService = jobService;
+    this.bursarMigrationService = bursarMigrationService;
   }
 
   @Override
@@ -60,7 +63,7 @@ public class FolioTenantService extends TenantService {
       oldJobDeleteScheduler.scheduleOldJobDeletion(context.getTenantId());
       kafka.createKafkaTopics();
       kafka.restartEventListeners();
-      LegacyBursarMigrationUtil.recreateLegacyJobs(bursarExportLegacyJobService, jobService);
+      bursarMigrationService.recreateLegacyJobs(bursarExportLegacyJobService, jobService);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       throw e;

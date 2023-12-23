@@ -2,7 +2,7 @@ package org.folio.des.service.util;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.de.entity.Job;
-import org.folio.de.entity.bursarlegacy.LegacyJob;
+import org.folio.de.entity.bursarlegacy.JobWithLegacyBursarParameters;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.Metadata;
 
@@ -55,47 +55,47 @@ public class JobMapperUtil {
     return result;
   }
 
-  public static org.folio.des.domain.dto.LegacyJob entityToDto(
-    LegacyJob legacyJobEntity
+  public static org.folio.des.domain.dto.JobWithLegacyBursarParameters entityToDto(
+    JobWithLegacyBursarParameters jobWithLegacyBursarParametersEntity
   ) {
-    var result = new org.folio.des.domain.dto.LegacyJob();
+    var result = new org.folio.des.domain.dto.JobWithLegacyBursarParameters();
 
-    result.setId(legacyJobEntity.getId());
-    result.setName(legacyJobEntity.getName());
-    result.setDescription(legacyJobEntity.getDescription());
-    result.setSource(legacyJobEntity.getSource());
-    result.setIsSystemSource(legacyJobEntity.getIsSystemSource());
-    result.setType(legacyJobEntity.getType());
+    result.setId(jobWithLegacyBursarParametersEntity.getId());
+    result.setName(jobWithLegacyBursarParametersEntity.getName());
+    result.setDescription(jobWithLegacyBursarParametersEntity.getDescription());
+    result.setSource(jobWithLegacyBursarParametersEntity.getSource());
+    result.setIsSystemSource(jobWithLegacyBursarParametersEntity.getIsSystemSource());
+    result.setType(jobWithLegacyBursarParametersEntity.getType());
     result.setExportTypeSpecificParameters(
-      legacyJobEntity.getExportTypeSpecificParameters()
+      jobWithLegacyBursarParametersEntity.getExportTypeSpecificParameters()
     );
-    result.setStatus(legacyJobEntity.getStatus());
+    result.setStatus(jobWithLegacyBursarParametersEntity.getStatus());
     if (
       ObjectUtils.notEqual(
         ExportType.EDIFACT_ORDERS_EXPORT,
-        legacyJobEntity.getType()
+        jobWithLegacyBursarParametersEntity.getType()
       )
     ) {
-      result.setFiles(legacyJobEntity.getFiles());
+      result.setFiles(jobWithLegacyBursarParametersEntity.getFiles());
     }
-    result.setFileNames(legacyJobEntity.getFileNames());
-    result.setStartTime(legacyJobEntity.getStartTime());
-    result.setEndTime(legacyJobEntity.getEndTime());
-    result.setIdentifierType(legacyJobEntity.getIdentifierType());
-    result.setEntityType(legacyJobEntity.getEntityType());
-    result.setProgress(legacyJobEntity.getProgress());
+    result.setFileNames(jobWithLegacyBursarParametersEntity.getFileNames());
+    result.setStartTime(jobWithLegacyBursarParametersEntity.getStartTime());
+    result.setEndTime(jobWithLegacyBursarParametersEntity.getEndTime());
+    result.setIdentifierType(jobWithLegacyBursarParametersEntity.getIdentifierType());
+    result.setEntityType(jobWithLegacyBursarParametersEntity.getEntityType());
+    result.setProgress(jobWithLegacyBursarParametersEntity.getProgress());
 
     var metadata = new Metadata();
-    metadata.setCreatedDate(legacyJobEntity.getCreatedDate());
-    metadata.setCreatedByUserId(legacyJobEntity.getCreatedByUserId());
-    metadata.setCreatedByUsername(legacyJobEntity.getCreatedByUsername());
-    metadata.setUpdatedDate(legacyJobEntity.getUpdatedDate());
-    metadata.setUpdatedByUserId(legacyJobEntity.getUpdatedByUserId());
-    metadata.setUpdatedByUsername(legacyJobEntity.getUpdatedByUsername());
+    metadata.setCreatedDate(jobWithLegacyBursarParametersEntity.getCreatedDate());
+    metadata.setCreatedByUserId(jobWithLegacyBursarParametersEntity.getCreatedByUserId());
+    metadata.setCreatedByUsername(jobWithLegacyBursarParametersEntity.getCreatedByUsername());
+    metadata.setUpdatedDate(jobWithLegacyBursarParametersEntity.getUpdatedDate());
+    metadata.setUpdatedByUserId(jobWithLegacyBursarParametersEntity.getUpdatedByUserId());
+    metadata.setUpdatedByUsername(jobWithLegacyBursarParametersEntity.getUpdatedByUsername());
     result.setMetadata(metadata);
 
-    result.setOutputFormat(legacyJobEntity.getOutputFormat());
-    result.setErrorDetails(legacyJobEntity.getErrorDetails());
+    result.setOutputFormat(jobWithLegacyBursarParametersEntity.getOutputFormat());
+    result.setErrorDetails(jobWithLegacyBursarParametersEntity.getErrorDetails());
 
     return result;
   }
