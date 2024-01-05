@@ -70,6 +70,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(1, schedulerListener.getJobsScheduledCount());
+
     await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(1, jobListener.getJobsExecutedCount()));
   }
@@ -133,6 +134,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
+
     await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
   }
@@ -176,10 +178,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(2, schedulerListener.getJobsAddedCount());
-    assertEquals(
-      jobTriggersInitialCount + jobTriggersRescheduleCount,
-      schedulerListener.getJobsScheduledCount()
-    );
+    assertEquals(jobTriggersInitialCount + jobTriggersRescheduleCount, schedulerListener.getJobsScheduledCount());
     assertEquals(1, schedulerListener.getJobsDeletedCount());
   }
 
@@ -211,8 +210,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
 
   @AllArgsConstructor
   @NoArgsConstructor
-  private static class TestTriggerConverter
-    implements Converter<ExportConfig, ExportTrigger> {
+  private static class TestTriggerConverter implements Converter<ExportConfig, ExportTrigger> {
 
     @Setter
     private int triggerAmount = 1;
@@ -274,7 +272,6 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   }
 
   private static class TestingSchedulerListener extends SchedulerListenerSupport {
-
     private final AtomicInteger jobsAddedCount = new AtomicInteger();
     private final AtomicInteger jobsDeletedCount = new AtomicInteger();
     private final AtomicInteger jobsScheduledCount = new AtomicInteger();
