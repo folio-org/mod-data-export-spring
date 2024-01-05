@@ -103,9 +103,7 @@ class JobCommandBuilderResolverTest {
     BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
     bursarExportFilterAge.setNumDays(1);
     BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
-    bursarExportFilterPatronGroup.setPatronGroupId(
-      UUID.fromString("0000-00-00-00-000000")
-    );
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
 
     List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
     bursarExportFilters.add(bursarExportFilterPatronGroup);
@@ -138,9 +136,6 @@ class JobCommandBuilderResolverTest {
 
     JobParameters jobParameters = builder.get().buildJobCommand(job);
 
-    assertNotEquals(
-      "null",
-      jobParameters.getParameters().get(paramsKey).getValue()
-    );
+    assertNotEquals("null", jobParameters.getParameters().get(paramsKey).getValue());
   }
 }

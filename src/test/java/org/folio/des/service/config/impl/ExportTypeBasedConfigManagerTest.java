@@ -108,9 +108,7 @@ class ExportTypeBasedConfigManagerTest {
     BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
     bursarExportFilterAge.setNumDays(1);
     BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
-    bursarExportFilterPatronGroup.setPatronGroupId(
-      UUID.fromString("0000-00-00-00-000000")
-    );
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
     List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
     bursarExportFilters.add(bursarExportFilterPatronGroup);
     bursarExportFilters.add(bursarExportFilterAge);
@@ -122,7 +120,6 @@ class ExportTypeBasedConfigManagerTest {
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig, exportName);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
-    doNothing().when(bursarExportScheduler).scheduleBursarJob(any());
     doNothing().when(bursarExportScheduler).scheduleBursarJob(any());
 
     var response = service.postConfig(bursarExportConfig);

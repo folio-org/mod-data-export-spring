@@ -82,13 +82,10 @@ class BaseExportConfigServiceTest {
 
   @Autowired
   private BurSarFeesFinesExportConfigService service;
-
   @Autowired
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
-
   @Autowired
   private ObjectMapper objectMapper;
-
   @MockBean
   private ConfigurationClient client;
   @MockBean
@@ -108,9 +105,7 @@ class BaseExportConfigServiceTest {
     BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
     bursarExportFilterAge.setNumDays(1);
     BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
-    bursarExportFilterPatronGroup.setPatronGroupId(
-      UUID.fromString("0000-00-00-00-000000")
-    );
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
     List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
     bursarExportFilters.add(bursarExportFilterPatronGroup);
     bursarExportFilters.add(bursarExportFilterAge);
@@ -176,13 +171,8 @@ class BaseExportConfigServiceTest {
   @Test
   @DisplayName("Config is not set")
   void noConfig() throws JsonProcessingException {
-    final ConfigurationCollection mockedResponse = objectMapper.readValue(
-      EMPTY_CONFIG_RESPONSE,
-      ConfigurationCollection.class
-    );
-    Mockito
-      .when(client.getConfigurations(any(), eq(1)))
-      .thenReturn(mockedResponse);
+    final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
+    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
 
     var config = service.getFirstConfig();
 
@@ -200,8 +190,7 @@ class BaseExportConfigServiceTest {
 
     Assertions.assertAll(
       () -> assertEquals(0, config.getTotalRecords()),
-      () -> assertTrue(config.getConfigs().isEmpty())
-    );
+      () -> assertTrue(config.getConfigs().isEmpty()));
   }
 
   @Test

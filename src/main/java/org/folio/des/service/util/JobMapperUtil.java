@@ -21,9 +21,7 @@ public class JobMapperUtil {
     result.setSource(jobEntity.getSource());
     result.setIsSystemSource(jobEntity.getIsSystemSource());
     result.setType(jobEntity.getType());
-    result.setExportTypeSpecificParameters(
-      jobEntity.getExportTypeSpecificParameters()
-    );
+    result.setExportTypeSpecificParameters(jobEntity.getExportTypeSpecificParameters());
     result.setStatus(jobEntity.getStatus());
     if (
       ObjectUtils.notEqual(
@@ -66,9 +64,7 @@ public class JobMapperUtil {
     result.setSource(jobWithLegacyBursarParametersEntity.getSource());
     result.setIsSystemSource(jobWithLegacyBursarParametersEntity.getIsSystemSource());
     result.setType(jobWithLegacyBursarParametersEntity.getType());
-    result.setExportTypeSpecificParameters(
-      jobWithLegacyBursarParametersEntity.getExportTypeSpecificParameters()
-    );
+    result.setExportTypeSpecificParameters(jobWithLegacyBursarParametersEntity.getExportTypeSpecificParameters());
     result.setStatus(jobWithLegacyBursarParametersEntity.getStatus());
     if (
       ObjectUtils.notEqual(

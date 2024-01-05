@@ -102,8 +102,7 @@ public class JobServiceImpl implements JobService {
       result.setJobRecords(cqlService.getByCQL(Job.class, query, offset, limit)
           .stream()
           .map(JobServiceImpl::entityToDto)
-          .toList()
-      );
+          .toList());
       result.setTotalRecords(cqlService.countByCQL(Job.class, query));
     }
     log.info("get:: result={}", result);
