@@ -44,11 +44,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(
-  properties = {
-    "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
-  }
-)
+@SpringBootTest(properties = {
+  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
+})
 @DirtiesContext
 class QuartzExportJobSchedulerTest extends BaseTest {
 
@@ -72,9 +70,8 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(1, schedulerListener.getJobsScheduledCount());
-    // TODO - Should be reworked because this code leads to the test failure due to unstable result
-    //    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
-    //      () -> assertEquals(1, jobListener.getJobsExecutedCount()));
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
+      () -> assertEquals(1, jobListener.getJobsExecutedCount()));
   }
 
   @Test
@@ -136,9 +133,8 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertTrue(scheduler.checkExists(JobKey.jobKey(SCHEDULE_ID)));
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
-    // TODO - Should be reworked because this code leads to the test failure during jenkins build
-    // await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
-    //   () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
+      () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
   }
 
   @Test
