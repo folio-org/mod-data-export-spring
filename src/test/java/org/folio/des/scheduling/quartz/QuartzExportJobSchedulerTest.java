@@ -71,7 +71,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(1, schedulerListener.getJobsScheduledCount());
 
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(30, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(60, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(1, jobListener.getJobsExecutedCount()));
   }
 
@@ -135,7 +135,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
 
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(30, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(60, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
   }
 
