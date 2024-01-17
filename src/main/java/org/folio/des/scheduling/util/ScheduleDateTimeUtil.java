@@ -22,7 +22,7 @@ public final class ScheduleDateTimeUtil {
 
   public static Date convertScheduleTimeToDate(ScheduleParameters scheduleParameters) {
     if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
-      LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
+      LocalTime localTime = parseLocalTime(scheduleParameters.getScheduleTime());
       ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
       ZonedDateTime startZoneDate = Instant.now().atZone(zoneId);
       LocalDate nowDate = startZoneDate.toLocalDate();
@@ -34,7 +34,7 @@ public final class ScheduleDateTimeUtil {
 
   public static Date convertScheduleTimeForWeekDayToDate(ScheduleParameters scheduleParameters, DayOfWeek dayOfWeek) {
     if (StringUtils.isNotEmpty(scheduleParameters.getScheduleTime())) {
-      LocalTime localTime = LocalTime.parse(scheduleParameters.getScheduleTime(), DateTimeFormatter.ISO_LOCAL_TIME);
+      LocalTime localTime = parseLocalTime(scheduleParameters.getScheduleTime());
       ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
       LocalDate localDate = LocalDate.now(zoneId).with(TemporalAdjusters.nextOrSame(dayOfWeek));
       ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, zoneId);
@@ -43,6 +43,35 @@ public final class ScheduleDateTimeUtil {
       return Date.from(getUtcDateTime().with(TemporalAdjusters.nextOrSame(dayOfWeek))
         .truncatedTo(ChronoUnit.SECONDS).toInstant());
     }
+  }
+
+  public static Date convertScheduleTimeForMonthDayToDate(ScheduleParameters scheduleParameters) {
+
+    ZoneId zoneId = ZoneId.of(scheduleParameters.getTimeZone());
+    LocalDate scheduleDate = getScheduleDate(scheduleParameters.getScheduleDay(), zoneId);
+    LocalTime localTime = getScheduleTimeUTC(scheduleParameters.getScheduleTime());
+
+    return Date.from(ZonedDateTime.of(scheduleDate, localTime, zoneId).toInstant());
+  }
+
+  private static LocalDate getScheduleDate(Integer scheduleDay, ZoneId zoneId) {
+    if (scheduleDay != null) {
+      return Instant.now().atZone(zoneId).toLocalDate().withDayOfMonth(scheduleDay);
+    } else {
+      return getUtcDateTime().toLocalDate();
+    }
+  }
+
+  private static LocalTime getScheduleTimeUTC(String scheduleTime) {
+    if (StringUtils.isNotEmpty(scheduleTime)) {
+      return parseLocalTime(scheduleTime);
+    } else {
+      return getUtcDateTime().toLocalTime().truncatedTo(ChronoUnit.SECONDS);
+    }
+  }
+
+  private static LocalTime parseLocalTime(String scheduleTime) {
+    return LocalTime.parse(scheduleTime, DateTimeFormatter.ISO_LOCAL_TIME);
   }
 
   private static ZonedDateTime getUtcDateTime() {
