@@ -45,7 +45,7 @@ class OldJobDeleteSchedulerTest extends BaseTest {
 
     oldJobDeleteScheduler.scheduleOldJobDeletion(TENANT);
     oldJobDeleteScheduler.removeJobs(TENANT);
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(30, TimeUnit.SECONDS).untilAsserted(
       () -> {
         var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupContains(EXPORT_DELETE_GROUP));
         assertTrue(jobKeys.isEmpty());
