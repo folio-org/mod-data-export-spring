@@ -22,6 +22,7 @@
 * [MODEXPS-203](https://issues.folio.org/browse/MODEXPS-203) Reimplementation of Edifact Scheduling to use Quartz
 * [MODEXPS-185](https://issues.folio.org/browse/MODEXPS-185) Prepare initial setup for introducing Quartz as a scheduler in mod-data-export-spring
 * [MODEXPS-167](https://issues.folio.org/browse/MODEXPS-167) Implement refresh token rotation
+* [MODEXPS-240](https://issues.folio.org/browse/MODEXPS-240) Make system user usage optional
 
 ### Bug fixes
 * [MODEXPS-226](https://issues.folio.org/browse/MODEXPS-226) Invalid system user credentials usage
