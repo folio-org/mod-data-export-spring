@@ -394,6 +394,28 @@
       </plugin>
 
       <plugin>
+        <groupId>io.github.floverfelt</groupId>
+        <artifactId>find-and-replace-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <executions>
+          <execution>
+            <id>LegacyBursarFeeFinesTypeMappings</id>
+            <phase>generate-sources</phase>
+            <goals>
+               <goal>find-and-replace</goal>
+            </goals>
+            <configuration>
+              <replacementType>file-contents</replacementType>
+              <baseDir>target/generated-sources/src/main/java/org/folio/des/domain/dto/</baseDir>
+              <fileMask>LegacyBursarFeeFinesTypeMappings.java</fileMask>
+              <findRegex>&lt;String, List&gt;</findRegex>
+              <replaceValue>&lt;String, List&lt;LegacyBursarFeeFinesTypeMapping&gt;&gt;</replaceValue>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
