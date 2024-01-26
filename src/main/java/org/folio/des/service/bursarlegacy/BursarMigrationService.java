@@ -385,7 +385,7 @@ public class BursarMigrationService {
     descriptionToken.setConditions(descriptionConditions);
 
     if (typeMappings != null) {
-      for (Map.Entry<String, List> entry : typeMappings.entrySet()) {
+      for (Map.Entry<String, List<LegacyBursarFeeFinesTypeMapping>> entry : typeMappings.entrySet()) {
         String ownerID = entry.getKey();
         List<LegacyBursarFeeFinesTypeMapping> typeMappingList = entry.getValue();
         for (LegacyBursarFeeFinesTypeMapping typeMapping : typeMappingList) {
