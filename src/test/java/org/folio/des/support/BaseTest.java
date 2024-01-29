@@ -24,6 +24,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -47,6 +49,7 @@ import lombok.SneakyThrows;
 @Testcontainers
 @EmbeddedKafka(topics = { "diku.data-export.job.update" })
 @EnableKafka
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class BaseTest {
 
   public static final int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
