@@ -2,6 +2,7 @@ package org.folio.des.scheduling.quartz.job.acquisition;
 
 import static org.folio.des.scheduling.quartz.QuartzConstants.EXPORT_CONFIG_ID_PARAM;
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
+import static org.folio.des.util.LoggerUtils.getJobForLog;
 
 import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.ExportConfig;
@@ -82,7 +83,7 @@ public class EdifactJob implements org.quartz.Job {
     job.setIsSystemSource(true);
     job.setExportTypeSpecificParameters(exportConfig.getExportTypeSpecificParameters());
     job.setTenant(exportConfig.getTenant());
-    log.info("createJob:: scheduled job assigned '{}'.", job);
+    log.info("createJob:: scheduled job assigned '{}'.", getJobForLog(job));
     return job;
   }
 

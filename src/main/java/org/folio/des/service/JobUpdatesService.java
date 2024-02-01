@@ -1,6 +1,7 @@
 package org.folio.des.service;
 
 import static java.util.Objects.nonNull;
+import static org.folio.des.util.LoggerUtils.getJobForLog;
 
 import java.util.Date;
 import java.util.EnumMap;
@@ -49,9 +50,9 @@ public class JobUpdatesService {
 
     if (updateJobPropsIfChanged(jobExecutionUpdate, job)) {
       job.setUpdatedDate(new Date());
-      log.info("Updating {}.", job);
+      log.info("Updating {}.", getJobForLog(job));
       job = repository.save(job);
-      log.info("Updated {}.", job);
+      log.info("Updated {}.", getJobForLog(job));
     }
   }
 

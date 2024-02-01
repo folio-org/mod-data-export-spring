@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static org.folio.des.domain.dto.ExportType.AUTH_HEADINGS_UPDATES;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
+import static org.folio.des.util.LoggerUtils.getJobForLog;
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
 
@@ -75,7 +76,7 @@ public class JobsController implements JobsApi {
 
   @Override
   public ResponseEntity<Void> sendJob(Job job) {
-    log.info("sendJob:: with job={}.", job);
+    log.info("sendJob:: with job={}.", getJobForLog(job));
     jobExecutionService.sendJobCommand(jobCommandSchedulerBuilder.buildJobCommand(job));
     return new ResponseEntity<>(HttpStatus.OK);
   }
