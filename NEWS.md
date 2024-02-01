@@ -1,3 +1,9 @@
+## 2024-02-01 v3.1.0
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.2...v3.1.0)
+
+### Stories
+* [MODEXPS-240](https://issues.folio.org/browse/MODEXPS-240) Make system user usage optional
+
 ## 2023-11-08 v3.0.2
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.1...v3.0.2)
