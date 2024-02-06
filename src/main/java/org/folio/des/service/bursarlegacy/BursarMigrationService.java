@@ -27,6 +27,8 @@ import org.folio.des.domain.dto.BursarExportTokenLengthControl;
 import org.folio.des.domain.dto.BursarExportTokenUserDataOptional;
 import org.folio.des.domain.dto.BursarExportTransferCriteria;
 import org.folio.des.domain.dto.BursarExportTransferCriteriaElse;
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportConfigWithLegacyBursar;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobWithLegacyBursarParameters;
@@ -34,16 +36,38 @@ import org.folio.des.domain.dto.LegacyBursarFeeFines;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
+import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
 import org.folio.des.service.util.JobMapperUtil;
 import org.springframework.stereotype.Service;
 
-@Service
 @Log4j2
+@Service
 @RequiredArgsConstructor
 public class BursarMigrationService {
 
   private static final String BURSAR_EXPORT_MIGRATION_HEADER_CONSTANT = "LIB02";
 
+  // this ensures the currently scheduled configuration is updated and new jobs are created with the new schema
+  public void updateLegacyBursarConfigs(BurSarFeesFinesExportConfigService configService) {
+    // there is only one possible configuration for bursar exports
+    configService
+      .getFirstConfigLegacy()
+      .ifPresent((ExportConfigWithLegacyBursar config) -> {
+        log.info("updating legacy bursar config: {}", config);
+
+        // will have empty exportTypeSpecificParameters
+        ExportConfig updated = configService.getFirstConfig().orElseThrow();
+
+        configService.updateConfig(
+          config.getId(),
+          updated.exportTypeSpecificParameters(
+            convertLegacyJobParameters(config.getExportTypeSpecificParameters().getBursarFeeFines())
+          )
+        );
+      });
+  }
+
+  // this ensures that any information about old jobs persisted in the DB makes sense
   public void updateLegacyBursarJobs(
     BursarExportLegacyJobService legacyJobService,
     JobService jobService
@@ -51,21 +75,20 @@ public class BursarMigrationService {
     List<JobWithLegacyBursarParameters> jobs = legacyJobService.getAllLegacyJobs();
     log.info("found {} legacy jobs to update", jobs.size());
 
-    for (JobWithLegacyBursarParameters jobWithLegacyBursarParameters : jobs) {
-      log.info("updating job: {}", jobWithLegacyBursarParameters);
+    for (JobWithLegacyBursarParameters legacyJob : jobs) {
+      log.info("updating job: {}", legacyJob);
 
-      Job newJob = convertLegacyJob(jobWithLegacyBursarParameters);
+      Job newJob = JobMapperUtil.legacyBursarToNewDto(
+        legacyJob,
+        convertLegacyJobParameters(legacyJob.getExportTypeSpecificParameters().getBursarFeeFines())
+      );
 
       // upsert recreated job, does not send to kafka despite the name
       jobService.upsertAndSendToKafka(newJob, false);
     }
   }
 
-  public static Job convertLegacyJob(JobWithLegacyBursarParameters legacyJob) {
-    LegacyBursarFeeFines legacyParams = legacyJob
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines();
-
+  public static ExportTypeSpecificParameters convertLegacyJobParameters(LegacyBursarFeeFines legacyParams) {
     ExportTypeSpecificParameters exportTypeSpecificParameters = new ExportTypeSpecificParameters();
     BursarExportJob bursarExportJob = new BursarExportJob();
 
@@ -81,25 +104,16 @@ public class BursarMigrationService {
 
     exportTypeSpecificParameters.setBursarFeeFines(bursarExportJob);
 
-    return JobMapperUtil.legacyBursarToNewDto(
-      legacyJob,
-      exportTypeSpecificParameters
-    );
+    return exportTypeSpecificParameters;
   }
 
-  private static BursarExportFilterCondition convertLegacyJobFilters(
-    LegacyBursarFeeFines params
-  ) {
+  private static BursarExportFilterCondition convertLegacyJobFilters(LegacyBursarFeeFines params) {
     // age
     BursarExportFilterAge ageFilter = new BursarExportFilterAge();
     ageFilter.setNumDays(params.getDaysOutstanding());
-    ageFilter.setCondition(
-      BursarExportFilterAge.ConditionEnum.GREATER_THAN_EQUAL
-    );
+    ageFilter.setCondition(BursarExportFilterAge.ConditionEnum.GREATER_THAN_EQUAL);
     BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition();
-    patronGroupListFilter.setOperation(
-      BursarExportFilterCondition.OperationEnum.OR
-    );
+    patronGroupListFilter.setOperation(BursarExportFilterCondition.OperationEnum.OR);
 
     // patron groups
     List<BursarExportFilter> patronGroupFilters = new ArrayList<>();
@@ -128,28 +142,20 @@ public class BursarMigrationService {
     return List.of(constant, newline);
   }
 
-  private static List<BursarExportDataToken> convertLegacyJobData(
-    LegacyBursarFeeFines params
-  ) {
-    List<BursarExportTokenConditional> typeMappingTokens = mapTypeMappingsToTokens(
-      params.getTypeMappings()
-    );
+  private static List<BursarExportDataToken> convertLegacyJobData(LegacyBursarFeeFines params) {
+    List<BursarExportTokenConditional> typeMappingTokens = mapTypeMappingsToTokens(params.getTypeMappings());
     // special if-else tokens for item type and description
     BursarExportTokenConditional itemTypeToken = typeMappingTokens.get(0);
     BursarExportTokenConditional descriptionToken = typeMappingTokens.get(1);
 
     //user's external id token
     BursarExportTokenUserDataOptional userIDToken = new BursarExportTokenUserDataOptional();
-    userIDToken.setValue(
-      BursarExportTokenUserDataOptional.ValueEnum.EXTERNAL_SYSTEM_ID
-    );
+    userIDToken.setValue(BursarExportTokenUserDataOptional.ValueEnum.EXTERNAL_SYSTEM_ID);
 
     BursarExportTokenLengthControl userIDTokenLengthControl = new BursarExportTokenLengthControl();
     userIDTokenLengthControl.setLength(7);
     userIDTokenLengthControl.setCharacter(" ");
-    userIDTokenLengthControl.setDirection(
-      BursarExportTokenLengthControl.DirectionEnum.FRONT
-    );
+    userIDTokenLengthControl.setDirection(BursarExportTokenLengthControl.DirectionEnum.FRONT);
     userIDTokenLengthControl.setTruncate(true);
     userIDToken.setLengthControl(userIDTokenLengthControl);
 
@@ -162,9 +168,7 @@ public class BursarMigrationService {
     BursarExportTokenLengthControl feeAmountLengthControl = new BursarExportTokenLengthControl();
     feeAmountLengthControl.setLength(9);
     feeAmountLengthControl.setCharacter("0");
-    feeAmountLengthControl.setDirection(
-      BursarExportTokenLengthControl.DirectionEnum.FRONT
-    );
+    feeAmountLengthControl.setDirection(BursarExportTokenLengthControl.DirectionEnum.FRONT);
     feeAmountLengthControl.setTruncate(true);
     feeAmountToken.setLengthControl(feeAmountLengthControl);
 
@@ -172,9 +176,7 @@ public class BursarMigrationService {
     BursarExportTokenLengthControl dateComponentLengthControl = new BursarExportTokenLengthControl();
     dateComponentLengthControl.setCharacter("0");
     dateComponentLengthControl.setLength(2);
-    dateComponentLengthControl.setDirection(
-      BursarExportTokenLengthControl.DirectionEnum.FRONT
-    );
+    dateComponentLengthControl.setDirection(BursarExportTokenLengthControl.DirectionEnum.FRONT);
     dateComponentLengthControl.setTruncate(true);
 
     String placeholderTimezone = "America/Chicago";
@@ -219,9 +221,7 @@ public class BursarMigrationService {
     );
   }
 
-  private static BursarExportTransferCriteria convertLegacyJobTransfer(
-    LegacyBursarFeeFines legacyParams
-  ) {
+  private static BursarExportTransferCriteria convertLegacyJobTransfer(LegacyBursarFeeFines legacyParams) {
     // legacy exports would transfer all to one account, so we don't have any conditions and use
     // the account as the default (else)
     BursarExportTransferCriteriaElse transferElse = new BursarExportTransferCriteriaElse();
@@ -233,9 +233,7 @@ public class BursarMigrationService {
     return transferCriteria;
   }
 
-  public static List<BursarExportTokenConditional> mapTypeMappingsToTokens(
-    LegacyBursarFeeFinesTypeMappings typeMappings
-  ) {
+  public static List<BursarExportTokenConditional> mapTypeMappingsToTokens(LegacyBursarFeeFinesTypeMappings typeMappings) {
     // item type token and description token
     BursarExportTokenConditional itemTypeToken = new BursarExportTokenConditional();
     BursarExportTokenConditional descriptionToken = new BursarExportTokenConditional();
@@ -261,9 +259,7 @@ public class BursarMigrationService {
 
           // item type
           BursarExportFilterCondition andCondition = new BursarExportFilterCondition();
-          andCondition.setOperation(
-            BursarExportFilterCondition.OperationEnum.AND
-          );
+          andCondition.setOperation(BursarExportFilterCondition.OperationEnum.AND);
 
           BursarExportFilterFeeType feeTypeCondition = new BursarExportFilterFeeType();
           feeTypeCondition.setFeeFineTypeId(typeMapping.getFeefineTypeId());
@@ -288,9 +284,7 @@ public class BursarMigrationService {
           descriptionValueToken.setValue(typeMapping.getItemDescription());
 
           descriptionTokenConditionalConditionsInner.setCondition(andCondition);
-          descriptionTokenConditionalConditionsInner.setValue(
-            descriptionValueToken
-          );
+          descriptionTokenConditionalConditionsInner.setValue(descriptionValueToken);
 
           itemTypeToken.getConditions().add(itemTypeConditionalConditionsInner);
           descriptionToken

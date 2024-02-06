@@ -1,6 +1,7 @@
 package org.folio.des.converter;
 
 import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportConfigWithLegacyBursar;
 import org.folio.des.domain.dto.ModelConfiguration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,14 @@ public final class DefaultModelConfigToExportConfigConverter implements Converte
   public ExportConfig convert(ModelConfiguration source) {
     final String value = source.getValue();
     var config = objectMapper.readValue(value, ExportConfig.class);
+    config.setId(source.getId());
+    return config;
+  }
+
+  @SneakyThrows
+  public ExportConfigWithLegacyBursar convertLegacy(ModelConfiguration source) {
+    final String value = source.getValue();
+    ExportConfigWithLegacyBursar config = objectMapper.readValue(value, ExportConfigWithLegacyBursar.class);
     config.setId(source.getId());
     return config;
   }

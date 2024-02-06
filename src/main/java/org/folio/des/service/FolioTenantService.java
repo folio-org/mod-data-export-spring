@@ -9,6 +9,7 @@ import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.BulkEditConfigService;
+import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -33,6 +34,7 @@ public class FolioTenantService extends TenantService {
   private final JobService jobService;
   private final PrepareSystemUserService prepareSystemUserService;
   private final BursarMigrationService bursarMigrationService;
+  private final BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService;
 
   public FolioTenantService(
     JdbcTemplate jdbcTemplate,
@@ -47,7 +49,8 @@ public class FolioTenantService extends TenantService {
     OldJobDeleteScheduler oldJobDeleteScheduler,
     BursarExportLegacyJobService bursarExportLegacyJobService,
     JobService jobService,
-    BursarMigrationService bursarMigrationService
+    BursarMigrationService bursarMigrationService,
+    BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService
   ) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
@@ -60,6 +63,7 @@ public class FolioTenantService extends TenantService {
     this.bursarExportLegacyJobService = bursarExportLegacyJobService;
     this.jobService = jobService;
     this.bursarMigrationService = bursarMigrationService;
+    this.burSarFeesFinesExportConfigService = burSarFeesFinesExportConfigService;
   }
 
   @Override
@@ -72,10 +76,9 @@ public class FolioTenantService extends TenantService {
       oldJobDeleteScheduler.scheduleOldJobDeletion(context.getTenantId());
       kafka.createKafkaTopics();
       kafka.restartEventListeners();
-      bursarMigrationService.updateLegacyBursarJobs(
-        bursarExportLegacyJobService,
-        jobService
-      );
+
+      bursarMigrationService.updateLegacyBursarJobs(bursarExportLegacyJobService, jobService);
+      bursarMigrationService.updateLegacyBursarConfigs(burSarFeesFinesExportConfigService);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       throw e;

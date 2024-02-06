@@ -198,6 +198,8 @@ components:
   schemas:
     exportConfig:
       $ref: '../../../../folio-export-common/schemas/exportConfig.json#/ExportConfig'
+    exportConfigWithLegacyBursar:
+      $ref: '../../../../folio-export-common/schemas/exportConfigWithLegacyBursar.json#/ExportConfigWithLegacyBursar'
     exportConfigCollection:
       $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:

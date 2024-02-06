@@ -2,12 +2,17 @@ package org.folio.des.service.bursarlegacy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.folio.des.domain.dto.BursarExportFilter;
 import org.folio.des.domain.dto.BursarExportFilterAge;
@@ -17,6 +22,9 @@ import org.folio.des.domain.dto.BursarExportFilterFeeType;
 import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
 import org.folio.des.domain.dto.BursarExportTokenConditional;
 import org.folio.des.domain.dto.BursarExportTokenConstant;
+import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.ExportConfigWithLegacyBursar;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ExportTypeSpecificParametersWithLegacyBursar;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobWithLegacyBursarParameters;
@@ -24,8 +32,10 @@ import org.folio.des.domain.dto.LegacyBursarFeeFines;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
+import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,22 +79,17 @@ class BursarMigrationServiceTest {
     );
 
     // check converted job makes sense
-    Job job = BursarMigrationService.convertLegacyJob(legacyJob);
-    assertEquals(
-      "928f4cc0-0f44-5d5f-aa73-3b7bc532961e",
-      job.getId().toString()
+    ExportTypeSpecificParameters params = BursarMigrationService.convertLegacyJobParameters(
+      legacyJob.getExportTypeSpecificParameters().getBursarFeeFines()
     );
 
     // verify filters
     List<BursarExportFilter> filters =
       (
-        (BursarExportFilterCondition) job
-          .getExportTypeSpecificParameters()
-          .getBursarFeeFines()
-          .getFilter()
+        (BursarExportFilterCondition) params.getBursarFeeFines().getFilter()
       ).getCriteria();
 
-      // age filter
+    // age filter
     assertEquals(
       1,
       filters
@@ -112,13 +117,17 @@ class BursarMigrationServiceTest {
       patronFilters
         .stream()
         .map(BursarExportFilterPatronGroup::getPatronGroupId)
-        .anyMatch(i -> i.equals(UUID.fromString("ed98f8c2-09b0-5d46-b610-ba955d0bf303")))
+        .anyMatch(i ->
+          i.equals(UUID.fromString("ed98f8c2-09b0-5d46-b610-ba955d0bf303"))
+        )
     );
     assertTrue(
       patronFilters
         .stream()
         .map(BursarExportFilterPatronGroup::getPatronGroupId)
-        .anyMatch(i -> i.equals(UUID.fromString("d82b6807-4ab3-5412-8428-1b49ac20e0c2")))
+        .anyMatch(i ->
+          i.equals(UUID.fromString("d82b6807-4ab3-5412-8428-1b49ac20e0c2"))
+        )
     );
 
     // ensure that calling .updateLegacyBursarJobs correctly updates the job above
@@ -131,14 +140,27 @@ class BursarMigrationServiceTest {
     );
 
     verify(bursarExportLegacyJobService, times(1)).getAllLegacyJobs();
-    verify(jobService, times(1)).upsertAndSendToKafka(job, false);
+
+    ArgumentCaptor<Job> jobCaptor = ArgumentCaptor.forClass(Job.class);
+    verify(jobService, times(1))
+      .upsertAndSendToKafka(jobCaptor.capture(), eq(false));
+    assertEquals(
+      UUID.fromString("928f4cc0-0f44-5d5f-aa73-3b7bc532961e"),
+      jobCaptor.getValue().getId()
+    );
+    assertEquals(
+      params,
+      jobCaptor.getValue().getExportTypeSpecificParameters()
+    );
   }
 
   @Test
   void testMapTypeMappingsToTokens() {
     LegacyBursarFeeFinesTypeMappings typeMappings = new LegacyBursarFeeFinesTypeMappings();
     LegacyBursarFeeFinesTypeMapping typeMapping = new LegacyBursarFeeFinesTypeMapping();
-    typeMapping.setFeefineTypeId(UUID.fromString("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00"));
+    typeMapping.setFeefineTypeId(
+      UUID.fromString("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00")
+    );
     typeMapping.setItemType("test_item_type");
     typeMapping.setItemDescription("test_item_description");
     typeMappings.put(
@@ -146,7 +168,9 @@ class BursarMigrationServiceTest {
       List.of(typeMapping)
     );
 
-    List<BursarExportTokenConditional> tokens = BursarMigrationService.mapTypeMappingsToTokens(typeMappings);
+    List<BursarExportTokenConditional> tokens = BursarMigrationService.mapTypeMappingsToTokens(
+      typeMappings
+    );
 
     // Type checking for item token
     assertEquals(
@@ -216,5 +240,49 @@ class BursarMigrationServiceTest {
           .getValue()
       ).getValue()
     );
+  }
+
+  @Test
+  void testConvertNoConfig() {
+    BurSarFeesFinesExportConfigService configService = mock(
+      BurSarFeesFinesExportConfigService.class
+    );
+    when(configService.getFirstConfigLegacy()).thenReturn(Optional.empty());
+
+    bursarMigrationService.updateLegacyBursarConfigs(configService);
+
+    verify(configService, times(1)).getFirstConfigLegacy();
+    verifyNoMoreInteractions(configService);
+  }
+
+  @Test
+  void testConvertExistingConfig() {
+    ExportConfigWithLegacyBursar legacyConfig = new ExportConfigWithLegacyBursar()
+      .id("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00")
+      .exportTypeSpecificParameters(
+        new ExportTypeSpecificParametersWithLegacyBursar()
+          .bursarFeeFines(new LegacyBursarFeeFines())
+      );
+
+    BurSarFeesFinesExportConfigService configService = mock(
+      BurSarFeesFinesExportConfigService.class
+    );
+    when(configService.getFirstConfigLegacy())
+      .thenReturn(Optional.of(legacyConfig));
+    when(configService.getFirstConfig())
+      .thenReturn(
+        Optional.of(
+          new ExportConfig().id("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00")
+        )
+      );
+
+    bursarMigrationService.updateLegacyBursarConfigs(configService);
+
+    verify(configService, times(1)).getFirstConfigLegacy();
+    verify(configService, times(1))
+      .updateConfig(
+        eq("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00"),
+        any(ExportConfig.class)
+      );
   }
 }
