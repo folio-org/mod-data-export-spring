@@ -99,13 +99,13 @@ class BursarMigrationServiceTest {
     // patron filters are nested inside an OR
     List<BursarExportFilterPatronGroup> patronFilters = filters
       .stream()
-      .filter(i -> i instanceof BursarExportTokenConditional)
-      .map(i -> (BursarExportTokenConditional) i)
+      .filter(i -> i instanceof BursarExportFilterCondition)
+      .map(i -> (BursarExportFilterCondition) i)
       .findFirst()
       .get()
-      .getConditions()
+      .getCriteria()
       .stream()
-      .map(i -> (BursarExportFilterPatronGroup) i.getCondition())
+      .map(i -> (BursarExportFilterPatronGroup) i)
       .toList();
     assertEquals(2, patronFilters.size());
     assertTrue(
