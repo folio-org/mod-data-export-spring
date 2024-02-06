@@ -4,13 +4,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.bursarlegacy.JobWithLegacyBursarParameters;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Metadata;
 
-public class JobMapperUtil {
+import lombok.experimental.UtilityClass;
 
-  private JobMapperUtil() {
-    throw new IllegalStateException("Utility class");
-  }
+@UtilityClass
+public class JobMapperUtil {
 
   public static org.folio.des.domain.dto.Job entityToDto(Job jobEntity) {
     var result = new org.folio.des.domain.dto.Job();
@@ -89,6 +89,39 @@ public class JobMapperUtil {
     metadata.setUpdatedByUserId(jobWithLegacyBursarParametersEntity.getUpdatedByUserId());
     metadata.setUpdatedByUsername(jobWithLegacyBursarParametersEntity.getUpdatedByUsername());
     result.setMetadata(metadata);
+
+    result.setOutputFormat(jobWithLegacyBursarParametersEntity.getOutputFormat());
+    result.setErrorDetails(jobWithLegacyBursarParametersEntity.getErrorDetails());
+
+    return result;
+  }
+
+  public static org.folio.des.domain.dto.Job legacyBursarToNewDto(
+    org.folio.des.domain.dto.JobWithLegacyBursarParameters jobWithLegacyBursarParametersEntity,
+    ExportTypeSpecificParameters newExportTypeSpecificParameters
+  ) {
+    var result = new org.folio.des.domain.dto.Job();
+
+    // this is the only different field between the two
+    result.setExportTypeSpecificParameters(newExportTypeSpecificParameters);
+
+    result.setId(jobWithLegacyBursarParametersEntity.getId());
+    result.setName(jobWithLegacyBursarParametersEntity.getName());
+    result.setDescription(jobWithLegacyBursarParametersEntity.getDescription());
+    result.setSource(jobWithLegacyBursarParametersEntity.getSource());
+    result.setIsSystemSource(jobWithLegacyBursarParametersEntity.getIsSystemSource());
+    result.setTenant(jobWithLegacyBursarParametersEntity.getTenant());
+    result.setType(jobWithLegacyBursarParametersEntity.getType());
+    result.setStatus(jobWithLegacyBursarParametersEntity.getStatus());
+    result.setFiles(jobWithLegacyBursarParametersEntity.getFiles());
+    result.setFileNames(jobWithLegacyBursarParametersEntity.getFileNames());
+    result.setStartTime(jobWithLegacyBursarParametersEntity.getStartTime());
+    result.setEndTime(jobWithLegacyBursarParametersEntity.getEndTime());
+    result.setIdentifierType(jobWithLegacyBursarParametersEntity.getIdentifierType());
+    result.setEntityType(jobWithLegacyBursarParametersEntity.getEntityType());
+    result.setProgress(jobWithLegacyBursarParametersEntity.getProgress());
+
+    result.setMetadata(jobWithLegacyBursarParametersEntity.getMetadata());
 
     result.setOutputFormat(jobWithLegacyBursarParametersEntity.getOutputFormat());
     result.setErrorDetails(jobWithLegacyBursarParametersEntity.getErrorDetails());

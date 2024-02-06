@@ -226,8 +226,6 @@ components:
       $ref: '../../../../folio-export-common/schemas/job.json#/Job'
     jobWithLegacyBursarParameters:
       $ref: '../../../../folio-export-common/schemas/jobWithLegacyBursarParameters.json#/JobWithLegacyBursarParameters'
-    jobWithLegacyBursarParametersCollection:
-      $ref: '../../../../folio-export-common/schemas/jobWithLegacyBursarParametersCollection.json#/JobWithLegacyBursarParametersCollection'
     jobCollection:
       $ref: '../../../../folio-export-common/schemas/jobCollection.json#/JobCollection'
     userdataCollection:

@@ -30,12 +30,16 @@ class FolioTenantServiceTest {
 
   @Mock
   KafkaService kafka;
+
   @Mock
   BulkEditConfigService bulkEditConfigService;
+
   @Mock
   EdifactScheduledJobInitializer edifactScheduledJobInitializer;
+
   @Mock
   FolioExecutionContext folioExecutionContext;
+
   @Mock
   ScheduledJobsRemover scheduledJobsRemover;
 
@@ -44,6 +48,7 @@ class FolioTenantServiceTest {
 
   @Mock
   OldJobDeleteScheduler oldJobDeleteScheduler;
+
   @Mock
   PrepareSystemUserService prepareSystemUserService;
 
@@ -56,19 +61,27 @@ class FolioTenantServiceTest {
 
     doNothing().when(prepareSystemUserService).setupSystemUser();
     doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
-    doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
+    doNothing()
+      .when(edifactScheduledJobInitializer)
+      .initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka).createKafkaTopics();
     doNothing().when(kafka).restartEventListeners();
-    doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
+    doNothing()
+      .when(bursarScheduledJobInitializer)
+      .initAllScheduledJob(tenantAttributes);
     doNothing().when(oldJobDeleteScheduler).scheduleOldJobDeletion(any());
-    doNothing().when(bursarMigrationService).recreateLegacyJobs(any(), any());
+    doNothing()
+      .when(bursarMigrationService)
+      .updateLegacyBursarJobs(any(), any());
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
     verify(prepareSystemUserService).setupSystemUser();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
-    verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
-    verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
+    verify(edifactScheduledJobInitializer, times(1))
+      .initAllScheduledJob(tenantAttributes);
+    verify(bursarScheduledJobInitializer, times(1))
+      .initAllScheduledJob(tenantAttributes);
     verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();

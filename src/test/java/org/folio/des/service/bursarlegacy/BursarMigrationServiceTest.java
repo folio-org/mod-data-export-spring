@@ -1,14 +1,12 @@
 package org.folio.des.service.bursarlegacy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.folio.des.domain.dto.BursarExportFilter;
@@ -22,17 +20,14 @@ import org.folio.des.domain.dto.BursarExportTokenConstant;
 import org.folio.des.domain.dto.ExportTypeSpecificParametersWithLegacyBursar;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.JobWithLegacyBursarParameters;
-import org.folio.des.domain.dto.JobWithLegacyBursarParametersCollection;
 import org.folio.des.domain.dto.LegacyBursarFeeFines;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,176 +43,110 @@ class BursarMigrationServiceTest {
   private JobService jobService;
 
   @Test
-  void testIsLegacyJob() {
-    JobWithLegacyBursarParameters job = mockJob();
+  void testNoLegacyJobs() {
+    when(bursarExportLegacyJobService.getAllLegacyJobs()).thenReturn(List.of());
 
-    JobWithLegacyBursarParameters jobWithLegacyBursarParameters = mockJob();
-    jobWithLegacyBursarParameters
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines()
-      .setDaysOutstanding(1);
-
-    Assertions.assertAll(
-      () -> assertFalse(bursarMigrationService.isLegacyJob(job)),
-      () -> assertTrue(bursarMigrationService.isLegacyJob(jobWithLegacyBursarParameters))
-    );
-  }
-
-  @Test
-  void testRecreateNoLegacyJob() {
-    List<JobWithLegacyBursarParameters> jobsWithLegacyBursarParameters = new ArrayList<>();
-    JobWithLegacyBursarParameters job = mockJob();
-    job.setId(UUID.fromString("0000-00-00-00-000000"));
-    jobsWithLegacyBursarParameters.add(job);
-
-    Mockito
-      .when(bursarExportLegacyJobService.get(0, 10000, "status==SCHEDULED"))
-      .thenReturn(mockLegacyCollectionOneItem(jobsWithLegacyBursarParameters));
-
-    bursarMigrationService.recreateLegacyJobs(
+    bursarMigrationService.updateLegacyBursarJobs(
       bursarExportLegacyJobService,
       jobService
     );
 
-    Mockito
-      .verify(jobService, times(0))
-      .upsertAndSendToKafka(any(Job.class), eq(true));
+    verifyNoInteractions(jobService);
   }
 
   @Test
-  void testRecreateOneLegacyJob() {
-    List<JobWithLegacyBursarParameters> jobsWithLegacyBursarParameters = new ArrayList<>();
-    JobWithLegacyBursarParameters jobWithLegacyBursarParameters = mockJob();
-    jobWithLegacyBursarParameters.setId(UUID.fromString("0000-00-00-00-000000"));
-    jobWithLegacyBursarParameters
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines()
-      .setDaysOutstanding(1);
-    jobWithLegacyBursarParameters
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines()
-      .setPatronGroups(Arrays.asList("0000-00-00-00-000001"));
-    jobsWithLegacyBursarParameters.add(jobWithLegacyBursarParameters);
-
-    Job job = bursarMigrationService.prepareNewJob();
-    job.setId(UUID.fromString("0000-00-00-00-000000"));
-    BursarExportFilterCondition filterBase = new BursarExportFilterCondition();
-    filterBase.setOperation(BursarExportFilterCondition.OperationEnum.AND);
-    List<BursarExportFilter> filterConditions = new ArrayList<>();
-    BursarExportFilterAge ageFilter = new BursarExportFilterAge();
-    ageFilter.setNumDays(1);
-    ageFilter.setCondition(
-      BursarExportFilterAge.ConditionEnum.GREATER_THAN_EQUAL
+  void testLegacyJobConversion() {
+    JobWithLegacyBursarParameters legacyJob = new JobWithLegacyBursarParameters();
+    legacyJob.setId(UUID.fromString("928f4cc0-0f44-5d5f-aa73-3b7bc532961e"));
+    legacyJob.setExportTypeSpecificParameters(
+      new ExportTypeSpecificParametersWithLegacyBursar()
+        .bursarFeeFines(
+          new LegacyBursarFeeFines()
+            .daysOutstanding(1)
+            .addPatronGroupsItem("ed98f8c2-09b0-5d46-b610-ba955d0bf303")
+            .addPatronGroupsItem("d82b6807-4ab3-5412-8428-1b49ac20e0c2")
+        )
     );
-    BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition();
-    patronGroupListFilter.setOperation(
-      BursarExportFilterCondition.OperationEnum.OR
+
+    // check converted job makes sense
+    Job job = BursarMigrationService.convertLegacyJob(legacyJob);
+    assertEquals(
+      "928f4cc0-0f44-5d5f-aa73-3b7bc532961e",
+      job.getId().toString()
     );
-    List<BursarExportFilter> patronGroupFilters = new ArrayList<>();
-    BursarExportFilterPatronGroup patronGroupFilter = new BursarExportFilterPatronGroup();
-    patronGroupFilter.setPatronGroupId(UUID.fromString("0000-00-00-00-000001"));
-    patronGroupFilters.add(patronGroupFilter);
-    patronGroupListFilter.setCriteria(patronGroupFilters);
 
-    filterConditions.add(ageFilter);
-    filterConditions.add(patronGroupListFilter);
+    // verify filters
+    List<BursarExportFilter> filters =
+      (
+        (BursarExportFilterCondition) job
+          .getExportTypeSpecificParameters()
+          .getBursarFeeFines()
+          .getFilter()
+      ).getCriteria();
 
-    filterBase.setCriteria(filterConditions);
+      // age filter
+    assertEquals(
+      1,
+      filters
+        .stream()
+        .filter(i -> i instanceof BursarExportFilterAge)
+        .map(i -> (BursarExportFilterAge) i)
+        .findFirst()
+        .get()
+        .getNumDays()
+    );
 
-    job
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines()
-      .setFilter(filterBase);
+    // patron filters are nested inside an OR
+    List<BursarExportFilterPatronGroup> patronFilters = filters
+      .stream()
+      .filter(i -> i instanceof BursarExportTokenConditional)
+      .map(i -> (BursarExportTokenConditional) i)
+      .findFirst()
+      .get()
+      .getConditions()
+      .stream()
+      .map(i -> (BursarExportFilterPatronGroup) i.getCondition())
+      .toList();
+    assertEquals(2, patronFilters.size());
+    assertTrue(
+      patronFilters
+        .stream()
+        .map(BursarExportFilterPatronGroup::getPatronGroupId)
+        .anyMatch(i -> i.equals(UUID.fromString("ed98f8c2-09b0-5d46-b610-ba955d0bf303")))
+    );
+    assertTrue(
+      patronFilters
+        .stream()
+        .map(BursarExportFilterPatronGroup::getPatronGroupId)
+        .anyMatch(i -> i.equals(UUID.fromString("d82b6807-4ab3-5412-8428-1b49ac20e0c2")))
+    );
 
-    Mockito
-      .when(bursarExportLegacyJobService.get(0, 10000, "status==SCHEDULED"))
-      .thenReturn(mockLegacyCollectionOneItem(jobsWithLegacyBursarParameters));
+    // ensure that calling .updateLegacyBursarJobs correctly updates the job above
+    when(bursarExportLegacyJobService.getAllLegacyJobs())
+      .thenReturn(List.of(legacyJob));
 
-    bursarMigrationService.recreateLegacyJobs(
+    bursarMigrationService.updateLegacyBursarJobs(
       bursarExportLegacyJobService,
       jobService
     );
 
-    Mockito.verify(jobService, times(1)).upsertAndSendToKafka(job, true);
-  }
-
-  @Test
-  void testRecreateMultipleLegacyJobs() {
-    // set up legacy job
-    List<JobWithLegacyBursarParameters> jobsWithLegacyBursarParameters = new ArrayList<>();
-    JobWithLegacyBursarParameters jobWithLegacyBursarParameters = mockJob();
-    jobWithLegacyBursarParameters.setId(UUID.fromString("0000-00-00-00-000000"));
-    jobWithLegacyBursarParameters
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines()
-      .setDaysOutstanding(1);
-
-    jobsWithLegacyBursarParameters.add(jobWithLegacyBursarParameters);
-
-    Job job = bursarMigrationService.prepareNewJob();
-    job.setId(UUID.fromString("0000-00-00-00-000000"));
-    BursarExportFilterCondition filterBase = new BursarExportFilterCondition();
-    filterBase.setOperation(BursarExportFilterCondition.OperationEnum.AND);
-    List<BursarExportFilter> filterConditions = new ArrayList<>();
-    BursarExportFilterAge ageFilter = new BursarExportFilterAge(); // outstandingDays => ageFilter
-    ageFilter.setNumDays(1);
-    ageFilter.setCondition(
-      BursarExportFilterAge.ConditionEnum.GREATER_THAN_EQUAL
-    );
-    BursarExportFilterCondition patronGroupListFilter = new BursarExportFilterCondition(); // patronGroups => patronGroupListFilter
-    patronGroupListFilter.setOperation(
-      BursarExportFilterCondition.OperationEnum.OR
-    );
-    List<BursarExportFilter> patronGroupFilters = new ArrayList<>();
-    patronGroupListFilter.setCriteria(patronGroupFilters);
-
-    filterConditions.add(ageFilter);
-    filterConditions.add(patronGroupListFilter);
-
-    filterBase.setCriteria(filterConditions);
-
-    job
-      .getExportTypeSpecificParameters()
-      .getBursarFeeFines()
-      .setFilter(filterBase);
-
-    JobWithLegacyBursarParametersCollection legacyCollection = mockLegacyCollectionOneItem(
-      jobsWithLegacyBursarParameters
-    );
-    legacyCollection.setTotalRecords(2);
-
-    Mockito
-      .when(bursarExportLegacyJobService.get(0, 10000, "status==SCHEDULED"))
-      .thenReturn(legacyCollection);
-    Mockito
-      .when(bursarExportLegacyJobService.get(1, 10000, "status==SCHEDULED"))
-      .thenReturn(legacyCollection);
-
-    bursarMigrationService.recreateLegacyJobs(
-      bursarExportLegacyJobService,
-      jobService
-    );
-
-    Mockito
-      .verify(bursarExportLegacyJobService, times(2))
-      .get(any(), eq(10000), eq("status==SCHEDULED"));
-    Mockito.verify(jobService, times(2)).upsertAndSendToKafka(job, true);
+    verify(bursarExportLegacyJobService, times(1)).getAllLegacyJobs();
+    verify(jobService, times(1)).upsertAndSendToKafka(job, false);
   }
 
   @Test
   void testMapTypeMappingsToTokens() {
     LegacyBursarFeeFinesTypeMappings typeMappings = new LegacyBursarFeeFinesTypeMappings();
-    List<LegacyBursarFeeFinesTypeMapping> typeMappingList = new ArrayList<>();
     LegacyBursarFeeFinesTypeMapping typeMapping = new LegacyBursarFeeFinesTypeMapping();
-    typeMapping.setFeefineTypeId(UUID.fromString("0000-00-00-00-000001"));
+    typeMapping.setFeefineTypeId(UUID.fromString("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00"));
     typeMapping.setItemType("test_item_type");
     typeMapping.setItemDescription("test_item_description");
-    typeMappingList.add(typeMapping);
-    typeMappings.put("0000-00-00-00-000001", typeMappingList);
-
-    List<BursarExportTokenConditional> tokens = bursarMigrationService.mapTypeMappingsToTokens(
-      typeMappings
+    typeMappings.put(
+      "81a5bb0a-e3a1-57b5-b8a8-9324989a7585",
+      List.of(typeMapping)
     );
+
+    List<BursarExportTokenConditional> tokens = BursarMigrationService.mapTypeMappingsToTokens(typeMappings);
 
     // Type checking for item token
     assertEquals(
@@ -239,7 +168,7 @@ class BursarMigrationServiceTest {
       .getCriteria()
       .get(0);
     assertEquals(
-      UUID.fromString("0000-00-00-00-000001"),
+      UUID.fromString("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00"),
       feeType.getFeeFineTypeId()
     );
     assertEquals(
@@ -250,7 +179,7 @@ class BursarMigrationServiceTest {
       .getCriteria()
       .get(1);
     assertEquals(
-      UUID.fromString("0000-00-00-00-000001"),
+      UUID.fromString("81a5bb0a-e3a1-57b5-b8a8-9324989a7585"),
       feeFineOwner.getFeeFineOwner()
     );
     assertEquals(
@@ -287,28 +216,5 @@ class BursarMigrationServiceTest {
           .getValue()
       ).getValue()
     );
-  }
-
-  private JobWithLegacyBursarParameters mockJob() {
-    JobWithLegacyBursarParameters job = new JobWithLegacyBursarParameters();
-    ExportTypeSpecificParametersWithLegacyBursar nonLegacyExportTypeSpecificParameters = new ExportTypeSpecificParametersWithLegacyBursar();
-    LegacyBursarFeeFines nonLegacyBursarFeeFines = new LegacyBursarFeeFines();
-    nonLegacyExportTypeSpecificParameters.setBursarFeeFines(nonLegacyBursarFeeFines);
-    job.setExportTypeSpecificParameters(
-      nonLegacyExportTypeSpecificParameters
-    );
-
-    return job;
-  }
-
-  private JobWithLegacyBursarParametersCollection mockLegacyCollectionOneItem(
-    List<JobWithLegacyBursarParameters> jobsWithLegacyBursarParameters
-  ) {
-    JobWithLegacyBursarParametersCollection legacyCollection = new JobWithLegacyBursarParametersCollection();
-
-    legacyCollection.setJobRecords(jobsWithLegacyBursarParameters);
-    legacyCollection.setTotalRecords(1);
-
-    return legacyCollection;
   }
 }

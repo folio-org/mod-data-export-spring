@@ -34,12 +34,21 @@ public class FolioTenantService extends TenantService {
   private final PrepareSystemUserService prepareSystemUserService;
   private final BursarMigrationService bursarMigrationService;
 
-  public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
-                            PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
-                            BulkEditConfigService bulkEditConfigService, EdifactScheduledJobInitializer edifactScheduledJobInitializer,
-                            ScheduledJobsRemover scheduledJobsRemover, BursarScheduledJobInitializer bursarScheduledJobInitializer,
-                            OldJobDeleteScheduler oldJobDeleteScheduler, BursarExportLegacyJobService bursarExportLegacyJobService,
-                            JobService jobService, BursarMigrationService bursarMigrationService) {
+  public FolioTenantService(
+    JdbcTemplate jdbcTemplate,
+    FolioExecutionContext context,
+    FolioSpringLiquibase folioSpringLiquibase,
+    PrepareSystemUserService prepareSystemUserService,
+    KafkaService kafka,
+    BulkEditConfigService bulkEditConfigService,
+    EdifactScheduledJobInitializer edifactScheduledJobInitializer,
+    ScheduledJobsRemover scheduledJobsRemover,
+    BursarScheduledJobInitializer bursarScheduledJobInitializer,
+    OldJobDeleteScheduler oldJobDeleteScheduler,
+    BursarExportLegacyJobService bursarExportLegacyJobService,
+    JobService jobService,
+    BursarMigrationService bursarMigrationService
+  ) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
@@ -63,7 +72,10 @@ public class FolioTenantService extends TenantService {
       oldJobDeleteScheduler.scheduleOldJobDeletion(context.getTenantId());
       kafka.createKafkaTopics();
       kafka.restartEventListeners();
-      bursarMigrationService.recreateLegacyJobs(bursarExportLegacyJobService, jobService);
+      bursarMigrationService.updateLegacyBursarJobs(
+        bursarExportLegacyJobService,
+        jobService
+      );
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       throw e;
