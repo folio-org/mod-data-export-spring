@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.EnumSet;
 
 import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
-import static org.folio.des.util.LoggerUtils.getExportConfigForLog;
 
 @RestController
 @RequestMapping("/data-export-spring")
@@ -35,7 +34,7 @@ public class ConfigsController implements ConfigsApi {
   @Override
   public ResponseEntity<String> postExportConfig(@RequestHeader("X-Okapi-Tenant") String tenantId, ExportConfig exportConfig) {
     exportConfig.setTenant(tenantId);
-    log.info("postExportConfig:: by exportConfig={}", getExportConfigForLog(exportConfig));
+    log.info("postExportConfig:: by exportConfig={}", exportConfig);
     manager.postConfig(exportConfig);
     if (applyAspectExportTypes.contains(exportConfig.getType())) {
       String config = exportConfig.toString();

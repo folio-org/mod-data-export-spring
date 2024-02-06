@@ -2,7 +2,6 @@ package org.folio.des.service.config.impl;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_QUERY;
-import static org.folio.des.util.LoggerUtils.getExportConfigForLog;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -55,7 +54,7 @@ public class ExportTypeBasedConfigManager {
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
-    log.info("postConfig:: by exportConfig={}", getExportConfigForLog(exportConfig));
+    log.info("postConfig:: by exportConfig={}", exportConfig);
     Optional<ExportConfigService> exportConfigService = exportConfigServiceResolver.resolve(exportConfig.getType());
     if (exportConfigService.isPresent()) {
       return exportConfigService.get().postConfig(exportConfig);

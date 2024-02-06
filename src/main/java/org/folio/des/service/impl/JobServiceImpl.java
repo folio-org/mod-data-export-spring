@@ -3,8 +3,6 @@ package org.folio.des.service.impl;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
-import static org.folio.des.util.LoggerUtils.getJobCollectionForLog;
-import static org.folio.des.util.LoggerUtils.getJobForLog;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -108,7 +106,7 @@ public class JobServiceImpl implements JobService {
           .toList());
       result.setTotalRecords(cqlService.countByCQL(Job.class, query));
     }
-    log.info("get:: result={}", getJobCollectionForLog(result));
+    log.info("get:: result={}", result);
     return result;
   }
 
@@ -123,7 +121,7 @@ public class JobServiceImpl implements JobService {
   public org.folio.des.domain.dto.Job upsertAndSendToKafka(org.folio.des.domain.dto.Job jobDto, boolean withJobCommandSend,
                                                            boolean validateConfigPresence) {
     log.info("upsertAndSendToKafka:: with jobDto={} and withJobCommandSend={} and validateConfigPresence={}.",
-                                                          getJobForLog(jobDto), withJobCommandSend, validateConfigPresence);
+                                                          jobDto, withJobCommandSend, validateConfigPresence);
 
     if (validateConfigPresence) {
       log.info("upsertAndSendToKafka:: validate config presence for job id {}", jobDto.getId());

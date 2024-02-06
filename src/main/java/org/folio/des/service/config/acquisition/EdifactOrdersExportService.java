@@ -15,8 +15,6 @@ import org.folio.des.validator.ExportConfigValidatorResolver;
 
 import lombok.extern.log4j.Log4j2;
 
-import static org.folio.des.util.LoggerUtils.getExportConfigForLog;
-
 @Log4j2
 public class EdifactOrdersExportService extends BaseExportConfigService {
 
@@ -45,7 +43,7 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
       exportConfig.setId(UUID.randomUUID().toString());
     }
     setExportConfigId(exportConfig);
-    log.debug("postConfig:: by exportConfig={}", getExportConfigForLog(exportConfig));
+    log.debug("postConfig:: by exportConfig={}", exportConfig);
     ModelConfiguration result = super.postConfig(exportConfig);
     exportJobScheduler.scheduleExportJob(exportConfig);
     log.info("postConfig:: initial jobs prepared for export config id '{}'", exportConfig.getId());

@@ -20,10 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
-import static org.folio.des.util.LoggerUtils.getExportConfigForLog;
-import static org.folio.des.util.LoggerUtils.getExportConfigCollectionForLog;
-import static org.folio.des.util.LoggerUtils.getModelConfigurationForLog;
-
 @RequiredArgsConstructor
 @Log4j2
 public class BaseExportConfigService implements ExportConfigService {
@@ -34,22 +30,20 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @Override
   public void updateConfig(String configId, ExportConfig exportConfig) {
-    ExportConfig configForLog = getExportConfigForLog(exportConfig);
-    log.info("Putting {} {}.", configId, configForLog);
+    log.info("Putting {} {}.", configId, exportConfig);
     validateIncomingExportConfig(exportConfig);
     var config = createConfigModel(exportConfig);
     client.putConfiguration(config, configId);
-    log.info("Put {} {}.", configId, getModelConfigurationForLog(config, configForLog));
+    log.info("Put {} {}.", configId, config);
   }
 
   @Override
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
-    ExportConfig configForLog = getExportConfigForLog(exportConfig);
-    log.info("Posting {}.", configForLog);
+    log.info("Posting {}.", exportConfig);
     validateIncomingExportConfig(exportConfig);
     var preparedConfig = createConfigModel(exportConfig);
     ModelConfiguration config = client.postConfiguration(preparedConfig);
-    log.info("Posted {}.", getModelConfigurationForLog(config, configForLog));
+    log.info("Posted {}.", config);
     return config;
   }
 
@@ -63,7 +57,7 @@ public class BaseExportConfigService implements ExportConfigService {
         .addConfigsItem(defaultModelConfigToExportConfigConverter.convert(modelConfig))
       );
       ExportConfigCollection totalRecords = exportConfigCollection.totalRecords(exportConfigCollection.getConfigs().size());
-      log.info("getConfigCollection:: totalRecords={}.", getExportConfigCollectionForLog(totalRecords));
+      log.info("getConfigCollection:: totalRecords={}.", totalRecords);
       return totalRecords;
     }
     log.debug("getConfigCollection:: returned empty result set.");
