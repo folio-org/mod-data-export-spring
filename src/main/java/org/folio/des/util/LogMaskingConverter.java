@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 @ConverterKeys({"spi"})
 @Log4j2
 public class LogMaskingConverter extends LogEventPatternConverter {
-  private static final Pattern SERVER_ADDRESS_PATTERN = Pattern.compile("ftp[s]?://[a-zA-Z0-9.]+/");
+  private static final Pattern SERVER_ADDRESS_PATTERN = Pattern.compile("ftps?://[a-zA-Z0-9.]+/");
   private static final String SERVER_ADDRESS_PATTERN_REPLACEMENT = "**********";
   public static final Pattern PASSWORD_PATTERN = Pattern.compile("password: [a-zA-Z0-9@#$?&%!~]+");
   public static final String PASSWORD_PATTERN_REPLACEMENT = "password: **********";
@@ -29,7 +29,7 @@ public class LogMaskingConverter extends LogEventPatternConverter {
     super(name, style);
   }
 
-  public static LogMaskingConverter newInstance(String[] options) {
+  public static LogMaskingConverter newInstance() {
     return new LogMaskingConverter("spi", Thread.currentThread().getName());
   }
 
