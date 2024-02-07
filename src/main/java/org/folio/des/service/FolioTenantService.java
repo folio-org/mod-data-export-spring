@@ -9,7 +9,7 @@ import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.BulkEditConfigService;
-import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
+import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -34,7 +34,7 @@ public class FolioTenantService extends TenantService {
   private final JobService jobService;
   private final PrepareSystemUserService prepareSystemUserService;
   private final BursarMigrationService bursarMigrationService;
-  private final BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService;
+  private final BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService;
 
   public FolioTenantService(
     JdbcTemplate jdbcTemplate,
@@ -50,7 +50,7 @@ public class FolioTenantService extends TenantService {
     BursarExportLegacyJobService bursarExportLegacyJobService,
     JobService jobService,
     BursarMigrationService bursarMigrationService,
-    BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService
+    BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService
   ) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
@@ -63,7 +63,7 @@ public class FolioTenantService extends TenantService {
     this.bursarExportLegacyJobService = bursarExportLegacyJobService;
     this.jobService = jobService;
     this.bursarMigrationService = bursarMigrationService;
-    this.burSarFeesFinesExportConfigService = burSarFeesFinesExportConfigService;
+    this.bursarFeesFinesExportConfigService = bursarFeesFinesExportConfigService;
   }
 
   @Override
@@ -78,7 +78,7 @@ public class FolioTenantService extends TenantService {
       kafka.restartEventListeners();
 
       bursarMigrationService.updateLegacyBursarJobs(bursarExportLegacyJobService, jobService);
-      bursarMigrationService.updateLegacyBursarConfigs(burSarFeesFinesExportConfigService);
+      bursarMigrationService.updateLegacyBursarConfigs(bursarFeesFinesExportConfigService);
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       throw e;

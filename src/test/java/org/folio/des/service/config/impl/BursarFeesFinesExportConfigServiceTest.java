@@ -45,7 +45,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
                   ServiceConfiguration.class})
 @EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
-class BurSarFeesFinesExportConfigServiceTest {
+class BursarFeesFinesExportConfigServiceTest {
 
   public static final String CONFIG_RESPONSE =
     """
@@ -78,7 +78,7 @@ class BurSarFeesFinesExportConfigServiceTest {
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
-  private BurSarFeesFinesExportConfigService service;
+  private BursarFeesFinesExportConfigService service;
   @Autowired
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
@@ -150,7 +150,7 @@ class BurSarFeesFinesExportConfigServiceTest {
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBursarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);

@@ -32,7 +32,7 @@ import org.folio.des.domain.dto.LegacyBursarFeeFines;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
-import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
+import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -244,8 +244,8 @@ class BursarMigrationServiceTest {
 
   @Test
   void testConvertNoConfig() {
-    BurSarFeesFinesExportConfigService configService = mock(
-      BurSarFeesFinesExportConfigService.class
+    BursarFeesFinesExportConfigService configService = mock(
+      BursarFeesFinesExportConfigService.class
     );
     when(configService.getFirstConfigLegacy()).thenReturn(Optional.empty());
 
@@ -264,8 +264,8 @@ class BursarMigrationServiceTest {
           .bursarFeeFines(new LegacyBursarFeeFines())
       );
 
-    BurSarFeesFinesExportConfigService configService = mock(
-      BurSarFeesFinesExportConfigService.class
+    BursarFeesFinesExportConfigService configService = mock(
+      BursarFeesFinesExportConfigService.class
     );
     when(configService.getFirstConfigLegacy())
       .thenReturn(Optional.of(legacyConfig));

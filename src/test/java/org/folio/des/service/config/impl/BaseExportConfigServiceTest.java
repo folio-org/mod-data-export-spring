@@ -81,7 +81,7 @@ class BaseExportConfigServiceTest {
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
-  private BurSarFeesFinesExportConfigService service;
+  private BursarFeesFinesExportConfigService service;
   @Autowired
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
@@ -144,7 +144,7 @@ class BaseExportConfigServiceTest {
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBursarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);

@@ -36,7 +36,7 @@ import org.folio.des.domain.dto.LegacyBursarFeeFines;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
-import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
+import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.des.service.util.JobMapperUtil;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +48,7 @@ public class BursarMigrationService {
   private static final String BURSAR_EXPORT_MIGRATION_HEADER_CONSTANT = "LIB02";
 
   // this ensures the currently scheduled configuration is updated and new jobs are created with the new schema
-  public void updateLegacyBursarConfigs(BurSarFeesFinesExportConfigService configService) {
+  public void updateLegacyBursarConfigs(BursarFeesFinesExportConfigService configService) {
     // there is only one possible configuration for bursar exports
     configService
       .getFirstConfigLegacy()

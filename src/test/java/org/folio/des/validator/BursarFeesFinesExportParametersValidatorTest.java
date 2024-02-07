@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Errors;
 
-@SpringBootTest(classes = { BurSarFeesFinesExportParametersValidator.class})
-class BurSarFeesFinesExportParametersValidatorTest {
+@SpringBootTest(classes = { BursarFeesFinesExportParametersValidator.class})
+class BursarFeesFinesExportParametersValidatorTest {
   @Autowired
-  private BurSarFeesFinesExportParametersValidator validator;
+  private BursarFeesFinesExportParametersValidator validator;
 
   @Test
   @DisplayName("Should throw exception if specific parameters is Null")

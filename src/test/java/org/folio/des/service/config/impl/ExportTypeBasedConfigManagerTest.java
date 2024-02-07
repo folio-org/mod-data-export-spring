@@ -160,7 +160,7 @@ class ExportTypeBasedConfigManagerTest {
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBursarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);

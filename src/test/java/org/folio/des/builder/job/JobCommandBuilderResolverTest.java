@@ -55,7 +55,7 @@ class JobCommandBuilderResolverTest {
   @ParameterizedTest
   @DisplayName("Should retrieve builder for specific export type if builder is registered in the resolver")
   @CsvSource({
-    "BURSAR_FEES_FINES, BurSarFeeFinesJobCommandBuilder",
+    "BURSAR_FEES_FINES, BursarFeeFinesJobCommandBuilder",
     "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
     "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
     "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",

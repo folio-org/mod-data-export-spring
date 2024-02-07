@@ -17,19 +17,19 @@ import org.junit.jupiter.api.Test;
 
 
 class BursarScheduledJobInitializerTest {
-  private ExportConfigService burSarExportConfigService = mock(ExportConfigService.class);
+  private ExportConfigService bursarExportConfigService = mock(ExportConfigService.class);
   private BursarExportScheduler bursarExportScheduler = mock(BursarExportScheduler.class);
 
   private BursarScheduledJobInitializer bursarScheduledJobInitializer;
 
   @BeforeEach
   void before() {
-    bursarScheduledJobInitializer = spy(new BursarScheduledJobInitializer(burSarExportConfigService, bursarExportScheduler));
+    bursarScheduledJobInitializer = spy(new BursarScheduledJobInitializer(bursarExportConfigService, bursarExportScheduler));
   }
 
   @Test
   void shouldInitiateBursarJob() {
-    when(burSarExportConfigService.getFirstConfig())
+    when(bursarExportConfigService.getFirstConfig())
       .thenReturn(Optional.of(new ExportConfig()));
     bursarScheduledJobInitializer.initAllScheduledJob(new TenantAttributes().moduleTo("3.0.0"));
     verify(bursarExportScheduler, times(1)).scheduleBursarJob(any());
@@ -37,7 +37,7 @@ class BursarScheduledJobInitializerTest {
 
   @Test
   void shouldNotInitiateBursarJob() {
-    when(burSarExportConfigService.getFirstConfig())
+    when(bursarExportConfigService.getFirstConfig())
       .thenReturn(Optional.empty());
     bursarScheduledJobInitializer.initAllScheduledJob(new TenantAttributes().moduleTo("3.0.0"));
     verify(bursarExportScheduler, times(0)).scheduleBursarJob(any());

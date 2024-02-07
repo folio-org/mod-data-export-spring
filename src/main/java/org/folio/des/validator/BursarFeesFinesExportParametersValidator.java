@@ -13,7 +13,7 @@ import lombok.extern.log4j.Log4j2;
 @AllArgsConstructor
 @Log4j2
 @Service
-public class BurSarFeesFinesExportParametersValidator implements Validator {
+public class BursarFeesFinesExportParametersValidator implements Validator {
   @Override
   public boolean supports(Class<?> aClass) {
     return ExportTypeSpecificParameters.class.isAssignableFrom(aClass);

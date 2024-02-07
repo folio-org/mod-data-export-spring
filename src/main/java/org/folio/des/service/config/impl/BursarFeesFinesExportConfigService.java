@@ -20,11 +20,11 @@ import org.folio.des.validator.ExportConfigValidatorResolver;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class BurSarFeesFinesExportConfigService extends BaseExportConfigService {
+public class BursarFeesFinesExportConfigService extends BaseExportConfigService {
 
   private final BursarExportScheduler bursarExportScheduler;
 
-  public BurSarFeesFinesExportConfigService(ConfigurationClient client,
+  public BursarFeesFinesExportConfigService(ConfigurationClient client,
                                             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                                             ExportConfigConverterResolver exportConfigConverterResolver,
                                             ExportConfigValidatorResolver exportConfigValidatorResolver, BursarExportScheduler bursarExportScheduler) {
