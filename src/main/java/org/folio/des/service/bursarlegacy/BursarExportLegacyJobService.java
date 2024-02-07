@@ -17,8 +17,7 @@ public class BursarExportLegacyJobService {
 
   @Transactional(readOnly = true)
   public List<org.folio.des.domain.dto.JobWithLegacyBursarParameters> getAllLegacyJobs() {
-    return repository
-      .findAll()
+    return repository.findAll()
       .stream()
       .filter(BursarExportLegacyJobService::hasLegacyBursarParameters)
       .map(BursarExportLegacyJobService::entityToDto)
@@ -27,7 +26,8 @@ public class BursarExportLegacyJobService {
 
   public static boolean hasLegacyBursarParameters(JobWithLegacyBursarParameters job) {
     // ensure legacy `bursarFeeFines` is present and actually contains values
-    LegacyBursarFeeFines legacyObject = job.getExportTypeSpecificParameters().getBursarFeeFines();
+    LegacyBursarFeeFines legacyObject = job.getExportTypeSpecificParameters()
+      .getBursarFeeFines();
 
     return (legacyObject != null && legacyObject.getDaysOutstanding() != null);
   }

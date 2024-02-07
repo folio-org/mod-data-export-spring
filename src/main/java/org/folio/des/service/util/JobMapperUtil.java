@@ -23,12 +23,7 @@ public class JobMapperUtil {
     result.setType(jobEntity.getType());
     result.setExportTypeSpecificParameters(jobEntity.getExportTypeSpecificParameters());
     result.setStatus(jobEntity.getStatus());
-    if (
-      ObjectUtils.notEqual(
-        ExportType.EDIFACT_ORDERS_EXPORT,
-        jobEntity.getType()
-      )
-    ) {
+    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, jobEntity.getType())) {
       result.setFiles(jobEntity.getFiles());
     }
     result.setFileNames(jobEntity.getFileNames());
@@ -54,8 +49,7 @@ public class JobMapperUtil {
   }
 
   public static org.folio.des.domain.dto.JobWithLegacyBursarParameters entityToDto(
-    JobWithLegacyBursarParameters jobWithLegacyBursarParametersEntity
-  ) {
+      JobWithLegacyBursarParameters jobWithLegacyBursarParametersEntity) {
     var result = new org.folio.des.domain.dto.JobWithLegacyBursarParameters();
 
     result.setId(jobWithLegacyBursarParametersEntity.getId());
@@ -66,12 +60,7 @@ public class JobMapperUtil {
     result.setType(jobWithLegacyBursarParametersEntity.getType());
     result.setExportTypeSpecificParameters(jobWithLegacyBursarParametersEntity.getExportTypeSpecificParameters());
     result.setStatus(jobWithLegacyBursarParametersEntity.getStatus());
-    if (
-      ObjectUtils.notEqual(
-        ExportType.EDIFACT_ORDERS_EXPORT,
-        jobWithLegacyBursarParametersEntity.getType()
-      )
-    ) {
+    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, jobWithLegacyBursarParametersEntity.getType())) {
       result.setFiles(jobWithLegacyBursarParametersEntity.getFiles());
     }
     result.setFileNames(jobWithLegacyBursarParametersEntity.getFileNames());
@@ -97,9 +86,8 @@ public class JobMapperUtil {
   }
 
   public static org.folio.des.domain.dto.Job legacyBursarToNewDto(
-    org.folio.des.domain.dto.JobWithLegacyBursarParameters jobWithLegacyBursarParametersEntity,
-    ExportTypeSpecificParameters newExportTypeSpecificParameters
-  ) {
+      org.folio.des.domain.dto.JobWithLegacyBursarParameters jobWithLegacyBursarParametersEntity,
+      ExportTypeSpecificParameters newExportTypeSpecificParameters) {
     var result = new org.folio.des.domain.dto.Job();
 
     // this is the only different field between the two

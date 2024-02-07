@@ -25,9 +25,9 @@ public class BursarFeesFinesExportConfigService extends BaseExportConfigService 
   private final BursarExportScheduler bursarExportScheduler;
 
   public BursarFeesFinesExportConfigService(ConfigurationClient client,
-                                            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                            ExportConfigConverterResolver exportConfigConverterResolver,
-                                            ExportConfigValidatorResolver exportConfigValidatorResolver, BursarExportScheduler bursarExportScheduler) {
+      DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+      ExportConfigConverterResolver exportConfigConverterResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
+      BursarExportScheduler bursarExportScheduler) {
     super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
     this.bursarExportScheduler = bursarExportScheduler;
   }
@@ -47,11 +47,11 @@ public class BursarFeesFinesExportConfigService extends BaseExportConfigService 
     return modelConfiguration;
   }
 
-
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     log.info("getConfigCollection:: the result doesn't base on a query.");
-    return getFirstConfig().map(this::createExportConfigCollection).orElse(emptyExportConfigCollection());
+    return getFirstConfig().map(this::createExportConfigCollection)
+      .orElse(emptyExportConfigCollection());
   }
 
   @Override
@@ -64,11 +64,13 @@ public class BursarFeesFinesExportConfigService extends BaseExportConfigService 
   }
 
   public <T> Optional<T> getFirstConfigGeneric(Function<ModelConfiguration, T> converter) {
-    ConfigurationCollection configurationCollection = client.getConfigurations(String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME), 1);
+    ConfigurationCollection configurationCollection = client
+      .getConfigurations(String.format(DEFAULT_CONFIG_QUERY, DEFAULT_CONFIG_NAME), 1);
     if (configurationCollection.getTotalRecords() == 0) {
       return Optional.empty();
     }
-    T config = converter.apply(configurationCollection.getConfigs().get(0));
+    T config = converter.apply(configurationCollection.getConfigs()
+      .get(0));
     return Optional.of(config);
   }
 

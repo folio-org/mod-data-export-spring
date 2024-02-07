@@ -44,22 +44,12 @@ public class FolioTenantService extends TenantService {
   private final BursarMigrationService bursarMigrationService;
   private final BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService;
 
-  public FolioTenantService(
-    JdbcTemplate jdbcTemplate,
-    FolioExecutionContext context,
-    FolioSpringLiquibase folioSpringLiquibase,
-    PrepareSystemUserService prepareSystemUserService,
-    KafkaService kafka,
-    BulkEditConfigService bulkEditConfigService,
-    EdifactScheduledJobInitializer edifactScheduledJobInitializer,
-    ScheduledJobsRemover scheduledJobsRemover,
-    BursarScheduledJobInitializer bursarScheduledJobInitializer,
-    OldJobDeleteScheduler oldJobDeleteScheduler,
-    BursarExportLegacyJobService bursarExportLegacyJobService,
-    JobService jobService,
-    BursarMigrationService bursarMigrationService,
-    BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService
-  ) {
+  public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
+      PrepareSystemUserService prepareSystemUserService, KafkaService kafka, BulkEditConfigService bulkEditConfigService,
+      EdifactScheduledJobInitializer edifactScheduledJobInitializer, ScheduledJobsRemover scheduledJobsRemover,
+      BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler,
+      BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService,
+      BursarMigrationService bursarMigrationService, BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
@@ -109,7 +99,7 @@ public class FolioTenantService extends TenantService {
       return false;
     }
 
-    Matcher versionMatcher = MODULE_VERSION_PATTERN.matcher( tenantAttributes.getModuleFrom());
+    Matcher versionMatcher = MODULE_VERSION_PATTERN.matcher(tenantAttributes.getModuleFrom());
     if (!versionMatcher.find()) {
       // if we can't extract version number, we can't compare, so let's assume we need to update
       return true;

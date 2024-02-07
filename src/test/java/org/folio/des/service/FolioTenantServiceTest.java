@@ -63,29 +63,29 @@ class FolioTenantServiceTest {
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
 
-    doNothing().when(prepareSystemUserService).setupSystemUser();
-    doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
-    doNothing()
-      .when(edifactScheduledJobInitializer)
+    doNothing().when(prepareSystemUserService)
+      .setupSystemUser();
+    doNothing().when(bulkEditConfigService)
+      .checkBulkEditConfiguration();
+    doNothing().when(edifactScheduledJobInitializer)
       .initAllScheduledJob(tenantAttributes);
-    doNothing().when(kafka).createKafkaTopics();
-    doNothing().when(kafka).restartEventListeners();
-    doNothing()
-      .when(bursarScheduledJobInitializer)
+    doNothing().when(kafka)
+      .createKafkaTopics();
+    doNothing().when(kafka)
+      .restartEventListeners();
+    doNothing().when(bursarScheduledJobInitializer)
       .initAllScheduledJob(tenantAttributes);
-    doNothing().when(oldJobDeleteScheduler).scheduleOldJobDeletion(any());
-    doNothing()
-      .when(bursarMigrationService)
+    doNothing().when(oldJobDeleteScheduler)
+      .scheduleOldJobDeletion(any());
+    doNothing().when(bursarMigrationService)
       .updateLegacyBursarJobs(any(), any());
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
     verify(prepareSystemUserService).setupSystemUser();
     verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
-    verify(edifactScheduledJobInitializer, times(1))
-      .initAllScheduledJob(tenantAttributes);
-    verify(bursarScheduledJobInitializer, times(1))
-      .initAllScheduledJob(tenantAttributes);
+    verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
+    verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
@@ -98,8 +98,10 @@ class FolioTenantServiceTest {
     tenantAttributes.setPurge(true);
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    doNothing().when(scheduledJobsRemover).deleteJobs(tenantId);
-    doNothing().when(oldJobDeleteScheduler).removeJobs(tenantId);
+    doNothing().when(scheduledJobsRemover)
+      .deleteJobs(tenantId);
+    doNothing().when(oldJobDeleteScheduler)
+      .removeJobs(tenantId);
 
     folioTenantService.afterTenantDeletion(tenantAttributes);
 
@@ -114,31 +116,25 @@ class FolioTenantServiceTest {
   }
 
   @ParameterizedTest
-  @CsvSource(
-    value = {
+  @CsvSource(value = {
       // new install => no need to upgrade
       ",false", // empty string is null (JUnit does this for csv source)
+
       // no/invalid version specified => assume need to upgrade
-      "mod-data-export-spring,true",
-      "1.0,true",
-      "'',true",
+      "mod-data-export-spring,true", "1.0,true", "'',true",
+
       // newer than v3.x.x => no need to upgrade
-      "mod-data-export-spring-4.0.0,false",
-      "mod-data-export-spring-4.0.0-SNAPSHOT,false",
+      "mod-data-export-spring-4.0.0,false", "mod-data-export-spring-4.0.0-SNAPSHOT,false",
       "mod-data-export-spring-4.0.0.1abcdef,false", // Git revisions are sometimes used
       "mod-data-export-spring-999.0.0,false",
+
       // v3.x.x => need to upgrade
-      "mod-data-export-spring-3.0.0,true",
-      "mod-data-export-spring-3.999.0,true",
-      "mod-data-export-spring-3.0.0-SNAPSHOT,true",
+      "mod-data-export-spring-3.0.0,true", "mod-data-export-spring-3.999.0,true", "mod-data-export-spring-3.0.0-SNAPSHOT,true",
       "mod-data-export-spring-3.0.0.1abcdef,true",
+
       // very old
-      "mod-data-export-spring-1.0.0,true",
-      "mod-data-export-spring-1.0.0-SNAPSHOT,true",
-      "mod-data-export-spring-1.0.0.1abcdef,true",
-      "mod-data-export-spring-0.0.0,true",
-    }
-  )
+      "mod-data-export-spring-1.0.0,true", "mod-data-export-spring-1.0.0-SNAPSHOT,true",
+      "mod-data-export-spring-1.0.0.1abcdef,true", "mod-data-export-spring-0.0.0,true", })
   void testShouldUpdateBursar(String moduleFrom, boolean expected) {
     TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom);
     assertEquals(expected, folioTenantService.shouldUpdateBursar(tenantAttributes), moduleFrom + "=" + expected);

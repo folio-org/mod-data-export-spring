@@ -50,38 +50,31 @@ public class BursarMigrationService {
   // this ensures the currently scheduled configuration is updated and new jobs are created with the new schema
   public void updateLegacyBursarConfigs(BursarFeesFinesExportConfigService configService) {
     // there is only one possible configuration for bursar exports
-    configService
-      .getFirstConfigLegacy()
+    configService.getFirstConfigLegacy()
       .ifPresent((ExportConfigWithLegacyBursar config) -> {
         log.info("updating legacy bursar config: {}", config);
 
         // will have empty exportTypeSpecificParameters
-        ExportConfig updated = configService.getFirstConfig().orElseThrow();
+        ExportConfig updated = configService.getFirstConfig()
+          .orElseThrow();
 
-        configService.updateConfig(
-          config.getId(),
-          updated.exportTypeSpecificParameters(
-            convertLegacyJobParameters(config.getExportTypeSpecificParameters().getBursarFeeFines())
-          )
-        );
+        configService.updateConfig(config.getId(),
+            updated.exportTypeSpecificParameters(convertLegacyJobParameters(config.getExportTypeSpecificParameters()
+              .getBursarFeeFines())));
       });
   }
 
   // this ensures that any information about old jobs persisted in the DB makes sense
-  public void updateLegacyBursarJobs(
-    BursarExportLegacyJobService legacyJobService,
-    JobService jobService
-  ) {
+  public void updateLegacyBursarJobs(BursarExportLegacyJobService legacyJobService, JobService jobService) {
     List<JobWithLegacyBursarParameters> jobs = legacyJobService.getAllLegacyJobs();
     log.info("found {} legacy jobs to update", jobs.size());
 
     for (JobWithLegacyBursarParameters legacyJob : jobs) {
       log.info("updating job: {}", legacyJob);
 
-      Job newJob = JobMapperUtil.legacyBursarToNewDto(
-        legacyJob,
-        convertLegacyJobParameters(legacyJob.getExportTypeSpecificParameters().getBursarFeeFines())
-      );
+      Job newJob = JobMapperUtil.legacyBursarToNewDto(legacyJob,
+          convertLegacyJobParameters(legacyJob.getExportTypeSpecificParameters()
+            .getBursarFeeFines()));
 
       // upsert recreated job, does not send to kafka despite the name
       jobService.upsertAndSendToKafka(newJob, false);
@@ -148,7 +141,7 @@ public class BursarMigrationService {
     BursarExportTokenConditional itemTypeToken = typeMappingTokens.get(0);
     BursarExportTokenConditional descriptionToken = typeMappingTokens.get(1);
 
-    //user's external id token
+    // user's external id token
     BursarExportTokenUserDataOptional userIDToken = new BursarExportTokenUserDataOptional();
     userIDToken.setValue(BursarExportTokenUserDataOptional.ValueEnum.EXTERNAL_SYSTEM_ID);
 
@@ -207,18 +200,8 @@ public class BursarMigrationService {
     BursarExportTokenConstant termToken = new BursarExportTokenConstant();
     termToken.setValue("    ");
 
-    return List.of(
-      userIDToken,
-      userIdPadding,
-      feeAmountToken,
-      itemTypeToken,
-      monthToken,
-      dayToken,
-      yearToken,
-      sfsToken,
-      termToken,
-      descriptionToken
-    );
+    return List.of(userIDToken, userIdPadding, feeAmountToken, itemTypeToken, monthToken, dayToken, yearToken, sfsToken, termToken,
+        descriptionToken);
   }
 
   private static BursarExportTransferCriteria convertLegacyJobTransfer(LegacyBursarFeeFines legacyParams) {
@@ -286,9 +269,9 @@ public class BursarMigrationService {
           descriptionTokenConditionalConditionsInner.setCondition(andCondition);
           descriptionTokenConditionalConditionsInner.setValue(descriptionValueToken);
 
-          itemTypeToken.getConditions().add(itemTypeConditionalConditionsInner);
-          descriptionToken
-            .getConditions()
+          itemTypeToken.getConditions()
+            .add(itemTypeConditionalConditionsInner);
+          descriptionToken.getConditions()
             .add(descriptionTokenConditionalConditionsInner);
         }
       }
