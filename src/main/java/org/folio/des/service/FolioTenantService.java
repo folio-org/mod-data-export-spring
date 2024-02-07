@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Primary
 public class FolioTenantService extends TenantService {
 
-  private static final Pattern MODULE_VERSION_PATTERN = Pattern.compile("(\\d++\\.\\d++\\.\\d++)");
+  private static final Pattern MODULE_VERSION_PATTERN = Pattern.compile("^\\D++(\\d++\\.\\d++\\.\\d++)");
   // bursar changes were introduced during v3.2.0 development cycle
   private static final int BURSAR_UPGRADE_VERSION_THRESHOLD = 3;
 
@@ -105,7 +105,7 @@ public class FolioTenantService extends TenantService {
       return true;
     }
 
-    String version = versionMatcher.group();
+    String version = versionMatcher.group(1);
     int major = Integer.parseInt(version.split("\\.")[0]);
     return major <= BURSAR_UPGRADE_VERSION_THRESHOLD;
   }
