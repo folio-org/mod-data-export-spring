@@ -1,5 +1,7 @@
 package org.folio.des.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -18,6 +20,8 @@ import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -107,5 +111,36 @@ class FolioTenantServiceTest {
     tenantAttributes.setPurge(false);
     tenantAttributes.setModuleTo("mod-data-export-spring");
     return tenantAttributes;
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+    value = {
+      // new install => no need to upgrade
+      ",false", // empty string is null (JUnit does this for csv source)
+      // no/invalid version specified => assume need to upgrade
+      "mod-data-export-spring,true",
+      "1.0,true",
+      "'',true",
+      // newer than v3.x.x => no need to upgrade
+      "mod-data-export-spring-4.0.0,false",
+      "mod-data-export-spring-4.0.0-SNAPSHOT,false",
+      "mod-data-export-spring-4.0.0.1abcdef,false", // Git revisions are sometimes used
+      "mod-data-export-spring-999.0.0,false",
+      // v3.x.x => need to upgrade
+      "mod-data-export-spring-3.0.0,true",
+      "mod-data-export-spring-3.999.0,true",
+      "mod-data-export-spring-3.0.0-SNAPSHOT,true",
+      "mod-data-export-spring-3.0.0.1abcdef,true",
+      // very old
+      "mod-data-export-spring-1.0.0,true",
+      "mod-data-export-spring-1.0.0-SNAPSHOT,true",
+      "mod-data-export-spring-1.0.0.1abcdef,true",
+      "mod-data-export-spring-0.0.0,true",
+    }
+  )
+  void testShouldUpdateBursar(String moduleFrom, boolean expected) {
+    TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom);
+    assertEquals(expected, folioTenantService.shouldUpdateBursar(tenantAttributes), moduleFrom + "=" + expected);
   }
 }
