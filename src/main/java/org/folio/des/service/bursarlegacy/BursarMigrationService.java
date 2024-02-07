@@ -14,7 +14,7 @@ import org.folio.des.domain.dto.BursarExportFilterCondition;
 import org.folio.des.domain.dto.BursarExportFilterFeeFineOwner;
 import org.folio.des.domain.dto.BursarExportFilterFeeType;
 import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
-import org.folio.des.domain.dto.BursarExportHeaderFooter;
+import org.folio.des.domain.dto.BursarExportHeaderFooterToken;
 import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.BursarExportTokenConditional;
 import org.folio.des.domain.dto.BursarExportTokenConditionalConditionsInner;
@@ -132,7 +132,7 @@ public class BursarMigrationService {
   }
 
   // the legacy header consisted just of the string "LIB02"
-  private static List<BursarExportHeaderFooter> convertLegacyJobHeader() {
+  private static List<BursarExportHeaderFooterToken> convertLegacyJobHeader() {
     BursarExportTokenConstant constant = new BursarExportTokenConstant();
     constant.setValue(BURSAR_EXPORT_MIGRATION_HEADER_CONSTANT);
 
