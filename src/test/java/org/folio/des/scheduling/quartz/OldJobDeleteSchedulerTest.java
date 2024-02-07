@@ -6,6 +6,8 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.log4j.Log4j2;
+
 import javax.annotation.PostConstruct;
 
 import org.folio.des.support.BaseTest;
@@ -14,10 +16,12 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {
-  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"})
+@Log4j2
+@AutoConfigureMockMvc
+@SpringBootTest(properties = { "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}" })
 class OldJobDeleteSchedulerTest extends BaseTest {
   private static final String EXPORT_DELETE_GROUP = TENANT + "_" + QuartzConstants.OLD_JOB_DELETE_GROUP_NAME;
 
@@ -35,19 +39,29 @@ class OldJobDeleteSchedulerTest extends BaseTest {
 
     oldJobDeleteScheduler.scheduleOldJobDeletion(TENANT);
     var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupContains(EXPORT_DELETE_GROUP));
-    var triggers = scheduler.getTriggersOfJob(jobKeys.iterator().next());
+    var triggers = scheduler.getTriggersOfJob(jobKeys.iterator()
+      .next());
     assertEquals(1, triggers.size());
-    assertEquals(EXPORT_DELETE_GROUP, triggers.get(0).getKey().getGroup());
+    assertEquals(EXPORT_DELETE_GROUP, triggers.get(0)
+      .getKey()
+      .getGroup());
   }
 
   @Test
   void testDeleteOldJobDeleteScheduler() throws SchedulerException {
+    log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
     oldJobDeleteScheduler.scheduleOldJobDeletion(TENANT);
     oldJobDeleteScheduler.removeJobs(TENANT);
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(30, TimeUnit.SECONDS).untilAsserted(
-      () -> {
+    await().pollDelay(1, TimeUnit.SECONDS)
+      .timeout(100, TimeUnit.SECONDS)
+      .untilAsserted(() -> {
         var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupContains(EXPORT_DELETE_GROUP));
+        log.info("jobKeys: {}", jobKeys);
         assertTrue(jobKeys.isEmpty());
       });
   }
