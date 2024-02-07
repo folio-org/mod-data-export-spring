@@ -1,11 +1,11 @@
 package org.folio.des.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import org.folio.des.config.kafka.KafkaService;
@@ -77,8 +77,6 @@ class FolioTenantServiceTest {
       .initAllScheduledJob(tenantAttributes);
     doNothing().when(oldJobDeleteScheduler)
       .scheduleOldJobDeletion(any());
-    doNothing().when(bursarMigrationService)
-      .updateLegacyBursarJobs(any(), any());
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
@@ -89,6 +87,7 @@ class FolioTenantServiceTest {
     verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
+    verifyNoInteractions(bursarMigrationService); // only on updates, not install
   }
 
   @Test
