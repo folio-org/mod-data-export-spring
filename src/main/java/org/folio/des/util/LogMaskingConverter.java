@@ -9,7 +9,7 @@ import org.apache.logging.log4j.core.pattern.LogEventPatternConverter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Plugin(name="LogMaskingConverter", category = "Converter")
+@Plugin(name = "LogMaskingConverter", category = "Converter")
 @ConverterKeys({"spi"})
 @Log4j2
 public class LogMaskingConverter extends LogEventPatternConverter {
@@ -41,7 +41,7 @@ public class LogMaskingConverter extends LogEventPatternConverter {
     try {
       maskedMessage = mask(messageString);
     } catch (Exception e) {
-      log.error("Failed While Masking");
+      log.error("Failed while masking with message: {}", e.getMessage());
       maskedMessage = messageString;
     }
     toAppendTo.append(maskedMessage);
@@ -53,22 +53,22 @@ public class LogMaskingConverter extends LogEventPatternConverter {
 
     matcher = SERVER_ADDRESS_PATTERN.matcher(message);
     maskMatcher(matcher, buffer, SERVER_ADDRESS_PATTERN_REPLACEMENT);
-    message=buffer.toString();
+    message = buffer.toString();
     buffer.setLength(0);
 
     matcher = PASSWORD_PATTERN.matcher(message);
     maskMatcher(matcher, buffer, PASSWORD_PATTERN_REPLACEMENT);
-    message=buffer.toString();
+    message = buffer.toString();
     buffer.setLength(0);
 
     matcher = PASSWORD_SECOND_PATTERN.matcher(message);
     maskMatcher(matcher, buffer, PASSWORD_SECOND_PATTERN_REPLACEMENT);
-    message=buffer.toString();
+    message = buffer.toString();
     buffer.setLength(0);
 
     matcher = USERNAME_PATTERN.matcher(message);
     maskMatcher(matcher, buffer, USERNAME_PATTERN_REPLACEMENT);
-    message=buffer.toString();
+    message = buffer.toString();
     buffer.setLength(0);
 
     matcher = USERNAME_SECOND_PATTERN.matcher(message);
@@ -77,10 +77,9 @@ public class LogMaskingConverter extends LogEventPatternConverter {
     return buffer.toString();
   }
 
-  private void maskMatcher(Matcher matcher, StringBuffer buffer, String maskStr)
-  {
+  private void maskMatcher(Matcher matcher, StringBuffer buffer, String maskStr) {
     while (matcher.find()) {
-      matcher.appendReplacement(buffer,maskStr);
+      matcher.appendReplacement(buffer, maskStr);
     }
     matcher.appendTail(buffer);
   }
