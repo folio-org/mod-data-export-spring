@@ -24,6 +24,8 @@
 
   <properties>
     <java.version>17</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -271,7 +273,6 @@
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -333,7 +334,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources</source>
+                <source>${project.build.directory}/generated-sources/api/src/main/java</source>
               </sources>
             </configuration>
           </execution>
@@ -401,6 +402,28 @@
                 <useSpringBoot3>true</useSpringBoot3>
                 <inlineSchemaNameDefaults>arrayItemSuffix=</inlineSchemaNameDefaults>
               </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.github.floverfelt</groupId>
+        <artifactId>find-and-replace-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <executions>
+          <execution>
+            <id>LegacyBursarFeeFinesTypeMappings</id>
+            <phase>generate-sources</phase>
+            <goals>
+               <goal>find-and-replace</goal>
+            </goals>
+            <configuration>
+              <replacementType>file-contents</replacementType>
+              <baseDir>target/generated-sources/src/main/java/org/folio/des/domain/dto/</baseDir>
+              <fileMask>LegacyBursarFeeFinesTypeMappings.java</fileMask>
+              <findRegex>&lt;String, List&gt;</findRegex>
+              <replaceValue>&lt;String, List&lt;LegacyBursarFeeFinesTypeMapping&gt;&gt;</replaceValue>
             </configuration>
           </execution>
         </executions>
@@ -490,6 +513,7 @@
           <localCheckout>true</localCheckout>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 

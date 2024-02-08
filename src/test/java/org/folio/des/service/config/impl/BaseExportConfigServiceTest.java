@@ -10,15 +10,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.BursarExportFilter;
+import org.folio.des.domain.dto.BursarExportFilterAge;
+import org.folio.des.domain.dto.BursarExportFilterCondition;
+import org.folio.des.domain.dto.BursarExportFilterCondition.OperationEnum;
+import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
+import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -74,7 +81,7 @@ class BaseExportConfigServiceTest {
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
-  private BurSarFeesFinesExportConfigService service;
+  private BursarFeesFinesExportConfigService service;
   @Autowired
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
@@ -93,9 +100,19 @@ class BaseExportConfigServiceTest {
   void addConfig() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+
+    BursarExportJob bursarFeeFines = new BursarExportJob();
+    BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
+    bursarExportFilterAge.setNumDays(1);
+    BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
+    List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
+    bursarExportFilters.add(bursarExportFilterPatronGroup);
+    bursarExportFilters.add(bursarExportFilterAge);
+    BursarExportFilterCondition bursarExportFilterCondition = new BursarExportFilterCondition();
+    bursarExportFilterCondition.setCriteria(bursarExportFilters);
+    bursarExportFilterCondition.setOperation(OperationEnum.AND);
+    bursarFeeFines.setFilter(bursarExportFilterCondition);
     parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
@@ -127,7 +144,7 @@ class BaseExportConfigServiceTest {
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBursarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);
@@ -172,8 +189,8 @@ class BaseExportConfigServiceTest {
     var config = service.getConfigCollection(query, 1);
 
     Assertions.assertAll(
-        () -> assertEquals(0, config.getTotalRecords()),
-        () -> assertTrue(config.getConfigs().isEmpty()));
+      () -> assertEquals(0, config.getTotalRecords()),
+      () -> assertTrue(config.getConfigs().isEmpty()));
   }
 
   @Test

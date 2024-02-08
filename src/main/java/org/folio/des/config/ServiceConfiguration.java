@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.folio.des.builder.job.AuthorityControlJobCommandBuilder;
 import org.folio.des.builder.job.BulkEditQueryJobCommandBuilder;
-import org.folio.des.builder.job.BurSarFeeFinesJobCommandBuilder;
+import org.folio.des.builder.job.BursarFeeFinesJobCommandBuilder;
 import org.folio.des.builder.job.CirculationLogJobCommandBuilder;
 import org.folio.des.builder.job.EHoldingsJobCommandBuilder;
 import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
@@ -33,10 +33,10 @@ import org.folio.des.scheduling.quartz.job.acquisition.EdifactJobKeyResolver;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
-import org.folio.des.service.config.impl.BurSarFeesFinesExportConfigService;
+import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.des.service.config.impl.ExportConfigServiceResolver;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
-import org.folio.des.validator.BurSarFeesFinesExportParametersValidator;
+import org.folio.des.validator.BursarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.quartz.Scheduler;
@@ -59,11 +59,11 @@ public class ServiceConfiguration {
   }
 
   @Bean
-  ExportConfigValidatorResolver exportConfigValidatorResolver(BurSarFeesFinesExportParametersValidator burSarFeesFinesExportParametersValidator,
+  ExportConfigValidatorResolver exportConfigValidatorResolver(BursarFeesFinesExportParametersValidator bursarFeesFinesExportParametersValidator,
                       EdifactOrdersExportParametersValidator edifactOrdersExportParametersValidator) {
     Map<String, Validator> validators = new HashMap<>();
     validators.put(ExportConfigValidatorResolver.buildKey(ExportType.BURSAR_FEES_FINES, ExportTypeSpecificParameters.class),
-      burSarFeesFinesExportParametersValidator);
+      bursarFeesFinesExportParametersValidator);
     validators.put(ExportConfigValidatorResolver.buildKey(ExportType.EDIFACT_ORDERS_EXPORT, ExportTypeSpecificParameters.class),
       edifactOrdersExportParametersValidator);
     return new ExportConfigValidatorResolver(validators);
@@ -79,10 +79,10 @@ public class ServiceConfiguration {
   }
 
   @Bean
-  BurSarFeesFinesExportConfigService burSarExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
+  BursarFeesFinesExportConfigService bursarExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
             ExportConfigConverterResolver  exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
-    return new BurSarFeesFinesExportConfigService(client, defaultModelConfigToExportConfigConverter,
+    return new BursarFeesFinesExportConfigService(client, defaultModelConfigToExportConfigConverter,
             exportConfigConverterResolver, exportConfigValidatorResolver, bursarExportScheduler);
   }
 
@@ -105,23 +105,23 @@ public class ServiceConfiguration {
 
 
   @Bean
-  ExportConfigServiceResolver exportConfigServiceResolver(BurSarFeesFinesExportConfigService burSarFeesFinesExportConfigService,
+  ExportConfigServiceResolver exportConfigServiceResolver(BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
                           EdifactOrdersExportService edifactOrdersExportService) {
     Map<ExportType, ExportConfigService> exportConfigServiceMap = new HashMap<>();
-    exportConfigServiceMap.put(ExportType.BURSAR_FEES_FINES, burSarFeesFinesExportConfigService);
+    exportConfigServiceMap.put(ExportType.BURSAR_FEES_FINES, bursarFeesFinesExportConfigService);
     exportConfigServiceMap.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersExportService);
     return new ExportConfigServiceResolver(exportConfigServiceMap);
   }
 
   @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BulkEditQueryJobCommandBuilder bulkEditQueryJobCommandBuilder,
-                          BurSarFeeFinesJobCommandBuilder burSarFeeFinesJobCommandBuilder,
+                          BursarFeeFinesJobCommandBuilder bursarFeeFinesJobCommandBuilder,
                           CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
                           EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
                           EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder,
                           AuthorityControlJobCommandBuilder authorityControlJobCommandBuilder) {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
-    converters.put(ExportType.BURSAR_FEES_FINES, burSarFeeFinesJobCommandBuilder);
+    converters.put(ExportType.BURSAR_FEES_FINES, bursarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
     converters.put(ExportType.E_HOLDINGS, eHoldingsJobCommandBuilder);

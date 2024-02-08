@@ -1,6 +1,6 @@
 package org.folio.des.validator;
 
-import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import lombok.extern.log4j.Log4j2;
 @AllArgsConstructor
 @Log4j2
 @Service
-public class BurSarFeesFinesExportParametersValidator implements Validator {
+public class BursarFeesFinesExportParametersValidator implements Validator {
   @Override
   public boolean supports(Class<?> aClass) {
     return ExportTypeSpecificParameters.class.isAssignableFrom(aClass);
@@ -30,7 +30,7 @@ public class BurSarFeesFinesExportParametersValidator implements Validator {
     ExportTypeSpecificParameters specificParameters = (ExportTypeSpecificParameters) target;
     if (specificParameters.getBursarFeeFines() == null) {
       String msg = String.format("%s type should contain %s parameters", ExportType.BURSAR_FEES_FINES.getValue(),
-                                  BursarFeeFines.class.getSimpleName());
+                                  BursarExportJob.class.getSimpleName());
       throw new IllegalArgumentException(msg);
     }
   }

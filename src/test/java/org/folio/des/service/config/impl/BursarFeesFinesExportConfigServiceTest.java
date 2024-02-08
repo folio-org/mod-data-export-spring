@@ -10,15 +10,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.BursarExportFilter;
+import org.folio.des.domain.dto.BursarExportFilterAge;
+import org.folio.des.domain.dto.BursarExportFilterCondition;
+import org.folio.des.domain.dto.BursarExportFilterCondition.OperationEnum;
+import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
+import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -35,13 +42,10 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
                   ServiceConfiguration.class})
 @EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
-class BurSarFeesFinesExportConfigServiceTest {
+class BursarFeesFinesExportConfigServiceTest {
 
   public static final String CONFIG_RESPONSE =
     """
@@ -74,7 +78,7 @@ class BurSarFeesFinesExportConfigServiceTest {
   public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
 
   @Autowired
-  private BurSarFeesFinesExportConfigService service;
+  private BursarFeesFinesExportConfigService service;
   @Autowired
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
@@ -92,10 +96,25 @@ class BurSarFeesFinesExportConfigServiceTest {
   @DisplayName("Set new configuration")
   void addConfig() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
+
+    bursarExportConfig.setId("0000-00-00-00-000000");
+
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+
+    BursarExportJob bursarFeeFines = new BursarExportJob();
+    BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
+    bursarExportFilterAge.setNumDays(1);
+    BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
+    bursarExportFilterPatronGroup.setPatronGroupId(
+      UUID.fromString("0000-00-00-00-000000")
+    );
+    List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
+    bursarExportFilters.add(bursarExportFilterPatronGroup);
+    bursarExportFilters.add(bursarExportFilterAge);
+    BursarExportFilterCondition bursarExportFilterCondition = new BursarExportFilterCondition();
+    bursarExportFilterCondition.setCriteria(bursarExportFilters);
+    bursarExportFilterCondition.setOperation(OperationEnum.AND);
+    bursarFeeFines.setFilter(bursarExportFilterCondition);
     parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
@@ -106,6 +125,7 @@ class BurSarFeesFinesExportConfigServiceTest {
 
     Assertions.assertAll(
       () -> assertNotNull(response.getId()),
+      () -> assertEquals(mockResponse.getId(), response.getId()),
       () -> assertEquals(mockResponse.getConfigName(), response.getConfigName()),
       () -> assertEquals(mockResponse.getModule(), response.getModule()),
       () -> assertEquals(mockResponse.getDescription(), response.getDescription()),
@@ -115,8 +135,11 @@ class BurSarFeesFinesExportConfigServiceTest {
   }
 
   @Test
-  @DisplayName("Should not create new configuration without specific parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfSpecificParametersIsNotSet() throws JsonProcessingException {
+  @DisplayName(
+    "Should not create new configuration without specific parameters"
+  )
+  void shouldNorCreateConfigurationAndThroughExceptionIfSpecificParametersIsNotSet()
+    throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig);
     Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
@@ -127,7 +150,7 @@ class BurSarFeesFinesExportConfigServiceTest {
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBursarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);

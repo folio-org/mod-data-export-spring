@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class BursarScheduledJobInitializer {
 
-  private final ExportConfigService burSarExportConfigService;
+  private final ExportConfigService bursarExportConfigService;
   private final BursarExportScheduler bursarExportScheduler;
 
 
@@ -28,7 +28,7 @@ public class BursarScheduledJobInitializer {
     log.info("initAllScheduledJob:: initiating scheduled job of type Bursar");
     try {
       if (shouldMigrateSchedulesToQuartz(tenantAttributes, quartzBursarMinVersion)) {
-        Optional<ExportConfig> savedConfig = burSarExportConfigService.getFirstConfig();
+        Optional<ExportConfig> savedConfig = bursarExportConfigService.getFirstConfig();
         if (savedConfig.isPresent()) {
           bursarExportScheduler.scheduleBursarJob(savedConfig.get());
         } else {

@@ -10,13 +10,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
-import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.BursarExportFilter;
+import org.folio.des.domain.dto.BursarExportFilterAge;
+import org.folio.des.domain.dto.BursarExportFilterCondition;
+import org.folio.des.domain.dto.BursarExportFilterCondition.OperationEnum;
+import org.folio.des.domain.dto.BursarExportFilterPatronGroup;
+import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
@@ -39,11 +46,8 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-@SpringBootTest(classes = { ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
+@SpringBootTest(classes = { ServiceConfiguration.class })
+@EnableAutoConfiguration(exclude = { BatchAutoConfiguration.class })
 class ExportTypeBasedConfigManagerTest {
 
   public static final String CONFIG_RESPONSE =
@@ -99,9 +103,19 @@ class ExportTypeBasedConfigManagerTest {
     ExportConfig bursarExportConfig = new ExportConfig();
     bursarExportConfig.setType(exportType);
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    BursarFeeFines bursarFeeFines = new BursarFeeFines();
-    bursarFeeFines.setDaysOutstanding(9);
-    bursarFeeFines.setPatronGroups(List.of(UUID.randomUUID().toString()));
+
+    BursarExportJob bursarFeeFines = new BursarExportJob();
+    BursarExportFilterAge bursarExportFilterAge = new BursarExportFilterAge();
+    bursarExportFilterAge.setNumDays(1);
+    BursarExportFilterPatronGroup bursarExportFilterPatronGroup = new BursarExportFilterPatronGroup();
+    bursarExportFilterPatronGroup.setPatronGroupId(UUID.fromString("0000-00-00-00-000000"));
+    List<BursarExportFilter> bursarExportFilters = new ArrayList<>();
+    bursarExportFilters.add(bursarExportFilterPatronGroup);
+    bursarExportFilters.add(bursarExportFilterAge);
+    BursarExportFilterCondition bursarExportFilterCondition = new BursarExportFilterCondition();
+    bursarExportFilterCondition.setCriteria(bursarExportFilters);
+    bursarExportFilterCondition.setOperation(OperationEnum.AND);
+    bursarFeeFines.setFilter(bursarExportFilterCondition);
     parameters.setBursarFeeFines(bursarFeeFines);
     bursarExportConfig.exportTypeSpecificParameters(parameters);
     ModelConfiguration mockResponse = mockResponse(bursarExportConfig, exportName);
@@ -146,7 +160,7 @@ class ExportTypeBasedConfigManagerTest {
 
   @Test
   @DisplayName("Should not create new configuration without bur sar parameters")
-  void shouldNorCreateConfigurationAndThroughExceptionIfBurSarConfigIsNotSet() throws JsonProcessingException {
+  void shouldNorCreateConfigurationAndThroughExceptionIfBursarConfigIsNotSet() throws JsonProcessingException {
     ExportConfig bursarExportConfig = new ExportConfig();
     ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
     bursarExportConfig.setExportTypeSpecificParameters(parameters);
@@ -223,7 +237,7 @@ class ExportTypeBasedConfigManagerTest {
     final ConfigurationCollection mockedResponse = objectMapper.readValue(CONFIG_RESPONSE, ConfigurationCollection.class);
     Mockito.when(client.getConfigurations(any(), eq(10))).thenReturn(mockedResponse);
 
-    var configs  = service.getConfigCollection(null, 10);
+    var configs = service.getConfigCollection(null, 10);
 
     assertEquals(1, configs.getTotalRecords());
 

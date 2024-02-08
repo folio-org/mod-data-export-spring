@@ -224,6 +224,8 @@ components:
       $ref: '../../../../folio-export-common/schemas/exportFilePresignedUrl.json#/PresignedUrl'
     job:
       $ref: '../../../../folio-export-common/schemas/job.json#/Job'
+    jobWithLegacyBursarParameters:
+      $ref: '../../../../folio-export-common/schemas/jobWithLegacyBursarParameters.json#/JobWithLegacyBursarParameters'
     jobCollection:
       $ref: '../../../../folio-export-common/schemas/jobCollection.json#/JobCollection'
     userdataCollection:
@@ -251,8 +253,7 @@ components:
     trait_pageable_offset:
       name: offset
       in: query
-      description: Skip over a number of elements by specifying an offset value for
-        the query
+      description: Skip over a number of elements by specifying an offset value for the query
       schema:
         default: 0
         minimum: 0

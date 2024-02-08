@@ -3,7 +3,7 @@ package org.folio.des.validator;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import org.folio.des.domain.dto.BursarFeeFines;
+import org.folio.des.domain.dto.BursarExportJob;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.validation.Errors;
 
-@SpringBootTest(classes = { BurSarFeesFinesExportParametersValidator.class})
-class BurSarFeesFinesExportParametersValidatorTest {
+@SpringBootTest(classes = { BursarFeesFinesExportParametersValidator.class})
+class BursarFeesFinesExportParametersValidatorTest {
   @Autowired
-  private BurSarFeesFinesExportParametersValidator validator;
+  private BursarFeesFinesExportParametersValidator validator;
 
   @Test
   @DisplayName("Should throw exception if specific parameters is Null")
@@ -36,7 +36,7 @@ class BurSarFeesFinesExportParametersValidatorTest {
   void shouldPassValidationIfBursarFeeFinesIsNotNull() {
     Errors errors = mock(Errors.class);
     ExportTypeSpecificParameters specificParameters = new ExportTypeSpecificParameters();
-    specificParameters.setBursarFeeFines(new BursarFeeFines());
+    specificParameters.setBursarFeeFines(new BursarExportJob());
     validator.validate(specificParameters, errors);
   }
 }

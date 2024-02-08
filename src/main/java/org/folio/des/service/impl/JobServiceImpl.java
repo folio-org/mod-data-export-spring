@@ -17,30 +17,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.de.entity.Job;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
-import org.folio.des.security.JWTokenUtils;
-import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.JobCollection;
 import org.folio.des.domain.dto.JobStatus;
-import org.folio.des.domain.dto.Metadata;
-import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.exceptions.FileDownloadException;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
+import org.folio.des.security.JWTokenUtils;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.BulkEditConfigService;
+import org.folio.des.service.util.JobMapperUtil;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
@@ -56,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Log4j2
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
+
   private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
   public static final int CONNECTION_TIMEOUT = 5000;
 
@@ -270,39 +269,7 @@ public class JobServiceImpl implements JobService {
   }
 
   public static org.folio.des.domain.dto.Job entityToDto(Job entity) {
-    var result = new org.folio.des.domain.dto.Job();
-
-    result.setId(entity.getId());
-    result.setName(entity.getName());
-    result.setDescription(entity.getDescription());
-    result.setSource(entity.getSource());
-    result.setIsSystemSource(entity.getIsSystemSource());
-    result.setType(entity.getType());
-    result.setExportTypeSpecificParameters(entity.getExportTypeSpecificParameters());
-    result.setStatus(entity.getStatus());
-    if (ObjectUtils.notEqual(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType())) {
-      result.setFiles(entity.getFiles());
-    }
-    result.setFileNames(entity.getFileNames());
-    result.setStartTime(entity.getStartTime());
-    result.setEndTime(entity.getEndTime());
-    result.setIdentifierType(entity.getIdentifierType());
-    result.setEntityType(entity.getEntityType());
-    result.setProgress(entity.getProgress());
-
-    var metadata = new Metadata();
-    metadata.setCreatedDate(entity.getCreatedDate());
-    metadata.setCreatedByUserId(entity.getCreatedByUserId());
-    metadata.setCreatedByUsername(entity.getCreatedByUsername());
-    metadata.setUpdatedDate(entity.getUpdatedDate());
-    metadata.setUpdatedByUserId(entity.getUpdatedByUserId());
-    metadata.setUpdatedByUsername(entity.getUpdatedByUsername());
-    result.setMetadata(metadata);
-
-    result.setOutputFormat(entity.getOutputFormat());
-    result.setErrorDetails(entity.getErrorDetails());
-
-    return result;
+    return JobMapperUtil.entityToDto(entity);
   }
 
   public static Job dtoToEntity(org.folio.des.domain.dto.Job dto) {

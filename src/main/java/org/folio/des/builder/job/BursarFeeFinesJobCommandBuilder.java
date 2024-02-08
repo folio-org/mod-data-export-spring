@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class BurSarFeeFinesJobCommandBuilder implements JobCommandBuilder {
+public class BursarFeeFinesJobCommandBuilder implements JobCommandBuilder {
 
   private final ObjectMapper objectMapper;
 

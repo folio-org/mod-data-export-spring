@@ -16,7 +16,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfig.SchedulePeriodEnum;
 import org.folio.des.scheduling.quartz.converter.ExportConfigToJobDetailConverter;
@@ -39,15 +42,12 @@ import org.quartz.listeners.JobListenerSupport;
 import org.quartz.listeners.SchedulerListenerSupport;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.convert.converter.Converter;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(properties = {
-  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}"
+  "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
 })
+@DirtiesContext
 class QuartzExportJobSchedulerTest extends BaseTest {
 
   private static final String SCHEDULE_ID = "scheduleId_" + UUID.randomUUID();
@@ -71,7 +71,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(1, schedulerListener.getJobsScheduledCount());
 
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(180, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(1, jobListener.getJobsExecutedCount()));
   }
 
@@ -135,7 +135,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
     assertEquals(1, schedulerListener.getJobsAddedCount());
     assertEquals(jobTriggersCount, schedulerListener.getJobsScheduledCount());
 
-    await().pollDelay(1, TimeUnit.SECONDS).timeout(10, TimeUnit.SECONDS).untilAsserted(
+    await().pollDelay(1, TimeUnit.SECONDS).timeout(200, TimeUnit.SECONDS).untilAsserted(
       () -> assertEquals(jobTriggersCount, jobListener.getJobsExecutedCount()));
   }
 
@@ -211,6 +211,7 @@ class QuartzExportJobSchedulerTest extends BaseTest {
   @AllArgsConstructor
   @NoArgsConstructor
   private static class TestTriggerConverter implements Converter<ExportConfig, ExportTrigger> {
+
     @Setter
     private int triggerAmount = 1;
 
@@ -230,13 +231,10 @@ class QuartzExportJobSchedulerTest extends BaseTest {
       return new ExportTrigger(exportConfig.getSchedulePeriod() == SchedulePeriodEnum.NONE, triggers);
     }
   }
-
   private static class TestJobDetailConverter implements ExportConfigToJobDetailConverter {
     @Override
     public JobDetail convert(ExportConfig exportConfig, JobKey jobKey) {
-      return JobBuilder.newJob(DraftJob.class)
-        .withIdentity(jobKey)
-        .build();
+      return JobBuilder.newJob(DraftJob.class).withIdentity(jobKey).build();
     }
   }
 

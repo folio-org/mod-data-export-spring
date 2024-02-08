@@ -1,6 +1,7 @@
 package org.folio.des.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
+import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.service.PrepareSystemUserService;
@@ -29,12 +31,16 @@ class FolioTenantServiceTest {
 
   @Mock
   KafkaService kafka;
+
   @Mock
   BulkEditConfigService bulkEditConfigService;
+
   @Mock
   EdifactScheduledJobInitializer edifactScheduledJobInitializer;
+
   @Mock
   FolioExecutionContext folioExecutionContext;
+
   @Mock
   ScheduledJobsRemover scheduledJobsRemover;
 
@@ -43,20 +49,33 @@ class FolioTenantServiceTest {
 
   @Mock
   OldJobDeleteScheduler oldJobDeleteScheduler;
+
   @Mock
   PrepareSystemUserService prepareSystemUserService;
+
+  @Mock
+  BursarMigrationService bursarMigrationService;
 
   @Test
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
 
-    doNothing().when(prepareSystemUserService).setupSystemUser();
-    doNothing().when(bulkEditConfigService).checkBulkEditConfiguration();
-    doNothing().when(edifactScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
-    doNothing().when(kafka).createKafkaTopics();
-    doNothing().when(kafka).restartEventListeners();
-    doNothing().when(bursarScheduledJobInitializer).initAllScheduledJob(tenantAttributes);
-    doNothing().when(oldJobDeleteScheduler).scheduleOldJobDeletion(any());
+    doNothing().when(prepareSystemUserService)
+      .setupSystemUser();
+    doNothing().when(bulkEditConfigService)
+      .checkBulkEditConfiguration();
+    doNothing().when(edifactScheduledJobInitializer)
+      .initAllScheduledJob(tenantAttributes);
+    doNothing().when(kafka)
+      .createKafkaTopics();
+    doNothing().when(kafka)
+      .restartEventListeners();
+    doNothing().when(bursarScheduledJobInitializer)
+      .initAllScheduledJob(tenantAttributes);
+    doNothing().when(oldJobDeleteScheduler)
+      .scheduleOldJobDeletion(any());
+    doNothing().when(bursarMigrationService)
+      .updateLegacyBursarIfNeeded(eq(tenantAttributes), any(), any(), any());
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
@@ -65,6 +84,7 @@ class FolioTenantServiceTest {
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());
+    verify(bursarMigrationService, times(1)).updateLegacyBursarIfNeeded(eq(tenantAttributes), any(), any(), any());
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
   }
@@ -76,8 +96,10 @@ class FolioTenantServiceTest {
     tenantAttributes.setPurge(true);
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    doNothing().when(scheduledJobsRemover).deleteJobs(tenantId);
-    doNothing().when(oldJobDeleteScheduler).removeJobs(tenantId);
+    doNothing().when(scheduledJobsRemover)
+      .deleteJobs(tenantId);
+    doNothing().when(oldJobDeleteScheduler)
+      .removeJobs(tenantId);
 
     folioTenantService.afterTenantDeletion(tenantAttributes);
 
