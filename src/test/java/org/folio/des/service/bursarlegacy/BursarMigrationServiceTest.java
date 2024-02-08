@@ -4,16 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.folio.des.domain.dto.BursarExportFilter;
 import org.folio.des.domain.dto.BursarExportFilterAge;
 import org.folio.des.domain.dto.BursarExportFilterCondition;
@@ -33,18 +29,28 @@ import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMapping;
 import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
+import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class BursarMigrationServiceTest {
 
   @InjectMocks
   private BursarMigrationService bursarMigrationService;
+
+  @Mock
+  private BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService;
 
   @Mock
   private BursarExportLegacyJobService bursarExportLegacyJobService;
@@ -184,13 +190,12 @@ class BursarMigrationServiceTest {
 
   @Test
   void testConvertNoConfig() {
-    BursarFeesFinesExportConfigService configService = mock(BursarFeesFinesExportConfigService.class);
-    when(configService.getFirstConfigLegacy()).thenReturn(Optional.empty());
+    when(bursarFeesFinesExportConfigService.getFirstConfigLegacy()).thenReturn(Optional.empty());
 
-    bursarMigrationService.updateLegacyBursarConfigs(configService);
+    bursarMigrationService.updateLegacyBursarConfigs(bursarFeesFinesExportConfigService);
 
-    verify(configService, times(1)).getFirstConfigLegacy();
-    verifyNoMoreInteractions(configService);
+    verify(bursarFeesFinesExportConfigService, times(1)).getFirstConfigLegacy();
+    verifyNoMoreInteractions(bursarFeesFinesExportConfigService);
   }
 
   @Test
@@ -198,13 +203,67 @@ class BursarMigrationServiceTest {
     ExportConfigWithLegacyBursar legacyConfig = new ExportConfigWithLegacyBursar().id("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00")
       .exportTypeSpecificParameters(new ExportTypeSpecificParametersWithLegacyBursar().bursarFeeFines(new LegacyBursarFeeFines()));
 
-    BursarFeesFinesExportConfigService configService = mock(BursarFeesFinesExportConfigService.class);
-    when(configService.getFirstConfigLegacy()).thenReturn(Optional.of(legacyConfig));
-    when(configService.getFirstConfig()).thenReturn(Optional.of(new ExportConfig().id("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00")));
+    when(bursarFeesFinesExportConfigService.getFirstConfigLegacy()).thenReturn(Optional.of(legacyConfig));
+    when(bursarFeesFinesExportConfigService.getFirstConfig())
+      .thenReturn(Optional.of(new ExportConfig().id("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00")));
 
-    bursarMigrationService.updateLegacyBursarConfigs(configService);
+    bursarMigrationService.updateLegacyBursarConfigs(bursarFeesFinesExportConfigService);
 
-    verify(configService, times(1)).getFirstConfigLegacy();
-    verify(configService, times(1)).updateConfig(eq("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00"), any(ExportConfig.class));
+    verify(bursarFeesFinesExportConfigService, times(1)).getFirstConfigLegacy();
+    verify(bursarFeesFinesExportConfigService, times(1)).updateConfig(eq("c4ff3edb-2cc4-523c-a90d-9a2fc8b02a00"),
+        any(ExportConfig.class));
+  }
+
+  @Test
+  void testEntryPointShouldNotUpdate() {
+    TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom("mod-data-export-spring-4.0.0");
+
+    bursarMigrationService.updateLegacyBursarIfNeeded(tenantAttributes, bursarFeesFinesExportConfigService,
+        bursarExportLegacyJobService, jobService);
+
+    verifyNoInteractions(jobService);
+    verifyNoInteractions(bursarFeesFinesExportConfigService);
+    verifyNoInteractions(bursarExportLegacyJobService);
+  }
+
+  @Test
+  void testEntryPointShouldUpdate() {
+    TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom("mod-data-export-spring-3.0.0");
+
+    when(bursarFeesFinesExportConfigService.getFirstConfigLegacy()).thenReturn(Optional.empty());
+    when(bursarExportLegacyJobService.getAllLegacyJobs()).thenReturn(List.of());
+
+    bursarMigrationService.updateLegacyBursarIfNeeded(tenantAttributes, bursarFeesFinesExportConfigService,
+        bursarExportLegacyJobService, jobService);
+
+    verify(bursarExportLegacyJobService, times(1)).getAllLegacyJobs();
+    verify(bursarFeesFinesExportConfigService, times(1)).getFirstConfigLegacy();
+    verifyNoMoreInteractions(bursarFeesFinesExportConfigService);
+    verifyNoInteractions(jobService);
+  }
+
+  @ParameterizedTest
+  @CsvSource(value = {
+      // new install => no need to upgrade
+      ",false", // empty string is null (JUnit does this for csv source)
+
+      // no/invalid version specified => assume need to upgrade
+      "mod-data-export-spring,true", "1.0,true", "'',true",
+
+      // newer than v3.x.x => no need to upgrade
+      "mod-data-export-spring-4.0.0,false", "mod-data-export-spring-4.0.0-SNAPSHOT,false",
+      "mod-data-export-spring-4.0.0.1abcdef,false", // Git revisions are sometimes used
+      "mod-data-export-spring-999.0.0,false",
+
+      // v3.x.x => need to upgrade
+      "mod-data-export-spring-3.0.0,true", "mod-data-export-spring-3.999.0,true", "mod-data-export-spring-3.0.0-SNAPSHOT,true",
+      "mod-data-export-spring-3.0.0.1abcdef,true",
+
+      // very old
+      "mod-data-export-spring-1.0.0,true", "mod-data-export-spring-1.0.0-SNAPSHOT,true",
+      "mod-data-export-spring-1.0.0.1abcdef,true", "mod-data-export-spring-0.0.0,true", })
+  void testShouldUpdateBursar(String moduleFrom, boolean expected) {
+    TenantAttributes tenantAttributes = new TenantAttributes().moduleFrom(moduleFrom);
+    assertEquals(expected, BursarMigrationService.shouldUpdateBursar(tenantAttributes), moduleFrom + "=" + expected);
   }
 }

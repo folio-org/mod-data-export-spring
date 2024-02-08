@@ -1,12 +1,5 @@
 package org.folio.des.service.bursarlegacy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.BursarExportDataToken;
 import org.folio.des.domain.dto.BursarExportFilter;
 import org.folio.des.domain.dto.BursarExportFilterAge;
@@ -38,7 +31,19 @@ import org.folio.des.domain.dto.LegacyBursarFeeFinesTypeMappings;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.des.service.util.JobMapperUtil;
+import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
@@ -46,6 +51,36 @@ import org.springframework.stereotype.Service;
 public class BursarMigrationService {
 
   private static final String BURSAR_EXPORT_MIGRATION_HEADER_CONSTANT = "LIB02";
+
+  private static final Pattern MODULE_VERSION_PATTERN = Pattern.compile("^\\D++(\\d++\\.\\d++\\.\\d++)");
+  // bursar changes were introduced during v3.2.0 development cycle
+  private static final int BURSAR_UPGRADE_VERSION_THRESHOLD = 3;
+
+  public void updateLegacyBursarIfNeeded(TenantAttributes tenantAttributes,
+      BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
+      BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService) {
+    if (shouldUpdateBursar(tenantAttributes)) {
+      updateLegacyBursarConfigs(bursarFeesFinesExportConfigService);
+      updateLegacyBursarJobs(bursarExportLegacyJobService, jobService);
+    }
+  }
+
+  protected static boolean shouldUpdateBursar(TenantAttributes tenantAttributes) {
+    // fresh install
+    if (tenantAttributes.getModuleFrom() == null) {
+      return false;
+    }
+
+    Matcher versionMatcher = MODULE_VERSION_PATTERN.matcher(tenantAttributes.getModuleFrom());
+    if (!versionMatcher.find()) {
+      // if we can't extract version number, we can't compare, so let's assume we need to update
+      return true;
+    }
+
+    String version = versionMatcher.group(1);
+    int major = Integer.parseInt(version.split("\\.")[0]);
+    return major <= BURSAR_UPGRADE_VERSION_THRESHOLD;
+  }
 
   // this ensures the currently scheduled configuration is updated and new jobs are created with the new schema
   public void updateLegacyBursarConfigs(BursarFeesFinesExportConfigService configService) {
@@ -287,4 +322,5 @@ public class BursarMigrationService {
 
     return new ArrayList<>(Arrays.asList(itemTypeToken, descriptionToken));
   }
+
 }
