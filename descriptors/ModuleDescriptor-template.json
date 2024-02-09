@@ -236,6 +236,7 @@
             "perms.users.get",
             "configuration.entries.collection.get",
             "configuration.entries.item.post",
+            "configuration.entries.item.put",
             "perms.users.assign.immutable",
             "data-export.job.collection.get",
             "data-export.config.collection.get"
