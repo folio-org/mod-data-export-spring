@@ -32,7 +32,6 @@
     </export-configs.yaml.file>
 
     <folio-spring-base.version>7.2.2</folio-spring-base.version>
-    <folio-spring-system-user.version>7.3.0-SNAPSHOT</folio-spring-system-user.version>
     <folio-service-tools.version>3.1.0</folio-service-tools.version>
     <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
     <commons-collections4.version>4.4</commons-collections4.version>
