@@ -1,3 +1,10 @@
+## 2024-27-02 v3.0.3
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.2...v3.0.3)
+
+### Bug fixes
+* [MODEXPS-248](https://issues.folio.org/browse/MODEXPS-248) Spring Boot 3.1.8, Kafka 3.6.1, folio-spring-base 7.2.2
+
 ## 2023-11-08 v3.0.2
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.1...v3.0.2)
