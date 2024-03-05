@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.8</version>
+    <version>3.2.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -33,10 +33,10 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>7.2.2</folio-spring-base.version>
-    <folio-spring-system-user.version>7.3.0-SNAPSHOT</folio-spring-system-user.version>
+    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-system-user.version>8.1.0</folio-spring-system-user.version>
     <folio-service-tools.version>3.1.0</folio-service-tools.version>
-    <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
+    <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <!-- remove kafka.version when spring-boot-starter-parent ships with kafka.version >= 3.6.1 -->
     <kafka.version>3.6.1</kafka.version>
@@ -111,8 +111,8 @@
 
     <dependency>
       <groupId>io.hypersistence</groupId>
-      <artifactId>hypersistence-utils-hibernate-60</artifactId>
-      <version>${hypersistence-utils-hibernate-60.version}</version>
+      <artifactId>hypersistence-utils-hibernate-63</artifactId>
+      <version>${hypersistence-utils-hibernate-63.version}</version>
     </dependency>
 
     <dependency>
