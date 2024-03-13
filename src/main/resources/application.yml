@@ -34,6 +34,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
   liquibase:
     changeLog: classpath:db/changelog/changelog-master.xml
     enabled: true

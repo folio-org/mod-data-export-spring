@@ -40,7 +40,6 @@ import org.folio.des.validator.BursarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.quartz.Scheduler;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -148,10 +147,5 @@ public class ServiceConfiguration {
   @Bean
   ScheduledJobsRemover scheduledJobsRemover(Scheduler scheduler) {
     return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME, QuartzConstants.BURSAR_EXPORT_GROUP_NAME));
-  }
-
-  @Bean
-  public static BeanDefinitionRegistryPostProcessor jobRegistryBeanPostProcessorRemover() {
-    return registry -> registry.removeBeanDefinition("jobRegistryBeanPostProcessor");
   }
 }
