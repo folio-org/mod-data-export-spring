@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-@EnableBatchProcessing(isolationLevelForCreate = "ISOLATION_READ_COMMITTED")
+//@EnableBatchProcessing(isolationLevelForCreate = "ISOLATION_READ_COMMITTED")
 @EntityScan(basePackageClasses = JobCommand.class)
 public class ModDataExportSpringApplication {
   public static final String SYSTEM_USER_PASSWORD = "SYSTEM_USER_PASSWORD";
