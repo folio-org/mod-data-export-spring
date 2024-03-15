@@ -251,7 +251,7 @@
       <artifactId>mockserver-client-java</artifactId>
       <version>${mockserver-client-java.version}</version>
       <scope>test</scope>
-      <exclusions>
+      <!--exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcprov-jdk18on</artifactId>
@@ -260,7 +260,7 @@
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcpkix-jdk18on</artifactId>
         </exclusion>
-      </exclusions>
+      </exclusions-->
     </dependency>
 
     <dependency>
