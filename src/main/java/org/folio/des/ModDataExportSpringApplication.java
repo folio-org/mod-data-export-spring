@@ -4,10 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.JobCommand;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = BatchAutoConfiguration.class)
 @EnableFeignClients
 @EntityScan(basePackageClasses = JobCommand.class)
 public class ModDataExportSpringApplication {

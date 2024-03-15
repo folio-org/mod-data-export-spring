@@ -12,6 +12,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -244,7 +246,7 @@ public class CQL2JPACriteria<E> {
       val = UUID.fromString((String) val);
     } else if (Boolean.class.equals(javaType)) {
       val = Boolean.valueOf((String) val);
-    } else if (Date.class.equals(javaType)) {
+    } else if (Date.class.equals(javaType) || Timestamp.class.equals(javaType)) {
       LocalDateTime dateTime = LocalDateTime.parse((String) val);
       val = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
     } else if (javaType.isEnum()) {
