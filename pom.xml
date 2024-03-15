@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.8</version>
+    <version>3.2.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -33,18 +33,15 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>7.2.2</folio-spring-base.version>
-    <folio-spring-system-user.version>7.3.0-SNAPSHOT</folio-spring-system-user.version>
+    <folio-spring-base.version>8.1.0</folio-spring-base.version>
     <folio-service-tools.version>3.1.0</folio-service-tools.version>
-    <hypersistence-utils-hibernate-60.version>3.0.1</hypersistence-utils-hibernate-60.version>
+    <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <commons-collections4.version>4.4</commons-collections4.version>
-    <!-- remove kafka.version when spring-boot-starter-parent ships with kafka.version >= 3.6.1 -->
-    <kafka.version>3.6.1</kafka.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
     <okapi.version>5.0.1</okapi.version>
 
     <!-- Test properties-->
-    <testcontainers-bom.version>1.17.6</testcontainers-bom.version>
+    <testcontainers-bom.version>1.19.3</testcontainers-bom.version>
     <junit-extensions.version>2.4.0</junit-extensions.version>
     <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
     <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
@@ -97,7 +94,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-system-user</artifactId>
-      <version>${folio-spring-system-user.version}</version>
+      <version>${folio-spring-base.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -111,8 +108,8 @@
 
     <dependency>
       <groupId>io.hypersistence</groupId>
-      <artifactId>hypersistence-utils-hibernate-60</artifactId>
-      <version>${hypersistence-utils-hibernate-60.version}</version>
+      <artifactId>hypersistence-utils-hibernate-63</artifactId>
+      <version>${hypersistence-utils-hibernate-63.version}</version>
     </dependency>
 
     <dependency>
@@ -202,6 +199,17 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
       <version>${mockito-inline.version}</version>
@@ -243,7 +251,7 @@
       <artifactId>mockserver-client-java</artifactId>
       <version>${mockserver-client-java.version}</version>
       <scope>test</scope>
-      <exclusions>
+      <!--exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcprov-jdk18on</artifactId>
@@ -252,19 +260,13 @@
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcpkix-jdk18on</artifactId>
         </exclusion>
-      </exclusions>
+      </exclusions-->
     </dependency>
 
     <dependency>
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock-standalone.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.kafka</groupId>
-      <artifactId>spring-kafka-test</artifactId>
       <scope>test</scope>
     </dependency>
 
