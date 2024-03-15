@@ -224,7 +224,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.errors[0].type", is("IllegalArgumentException"))));
+              jsonPath("$.errors[0].type", is("PathElementException"))));
   }
 
   @Test
