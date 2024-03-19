@@ -1,3 +1,47 @@
+## 2024-03-19 v3.2.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.1.0...v3.2.0)
+
+### Bug fixes
+* [MODEXPS-256](https://folio-org.atlassian.net/browse/MODEXPS-256) Update submodule folio-export-common to latest commit (735653a)
+
+### Technical tasks
+* [MODEXPS-255](https://folio-org.atlassian.net/browse/MODEXPS-255) User schema update
+* [MODEXPS-253](https://folio-org.atlassian.net/browse/MODEXPS-253) mod-data-export-spring: spring upgrade
+* [MODEXPS-251](https://folio-org.atlassian.net/browse/MODEXPS-251) Delete sensitive information from the log
+* [MODEXPS-243](https://folio-org.atlassian.net/browse/MODEXPS-243) Enable "Hourly" and “Monthly” EDI export scheduling frequency options
+
+## 2024-02-27 v3.0.3
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.2...v3.0.3)
+
+### Bug fixes
+* [MODEXPS-248](https://issues.folio.org/browse/MODEXPS-248) Spring Boot 3.1.8, Kafka 3.6.1, folio-spring-base 7.2.2
+
+## 2024-02-02 v3.1.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.2...v3.1.0)
+
+### Features
+* [MODEXPS-240](https://issues.folio.org/browse/MODEXPS-240) Make system user usage optional
+
+**Purpose of this release:**
+The ability to optionally disable system user creation/mgmt/use is required in order to allow for system users to be specified declaratively in module descriptors.  These users would instead be created and assigned appropriate privileges by mgr-tenant-entitlements.
+
+## 2023-11-08 v3.0.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.1...v3.0.2)
+
+### Technical tasks
+* [MODEXPS-236](https://issues.folio.org/browse/MODEXPS-236) mod-data-export-spring: spring upgrade
+
+## 2023-11-03 v3.0.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.0...v3.0.1)
+
+### Stories
+* [MODEXPS-167](https://issues.folio.org/browse/MODEXPS-167) Implement refresh token rotation
+
 ## 2023-10-12 v3.0.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v2.0.2...v3.0.0)
