@@ -1,3 +1,10 @@
+## 2024-26-03 v3.0.4
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.3...v3.0.4)
+
+### Bug fixes
+* [FEXPCMN-21](https://folio-org.atlassian.net/browse/FEXPCMN-21) sync action_type.json with original
+
 ## 2024-27-02 v3.0.3
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.0.2...v3.0.3)
