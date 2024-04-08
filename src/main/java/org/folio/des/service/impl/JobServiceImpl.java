@@ -247,7 +247,7 @@ public class JobServiceImpl implements JobService {
   }
 
   @Override
-  public InputStream downloadExportedFile(UUID jobId) {
+  public InputStream downloadExportedFile(UUID jobId, String key) {
     log.debug("downloadExportedFile:: download exported files for jobId={}.", jobId);
     Job job = getJobEntity(jobId);
     if (CollectionUtils.isEmpty(job.getFileNames())) {
@@ -256,7 +256,7 @@ public class JobServiceImpl implements JobService {
     }
     log.debug("Refreshing download url for jobId: {}", job.getId());
     try {
-      PresignedUrl presignedUrl = exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
+      PresignedUrl presignedUrl = getPresignedUrl(job, key);
       URL url = new URL(presignedUrl.getUrl());
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
@@ -310,5 +310,12 @@ public class JobServiceImpl implements JobService {
     String jwt = context.getToken();
     Optional<JWTokenUtils.UserInfo> userInfo = StringUtils.isBlank(jwt) ? Optional.empty() : JWTokenUtils.parseToken(jwt);
     return StringUtils.substring(userInfo.map(JWTokenUtils.UserInfo::getUserName).orElse(null), 0, 50);
+  }
+
+  private PresignedUrl getPresignedUrl(Job job, String key) {
+    if (job.getType() == BULK_EDIT_IDENTIFIERS || job.getType() == BULK_EDIT_UPDATE || job.getType() == BULK_EDIT_QUERY) {
+      return exportWorkerClient.getRefreshedPresignedUrl(key);
+    }
+    return exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
   }
 }
