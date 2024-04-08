@@ -99,8 +99,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(8)),
-                jsonPath("$.jobRecords", hasSize(8))));
+                jsonPath("$.totalRecords", is(9)),
+                jsonPath("$.jobRecords", hasSize(9))));
   }
 
   @Test
@@ -115,7 +115,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(8)),
+                jsonPath("$.totalRecords", is(9)),
                 jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -131,7 +131,7 @@ class JobsControllerTest extends BaseTest {
         matchAll(
           status().isOk(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE),
-          jsonPath("$.totalRecords", is(8)),
+          jsonPath("$.totalRecords", is(9)),
           jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -177,8 +177,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(7)),
-              jsonPath("$.jobRecords", hasSize(7))));
+              jsonPath("$.totalRecords", is(8)),
+              jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -193,8 +193,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(7)),
-              jsonPath("$.jobRecords", hasSize(7))));
+              jsonPath("$.totalRecords", is(8)),
+              jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -239,8 +239,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(3)),
-                jsonPath("$.jobRecords", hasSize(3))));
+                jsonPath("$.totalRecords", is(4)),
+                jsonPath("$.jobRecords", hasSize(4))));
   }
 
   @Test
