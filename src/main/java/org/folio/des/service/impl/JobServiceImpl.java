@@ -314,9 +314,13 @@ public class JobServiceImpl implements JobService {
   }
 
   private PresignedUrl getPresignedUrl(Job job, String key) {
-    if (nonNull(key)) {
+    if (isBulkEditJob(job) && nonNull(key)) {
       return exportWorkerClient.getRefreshedPresignedUrl(key);
     }
     return exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
+  }
+
+  private boolean isBulkEditJob(Job job) {
+    return job.getType() == BULK_EDIT_IDENTIFIERS || job.getType() == BULK_EDIT_UPDATE || job.getType() == BULK_EDIT_QUERY;
   }
 }
