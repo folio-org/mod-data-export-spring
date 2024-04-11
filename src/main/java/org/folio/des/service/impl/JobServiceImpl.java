@@ -1,5 +1,6 @@
 package org.folio.des.service.impl;
 
+import static java.util.Objects.nonNull;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
@@ -247,7 +248,7 @@ public class JobServiceImpl implements JobService {
   }
 
   @Override
-  public InputStream downloadExportedFile(UUID jobId) {
+  public InputStream downloadExportedFile(UUID jobId, String key) {
     log.debug("downloadExportedFile:: download exported files for jobId={}.", jobId);
     Job job = getJobEntity(jobId);
     if (CollectionUtils.isEmpty(job.getFileNames())) {
@@ -256,14 +257,14 @@ public class JobServiceImpl implements JobService {
     }
     log.debug("Refreshing download url for jobId: {}", job.getId());
     try {
-      PresignedUrl presignedUrl = exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
+      PresignedUrl presignedUrl = getPresignedUrl(job, key);
       URL url = new URL(presignedUrl.getUrl());
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
       conn.setConnectTimeout(CONNECTION_TIMEOUT);
       return conn.getInputStream();
     } catch (Exception e) {
-      log.error("Error downloading a file: {} for jobId: {}", e.getMessage(), job.getId());
+      log.error("Error downloading a file: {} for jobId: {} and key: {}", e.getMessage(), job.getId(), key);
       throw new FileDownloadException(String.format("Error downloading a file: %s", e));
     }
   }
@@ -310,5 +311,12 @@ public class JobServiceImpl implements JobService {
     String jwt = context.getToken();
     Optional<JWTokenUtils.UserInfo> userInfo = StringUtils.isBlank(jwt) ? Optional.empty() : JWTokenUtils.parseToken(jwt);
     return StringUtils.substring(userInfo.map(JWTokenUtils.UserInfo::getUserName).orElse(null), 0, 50);
+  }
+
+  private PresignedUrl getPresignedUrl(Job job, String key) {
+    if (nonNull(key)) {
+      return exportWorkerClient.getRefreshedPresignedUrl(key);
+    }
+    return exportWorkerClient.getRefreshedPresignedUrl(job.getFiles().get(0));
   }
 }
