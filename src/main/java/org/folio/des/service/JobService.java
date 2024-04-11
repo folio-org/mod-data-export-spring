@@ -59,8 +59,9 @@ public interface JobService {
   /**
    * Downloading the exported file. A job can have only one exported file.
    * @param jobId the job id
+   * @param key the key of the file in the storage
    * @return Input stream of exported file.
    */
-  InputStream downloadExportedFile(UUID jobId);
+  InputStream downloadExportedFile(UUID jobId, String key);
 
 }

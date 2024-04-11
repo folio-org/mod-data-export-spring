@@ -177,6 +177,12 @@ paths:
           description: UUID of the job
           schema:
             $ref: "#/components/schemas/UUID"
+        - name: key
+          in: query
+          required: false
+          description: Key of the file in storage to be downloaded
+          schema:
+            type: string
       responses:
         "200":
           description: Export file successfully retrieved
