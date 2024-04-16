@@ -1,3 +1,10 @@
+## 2024-04-16 v3.2.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.2.0...v3.2.1)
+
+### Bug fixes
+* [MODEXPS-261](https://folio-org.atlassian.net/browse/MODEXPS-261) "Request has expired" or  "Expired token" errors
+
 ## 2024-03-19 v3.2.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.1.0...v3.2.0)

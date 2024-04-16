@@ -99,8 +99,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(8)),
-                jsonPath("$.jobRecords", hasSize(8))));
+                jsonPath("$.totalRecords", is(9)),
+                jsonPath("$.jobRecords", hasSize(9))));
   }
 
   @Test
@@ -115,7 +115,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(8)),
+                jsonPath("$.totalRecords", is(9)),
                 jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -131,7 +131,7 @@ class JobsControllerTest extends BaseTest {
         matchAll(
           status().isOk(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE),
-          jsonPath("$.totalRecords", is(8)),
+          jsonPath("$.totalRecords", is(9)),
           jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -177,8 +177,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(7)),
-              jsonPath("$.jobRecords", hasSize(7))));
+              jsonPath("$.totalRecords", is(8)),
+              jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -193,8 +193,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(7)),
-              jsonPath("$.jobRecords", hasSize(7))));
+              jsonPath("$.totalRecords", is(8)),
+              jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -239,8 +239,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(3)),
-                jsonPath("$.jobRecords", hasSize(3))));
+                jsonPath("$.totalRecords", is(4)),
+                jsonPath("$.jobRecords", hasSize(4))));
   }
 
   @Test
@@ -287,6 +287,23 @@ class JobsControllerTest extends BaseTest {
         .andExpect(
             matchAll(
                 status().is5xxServerError()));
+  }
+
+  @Test
+  @DisplayName("Should succeed download file with key to storage")
+  void shouldSucceedDownloadWithKey() throws Exception {
+    PresignedUrl presignedUrl = new PresignedUrl();
+    presignedUrl.setUrl("http://localhost:" + WIRE_MOCK_PORT + "/TestFile.csv");
+    when(exportWorkerClient.getRefreshedPresignedUrl(anyString())).thenReturn(presignedUrl);
+    mockMvc
+      .perform(
+        get("/data-export-spring/jobs/22ae5d0f-6425-82a1-a361-1bc9b88e8172/download?key=TestFile.csv")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpect(
+        matchAll(
+          status().is2xxSuccessful(),
+          content().bytes("Test file content".getBytes())));
   }
 
   @Test

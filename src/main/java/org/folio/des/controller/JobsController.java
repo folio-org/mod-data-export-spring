@@ -66,9 +66,9 @@ public class JobsController implements JobsApi {
   }
 
   @Override
-  public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id) {
-    log.info("downloadExportedFileByJobId:: with id={}.", id);
-    return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id)));
+  public ResponseEntity<Resource> downloadExportedFileByJobId(UUID id, String key) {
+    log.info("downloadExportedFileByJobId:: with id={}, key={}.", id, key);
+    return ResponseEntity.ok(new InputStreamResource(service.downloadExportedFile(id, key)));
   }
 
   @Override
