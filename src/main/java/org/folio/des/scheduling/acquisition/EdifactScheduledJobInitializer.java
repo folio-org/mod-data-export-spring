@@ -9,7 +9,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
-import org.folio.okapi.common.SemVer;
+import org.folio.des.util.SemVer;
 import org.folio.tenant.domain.dto.TenantAttributes;
 
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.service.config.ExportConfigService;
-import org.folio.okapi.common.SemVer;
+import org.folio.des.util.SemVer;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.stereotype.Component;
 

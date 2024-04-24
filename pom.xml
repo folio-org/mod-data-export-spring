@@ -38,7 +38,6 @@
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
-    <okapi.version>5.0.1</okapi.version>
 
     <!-- Test properties-->
     <testcontainers-bom.version>1.19.3</testcontainers-bom.version>
@@ -174,12 +173,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.folio.okapi</groupId>
-      <artifactId>okapi-common</artifactId>
-      <version>${okapi.version}</version>
     </dependency>
 
     <!-- Test dependencies -->
