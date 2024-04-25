@@ -5,12 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * @deprecated
  * Semantic version implementation. Based
  * <a href="https://semver.org/spec/v1.0.0.html">semver 1.0.0</a>,
  * but is a little liberal at the moment, eg only major component
  * is (eg 1) required or even more than 3 components for dot-separated
  * list (eg 1.2.3.4).
  */
+@Deprecated(forRemoval = true)
 public class SemVer implements Comparable<SemVer> {
 
   private final List<String> preRelease = new LinkedList<>();
