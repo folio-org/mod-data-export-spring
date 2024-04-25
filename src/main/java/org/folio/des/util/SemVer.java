@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * @deprecated
  * Semantic version implementation. Based
  * <a href="https://semver.org/spec/v1.0.0.html">semver 1.0.0</a>,
  * but is a little liberal at the moment, eg only major component
