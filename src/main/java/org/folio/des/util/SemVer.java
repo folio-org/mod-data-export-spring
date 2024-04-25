@@ -11,6 +11,7 @@ import java.util.List;
  * is (eg 1) required or even more than 3 components for dot-separated
  * list (eg 1.2.3.4).
  */
+@Deprecated(forRemoval = true)
 public class SemVer implements Comparable<SemVer> {
 
   private final List<String> preRelease = new LinkedList<>();

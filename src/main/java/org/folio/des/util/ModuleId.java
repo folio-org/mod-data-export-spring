@@ -2,6 +2,7 @@ package org.folio.des.util;
 
 import java.util.Collection;
 
+@Deprecated(forRemoval = true)
 public class ModuleId implements Comparable<ModuleId> {
 
   private final String product;
