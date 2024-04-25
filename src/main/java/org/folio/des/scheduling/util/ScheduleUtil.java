@@ -3,8 +3,8 @@ package org.folio.des.scheduling.util;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import org.folio.okapi.common.ModuleId;
-import org.folio.okapi.common.SemVer;
+import org.folio.des.util.ModuleId;
+import org.folio.des.util.SemVer;
 import org.folio.tenant.domain.dto.TenantAttributes;
 
 import lombok.extern.log4j.Log4j2;
