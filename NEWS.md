@@ -1,3 +1,10 @@
+## 2024-04-16 v3.2.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.2.1...v3.2.2)
+
+### Technical tasks
+* [MODEXPS-263](https://folio-org.atlassian.net/browse/MODEXPS-263) Remove usage of okapi-common lib, based on Vert.x classes, from Spring project
+
 ## 2024-04-16 v3.2.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.2.0...v3.2.1)
