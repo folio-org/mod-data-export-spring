@@ -2,12 +2,13 @@ package org.folio.des.scheduling.quartz.job;
 
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.des.service.JobService;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @RequiredArgsConstructor
 @Log4j2
