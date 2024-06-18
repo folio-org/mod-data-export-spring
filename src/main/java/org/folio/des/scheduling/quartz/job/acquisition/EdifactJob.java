@@ -3,22 +3,18 @@ package org.folio.des.scheduling.quartz.job.acquisition;
 import static org.folio.des.scheduling.quartz.QuartzConstants.EXPORT_CONFIG_ID_PARAM;
 import static org.folio.des.scheduling.quartz.QuartzConstants.TENANT_ID_PARAM;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.exceptions.SchedulingException;
 import org.folio.des.service.JobService;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
-import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
-import org.folio.spring.scope.FolioExecutionContextSetter;
-import org.folio.spring.service.SystemUserService;
+import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -26,15 +22,14 @@ public class EdifactJob implements org.quartz.Job {
   private static final String PARAM_NOT_FOUND_MESSAGE = "'%s' param is missing in the jobExecutionContext";
   private final ExportTypeBasedConfigManager exportTypeBasedConfigManager;
   private final JobService jobService;
-  private final ExecutionContextBuilder contextBuilder;
-  private final SystemUserService systemUserService;
+  private final SystemUserScopedExecutionService executionService;
   private final DataExportSpringClient dataExportSpringClient;
 
   @Override
   public void execute(JobExecutionContext jobExecutionContext) {
     try {
       String tenantId = getTenantId(jobExecutionContext);
-      try (var context = new FolioExecutionContextSetter(folioExecutionContext(tenantId))) {
+      executionService.executeSystemUserScoped(tenantId, () -> {
         Job job = getJob(jobExecutionContext);
         Job resultJob = jobService.upsertAndSendToKafka(job, false, false);
         log.info("execute:: configured task saved in DB jobId: {}", resultJob.getId());
@@ -42,7 +37,8 @@ public class EdifactJob implements org.quartz.Job {
           dataExportSpringClient.sendJob(resultJob);
           log.info("execute:: configured task scheduled and sent to kafka for jobId: {}", resultJob.getId());
         }
-      }
+        return null;
+      });
     } catch (Exception e) {
       log.error("execute:: exception caught during edifact job execution", e);
       throw e;
@@ -94,9 +90,5 @@ public class EdifactJob implements org.quartz.Job {
     } catch (Exception e) {
       log.warn("deleteJob:: exception deleting job '{}'", jobKey, e);
     }
-  }
-
-  private FolioExecutionContext folioExecutionContext(String tenantId) {
-    return contextBuilder.forSystemUser(systemUserService.getAuthedSystemUser(tenantId));
   }
 }

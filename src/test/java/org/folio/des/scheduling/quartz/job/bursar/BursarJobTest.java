@@ -3,13 +3,10 @@ package org.folio.des.scheduling.quartz.job.bursar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
 import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.EdiSchedule;
@@ -28,10 +25,11 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.SystemUser;
+import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.folio.spring.service.SystemUserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
@@ -62,8 +60,6 @@ class BursarJobTest {
   private SystemUserService systemUserService;
   @Mock
   private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
-  @InjectMocks
-  private BursarJob bursarJob;
   @Mock
   private JobExecutionContext jobExecutionContext;
   @Mock
@@ -71,6 +67,15 @@ class BursarJobTest {
   @Mock
   private DataExportSpringClient dataExportSpringClient;
   private final FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
+
+  private BursarJob bursarJob;
+
+  @BeforeEach
+  void setUp() {
+    var executionService = new SystemUserScopedExecutionService(folioExecutionContext, contextBuilder);
+    executionService.setSystemUserService(systemUserService);
+    bursarJob = new BursarJob(executionService, exportTypeBasedConfigManager, dataExportSpringClient);
+  }
 
   @Test
   void testSuccessfulExecute() throws JobExecutionException {
