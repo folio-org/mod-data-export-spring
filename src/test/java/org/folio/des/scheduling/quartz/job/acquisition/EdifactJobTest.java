@@ -30,10 +30,11 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.SystemUser;
+import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.folio.spring.service.SystemUserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
@@ -57,8 +58,6 @@ class EdifactJobTest {
   private SystemUserService systemUserService;
   @Mock
   private ExportTypeBasedConfigManager exportTypeBasedConfigManager;
-  @InjectMocks
-  private EdifactJob edifactJob;
   @Mock
   private JobExecutionContext jobExecutionContext;
   @Mock
@@ -66,10 +65,20 @@ class EdifactJobTest {
   @Mock
   private DataExportSpringClient dataExportSpringClient;
   private FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
+
+  private EdifactJob edifactJob;
+
   private static final String TENANT_ID = "some_test_tenant";
   private static final String EXPORT_CONFIG_ID = "some_test_export_config_id";
   private static final ExportType EXPORT_TYPE = ExportType.EDIFACT_ORDERS_EXPORT;
   private static final JobKey JOB_KEY = JobKey.jobKey("testJobKey", "testJobGroup");
+
+  @BeforeEach
+  void setUp() {
+    var executionService = new SystemUserScopedExecutionService(folioExecutionContext, contextBuilder);
+    executionService.setSystemUserService(systemUserService);
+    edifactJob = new EdifactJob(exportTypeBasedConfigManager, jobService, executionService, dataExportSpringClient);
+  }
 
   @Test
   void testExecuteSuccessful() {

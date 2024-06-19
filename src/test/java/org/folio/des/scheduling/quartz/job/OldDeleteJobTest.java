@@ -12,10 +12,11 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.model.SystemUser;
+import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.folio.spring.service.SystemUserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
@@ -36,11 +37,18 @@ class OldDeleteJobTest {
   private ExecutionContextBuilder contextBuilder;
   @Mock
   private SystemUserService systemUserService;
-  @InjectMocks
-  private OldDeleteJob oldDeleteJob;
   @Mock
   private JobExecutionContext jobExecutionContext;
   private final FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
+
+  private OldDeleteJob oldDeleteJob;
+
+  @BeforeEach
+  void setUp() {
+    var executionService = new SystemUserScopedExecutionService(folioExecutionContext, contextBuilder);
+    executionService.setSystemUserService(systemUserService);
+    oldDeleteJob = new OldDeleteJob(jobService, executionService);
+  }
 
   @Test
   void testSuccessfulExecute() throws JobExecutionException {
