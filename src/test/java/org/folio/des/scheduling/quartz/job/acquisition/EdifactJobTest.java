@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-
+import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandSchedulerBuilder;
 import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.domain.dto.EdiSchedule;
@@ -30,6 +30,7 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.context.ExecutionContextBuilder;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.model.SystemUser;
+import org.folio.spring.service.SystemUserProperties;
 import org.folio.spring.service.SystemUserScopedExecutionService;
 import org.folio.spring.service.SystemUserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +64,11 @@ class EdifactJobTest {
   @Mock
   private Scheduler scheduler;
   @Mock
+  private JobCommandSchedulerBuilder jobCommandSchedulerBuilder;
+  @Mock
   private DataExportSpringClient dataExportSpringClient;
+  @Mock
+  private SystemUserProperties systemUserProperties;
   private FolioExecutionContext folioExecutionContext = new TestFolioExecutionContext();
 
   private EdifactJob edifactJob;
@@ -77,16 +82,38 @@ class EdifactJobTest {
   void setUp() {
     var executionService = new SystemUserScopedExecutionService(folioExecutionContext, contextBuilder);
     executionService.setSystemUserService(systemUserService);
-    edifactJob = new EdifactJob(exportTypeBasedConfigManager, jobService, executionService, dataExportSpringClient);
+    edifactJob = new EdifactJob(exportTypeBasedConfigManager, jobService, jobCommandSchedulerBuilder,
+      jobExecutionService, executionService, systemUserProperties, dataExportSpringClient);
   }
 
   @Test
-  void testExecuteSuccessful() {
+  void testExecuteSuccessfulSysUserDisabled() {
+    when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
+    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
+    when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
+    when(systemUserProperties.isEnabled()).thenReturn(false);
+    var job = new Job().id(UUID.randomUUID());
+    when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(job);
+    var jobCommand = new JobCommand();
+    jobCommand.setId(job.getId());
+    when(jobCommandSchedulerBuilder.buildJobCommand(job)).thenReturn(jobCommand);
+    doNothing().when(jobExecutionService).sendJobCommand(jobCommand);
+
+    edifactJob.execute(jobExecutionContext);
+
+    verify(jobService).upsertAndSendToKafka(any(), eq(false), eq(false));
+    verify(jobExecutionService).sendJobCommand(jobCommand);
+  }
+
+  @Test
+  void testExecuteSuccessfulSysUserEnabled() {
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
     when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job().id(UUID.randomUUID()));
+    when(systemUserProperties.isEnabled()).thenReturn(true);
     doNothing().when(dataExportSpringClient).sendJob(any());
 
     edifactJob.execute(jobExecutionContext);
