@@ -41,6 +41,9 @@ public class EdifactJob implements org.quartz.Job {
         Job resultJob = jobService.upsertAndSendToKafka(job, false, false);
         log.info("execute:: configured task saved in DB jobId: {}", resultJob.getId());
         if (resultJob.getId() != null) {
+          // To support RTR the job is calling job execution service via module's API /jobs/send.
+          // This doesn't work for Eureka. Solution is to call the service directly in case of system user functionality
+          // is disabled (Eureka mode) and call the API in another case
           if (systemUserProperties.isEnabled()) {
             dataExportSpringClient.sendJob(resultJob);
           } else {
