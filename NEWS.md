@@ -1,3 +1,10 @@
+## 2024-06-19 v3.3.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.2.2...v3.3.0)
+
+### Bug fixes
+* [EUREKA-48](https://folio-org.atlassian.net/browse/EUREKA-48) EDIFACT order export job does not run in scheduled time
+
 ## 2024-03-19 v3.2.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.1.0...v3.2.0)
