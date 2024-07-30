@@ -365,6 +365,39 @@
       ]
     }
   ],
+  "metadata": {
+    "user": {
+      "type": "system",
+      "permissions": [
+        "data-export.job.item.post",
+        "data-export.job.item.send",
+        "accounts.transfer.post",
+        "accounts.collection.get",
+        "circulation-logs.collection.get",
+        "configuration.entries.collection.get",
+        "configuration.entries.item.get",
+        "configuration.entries.item.post",
+        "configuration.entries.item.put",
+        "configuration.entries.item.delete",
+        "data-export.job.collection.get",
+        "data-export.config.collection.get",
+        "feefineactions.collection.get",
+        "finance.expense-classes.item.get",
+        "inventory-storage.holdings.item.get",
+        "inventory-storage.identifier-types.item.get",
+        "inventory-storage.locations.item.get",
+        "inventory-storage.material-types.item.get",
+        "inventory-storage.service-points.collection.get",
+        "organizations-storage.organizations.item.get",
+        "orders-storage.po-lines.collection.get",
+        "orders-storage.purchase-orders.collection.get",
+        "transfers.collection.get",
+        "users.collection.get",
+        "users.item.post",
+        "users.item.put"
+      ]
+    }
+  },
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",
     "dockerPull": false,
