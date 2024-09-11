@@ -1,5 +1,7 @@
 package org.folio.des;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.JobCommand;
 import org.springframework.boot.SpringApplication;
@@ -13,9 +15,15 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EntityScan(basePackageClasses = JobCommand.class)
 public class ModDataExportSpringApplication {
   public static final String SYSTEM_USER_PASSWORD = "SYSTEM_USER_PASSWORD";
+  public static final String SYSTEM_USER_ENABLED = "SYSTEM_USER_ENABLED";
 
   public static void main(String[] args) {
-    if (StringUtils.isEmpty(System.getenv(SYSTEM_USER_PASSWORD))) {
+    String systemUserEnabled = Optional.ofNullable(System.getenv(SYSTEM_USER_ENABLED)).orElse("true");
+  
+    if (
+      Boolean.parseBoolean(systemUserEnabled)
+      && StringUtils.isEmpty(System.getenv(SYSTEM_USER_PASSWORD))
+    ) {
       throw new IllegalArgumentException("Required environment variable is missing: " + SYSTEM_USER_PASSWORD);
     }
 
