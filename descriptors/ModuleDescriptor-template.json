@@ -316,9 +316,10 @@
       "description": "Get data export jobs"
     },
     {
-      "permissionName": "data-export.job.item.send",
+      "permissionName": "data-export.job.send.item.execute",
       "displayName": "send job to kafka",
-      "description": "Send job to Kafka"
+      "description": "Send job to Kafka",
+      "replaces": ["data-export.job.item.send"]
     },
     {
       "permissionName": "data-export.config.all",
