@@ -187,7 +187,7 @@
           ],
           "pathPattern": "/data-export-spring/jobs/send",
           "permissionsRequired": [
-            "data-export.job.item.send"
+            "data-export.job.send.item.execute"
           ],
           "modulePermissions": [
             "accounts.transfer.post",
@@ -343,7 +343,7 @@
         "data-export.job.collection.get",
         "data-export.job.item.download",
         "data-export.job.item.resend",
-        "data-export.job.item.send"
+        "data-export.job.send.item.execute"
       ]
     },
     {
@@ -371,7 +371,7 @@
       "type": "system",
       "permissions": [
         "data-export.job.item.post",
-        "data-export.job.item.send",
+        "data-export.job.send.item.execute",
         "accounts.transfer.post",
         "accounts.collection.get",
         "circulation-logs.collection.get",
