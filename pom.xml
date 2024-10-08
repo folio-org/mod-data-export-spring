@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.3</version>
+    <version>3.2.10</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -33,7 +33,7 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-base.version>8.1.2</folio-spring-base.version>
     <folio-service-tools.version>3.1.0</folio-service-tools.version>
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <commons-collections4.version>4.4</commons-collections4.version>
@@ -244,16 +244,12 @@
       <artifactId>mockserver-client-java</artifactId>
       <version>${mockserver-client-java.version}</version>
       <scope>test</scope>
-      <!--exclusions>
+      <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcprov-jdk18on</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcpkix-jdk18on</artifactId>
-        </exclusion>
-      </exclusions-->
+      </exclusions>
     </dependency>
 
     <dependency>
