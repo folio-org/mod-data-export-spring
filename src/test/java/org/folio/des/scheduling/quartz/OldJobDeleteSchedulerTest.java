@@ -6,9 +6,10 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 import java.util.concurrent.TimeUnit;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 
-import javax.annotation.PostConstruct;
+
 
 import org.folio.des.support.BaseTest;
 import org.junit.jupiter.api.Test;
