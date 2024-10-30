@@ -1,3 +1,19 @@
+## 2024-10-30 v3.4.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.3.0...v3.4.0)
+
+### Stories
+* [EUREKA-225](https://issues.folio.org/browse/EUREKA-225) Update module descriptors to use the "metadata" field
+* [FOLIO-4087](https://issues.folio.org/browse/FOLIO-4087) RMB & Spring upgrades (all modules)
+
+### Technical tasks
+* [MODEXPS-269](https://issues.folio.org/browse/MODEXPS-269) inventory API version update
+* [MODEXPS-268](https://issues.folio.org/browse/MODEXPS-268) Review and cleanup Module Descriptors for mod-data-export-spring
+
+### Bug fixes
+* [MODEXPS-270](https://issues.folio.org/browse/MODEXPS-270) Fix org.bouncycastle:bcprov-jdk18on:1.72 vulnerabilities
+* [MODEXPS-267](https://issues.folio.org/browse/MODEXPS-267) SYSTEM_USER env var is not taking affect
+
 ## 2024-06-19 v3.3.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.2.2...v3.3.0)
