@@ -35,6 +35,7 @@
 
     <folio-spring-base.version>8.2.0</folio-spring-base.version>
     <folio-service-tools.version>3.1.0</folio-service-tools.version>
+    <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
