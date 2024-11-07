@@ -73,7 +73,8 @@
             "data-export.job.item.post"
           ],
           "modulePermissions": [
-            "accounts.transfer.post",
+            "feesfines.accounts.transfer.item.post",
+            "feesfines.accounts-bulk.transfer.item.post",
             "accounts.collection.get",
             "circulation-logs.collection.get",
             "configuration.entries.collection.get",
@@ -190,7 +191,8 @@
             "data-export.job.send.item.execute"
           ],
           "modulePermissions": [
-            "accounts.transfer.post",
+            "feesfines.accounts.transfer.item.post",
+            "feesfines.accounts-bulk.transfer.item.post",
             "accounts.collection.get",
             "circulation-logs.collection.get",
             "configuration.entries.collection.get",
@@ -372,7 +374,8 @@
       "permissions": [
         "data-export.job.item.post",
         "data-export.job.send.item.execute",
-        "accounts.transfer.post",
+        "feesfines.accounts.transfer.item.post",
+        "feesfines.accounts-bulk.transfer.item.post",
         "accounts.collection.get",
         "circulation-logs.collection.get",
         "configuration.entries.collection.get",
