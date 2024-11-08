@@ -1,7 +1,7 @@
 data-export.job.item.post
 data-export.job.send.item.execute
-feesfines.accounts.transfer.item.post
-feesfines.accounts-bulk.transfer.item.post
+feesfines.accounts.transfer.post
+feesfines.accounts-bulk.transfer.post
 accounts.collection.get
 circulation-logs.collection.get
 configuration.entries.collection.get
