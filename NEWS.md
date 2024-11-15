@@ -1,3 +1,10 @@
+## 2024-11-15 v3.4.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.0...v3.4.1)
+
+### Bug fixes
+* [MODEXPS-275](https://issues.folio.org/browse/MODEXPS-275) Missing interface dependencies in module descriptor
+
 ## 2024-10-30 v3.4.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.3.0...v3.4.0)
