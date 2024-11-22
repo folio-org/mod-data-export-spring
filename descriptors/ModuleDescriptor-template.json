@@ -37,6 +37,10 @@
     {
       "id": "finance.expense-classes",
       "version": "3.0"
+    },
+    {
+      "id" :  "bulk-edit",
+      "version": "4.1"
     }
   ],
   "provides": [
