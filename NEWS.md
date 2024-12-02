@@ -1,3 +1,7 @@
+## 2024-12-02 v3.4.2
+
+* [MODEXPS-278](https://folio-org.atlassian.net/browse/MODEXPS-278) Update permissions for mod-feesfines
+
 ## 2024-11-15 v3.4.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.0...v3.4.1)
