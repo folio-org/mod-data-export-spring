@@ -5,14 +5,14 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.10</version>
+    <version>3.3.6</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export-spring</artifactId>
   <description>Data Export Spring module</description>
-  <version>3.4.3-SNAPSHOT</version>
+  <version>3.5.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -33,7 +33,7 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>8.2.0</folio-spring-base.version>
+    <folio-spring-base.version>8.2.2</folio-spring-base.version>
     <folio-service-tools.version>3.1.0</folio-service-tools.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
