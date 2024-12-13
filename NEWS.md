@@ -1,3 +1,7 @@
+## 2024-12-13 v3.4.3
+
+* [MODEXPS-280](https://folio-org.atlassian.net/browse/MODEXPS-280) Upgrade Spring Boot and Kafka fixing vulns
+
 ## 2024-12-02 v3.4.2
 
 * [MODEXPS-278](https://folio-org.atlassian.net/browse/MODEXPS-278) Update permissions for mod-feesfines
