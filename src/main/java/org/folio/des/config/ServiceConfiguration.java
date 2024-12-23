@@ -16,6 +16,7 @@ import org.folio.des.client.ConfigurationClient;
 import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
 import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.converter.ExportConfigConverterResolver;
+import org.folio.des.converter.aqcuisition.ClaimsExportConfigToModelConfigConverter;
 import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -31,6 +32,7 @@ import org.folio.des.scheduling.quartz.converter.acquisition.ExportConfigToEdifa
 import org.folio.des.scheduling.quartz.converter.acquisition.ExportConfigToEdifactTriggerConverter;
 import org.folio.des.scheduling.quartz.job.acquisition.EdifactJobKeyResolver;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.acquisition.ClaimsExportService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
@@ -51,10 +53,12 @@ import org.springframework.validation.Validator;
 public class ServiceConfiguration {
   @Bean
   ExportConfigConverterResolver exportConfigConverterResolver(DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter,
-                      EdifactExportConfigToModelConfigConverter edifactExportConfigToModelConfigConverter) {
-    Map<ExportType, Converter<ExportConfig, ModelConfiguration>> converters = new HashMap<>();
+                                                              EdifactExportConfigToModelConfigConverter edifactExportConfigToModelConfigConverter,
+                                                              ClaimsExportConfigToModelConfigConverter claimsExportConfigToModelConfigConverter) {
+    var converters = new HashMap<ExportType, Converter<ExportConfig, ModelConfiguration>>();
     converters.put(ExportType.BURSAR_FEES_FINES, defaultExportConfigToModelConfigConverter);
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactExportConfigToModelConfigConverter);
+    converters.put(ExportType.CLAIMS, claimsExportConfigToModelConfigConverter);
     return new ExportConfigConverterResolver(converters, defaultExportConfigToModelConfigConverter);
   }
 
@@ -96,6 +100,14 @@ public class ServiceConfiguration {
   }
 
   @Bean
+  ClaimsExportService claimsExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                          DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
+                                          ExportConfigConverterResolver exportConfigConverterResolver) {
+    return new ClaimsExportService(client, defaultModelConfigToExportConfigConverter,
+      exportConfigConverterResolver, exportConfigValidatorResolver);
+  }
+
+  @Bean
   BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
                         DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
                         ExportConfigConverterResolver exportConfigConverterResolver) {
@@ -106,10 +118,12 @@ public class ServiceConfiguration {
 
   @Bean
   ExportConfigServiceResolver exportConfigServiceResolver(BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
-                          EdifactOrdersExportService edifactOrdersExportService) {
-    Map<ExportType, ExportConfigService> exportConfigServiceMap = new HashMap<>();
+                                                          EdifactOrdersExportService edifactOrdersExportService,
+                                                          ClaimsExportService claimsExportService) {
+    var exportConfigServiceMap = new HashMap<ExportType, ExportConfigService>();
     exportConfigServiceMap.put(ExportType.BURSAR_FEES_FINES, bursarFeesFinesExportConfigService);
     exportConfigServiceMap.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersExportService);
+    exportConfigServiceMap.put(ExportType.CLAIMS, claimsExportService);
     return new ExportConfigServiceResolver(exportConfigServiceMap);
   }
 
