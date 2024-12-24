@@ -32,9 +32,6 @@ public class ClaimsExportService extends BaseExportConfigService {
 
   @Override
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
-    if (exportConfig.getId() == null) {
-      exportConfig.setId(UUID.randomUUID().toString());
-    }
     setExportConfigId(exportConfig);
     log.debug("postConfig:: by exportConfig={}", exportConfig);
     ModelConfiguration result = super.postConfig(exportConfig);
@@ -44,6 +41,9 @@ public class ClaimsExportService extends BaseExportConfigService {
   }
 
   private void setExportConfigId(ExportConfig exportConfig) {
+    if (exportConfig.getId() == null) {
+      exportConfig.setId(UUID.randomUUID().toString());
+    }
     Optional.ofNullable(exportConfig.getExportTypeSpecificParameters())
       .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
       .ifPresent(ediOrdersExportConfig -> ediOrdersExportConfig.setExportConfigId(UUID.fromString(exportConfig.getId())));

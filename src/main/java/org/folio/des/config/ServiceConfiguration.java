@@ -40,6 +40,7 @@ import org.folio.des.service.config.impl.ExportConfigServiceResolver;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.folio.des.validator.BursarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
+import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.quartz.Scheduler;
 import org.springframework.context.annotation.Bean;
@@ -64,12 +65,12 @@ public class ServiceConfiguration {
 
   @Bean
   ExportConfigValidatorResolver exportConfigValidatorResolver(BursarFeesFinesExportParametersValidator bursarFeesFinesExportParametersValidator,
-                      EdifactOrdersExportParametersValidator edifactOrdersExportParametersValidator) {
+                                                              EdifactOrdersExportParametersValidator edifactOrdersExportParametersValidator,
+                                                              ClaimsExportParametersValidator claimsExportParametersValidator) {
     Map<String, Validator> validators = new HashMap<>();
-    validators.put(ExportConfigValidatorResolver.buildKey(ExportType.BURSAR_FEES_FINES, ExportTypeSpecificParameters.class),
-      bursarFeesFinesExportParametersValidator);
-    validators.put(ExportConfigValidatorResolver.buildKey(ExportType.EDIFACT_ORDERS_EXPORT, ExportTypeSpecificParameters.class),
-      edifactOrdersExportParametersValidator);
+    validators.put(ExportConfigValidatorResolver.buildKey(ExportType.BURSAR_FEES_FINES, ExportTypeSpecificParameters.class), bursarFeesFinesExportParametersValidator);
+    validators.put(ExportConfigValidatorResolver.buildKey(ExportType.EDIFACT_ORDERS_EXPORT, ExportTypeSpecificParameters.class), edifactOrdersExportParametersValidator);
+    validators.put(ExportConfigValidatorResolver.buildKey(ExportType.CLAIMS, ExportTypeSpecificParameters.class), claimsExportParametersValidator);
     return new ExportConfigValidatorResolver(validators);
   }
 

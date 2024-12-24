@@ -8,6 +8,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +21,7 @@ import java.util.UUID;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(classes = { JacksonConfiguration.class, ClaimsExportConfigToModelConfigConverter.class })
+@SpringBootTest(classes = { JacksonConfiguration.class, ClaimsExportConfigToModelConfigConverter.class, ClaimsExportParametersValidator.class,  })
 class ClaimsExportConfigToModelConfigConverterTest {
 
   @Autowired
@@ -39,6 +40,9 @@ class ClaimsExportConfigToModelConfigConverterTest {
 
     var vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
+    vendorEdiOrdersExportConfig.integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
+    vendorEdiOrdersExportConfig.transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
+    vendorEdiOrdersExportConfig.fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
 
     var parameters = new ExportTypeSpecificParameters();
     parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
@@ -68,6 +72,9 @@ class ClaimsExportConfigToModelConfigConverterTest {
 
     var vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
+    vendorEdiOrdersExportConfig.integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
+    vendorEdiOrdersExportConfig.transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
+    vendorEdiOrdersExportConfig.fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
 
     var parameters = new ExportTypeSpecificParameters();
     parameters.setVendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);

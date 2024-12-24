@@ -56,8 +56,11 @@ class ClaimsExportServiceTest {
     edifactOrdersExportConfig.setId(UUID.randomUUID().toString());
 
     var vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    vendorEdiOrdersExportConfig.setConfigName("test_claims_config");
-    vendorEdiOrdersExportConfig.vendorId(UUID.fromString("046b6c7f-0b8a-43b9-b35d-6489e6daee91"));
+    vendorEdiOrdersExportConfig.setConfigName("name");
+    vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
+    vendorEdiOrdersExportConfig.integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
+    vendorEdiOrdersExportConfig.transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
+    vendorEdiOrdersExportConfig.fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
 
     var parameters = new ExportTypeSpecificParameters();
     parameters.vendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
@@ -87,8 +90,11 @@ class ClaimsExportServiceTest {
     edifactOrdersExportConfig.setId(configId);
 
     var vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    vendorEdiOrdersExportConfig.setConfigName("test_claims_config");
-    vendorEdiOrdersExportConfig.vendorId(UUID.fromString("046b6c7f-0b8a-43b9-b35d-6489e6daee91"));
+    vendorEdiOrdersExportConfig.setConfigName("name");
+    vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
+    vendorEdiOrdersExportConfig.integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
+    vendorEdiOrdersExportConfig.transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
+    vendorEdiOrdersExportConfig.fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
 
     var parameters = new ExportTypeSpecificParameters();
     parameters.vendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);

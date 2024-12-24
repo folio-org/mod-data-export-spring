@@ -6,8 +6,10 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 
@@ -19,10 +21,14 @@ public final class ClaimsExportConfigToModelConfigConverter implements Converter
   private static final String CONFIG_DESCRIPTION = "Claims export configuration parameters";
 
   private final ObjectMapper objectMapper;
+  private ClaimsExportParametersValidator validator;
 
   @Override
   @SneakyThrows
   public ModelConfiguration convert(ExportConfig exportConfig) {
+    var errors = new BeanPropertyBindingResult(exportConfig.getExportTypeSpecificParameters(), "specificParameters");
+    validator.validate(exportConfig.getExportTypeSpecificParameters(), errors);
+
     var config = new ModelConfiguration();
     config.setId(exportConfig.getId());
     config.setModule(DEFAULT_MODULE_NAME);
