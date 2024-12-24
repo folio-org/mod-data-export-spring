@@ -109,7 +109,6 @@ class ClaimsExportServiceTest {
       () -> assertEquals(mockResponse.getEnabled(), postResponse.getEnabled())
     );
 
-
     vendorEdiOrdersExportConfig.setConfigName("test_claims_config_update");
     service.updateConfig(configId, edifactOrdersExportConfig);
   }
@@ -132,6 +131,7 @@ class ClaimsExportServiceTest {
     mockResponse.setEnabled(true);
     mockResponse.setDefault(true);
     mockResponse.setValue(objectMapper.writeValueAsString(edifactOrdersExportConfig));
+
     return mockResponse;
   }
 }

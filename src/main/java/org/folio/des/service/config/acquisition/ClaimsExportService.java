@@ -39,6 +39,7 @@ public class ClaimsExportService extends BaseExportConfigService {
     log.debug("postConfig:: by exportConfig={}", exportConfig);
     ModelConfiguration result = super.postConfig(exportConfig);
     log.info("postConfig:: initial jobs prepared for export config id '{}'", exportConfig.getId());
+
     return result;
   }
 
