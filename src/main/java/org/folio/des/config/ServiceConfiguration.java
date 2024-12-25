@@ -129,16 +129,17 @@ public class ServiceConfiguration {
   }
 
   @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BulkEditQueryJobCommandBuilder bulkEditQueryJobCommandBuilder,
-                          BursarFeeFinesJobCommandBuilder bursarFeeFinesJobCommandBuilder,
-                          CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
-                          EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
-                          EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder,
-                          AuthorityControlJobCommandBuilder authorityControlJobCommandBuilder) {
+                                                            BursarFeeFinesJobCommandBuilder bursarFeeFinesJobCommandBuilder,
+                                                            CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
+                                                            EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
+                                                            EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder,
+                                                            AuthorityControlJobCommandBuilder authorityControlJobCommandBuilder) {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BULK_EDIT_QUERY, bulkEditQueryJobCommandBuilder);
     converters.put(ExportType.BURSAR_FEES_FINES, bursarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
     converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactOrdersJobCommandBuilder);
+    converters.put(ExportType.CLAIMS, edifactOrdersJobCommandBuilder);
     converters.put(ExportType.E_HOLDINGS, eHoldingsJobCommandBuilder);
     converters.put(ExportType.AUTH_HEADINGS_UPDATES, authorityControlJobCommandBuilder);
     return new JobCommandBuilderResolver(converters);
