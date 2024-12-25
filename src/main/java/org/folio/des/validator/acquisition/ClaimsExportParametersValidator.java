@@ -38,14 +38,14 @@ public class ClaimsExportParametersValidator implements Validator {
 
   private void validateExportConfig(VendorEdiOrdersExportConfig exportConfig) {
     if (exportConfig == null) {
-      throw new IllegalArgumentException("Export configuration is incomplete, an export config");
+      throw new IllegalArgumentException("Export configuration is incomplete, missing an export config");
     }
   }
 
   private void validateIntegrationType(VendorEdiOrdersExportConfig exportConfig) {
     var integrationType = exportConfig.getIntegrationType();
     if (integrationType == null) {
-      throw new IllegalArgumentException("Export configuration is incomplete, an integration type");
+      throw new IllegalArgumentException("Export configuration is incomplete, missing an integration type");
     }
 
     if (integrationType != CLAIMING) {
