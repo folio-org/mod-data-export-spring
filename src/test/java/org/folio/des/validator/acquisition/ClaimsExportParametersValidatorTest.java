@@ -253,42 +253,6 @@ class ClaimsExportParametersValidatorTest {
   }
 
   @Test
-  @DisplayName("Should throw exception if some required fields are set for transmission type File download missing Lib Edi Type")
-  void shouldThrowExceptionIfSomeRequiredFieldsAreSetTransmissionTypeFileDownloadMissingLibEdiType() {
-    var errors = mock(Errors.class);
-    var specificParameters = new ExportTypeSpecificParameters();
-    var config = new VendorEdiOrdersExportConfig();
-    config.setIntegrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
-    config.setFileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.EDI);
-    config.setTransmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
-    config.setEdiConfig(new EdiConfig()
-      .libEdiCode("libCode")
-      .vendorEdiCode("vendorCode")
-      .vendorEdiType(EdiConfig.VendorEdiTypeEnum._014_EAN)
-      .accountNoList(List.of("accountNo")));
-    specificParameters.setVendorEdiOrdersExportConfig(config);
-    assertThrows(IllegalArgumentException.class, () -> validator.validate(specificParameters, errors));
-  }
-
-  @Test
-  @DisplayName("Should throw exception if some required fields are set for transmission type File download missing Vendor Edi Type")
-  void shouldThrowExceptionIfSomeRequiredFieldsAreSetTransmissionTypeFileDownloadMissingVendorEdiType() {
-    var errors = mock(Errors.class);
-    var specificParameters = new ExportTypeSpecificParameters();
-    var config = new VendorEdiOrdersExportConfig();
-    config.setIntegrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
-    config.setFileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.EDI);
-    config.setTransmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
-    config.setEdiConfig(new EdiConfig()
-      .libEdiCode("libCode")
-      .libEdiType(EdiConfig.LibEdiTypeEnum._014_EAN)
-      .libEdiType(EdiConfig.LibEdiTypeEnum._014_EAN)
-      .accountNoList(List.of("accountNo")));
-    specificParameters.setVendorEdiOrdersExportConfig(config);
-    assertThrows(IllegalArgumentException.class, () -> validator.validate(specificParameters, errors));
-  }
-
-  @Test
   @DisplayName("Should throw exception if some required fields are set for transmission type File download missing Vendor Edi Code")
   void shouldThrowExceptionIfSomeRequiredFieldsAreSetTransmissionTypeFileDownloadMissingVendorEdiCode() {
     var errors = mock(Errors.class);
@@ -300,7 +264,7 @@ class ClaimsExportParametersValidatorTest {
     config.setEdiConfig(new EdiConfig()
       .libEdiCode("libCode")
       .libEdiType(EdiConfig.LibEdiTypeEnum._014_EAN)
-      .vendorEdiCode("vendorCode")
+      .vendorEdiType(EdiConfig.VendorEdiTypeEnum._014_EAN)
       .accountNoList(List.of("accountNo")));
     specificParameters.setVendorEdiOrdersExportConfig(config);
     assertThrows(IllegalArgumentException.class, () -> validator.validate(specificParameters, errors));
