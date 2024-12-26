@@ -73,7 +73,7 @@ public class ClaimsExportParametersValidator implements Validator {
         throw new IllegalArgumentException("Export configuration is incomplete, missing Vendor Account Number(s)");
       }
 
-      if (StringUtils.isEmpty(ediConfig.getLibEdiCode()) || ediConfig.getLibEdiType() == null || StringUtils.isEmpty(ediConfig.getVendorEdiCode()) || ediConfig.getVendorEdiType() == null) {
+      if (StringUtils.isEmpty(ediConfig.getLibEdiCode()) || StringUtils.isEmpty(ediConfig.getVendorEdiCode())) {
         throw new IllegalArgumentException("Export configuration is incomplete, missing library EDI code/Vendor EDI code");
       }
     }
