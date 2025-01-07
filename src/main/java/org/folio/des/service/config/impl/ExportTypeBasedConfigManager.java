@@ -102,7 +102,7 @@ public class ExportTypeBasedConfigManager {
       return List.of();
     }
     var exportTypes = new ArrayList<ExportType>();
-    query = query.replaceAll("type==", "").toUpperCase();
+    query = query.replace("type==", "").toUpperCase();
     for (var entry : query.split(" OR ")) {
       var matcher = exportTypePattern.matcher(entry);
       if (!matcher.find()) {
@@ -129,7 +129,7 @@ public class ExportTypeBasedConfigManager {
       query = DEFAULT_MODULE_QUERY + " AND " + query;
     }
     if (CollectionUtils.isNotEmpty(exportTypes)) {
-      query = query.replaceAll("type==", "value==(");
+      query = query.replace("type==", "value==(");
       for (ExportType exportType : exportTypes) {
         query = query.replaceAll(exportType.name(), String.format("*%s*", exportType));
       }
