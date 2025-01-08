@@ -20,9 +20,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
-@RequiredArgsConstructor
 @Log4j2
+@RequiredArgsConstructor
 public class BaseExportConfigService implements ExportConfigService {
+
   protected final ConfigurationClient client;
   protected final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   protected final ExportConfigConverterResolver exportConfigConverterResolver;

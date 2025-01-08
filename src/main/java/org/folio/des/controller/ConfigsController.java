@@ -17,18 +17,19 @@ import java.util.EnumSet;
 
 import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 
-@RestController
-@RequestMapping("/data-export-spring")
-@RequiredArgsConstructor
 @Log4j2
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/data-export-spring")
 public class ConfigsController implements ConfigsApi {
+
   private final EnumSet<ExportType> applyAspectExportTypes = EnumSet.of(EDIFACT_ORDERS_EXPORT);
   private final ExportTypeBasedConfigManager manager;
 
   @Override
   public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
-      log.info("getExportConfigs:: by query={} with limit={}", query, limit);
-      return ResponseEntity.ok(manager.getConfigCollection(query, limit));
+    log.info("getExportConfigs:: by query={} with limit={}", query, limit);
+    return ResponseEntity.ok(manager.getConfigCollection(query, limit));
   }
 
   @Override
