@@ -1,5 +1,9 @@
 package org.folio.des.service.config.impl;
 
+import static org.folio.des.domain.FilterOperator.AND_OPERATOR;
+import static org.folio.des.domain.FilterOperator.OR_OPERATOR;
+import static org.folio.des.domain.FilterPredicate.BY_TYPE_CONDITION;
+import static org.folio.des.domain.FilterPredicate.BY_VALUE_CONDITION;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_QUERY;
 
@@ -69,16 +73,24 @@ public class ExportTypeBasedConfigManager {
 
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     var exportTypes = extractExportTypes(query);
-    if (CollectionUtils.isNotEmpty(exportTypes)) {
+    if (isFilterByType(query) && CollectionUtils.isNotEmpty(exportTypes)) {
       log.info("getConfigCollection:: exportTypes is non-empty");
-      var exportConfigCollections = collectConfigsByService(limit, exportTypes);
-      var mergedConfigs = exportConfigCollections.stream()
-        .flatMap(configs -> configs.getConfigs().stream()).toList();
-      return new ExportConfigCollection().configs(mergedConfigs).totalRecords(mergedConfigs.size());
+      return getConfigCollectionByExportTypes(limit, exportTypes);
     }
     var normalizedQuery = normalizeQuery(exportTypes, query);
     log.info("getConfigCollection:: defaultExportConfigService.getConfigCollection flow's working, by normalizedQuery: {} with limit={}", normalizedQuery, limit);
     return defaultExportConfigService.getConfigCollection(normalizedQuery, limit);
+  }
+
+  private boolean isFilterByType(String query) {
+    return StringUtils.isNotEmpty(query) && query.startsWith(BY_TYPE_CONDITION.getValue());
+  }
+
+  private ExportConfigCollection getConfigCollectionByExportTypes(Integer limit, List<ExportType> exportTypes) {
+    var exportConfigCollections = collectConfigsByService(limit, exportTypes);
+    var mergedConfigs = exportConfigCollections.stream()
+      .flatMap(configs -> configs.getConfigs().stream()).toList();
+    return new ExportConfigCollection().configs(mergedConfigs).totalRecords(mergedConfigs.size());
   }
 
   private List<ExportConfigCollection> collectConfigsByService(Integer limit, List<ExportType> exportTypes) {
@@ -102,8 +114,7 @@ public class ExportTypeBasedConfigManager {
       return List.of();
     }
     var exportTypes = new ArrayList<ExportType>();
-    query = query.replace("type==", "").toUpperCase();
-    for (var entry : query.split(" OR ")) {
+    for (var entry : query.split(OR_OPERATOR.getValue())) {
       var matcher = exportTypePattern.matcher(entry);
       if (!matcher.find()) {
         continue;
@@ -124,16 +135,14 @@ public class ExportTypeBasedConfigManager {
     if (StringUtils.isEmpty(query)) {
       return DEFAULT_MODULE_QUERY;
     }
-    query = query.replaceAll("[()]", "");
     if (!query.contains(DEFAULT_MODULE_NAME)) {
-      query = DEFAULT_MODULE_QUERY + " AND " + query;
+      query = DEFAULT_MODULE_QUERY + AND_OPERATOR.getValue() + query;
     }
-    if (CollectionUtils.isNotEmpty(exportTypes)) {
-      query = query.replace("type==", "value==(");
+    if (isFilterByType(query) && CollectionUtils.isNotEmpty(exportTypes)) {
+      query = query.replace(BY_TYPE_CONDITION.getValue(), BY_VALUE_CONDITION.getValue());
       for (ExportType exportType : exportTypes) {
         query = query.replaceAll(exportType.name(), String.format("*%s*", exportType));
       }
-      query = query.concat(")");
     }
     return query;
   }
