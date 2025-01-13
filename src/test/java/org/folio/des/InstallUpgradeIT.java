@@ -65,7 +65,7 @@ class InstallUpgradeIT {
 
   @Container
   public static final PostgreSQLContainer<?> POSTGRES =
-    new PostgreSQLContainer<>("postgres:12-alpine")
+    new PostgreSQLContainer<>("postgres:16-alpine")
     .withClasspathResourceMapping("v1.2.3.sql", "/v1.2.3.sql", BindMode.READ_ONLY)
     .withNetwork(NETWORK)
     .withNetworkAliases("mypostgres")

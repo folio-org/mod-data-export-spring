@@ -74,6 +74,9 @@ class ConfigsControllerTest extends BaseTest {
     "/data-export-spring/configs?query=type==(CLAIMS), module==mod-data-export-spring AND value==*CLAIMS*,",
     "/data-export-spring/configs?query=type==(CLAIMS OR EDIFACT_ORDERS_EXPORT), module==mod-data-export-spring AND value==*CLAIMS*, module==mod-data-export-spring AND value==*EDIFACT_ORDERS_EXPORT*",
     "/data-export-spring/configs?query=type==(CLAIMS OR BATCH_VOUCHER_EXPORT), module==mod-data-export-spring AND value==*CLAIMS*, module==mod-data-export-spring AND value==*BATCH_VOUCHER_EXPORT*",
+    "/data-export-spring/configs?query=configName==\"EDIFACT_ORDERS_EXPORT_079e28a8-bf6d-4424-8461-13a3b1c3ec71**\", module==mod-data-export-spring AND configName==\"EDIFACT_ORDERS_EXPORT_079e28a8-bf6d-4424-8461-13a3b1c3ec71**\",",
+    "/data-export-spring/configs?query=configName==\"CLAIMS_1e958895-82a6-4fa1-b6fe-763063381946*\", module==mod-data-export-spring AND configName==\"CLAIMS_1e958895-82a6-4fa1-b6fe-763063381946*\",",
+    "/data-export-spring/configs?query=configName==(\"CLAIMS_2e6623c8-e201-48e8-bfae-e6426f04bea3*\" OR \"EDIFACT_ORDERS_EXPORT_079e28a8-bf6d-4424-8461-13a3b1c3ec71*\"), module==mod-data-export-spring AND configName==(\"CLAIMS_2e6623c8-e201-48e8-bfae-e6426f04bea3*\" OR \"EDIFACT_ORDERS_EXPORT_079e28a8-bf6d-4424-8461-13a3b1c3ec71*\"),",
   })
   @DisplayName("Fetch config by query")
   void getConfigs(String exportConfigQuery, String firstModConfigQuery, String secondModConfigQuery) throws Exception {
