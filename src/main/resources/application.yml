@@ -16,7 +16,7 @@ folio:
     schemaName: mod_data_export_spring_quartz
     changeLog: classpath:db/changelog/changelog-quartz.xml
 server:
-  port: 30025
+  port: 8081
 logging:
   level:
     liquibase: debug
