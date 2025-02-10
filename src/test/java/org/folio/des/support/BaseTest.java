@@ -57,7 +57,7 @@ public abstract class BaseTest {
   public static final String TENANT = "diku";
 
   public static WireMockServer wireMockServer;
-  public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:13");
+  public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @Autowired
   protected MockMvc mockMvc;
