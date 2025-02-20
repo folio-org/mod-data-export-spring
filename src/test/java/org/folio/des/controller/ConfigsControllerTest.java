@@ -102,6 +102,64 @@ class ConfigsControllerTest extends BaseTest {
     }
   }
 
+  @ParameterizedTest
+  @CsvSource({
+    "/data-export-spring/configs?query=type==(CLAIMS OR EDIFACT_ORDERS_EXPORT)",
+    "/data-export-spring/configs?query=type==(CLAIMS Or EDIFACT_ORDERS_EXPORT)",
+    "/data-export-spring/configs?query=type==(CLAIMS oR EDIFACT_ORDERS_EXPORT)",
+    "/data-export-spring/configs?query=type==(CLAIMS or EDIFACT_ORDERS_EXPORT)",
+  })
+  @DisplayName("Fetch config by query with case-insensitive operator")
+  void getConfigsCaseWithInsensitiveOperators(String exportConfigQuery) throws Exception {
+    var config = new ConfigurationCollection();
+    config.setTotalRecords(0);
+    wireMockServer.stubFor(WireMock.get(anyUrl())
+      .willReturn(aResponse().withBody(asJsonString(config))
+        .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withStatus(200)));
+
+    mockMvc
+      .perform(
+        get(exportConfigQuery)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpectAll(status().isOk(),
+        content().contentType(MediaType.APPLICATION_JSON_VALUE),
+        jsonPath("$.totalRecords", is(0)));
+
+    verify(configurationClient, times(1)).getConfigurations(
+      eq("module==mod-data-export-spring AND value==*CLAIMS*"), any());
+    verify(configurationClient, times(1)).getConfigurations(
+      eq("module==mod-data-export-spring AND value==*EDIFACT_ORDERS_EXPORT*"), any());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "/data-export-spring/configs?query=type==(CLAIMS OR CLAIMS), module==mod-data-export-spring AND value==*CLAIMS*",
+    "/data-export-spring/configs?query=type==(EDIFACT_ORDERS_EXPORT OR EDIFACT_ORDERS_EXPORT), module==mod-data-export-spring AND value==*EDIFACT_ORDERS_EXPORT*",
+  })
+  @DisplayName("Fetch config by query with duplicate export type")
+  void getConfigsWithDuplicateExportTypes(String exportConfigQuery, String modConfigQuery) throws Exception {
+    var config = new ConfigurationCollection();
+    config.setTotalRecords(0);
+    wireMockServer.stubFor(WireMock.get(anyUrl())
+      .willReturn(aResponse().withBody(asJsonString(config))
+        .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .withStatus(200)));
+
+    mockMvc
+      .perform(
+        get(exportConfigQuery)
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpectAll(status().isOk(),
+        content().contentType(MediaType.APPLICATION_JSON_VALUE),
+        jsonPath("$.totalRecords", is(0)));
+
+    verify(configurationClient, times(1)).getConfigurations(
+      eq(modConfigQuery), any());
+  }
+
   @Test
   @DisplayName("Can not post duplicable config")
   void postConfig() throws Exception {
