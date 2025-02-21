@@ -9,6 +9,7 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -113,8 +114,8 @@ public class ExportTypeBasedConfigManager {
     if (StringUtils.isEmpty(query)) {
       return List.of();
     }
-    var exportTypes = new ArrayList<ExportType>();
-    for (var entry : query.split(OR_OPERATOR.getValue())) {
+    var exportTypes = new HashSet<ExportType>();
+    for (var entry : query.split(OR_OPERATOR.getRegexPattern())) {
       var matcher = exportTypePattern.matcher(entry);
       if (!matcher.find()) {
         continue;
@@ -124,7 +125,7 @@ public class ExportTypeBasedConfigManager {
         exportTypes.add(ExportType.valueOf(exportTypeString));
       }
     }
-    return exportTypes;
+    return new ArrayList<>(exportTypes);
   }
 
   private String normalizeQuery(ExportType exportType) {
