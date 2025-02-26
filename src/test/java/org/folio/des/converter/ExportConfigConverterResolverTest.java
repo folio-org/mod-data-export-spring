@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
 @EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
@@ -25,11 +25,11 @@ class ExportConfigConverterResolverTest {
 
   @Autowired
   private ExportConfigConverterResolver resolver;
-  @MockBean
+  @MockitoBean
   private ConfigurationClient client;
-  @MockBean
+  @MockitoBean
   private Scheduler scheduler;
-  @MockBean
+  @MockitoBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
 
   @Test

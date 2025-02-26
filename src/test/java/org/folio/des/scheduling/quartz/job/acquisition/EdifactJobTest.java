@@ -89,7 +89,7 @@ class EdifactJobTest {
   @Test
   void testExecuteSuccessfulSysUserDisabled() {
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(systemUserProperties.isEnabled()).thenReturn(false);
@@ -109,7 +109,7 @@ class EdifactJobTest {
   @Test
   void testExecuteSuccessfulSysUserEnabled() {
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job().id(UUID.randomUUID()));
@@ -125,7 +125,7 @@ class EdifactJobTest {
   @Test
   void testExecuteSuccessfulSkipKafkaWhenNoJobId() {
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(jobService.upsertAndSendToKafka(any(), eq(false), eq(false))).thenReturn(new Job());
@@ -150,7 +150,7 @@ class EdifactJobTest {
   @Test
   void testExecuteFailureWhenNoExportConfigIdPassed() {
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     JobDetail jobDetail = getJobDetail();
     jobDetail.getJobDataMap().remove("exportConfigId");
     when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
@@ -162,7 +162,7 @@ class EdifactJobTest {
   @Test
   void testExecuteFailureAndJobDeletedWhenExportConfigNotFound() throws SchedulerException {
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))

@@ -54,7 +54,7 @@ class OldDeleteJobTest {
   void testSuccessfulExecute() throws JobExecutionException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     doNothing().when(jobService).deleteOldJobs();
     oldDeleteJob.execute(jobExecutionContext);
     verify(jobService).deleteOldJobs();

@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -55,8 +55,9 @@ class ConfigsControllerTest extends BaseTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @SpyBean private BursarExportScheduler bursarExportScheduler;
-  @SpyBean private ConfigurationClient configurationClient;
+  @MockitoSpyBean
+  private BursarExportScheduler bursarExportScheduler;
+  @MockitoSpyBean private ConfigurationClient configurationClient;
 
   @AfterEach
   void clear(){

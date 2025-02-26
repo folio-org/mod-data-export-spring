@@ -83,7 +83,7 @@ class BursarJobTest {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID)).thenReturn(getExportConfig());
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     when(dataExportSpringClient.upsertJob(any())).thenReturn(new Job().id(UUID.randomUUID()));
     bursarJob.execute(jobExecutionContext);
     verify(dataExportSpringClient).upsertJob(any());
@@ -105,7 +105,7 @@ class BursarJobTest {
     jobDetail.getJobDataMap().remove("exportConfigId");
     when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
 
     String message = assertThrows(IllegalArgumentException.class, () -> bursarJob.execute(jobExecutionContext)).getMessage();
     assertEquals("'exportConfigId' param is missing in the jobExecutionContext", message);
@@ -115,7 +115,7 @@ class BursarJobTest {
   void testExecuteFailureWhenWhenConfigIdNotFoundInSettings() throws SchedulerException {
     when(jobExecutionContext.getJobDetail()).thenReturn(getJobDetail());
     when(systemUserService.getAuthedSystemUser(any())).thenReturn(SystemUser.builder().build());
-    when(contextBuilder.forSystemUser(any())).thenReturn(folioExecutionContext);
+    when(contextBuilder.forSystemUser(any(), any())).thenReturn(folioExecutionContext);
     when(jobExecutionContext.getScheduler()).thenReturn(scheduler);
     when(exportTypeBasedConfigManager.getConfigById(EXPORT_CONFIG_ID))
       .thenThrow(new NotFoundException("config not found"));

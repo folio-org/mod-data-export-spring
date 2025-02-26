@@ -32,10 +32,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
   ServiceConfiguration.class})
@@ -46,16 +46,16 @@ class EdifactOrdersExportServiceTest {
 
   @Autowired
   private EdifactOrdersExportService service;
-  @MockBean
+  @MockitoBean
   private ConfigurationClient client;
   @Autowired
   private ObjectMapper objectMapper;
-  @MockBean
+  @MockitoBean
   @Qualifier("edifactOrdersExportJobScheduler")
   private ExportJobScheduler exportJobScheduler;
-  @MockBean
+  @MockitoBean
   private Scheduler scheduler;
-  @MockBean
+  @MockitoBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
 
 
