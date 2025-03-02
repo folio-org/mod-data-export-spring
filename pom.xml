@@ -34,10 +34,10 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
     </export-configs.yaml.file>
 
-    <folio-spring-base.version>9.0.0-SNAPSHOT</folio-spring-base.version>
+    <folio-spring-base.version>9.0.0</folio-spring-base.version>
     <folio-service-tools.version>4.1.1</folio-service-tools.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
-    <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
+    <hypersistence-utils-hibernate-63.version>3.9.2</hypersistence-utils-hibernate-63.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
 
