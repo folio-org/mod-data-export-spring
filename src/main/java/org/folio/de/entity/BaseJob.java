@@ -26,8 +26,9 @@ import org.springframework.batch.core.ExitStatus;
 public abstract class BaseJob {
 
   @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", type = org.folio.des.repository.generator.CustomUUIDGenerator.class)
+  @JobId
+//  @GeneratedValue(generator = "UUID")
+//  @GenericGenerator(name = "UUID", type = org.folio.des.repository.generator.CustomUUIDGenerator.class)
   @Column(updatable = false, nullable = false)
   private UUID id;
 
