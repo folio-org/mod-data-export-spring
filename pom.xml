@@ -42,7 +42,7 @@
     <openapi-generator.version>6.2.1</openapi-generator.version>
 
     <!-- Test properties-->
-    <testcontainers-bom.version>1.19.3</testcontainers-bom.version>
+    <testcontainers-bom.version>1.20.5</testcontainers-bom.version>
     <junit-extensions.version>2.4.0</junit-extensions.version>
     <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
     <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
