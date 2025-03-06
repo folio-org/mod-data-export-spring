@@ -94,7 +94,7 @@ class InstallUpgradeIT {
     .withEnv("DB_DATABASE", "postgres")
     .withEnv("KAFKA_HOST", "mykafka")
     .withEnv("KAFKA_PORT", "9092")
-    .withEnv("SYSTEM_USER_PASSWORD", "password");
+    .withEnv("SYSTEM_USER_ENABLED", "false");
 
   private static void mockPath(MockServerClient mockServerClient, String path, String jsonBody) {
     mockServerClient.when(request(path))

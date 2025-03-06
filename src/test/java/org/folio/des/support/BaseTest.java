@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ import lombok.SneakyThrows;
 @EmbeddedKafka(topics = { "diku.data-export.job.update" })
 @EnableKafka
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseTest {
 
   public static final int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
@@ -65,6 +67,7 @@ public abstract class BaseTest {
   protected Scheduler scheduler;
   @Autowired
   private FolioEnvironment folioEnvironment;
+
 
   static {
     postgreDBContainer.start();
@@ -82,16 +85,15 @@ public abstract class BaseTest {
   }
 
   @BeforeAll
-  static void beforeAll(@Autowired MockMvc mockMvc) {
+  void beforeAll(@Autowired MockMvc mockMvc) {
     wireMockServer = new WireMockServer(WIRE_MOCK_PORT);
     wireMockServer.start();
-
+    folioEnvironment.setOkapiUrl(wireMockServer.baseUrl());
     setUpTenant(mockMvc);
   }
 
   @BeforeEach
   void beforeEach() throws SchedulerException {
-    folioEnvironment.setOkapiUrl(wireMockServer.baseUrl());
     scheduler.clear();
   }
 

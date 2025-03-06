@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
                   ServiceConfiguration.class})
@@ -83,13 +83,13 @@ class BursarFeesFinesExportConfigServiceTest {
   private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
   @Autowired
   private ObjectMapper objectMapper;
-  @MockBean
+  @MockitoBean
   private ConfigurationClient client;
-  @MockBean
+  @MockitoBean
   private Scheduler scheduler;
-  @MockBean
+  @MockitoBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
-  @MockBean
+  @MockitoBean
   private BursarExportScheduler bursarExportScheduler;
 
   @Test

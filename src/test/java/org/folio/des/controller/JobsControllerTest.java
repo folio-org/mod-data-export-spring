@@ -33,8 +33,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
@@ -43,7 +43,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
 class JobsControllerTest extends BaseTest {
 
-  @MockBean
+  @MockitoBean
   ExportWorkerClient exportWorkerClient;
   private static final String JOB_BURSAR_REQUEST =
     """

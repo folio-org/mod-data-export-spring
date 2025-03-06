@@ -4,7 +4,6 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Date;
@@ -16,7 +15,6 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.IdentifierType;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Progress;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
@@ -26,8 +24,7 @@ import org.springframework.batch.core.ExitStatus;
 public abstract class BaseJob {
 
   @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", type = org.folio.des.repository.generator.CustomUUIDGenerator.class)
+  @JobId
   @Column(updatable = false, nullable = false)
   private UUID id;
 
