@@ -3,6 +3,7 @@
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.3...v3.5.0)
 
 ### Stories
+* [MODEXPS-286](https://issues.folio.org/browse/MODEXPS-286) Create migration  to populate integration type 'Ordering' for an existing jobs
 * [MODEXPS-277](https://issues.folio.org/browse/MODEXPS-277) Adjust Edi Orders export schema to support Claiming type
 * [MODEXPS-273](https://issues.folio.org/browse/MODEXPS-273) Add claiming job type
 
