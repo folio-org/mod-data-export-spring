@@ -12,5 +12,6 @@
   <include file="changes/04-01-2024_add_types_for_instance.xml" relativeToChangelogFile="true"/>
   <include file="changes/db.changelog-3.5.0.xml" relativeToChangelogFile="true"/>
   <include file="changes/03-03-2025_delete_enum_types.xml" relativeToChangelogFile="true"/>
+  <include file="changes/03_10_2025_populate_orders_jobs_missing_fields.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
