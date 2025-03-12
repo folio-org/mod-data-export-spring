@@ -1,3 +1,20 @@
+## 2024-10-30 v3.5.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.3...v3.5.0)
+
+### Stories
+* [MODEXPS-277](https://issues.folio.org/browse/MODEXPS-277) Adjust Edi Orders export schema to support Claiming type
+* [MODEXPS-273](https://issues.folio.org/browse/MODEXPS-273) Add claiming job type
+
+### Technical tasks
+* [MODEXPW-529](https://issues.folio.org/browse/MODEXPW-529) Create CSV file for claims
+* [MODEXPS-283](https://issues.folio.org/browse/MODEXPS-283) Update to mod-data-export-spring Java 21
+* [MODEXPS-278](https://issues.folio.org/browse/MODEXPS-278) Update permissions for mod-feesfines
+
+### Bug fixes
+* [MODEXPS-282](https://issues.folio.org/browse/MODEXPS-282) Existing export methods are not displayed in the dropdown on "Search & filter" pane in "Export manager"
+* [MODEXPS-280](https://issues.folio.org/browse/MODEXPS-280) Upgrade Spring Boot and Kafka fixing vulnerabilities
+
 ## 2024-11-15 v3.4.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.0...v3.4.1)
