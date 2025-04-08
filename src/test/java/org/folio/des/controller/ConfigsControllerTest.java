@@ -7,6 +7,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.apache.http.protocol.HTTP.CONTENT_TYPE;
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -250,7 +251,7 @@ class ConfigsControllerTest extends BaseTest {
               .content(UPDATE_CONFIG_REQUEST_FAILED))
       .andExpectAll(status().isBadRequest(),
          content().contentType(MediaType.APPLICATION_JSON_VALUE),
-         jsonPath("$.errors[0].type", is("MethodArgumentNotValidException")));
+         jsonPath("$.errors[0].message", startsWith("MethodArgumentNotValidException")));
   }
 
   @Test
@@ -294,7 +295,7 @@ class ConfigsControllerTest extends BaseTest {
           .headers(defaultHeaders()))
       .andExpectAll(status().isNotFound(),
          content().contentType(MediaType.APPLICATION_JSON_VALUE),
-         jsonPath("$.errors[0].type", is("NotFoundException")));
+         jsonPath("$.errors[0].message", startsWith("NotFoundException")));
   }
 
   @Test
@@ -312,7 +313,7 @@ class ConfigsControllerTest extends BaseTest {
           .headers(defaultHeaders()))
       .andExpectAll(status().isNotFound(),
          content().contentType(MediaType.APPLICATION_JSON_VALUE),
-         jsonPath("$.errors[0].type", is("NotFoundException")));
+         jsonPath("$.errors[0].message", startsWith("NotFoundException")));
   }
 
   @Test
@@ -345,6 +346,6 @@ class ConfigsControllerTest extends BaseTest {
           .headers(defaultHeaders()))
       .andExpectAll(status().isNotFound(),
          content().contentType(MediaType.APPLICATION_JSON_VALUE),
-         jsonPath("$.errors[0].type", is("NotFoundException")));
+         jsonPath("$.errors[0].message", startsWith("NotFoundException")));
   }
 }
