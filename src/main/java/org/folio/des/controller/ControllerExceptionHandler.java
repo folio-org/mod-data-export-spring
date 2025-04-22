@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.folio.des.domain.dto.Error;
+import org.folio.des.domain.dto.ErrorType;
 import org.folio.des.domain.dto.Errors;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.spring.exception.NotFoundException;
@@ -46,7 +47,7 @@ public class ControllerExceptionHandler {
     listOfErrors.add(exception.getError());
     var errors = new Errors();
     errors.setErrors(listOfErrors);
-    errors.setTotalRecords(listOfErrors.size());
+    errors.setTotalErrorRecords(listOfErrors.size());
     return errors;
   }
 
@@ -83,10 +84,10 @@ public class ControllerExceptionHandler {
     return buildError(exception.getLocalizedMessage(), exception.getClass().getSimpleName(), status.toString());
   }
 
-  private Errors buildError(String message, String type, String code) {
+  private Errors buildError(String message, String exceptionName, String code) {
     var error = new Error();
-    error.setMessage(message);
-    error.setType(type);
+    error.setMessage(exceptionName + ": " + message);
+    error.setType(ErrorType.ERROR);
     error.setCode(code);
     List<Error> listOfErrors = new ArrayList<>();
     listOfErrors.add(error);
@@ -96,7 +97,7 @@ public class ControllerExceptionHandler {
   private Errors buildErrors(List<Error> listOfErrors) {
     var errors = new Errors();
     errors.setErrors(listOfErrors);
-    errors.setTotalRecords(listOfErrors.size());
+    errors.setTotalErrorRecords(listOfErrors.size());
     return errors;
   }
 

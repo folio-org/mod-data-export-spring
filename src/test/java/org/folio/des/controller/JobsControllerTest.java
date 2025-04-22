@@ -2,6 +2,7 @@ package org.folio.des.controller;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
@@ -147,7 +148,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.errors[0].type", is("IllegalArgumentException"))));
+                jsonPath("$.errors[0].message", startsWith("IllegalArgumentException"))));
   }
 
   @Test
@@ -224,7 +225,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.errors[0].type", is("PathElementException"))));
+              jsonPath("$.errors[0].message", startsWith("PathElementException"))));
   }
 
   @Test
@@ -318,7 +319,7 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isNotFound(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.errors[0].type", is("NotFoundException"))));
+                jsonPath("$.errors[0].message", startsWith("NotFoundException"))));
   }
 
   @Test
