@@ -1,3 +1,10 @@
+## 2025-05-08 v3.5.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.5.0...v3.5.1)
+
+### Bug fixes
+* [MODEXPS-289](https://issues.folio.org/browse/MODEXPS-289) EDIFACT Order export jobs are being deleted every 7 days
+
 ## 2024-10-30 v3.5.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.3...v3.5.0)
