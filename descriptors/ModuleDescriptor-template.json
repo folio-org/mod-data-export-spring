@@ -480,6 +480,14 @@
       {
         "name": "ENV",
         "value": "folio"
+      },
+      {
+        "name": "JOB_EXPIRATION_PERIOD_DAYS",
+        "value": "7"
+      },
+      {
+        "name": "JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS",
+        "value": "5000"
       }
     ]
   }

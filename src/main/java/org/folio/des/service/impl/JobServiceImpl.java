@@ -4,6 +4,8 @@ import static java.util.Objects.nonNull;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
+import static org.folio.des.domain.dto.ExportType.CLAIMS;
+import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -21,6 +23,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.des.client.ConfigurationClient;
@@ -45,6 +48,7 @@ import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
@@ -56,10 +60,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
 
-  private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
-  public static final int CONNECTION_TIMEOUT = 5000;
+  @Value("${job.expirationPeriodDays}")
+  private int jobExpirationPeriod;
+  @Value("${job.downloadFileConnectionTimeoutMs}")
+  private int jobDownloadFileConnectionTimeout;
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
+  private static final Set<ExportType> BULK_EDIT_TYPES = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
+  private static final Set<ExportType> ACQUISITION_TYPES = Set.of(EDIFACT_ORDERS_EXPORT, CLAIMS);
 
   static {
     OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Fees & Fines Bursar Report");
@@ -74,8 +82,6 @@ public class JobServiceImpl implements JobService {
   private final CQLService cqlService;
   private final BulkEditConfigService bulkEditConfigService;
   private final ConfigurationClient client;
-
-  private Set<ExportType> bulkEditTypes = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
 
   @Transactional(readOnly = true)
   @Override
@@ -195,13 +201,14 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void deleteOldJobs() {
-    var expirationDate = createExpirationDate(DEFAULT_JOB_EXPIRATION_PERIOD);
+    var expirationDate = createExpirationDate(jobExpirationPeriod);
     log.info("Collecting old jobs with 'updatedDate' less than {}.", expirationDate);
-    var jobsToDelete = filterJobsNotMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), bulkEditTypes);
+    Set<ExportType> excludedTypes = SetUtils.union(BULK_EDIT_TYPES, ACQUISITION_TYPES);
+    var jobsToDelete = filterJobsNotMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), excludedTypes);
 
     expirationDate = createExpirationDate(bulkEditConfigService.getBulkEditJobExpirationPeriod());
     log.info("Collecting old bulk-edit jobs with 'updatedDate' less than {}.", expirationDate);
-    jobsToDelete.addAll(filterJobsMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), bulkEditTypes));
+    jobsToDelete.addAll(filterJobsMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), BULK_EDIT_TYPES));
 
     deleteJobs(jobsToDelete);
   }
@@ -261,7 +268,7 @@ public class JobServiceImpl implements JobService {
       URL url = new URL(presignedUrl.getUrl());
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("GET");
-      conn.setConnectTimeout(CONNECTION_TIMEOUT);
+      conn.setConnectTimeout(jobDownloadFileConnectionTimeout);
       return conn.getInputStream();
     } catch (Exception e) {
       log.error("Error downloading a file: {} for jobId: {} and key: {}", e.getMessage(), job.getId(), key);

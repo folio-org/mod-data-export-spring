@@ -47,6 +47,9 @@ public interface JobService {
 
   /**
    * Deletes old jobs.
+   * This method skips deleting EDIFACT_ORDERS_EXPORT and CLAIMS jobs.
+   * For bulk edit jobs, it uses custom expiration period defined in mod-configuration(by default 14 days).
+   * For all other jobs, it uses default expiration period 7 days(configurable).
    */
   void deleteOldJobs();
 

@@ -10,20 +10,22 @@ API for Data Export Spring module.
 
 ## Environment variables:
 
-| Name                          | Default value             | Description                                                       |
-| :-----------------------------| :------------------------:|:------------------------------------------------------------------|
-| DB_HOST                       | postgres                  | Postgres hostname                                                 |
-| DB_PORT                       | 5432                      | Postgres port                                                     |
-| DB_USERNAME                   | folio_admin               | Postgres username                                                 |
-| DB_PASSWORD                   | -                         | Postgres username password                                        |
-| DB_DATABASE                   | okapi_modules             | Postgres database name                                            |
-| KAFKA_HOST                    | kafka                     | Kafka broker hostname                                             |
-| KAFKA_PORT                    | 9092                      | Kafka broker port                                                 |
-| OKAPI_URL                     | http://okapi:9130         | Okapi url                                                         |
-| SYSTEM\_USER\_NAME            | data-export-system-user   | Username of the system user                                       |
-| SYSTEM\_USER\_PASSWORD        | -                         | Password of the system user                                       |
-| SYSTEM\_USER\_ENABLED         |           true            | Defines if system user must be created at service tenant initialization or used for egress service requests |
-| ENV                           | folio                     | Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed|
+| Name                                    |      Default value      | Description                                                                                                                                            |
+|:----------------------------------------|:-----------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DB_HOST                                 |        postgres         | Postgres hostname                                                                                                                                      |
+| DB_PORT                                 |          5432           | Postgres port                                                                                                                                          |
+| DB_USERNAME                             |       folio_admin       | Postgres username                                                                                                                                      |
+| DB_PASSWORD                             |            -            | Postgres username password                                                                                                                             |
+| DB_DATABASE                             |      okapi_modules      | Postgres database name                                                                                                                                 |
+| KAFKA_HOST                              |          kafka          | Kafka broker hostname                                                                                                                                  |
+| KAFKA_PORT                              |          9092           | Kafka broker port                                                                                                                                      |
+| OKAPI_URL                               |    http://okapi:9130    | Okapi url                                                                                                                                              |
+| SYSTEM\_USER\_NAME                      | data-export-system-user | Username of the system user                                                                                                                            |
+| SYSTEM\_USER\_PASSWORD                  |            -            | Password of the system user                                                                                                                            |
+| SYSTEM\_USER\_ENABLED                   |          true           | Defines if system user must be created at service tenant initialization or used for egress service requests                                            |
+| ENV                                     |          folio          | Logical name of the deployment, must be set if Kafka/Elasticsearch are shared for environments, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed |
+| JOB_EXPIRATION_PERIOD_DAYS              |            7            | Expiration period of export jobs, acquisition jobs have no expiration, bulk edit jobs use own rules to define it with using mod-configuration          |
+| JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS |          5000           | Connection timeout to download exported file from storage                                                                                              |
 
 
 ## Additional information
