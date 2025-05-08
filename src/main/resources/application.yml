@@ -94,5 +94,5 @@ application:
     topic-pattern: ${ENV:folio}.(.*\.)?data-export.job.update
     group-id: ${ENV:folio}-mod-data-export-spring-events-group
 job:
-  expiration-period-days: ${JOB_EXPIRATION_PERIOD_DAYS:7}
-  download-file-connection-timeout-ms: ${JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS:5000}
+  expirationPeriodDays: ${JOB_EXPIRATION_PERIOD_DAYS:7}
+  downloadFileConnectionTimeoutMs: ${JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS:5000}
