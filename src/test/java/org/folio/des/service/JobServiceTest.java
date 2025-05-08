@@ -38,6 +38,7 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,6 +49,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.SneakyThrows;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JobServiceTest {
@@ -79,6 +81,12 @@ class JobServiceTest {
   @Mock
   private ObjectMapper objectMapper;
 
+  @BeforeEach
+  void setup() {
+    ReflectionTestUtils.setField(jobService, "jobExpirationPeriod", 7);
+    ReflectionTestUtils.setField(jobService, "jobDownloadFileConnectionTimeout", 5000);
+  }
+
   @Test
   void shouldCollectExpiredJobs() {
     var expiredJobs = createExpiredJobs();
@@ -93,7 +101,11 @@ class JobServiceTest {
 
     verify(repository).findByUpdatedDateBefore(jobsExpirationDate);
     verify(repository).findByUpdatedDateBefore(bulkEditExpirationDate);
-    verify(jobExecutionService).deleteJobs(expiredJobs);
+    List<Job> actualDeletedJobs = expiredJobs.stream()
+      .filter(job -> job.getType() != ExportType.EDIFACT_ORDERS_EXPORT)
+      .filter(job -> job.getType() != ExportType.CLAIMS)
+      .toList();
+    verify(jobExecutionService).deleteJobs(actualDeletedJobs);
   }
 
   @Test

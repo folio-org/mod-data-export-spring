@@ -93,3 +93,6 @@ application:
         partitions: ${DATA_EXPORT_JOB_COMMAND_TOPIC_PARTITIONS:50}
     topic-pattern: ${ENV:folio}.(.*\.)?data-export.job.update
     group-id: ${ENV:folio}-mod-data-export-spring-events-group
+job:
+  expiration-period-days: ${JOB_EXPIRATION_PERIOD_DAYS:7}
+  download-file-connection-timeout-ms: ${JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS:5000}
