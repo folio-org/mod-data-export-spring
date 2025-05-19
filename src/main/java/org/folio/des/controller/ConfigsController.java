@@ -23,7 +23,6 @@ import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 @RequestMapping("/data-export-spring")
 public class ConfigsController implements ConfigsApi {
 
-  private final EnumSet<ExportType> applyAspectExportTypes = EnumSet.of(EDIFACT_ORDERS_EXPORT);
   private final ExportTypeBasedConfigManager manager;
 
   @Override
@@ -37,10 +36,6 @@ public class ConfigsController implements ConfigsApi {
     exportConfig.setTenant(tenantId);
     log.info("postExportConfig:: by exportConfig={}", exportConfig);
     manager.postConfig(exportConfig);
-    if (applyAspectExportTypes.contains(exportConfig.getType())) {
-      String config = exportConfig.toString();
-      return new ResponseEntity<>(config.substring(config.indexOf("{")), HttpStatus.CREATED);
-    }
     return new ResponseEntity<>("Export configuration added", HttpStatus.CREATED);
   }
 
