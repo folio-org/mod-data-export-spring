@@ -20,7 +20,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -28,6 +27,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
@@ -59,9 +59,10 @@ class InstallUpgradeIT {
 
   @Container
   public static final KafkaContainer KAFKA =
-    new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.5.3"))
+    new KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.0"))
     .withNetwork(NETWORK)
-    .withNetworkAliases("mykafka");
+    .withListener("mykafka:19092")
+    .withStartupAttempts(3);
 
   @Container
   public static final PostgreSQLContainer<?> POSTGRES =
@@ -93,7 +94,7 @@ class InstallUpgradeIT {
     .withEnv("DB_PASSWORD", "password")
     .withEnv("DB_DATABASE", "postgres")
     .withEnv("KAFKA_HOST", "mykafka")
-    .withEnv("KAFKA_PORT", "9092")
+    .withEnv("KAFKA_PORT", "19092")
     .withEnv("SYSTEM_USER_ENABLED", "false");
 
   private static void mockPath(MockServerClient mockServerClient, String path, String jsonBody) {
