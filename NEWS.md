@@ -1,3 +1,8 @@
+## 2025-05-26 v3.4.4
+
+### Bug fixes
+* [MODEXPS-287](https://folio-org.atlassian.net/browse/MODEXPS-287) Remove size limitation on outputFormat job parameter
+
 ## 2024-12-13 v3.4.3
 
 * [MODEXPS-280](https://folio-org.atlassian.net/browse/MODEXPS-280) Upgrade Spring Boot and Kafka fixing vulns
