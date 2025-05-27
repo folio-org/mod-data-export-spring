@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="05_16_2025_alter_job_output_format" author="viacheslav_kolesnyk">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="job"/>
+                <sqlCheck expectedResult="character varying">
+                    SELECT data_type
+                    FROM information_schema.columns
+                    WHERE table_schema = '${database.defaultSchemaName}'
+                    AND table_name = 'job'
+                    AND column_name = 'output_format';
+                </sqlCheck>
+            </and>
+        </preConditions>
+
+        <sql>
+            ALTER TABLE job ALTER COLUMN output_format TYPE text;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

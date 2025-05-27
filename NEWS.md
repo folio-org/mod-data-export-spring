@@ -1,3 +1,10 @@
+## 2025-05-27 v3.5.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.5.1...v3.5.2)
+
+### Bug fixes
+* [MODEXPS-291](https://issues.folio.org/browse/MODEXPS-291) Remove size limitation on outputFormat job parameter
+
 ## 2025-05-08 v3.5.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.5.0...v3.5.1)
