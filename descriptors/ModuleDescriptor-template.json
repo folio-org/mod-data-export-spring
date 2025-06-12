@@ -27,20 +27,22 @@
       "version": "1.2"
     },
     {
-      "id": "orders",
-      "version": "13.0"
-    },
-    {
       "id": "configuration",
       "version": "2.0"
     },
     {
-      "id": "finance.expense-classes",
-      "version": "3.0"
-    },
-    {
       "id" :  "bulk-edit",
       "version": "4.1"
+    }
+  ],
+  "optional": [
+    {
+      "id": "orders",
+      "version": "13.0"
+    },
+    {
+      "id": "finance.expense-classes",
+      "version": "3.0"
     }
   ],
   "provides": [
