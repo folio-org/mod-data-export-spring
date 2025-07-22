@@ -1,0 +1,62 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="MODEXPS-298@@create-job-deletion-interval-table" author="serhii_nosko">
+    <createTable tableName="job_deletion_interval">
+      <column name="export_type" type="TEXT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="retention_days" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_date" type="TIMESTAMP" defaultValueComputed="now()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_by" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_date" type="TIMESTAMP">
+        <constraints nullable="true"/>
+      </column>
+      <column name="updated_by" type="UUID">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="MODEXPS-298@@populate-default-job-deletion-intervals" author="serhii_nosko">
+    <insert tableName="job_deletion_interval">
+      <column name="export_type" value="CIRCULATION_LOG"/>
+      <column name="retention_days" valueNumeric="7"/>
+      <column name="created_by" value="1c49bbf9-abda-4c02-a7cc-0504f8301268"/> <!-- Created by SYSTEM -->
+    </insert>
+    <insert tableName="job_deletion_interval">
+      <column name="export_type" value="BURSAR_FEES_FINES"/>
+      <column name="retention_days" valueNumeric="7"/>
+      <column name="created_by" value="1c49bbf9-abda-4c02-a7cc-0504f8301268"/>
+    </insert>
+    <insert tableName="job_deletion_interval">
+      <column name="export_type" value="EDIFACT_ORDERS_EXPORT"/>
+      <column name="retention_days" valueNumeric="730"/>
+      <column name="created_by" value="1c49bbf9-abda-4c02-a7cc-0504f8301268"/>
+    </insert>
+    <insert tableName="job_deletion_interval">
+      <column name="export_type" value="CLAIMS"/>
+      <column name="retention_days" valueNumeric="730"/>
+      <column name="created_by" value="1c49bbf9-abda-4c02-a7cc-0504f8301268"/>
+    </insert>
+    <insert tableName="job_deletion_interval">
+      <column name="export_type" value="E_HOLDINGS"/>
+      <column name="retention_days" valueNumeric="7"/>
+      <column name="created_by" value="1c49bbf9-abda-4c02-a7cc-0504f8301268"/>
+    </insert>
+    <insert tableName="job_deletion_interval">
+      <column name="export_type" value="AUTH_HEADINGS_UPDATES"/>
+      <column name="retention_days" valueNumeric="7"/>
+      <column name="created_by" value="1c49bbf9-abda-4c02-a7cc-0504f8301268"/>
+    </insert>
+  </changeSet>
+</databaseChangeLog>

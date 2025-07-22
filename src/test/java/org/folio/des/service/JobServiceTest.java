@@ -1,7 +1,10 @@
 package org.folio.des.service;
 
+import static org.folio.des.domain.dto.ExportType.BURSAR_FEES_FINES;
+import static org.folio.des.domain.dto.ExportType.CLAIMS;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,10 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
+import org.folio.des.CopilotGenerated;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
@@ -29,8 +32,9 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.domain.dto.delete_interval.JobDeletionInterval;
+import org.folio.des.domain.dto.delete_interval.JobDeletionIntervalCollection;
 import org.folio.des.repository.JobDataExportRepository;
-import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -43,7 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,8 +56,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JobServiceTest {
-  private static final int DEFAULT_JOB_EXPIRATION_PERIOD = 7;
-  private static final int DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD = 14;
 
   @InjectMocks
   private JobServiceImpl jobService;
@@ -62,8 +63,6 @@ class JobServiceTest {
   private JobDataExportRepository repository;
   @Mock
   private JobExecutionService jobExecutionService;
-  @Mock
-  private BulkEditConfigService configService;
   @Mock
   private ConfigurationClient client;
   @Mock
@@ -80,32 +79,13 @@ class JobServiceTest {
   private KafkaService kafka;
   @Mock
   private ObjectMapper objectMapper;
+  @Mock
+  private JobDeletionIntervalService deletionIntervalService;
 
   @BeforeEach
   void setup() {
     ReflectionTestUtils.setField(jobService, "jobExpirationPeriod", 7);
     ReflectionTestUtils.setField(jobService, "jobDownloadFileConnectionTimeout", 5000);
-  }
-
-  @Test
-  void shouldCollectExpiredJobs() {
-    var expiredJobs = createExpiredJobs();
-
-    var jobsExpirationDate = getExpiredDate(DEFAULT_JOB_EXPIRATION_PERIOD);
-    var bulkEditExpirationDate = getExpiredDate(DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD);
-
-    Mockito.when(repository.findByUpdatedDateBefore(any())).thenReturn(expiredJobs);
-    Mockito.when(configService.getBulkEditJobExpirationPeriod()).thenReturn(DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD);
-
-    jobService.deleteOldJobs();
-
-    verify(repository).findByUpdatedDateBefore(jobsExpirationDate);
-    verify(repository).findByUpdatedDateBefore(bulkEditExpirationDate);
-    List<Job> actualDeletedJobs = expiredJobs.stream()
-      .filter(job -> job.getType() != ExportType.EDIFACT_ORDERS_EXPORT)
-      .filter(job -> job.getType() != ExportType.CLAIMS)
-      .toList();
-    verify(jobExecutionService).deleteJobs(actualDeletedJobs);
   }
 
   @Test
@@ -134,7 +114,7 @@ class JobServiceTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
-    var jobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, null, client);
+    var jobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, client, deletionIntervalService);
     var config = new ExportConfig();
     config.setId(configId.toString());
     org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
@@ -158,20 +138,86 @@ class JobServiceTest {
     Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
   }
 
-  private List<Job> createExpiredJobs() {
-    var bulkEditExportTypes = new ArrayList<Job>();
+  @Test
+  @CopilotGenerated(model = "Claude Sonnet 3.5")
+  void shouldDeleteExpiredJobsWhenIntervalsExist() {
+    var bursarExpiredJobs = createExpiredJobs(5, BURSAR_FEES_FINES, 7);
+    var claimsExpiredJobs = createExpiredJobs(10, CLAIMS, 14);
+    var date7Days = getExpiredDate(7);
+    var date14Days = getExpiredDate(14);
+
+    var interval1 = new JobDeletionInterval()
+      .exportType(BURSAR_FEES_FINES)
+      .retentionDays(7);
+    var interval2 = new JobDeletionInterval()
+      .exportType(ExportType.CLAIMS)
+      .retentionDays(14);
+    var jobDeletionIntervals = List.of(interval1, interval2);
+
+    var jobDeletionIntervalCollection = new JobDeletionIntervalCollection()
+      .jobDeletionIntervals(jobDeletionIntervals);
+
+    when(deletionIntervalService.getAll()).thenReturn(jobDeletionIntervalCollection);
+    when(repository.findByTypeAndUpdatedDateBefore(BURSAR_FEES_FINES, date7Days)).thenReturn(bursarExpiredJobs);
+    when(repository.findByTypeAndUpdatedDateBefore(ExportType.CLAIMS, date14Days)).thenReturn(claimsExpiredJobs);
+
+    var expiredJobs = new ArrayList<Job>();
+    expiredJobs.addAll(bursarExpiredJobs);
+    expiredJobs.addAll(claimsExpiredJobs);
+
+    jobService.deleteOldJobs();
+
+    verify(repository).findByTypeAndUpdatedDateBefore(BURSAR_FEES_FINES, date7Days);
+    verify(repository).findByTypeAndUpdatedDateBefore(ExportType.CLAIMS, date14Days);
+    verify(repository).deleteAllInBatch(expiredJobs);
+    verify(jobExecutionService).deleteJobs(expiredJobs);
+  }
+
+  @Test
+  @CopilotGenerated(model = "Claude Sonnet 3.5")
+  void shouldNotDeleteJobsWhenTheyAreNotExpired() {
+    var date200Days = getExpiredDate(200);
+
+    var interval1 = new JobDeletionInterval()
+      .exportType(BURSAR_FEES_FINES)
+      .retentionDays(200); // 200 days retention period
+    var jobDeletionIntervals = List.of(interval1);
+
+    var jobDeletionIntervalCollection = new JobDeletionIntervalCollection()
+      .jobDeletionIntervals(jobDeletionIntervals);
+
+    when(deletionIntervalService.getAll()).thenReturn(jobDeletionIntervalCollection);
+    when(repository.findByTypeAndUpdatedDateBefore(BURSAR_FEES_FINES, date200Days)).thenReturn(List.of());
+
+    jobService.deleteOldJobs();
+
+    verify(repository).findByTypeAndUpdatedDateBefore(BURSAR_FEES_FINES, date200Days);
+    verify(repository, never()).deleteAllInBatch(any());
+    verify(jobExecutionService, never()).deleteJobs(any());
+  }
+
+  @Test
+  @CopilotGenerated(model = "Claude Sonnet 3.5")
+  void shouldSkipDeletionWhenNoIntervalsExist() {
+    var emptyCollection = new JobDeletionIntervalCollection()
+      .jobDeletionIntervals(List.of());
+
+    when(deletionIntervalService.getAll()).thenReturn(emptyCollection);
+
+    jobService.deleteOldJobs();
+
+    verify(repository, never()).findByTypeAndUpdatedDateBefore(any(), any());
+    verify(repository, never()).deleteAllInBatch(any());
+    verify(jobExecutionService, never()).deleteJobs(any());
+  }
+
+  private List<Job> createExpiredJobs(int count, ExportType exportType, int expirationPeriod) {
     var exportTypes = new ArrayList<Job>();
 
-    Stream.of(ExportType.values())
-      .forEach(exportType -> {
-        if (isBulkEdit(exportType)) {
-          bulkEditExportTypes.add(createJob(exportType, DEFAULT_BULK_EDIT_JOB_EXPIRATION_PERIOD));
-        } else {
-          exportTypes.add(createJob(exportType, DEFAULT_JOB_EXPIRATION_PERIOD));
-        }
-      });
+    for (int i = 0; i < count; i++) {
+      exportTypes.add(createJob(exportType, expirationPeriod));
+    }
 
-    exportTypes.addAll(bulkEditExportTypes);
     return exportTypes;
   }
 
@@ -185,9 +231,5 @@ class JobServiceTest {
 
   private Date getExpiredDate(int days) {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-  }
-
-  private boolean isBulkEdit(ExportType exportType) {
-    return exportType.getValue().startsWith("BULK_EDIT");
   }
 }

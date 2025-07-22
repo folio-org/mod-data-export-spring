@@ -1,6 +1,7 @@
 package org.folio.des.repository;
 
 import org.folio.de.entity.Job;
+import org.folio.des.domain.dto.ExportType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,6 +14,6 @@ public interface JobDataExportRepository extends JpaRepository<Job, UUID> {
   @Query(value = "SELECT nextval('job-number')", nativeQuery = true)
   Integer getNextJobNumber();
 
-  List<Job> findByUpdatedDateBefore(Date updatedDate);
+  List<Job> findByTypeAndUpdatedDateBefore(ExportType type, Date updatedDate);
 
 }
