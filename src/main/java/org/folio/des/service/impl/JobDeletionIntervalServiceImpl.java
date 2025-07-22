@@ -92,7 +92,6 @@ public class JobDeletionIntervalServiceImpl implements JobDeletionIntervalServic
     var entity = new JobDeletionIntervalEntity();
     entity.setExportType(dto.getExportType());
     entity.setRetentionDays(dto.getRetentionDays());
-    entity.setCreatedDate(dto.getMetadata().getCreatedDate());
     entity.setUpdatedBy(context.getUserId());
     entity.setUpdatedDate(LocalDateTime.now());
     if (dto.getMetadata() != null) {
