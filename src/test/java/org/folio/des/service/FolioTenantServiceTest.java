@@ -13,7 +13,6 @@ import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
-import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -31,9 +30,6 @@ class FolioTenantServiceTest {
 
   @Mock
   KafkaService kafka;
-
-  @Mock
-  BulkEditConfigService bulkEditConfigService;
 
   @Mock
   EdifactScheduledJobInitializer edifactScheduledJobInitializer;
@@ -62,8 +58,6 @@ class FolioTenantServiceTest {
 
     doNothing().when(prepareSystemUserService)
       .setupSystemUser();
-    doNothing().when(bulkEditConfigService)
-      .checkBulkEditConfiguration();
     doNothing().when(edifactScheduledJobInitializer)
       .initAllScheduledJob(tenantAttributes);
     doNothing().when(kafka)
@@ -80,7 +74,6 @@ class FolioTenantServiceTest {
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
     verify(prepareSystemUserService).setupSystemUser();
-    verify(bulkEditConfigService, times(1)).checkBulkEditConfiguration();
     verify(edifactScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());

@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info:
+  title: Data Export Spring Job Deletion Intervals
+  version: v1
+servers:
+  - url: /data-export-spring/
+paths:
+  /job-deletion-intervals:
+    get:
+      description: Get all job deletion intervals
+      operationId: getAllJobDeletionIntervals
+      responses:
+        "200":
+          description: Job deletion intervals successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobDeletionIntervalCollection"
+        "500":
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+    post:
+      description: Create a new job deletion interval
+      operationId: createJobDeletionInterval
+      responses:
+        "201":
+          description: Job deletion interval created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobDeletionInterval"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "409":
+          description: Interval for this export type already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal server errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/jobDeletionInterval"
+        required: true
+  /job-deletion-intervals/{exportType}:
+    get:
+      description: Get job deletion interval by export type
+      operationId: getJobDeletionIntervalByExportType
+      parameters:
+        - $ref: '#/components/parameters/exportType'
+      responses:
+        '200':
+          description: Returns job deletion interval
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/jobDeletionInterval'
+        '404':
+          description: Job deletion interval not found
+          content:
+            text/plain:
+              schema:
+                type: string
+    put:
+      description: Update an existing job deletion interval
+      operationId: updateJobDeletionInterval
+      parameters:
+        - $ref: '#/components/parameters/exportType'
+      responses:
+        "200":
+          description: Job deletion interval updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobDeletionInterval"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "404":
+          description: Job deletion interval not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal server errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/jobDeletionInterval"
+        required: true
+    delete:
+      description: Delete a job deletion interval by export type
+      operationId: deleteJobDeletionInterval
+      parameters:
+        - $ref: '#/components/parameters/exportType'
+      responses:
+        "204":
+          description: Job deletion interval successfully deleted
+        "404":
+          description: Job deletion interval not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal server errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+components:
+  parameters:
+    exportType:
+      name: exportType
+      in: path
+      required: true
+      description: Export type of the interval
+      schema:
+        $ref: "./jobs.yaml#/components/schemas/exportType"
+  schemas:
+    errors:
+      $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
+    jobDeletionInterval:
+      $ref: '../../../../folio-export-common/schemas/jobDeletionInterval.json#/JobDeletionInterval'
+    jobDeletionIntervalCollection:
+      $ref: '../../../../folio-export-common/schemas/jobDeletionIntervalCollection.json#/JobDeletionIntervalCollection'

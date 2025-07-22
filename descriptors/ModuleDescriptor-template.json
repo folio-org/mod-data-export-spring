@@ -227,6 +227,56 @@
             "users.item.post",
             "users.item.put"
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export-spring/job-deletion-intervals",
+          "permissionsRequired": [
+            "data-export.job-deletion-intervals.collection.get"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export-spring/job-deletion-intervals/{exportType}",
+          "permissionsRequired": [
+            "data-export.job-deletion-intervals.item.get"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export-spring/job-deletion-intervals",
+          "permissionsRequired": [
+            "data-export.job-deletion-intervals.item.post"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/data-export-spring/job-deletion-intervals/{exportType}",
+          "permissionsRequired": [
+            "data-export.job-deletion-intervals.item.put"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/data-export-spring/job-deletion-intervals/{exportType}",
+          "permissionsRequired": [
+            "data-export.job-deletion-intervals.item.delete"
+          ],
+          "modulePermissions": []
         }
       ]
     },
@@ -376,6 +426,43 @@
         "orders-storage.po-lines.collection.get",
         "orders-storage.purchase-orders.collection.get",
         "orders-storage.pieces.collection.get"
+      ]
+    },
+    {
+      "permissionName": "data-export.job-deletion-intervals.collection.get",
+      "displayName": "Get job deletion intervals",
+      "description": "Get job deletion intervals"
+    },
+    {
+      "permissionName": "data-export.job-deletion-intervals.item.get",
+      "displayName": "Get job deletion interval",
+      "description": "Get job deletion interval by export type"
+    },
+    {
+      "permissionName": "data-export.job-deletion-intervals.item.post",
+      "displayName": "Create/update job deletion interval",
+      "description": "Create/update job deletion interval"
+    },
+    {
+      "permissionName": "data-export.job-deletion-intervals.item.put",
+      "displayName": "Update job deletion interval",
+      "description": "Update job deletion interval"
+    },
+    {
+      "permissionName": "data-export.job-deletion-intervals.item.delete",
+      "displayName": "Delete job deletion interval",
+      "description": "Delete job deletion interval"
+    },
+    {
+      "permissionName": "data-export.job-deletion-intervals.all",
+      "displayName": "Job deletion intervals - all permissions",
+      "description": "All permissions for job deletion intervals",
+      "subPermissions": [
+        "data-export.job-deletion-intervals.collection.get",
+        "data-export.job-deletion-intervals.item.get",
+        "data-export.job-deletion-intervals.item.post",
+        "data-export.job-deletion-intervals.item.put",
+        "data-export.job-deletion-intervals.item.delete"
       ]
     }
   ],

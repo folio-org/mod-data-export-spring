@@ -31,8 +31,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <jobs.yaml.file>${project.basedir}/src/main/resources/swagger.api/jobs.yaml</jobs.yaml.file>
-    <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml
-    </export-configs.yaml.file>
+    <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
+    <job-deletion-intervals.yaml.file>${project.basedir}/src/main/resources/swagger.api/job-deletion-intervals.yaml</job-deletion-intervals.yaml.file>
 
     <folio-spring-base.version>9.0.0</folio-spring-base.version>
     <folio-service-tools.version>4.1.1</folio-service-tools.version>
@@ -394,6 +394,36 @@
                 <interfaceOnly>true</interfaceOnly>
                 <useSpringBoot3>true</useSpringBoot3>
                 <inlineSchemaNameDefaults>arrayItemSuffix=</inlineSchemaNameDefaults>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <id>job-deletion-intervals</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${job-deletion-intervals.yaml.file}</inputSpec>
+              <output>${project.build.directory}/generated-sources</output>
+              <generatorName>spring</generatorName>
+              <modelPackage>${project.groupId}.des.domain.dto.delete_interval</modelPackage>
+              <apiPackage>${project.groupId}.des.rest.resource</apiPackage>
+              <generateApis>true</generateApis>
+              <generateApiTests>true</generateApiTests>
+              <generateApiDocumentation>true</generateApiDocumentation>
+              <generateModels>true</generateModels>
+              <generateModelTests>false</generateModelTests>
+              <generateSupportingFiles>true</generateSupportingFiles>
+              <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+              <generateModelDocumentation>true</generateModelDocumentation>
+              <importMappings>
+                <importMapping>ExportType=org.folio.des.domain.dto.ExportType</importMapping>
+              </importMappings>
+              <configOptions>
+                <java8>true</java8>
+                <dateLibrary>java8-localdatetime</dateLibrary>
+                <interfaceOnly>true</interfaceOnly>
+                <useSpringBoot3>true</useSpringBoot3>
               </configOptions>
             </configuration>
           </execution>

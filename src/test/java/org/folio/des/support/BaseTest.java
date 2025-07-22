@@ -57,6 +57,7 @@ public abstract class BaseTest {
   public static final int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   public static final String TENANT = "diku";
+  public static final String USER_ID = "625dd2b6-b6f2-4f77-90fe-68954b26ee3c";
 
   public static WireMockServer wireMockServer;
   public static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -120,6 +121,7 @@ public abstract class BaseTest {
     httpHeaders.put(XOkapiHeaders.TENANT, List.of(TENANT));
     httpHeaders.add(XOkapiHeaders.URL, wireMockServer.baseUrl());
     httpHeaders.add(XOkapiHeaders.TOKEN, TOKEN);
+    httpHeaders.add(XOkapiHeaders.USER_ID, USER_ID);
 
     return httpHeaders;
   }

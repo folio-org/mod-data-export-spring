@@ -14,5 +14,6 @@
   <include file="changes/03-03-2025_delete_enum_types.xml" relativeToChangelogFile="true"/>
   <include file="changes/03_10_2025_populate_orders_jobs_missing_fields.xml" relativeToChangelogFile="true"/>
   <include file="changes/05_16_2025_alter_job_output_format.xml" relativeToChangelogFile="true"/>
+  <include file="changes/17_07_2025_create_job_deletion_interval.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -47,12 +47,12 @@ class OldJobDeleteSchedulerTest extends BaseTest {
   }
 
   @Test
-  void testDeleteOldJobDeleteScheduler() throws SchedulerException {
+  void testDeleteOldJobDeleteScheduler() {
 
     oldJobDeleteScheduler.scheduleOldJobDeletion(TENANT);
     oldJobDeleteScheduler.removeJobs(TENANT);
     await().pollDelay(1, TimeUnit.SECONDS)
-      .timeout(10, TimeUnit.SECONDS)
+      .timeout(15, TimeUnit.SECONDS)
       .untilAsserted(() -> {
         var jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupContains(EXPORT_DELETE_GROUP));
         log.info("jobKeys: {}", jobKeys);

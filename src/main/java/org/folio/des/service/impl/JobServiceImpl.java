@@ -1,11 +1,6 @@
 package org.folio.des.service.impl;
 
 import static java.util.Objects.nonNull;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_UPDATE;
-import static org.folio.des.domain.dto.ExportType.CLAIMS;
-import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -18,12 +13,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.des.client.ConfigurationClient;
@@ -35,13 +28,14 @@ import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.PresignedUrl;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.domain.dto.delete_interval.JobDeletionInterval;
 import org.folio.des.exceptions.FileDownloadException;
 import org.folio.des.repository.CQLService;
 import org.folio.des.repository.JobDataExportRepository;
 import org.folio.des.security.JWTokenUtils;
+import org.folio.des.service.JobDeletionIntervalService;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
-import org.folio.des.service.config.BulkEditConfigService;
 import org.folio.des.service.util.JobMapperUtil;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -66,8 +60,6 @@ public class JobServiceImpl implements JobService {
   private int jobDownloadFileConnectionTimeout;
 
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
-  private static final Set<ExportType> BULK_EDIT_TYPES = Set.of(BULK_EDIT_IDENTIFIERS, BULK_EDIT_QUERY, BULK_EDIT_UPDATE);
-  private static final Set<ExportType> ACQUISITION_TYPES = Set.of(EDIFACT_ORDERS_EXPORT, CLAIMS);
 
   static {
     OUTPUT_FORMATS.put(ExportType.BURSAR_FEES_FINES, "Fees & Fines Bursar Report");
@@ -80,8 +72,8 @@ public class JobServiceImpl implements JobService {
   private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
   private final CQLService cqlService;
-  private final BulkEditConfigService bulkEditConfigService;
   private final ConfigurationClient client;
+  private final JobDeletionIntervalService deletionIntervalService;
 
   @Transactional(readOnly = true)
   @Override
@@ -201,14 +193,20 @@ public class JobServiceImpl implements JobService {
   @Transactional
   @Override
   public void deleteOldJobs() {
-    var expirationDate = createExpirationDate(jobExpirationPeriod);
-    log.info("Collecting old jobs with 'updatedDate' less than {}.", expirationDate);
-    Set<ExportType> excludedTypes = SetUtils.union(BULK_EDIT_TYPES, ACQUISITION_TYPES);
-    var jobsToDelete = filterJobsNotMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), excludedTypes);
+    List<JobDeletionInterval> jobDeletionIntervals = deletionIntervalService.getAll().getJobDeletionIntervals();
+    if (CollectionUtils.isEmpty(jobDeletionIntervals)) {
+      log.info("deleteOldJobs:: No job deletion intervals found, skipping.");
+      return;
+    }
+    List<Job> jobsToDelete = new ArrayList<>();
 
-    expirationDate = createExpirationDate(bulkEditConfigService.getBulkEditJobExpirationPeriod());
-    log.info("Collecting old bulk-edit jobs with 'updatedDate' less than {}.", expirationDate);
-    jobsToDelete.addAll(filterJobsMatchingExportTypes(repository.findByUpdatedDateBefore(expirationDate), BULK_EDIT_TYPES));
+    jobDeletionIntervals.forEach(interval -> {
+      log.info("deleteOldJobs:: Deleting old jobs for export type: {} with retention days: {}.", interval.getExportType(), interval.getRetentionDays());
+      var expirationDate = createExpirationDate(interval.getRetentionDays());
+      List<Job> expiredJobs = repository.findByTypeAndUpdatedDateBefore(interval.getExportType(), expirationDate);
+      log.info("deleteOldJobs:: Found {} old jobs for export type: {} for deletion.", expiredJobs.size(), interval.getExportType());
+      jobsToDelete.addAll(expiredJobs);
+    });
 
     deleteJobs(jobsToDelete);
   }
@@ -228,18 +226,6 @@ public class JobServiceImpl implements JobService {
 
   private Date createExpirationDate(int days) {
     return Date.from(LocalDate.now().minusDays(days).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-  }
-
-  private List<Job> filterJobsNotMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
-    return new ArrayList<>(jobs.stream()
-      .filter(j -> !exportTypes.contains(j.getType()))
-      .toList());
-  }
-
-  private List<Job> filterJobsMatchingExportTypes(List<Job> jobs, Set<ExportType> exportTypes) {
-    return jobs.stream()
-      .filter(j -> exportTypes.contains(j.getType()))
-      .toList();
   }
 
   public void deleteJobs(List<Job> jobs) {
