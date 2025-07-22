@@ -2,8 +2,6 @@ package org.folio.des.controller;
 
 import static java.util.Objects.isNull;
 import static org.folio.des.domain.dto.ExportType.AUTH_HEADINGS_UPDATES;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_IDENTIFIERS;
-import static org.folio.des.domain.dto.ExportType.BULK_EDIT_QUERY;
 import static org.hibernate.internal.util.StringHelper.isBlank;
 
 import java.util.UUID;
@@ -80,9 +78,7 @@ public class JobsController implements JobsApi {
 
   private boolean isMissingRequiredParameters(Job job) {
     var exportTypeParameters = job.getExportTypeSpecificParameters();
-    return (BULK_EDIT_QUERY == job.getType() && (isNull(job.getEntityType()) || isBlank(exportTypeParameters.getQuery()))) ||
-      (BULK_EDIT_IDENTIFIERS == job.getType() && (isNull(job.getIdentifierType()) || isNull(job.getEntityType()))) ||
-      invalidAuthorityControlJob(job, exportTypeParameters);
+    return invalidAuthorityControlJob(job, exportTypeParameters);
   }
 
   private boolean invalidAuthorityControlJob(Job job, ExportTypeSpecificParameters exportTypeParameters) {
