@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @CopilotGenerated(model = "Claude Sonnet 3.5")
-public class JobDeletionIntervalServiceTest {
+class JobDeletionIntervalServiceTest {
   @Mock
   private JobDeletionIntervalRepository repository;
 

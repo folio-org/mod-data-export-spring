@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class JobDeletionIntervalsControllerTest extends BaseTest {
+class JobDeletionIntervalsControllerTest extends BaseTest {
   @Autowired
   private MockMvc mockMvc;
 
@@ -79,7 +79,7 @@ public class JobDeletionIntervalsControllerTest extends BaseTest {
     assertDeleteInterval(interval.getExportType());
 
     // 6. check if interval is not exists anymore
-    ResultActions result = mockMvc.perform(get("/data-export-spring/job-deletion-intervals/INVOICE_EXPORT")
+    mockMvc.perform(get("/data-export-spring/job-deletion-intervals/INVOICE_EXPORT")
         .contentType(APPLICATION_JSON)
         .headers(defaultHeaders())
         .accept(APPLICATION_JSON))

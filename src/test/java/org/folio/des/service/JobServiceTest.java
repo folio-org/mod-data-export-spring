@@ -114,7 +114,7 @@ class JobServiceTest {
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
     var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
-    var jobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, client, deletionIntervalService);
+    var internalJobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, client, deletionIntervalService);
     var config = new ExportConfig();
     config.setId(configId.toString());
     org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
@@ -130,9 +130,9 @@ class JobServiceTest {
       return exportConfig;
     });
     when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
-    assertThrows(NotFoundException.class, () -> jobService.resendExportedFile(configId));
+    assertThrows(NotFoundException.class, () -> internalJobService.resendExportedFile(configId));
     job.setFileNames(list);
-    jobService.resendExportedFile(jobDto.getId());
+    internalJobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
     Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").getValue());
     Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));

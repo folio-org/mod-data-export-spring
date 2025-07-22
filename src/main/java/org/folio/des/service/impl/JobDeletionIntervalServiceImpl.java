@@ -32,7 +32,7 @@ public class JobDeletionIntervalServiceImpl implements JobDeletionIntervalServic
     var entities = repository.findAll();
     var intervals = entities.stream()
       .map(this::mapToDto)
-      .collect(Collectors.toList());
+      .toList();
     return new JobDeletionIntervalCollection()
       .jobDeletionIntervals(intervals)
       .totalRecords(intervals.size());
