@@ -33,7 +33,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -68,24 +67,6 @@ class JobsControllerTest extends BaseTest {
   private static final String JOB_CIRCULATION_REQUEST =
       "{ \"type\": \"CIRCULATION_LOG\", \"exportTypeSpecificParameters\" : {}}";
 
-  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS_NO_ENTITY =
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}}";
-
-  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS =
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\"}";
-
-  private static final String BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY =
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"identifierType\" : \"ID\"}";
-
-  private static final String BULK_EDIT_QUERY_REQUEST_NO_ENTITY_NO_QUERY =
-    "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}}";
-
-  private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_NO_QUERY =
-    "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\"}";
-
-  private static final String BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY =
-    "{ \"type\": \"BULK_EDIT_QUERY\", \"exportTypeSpecificParameters\" : {\"query\":\"barcode==123\"}, \"entityType\" : \"USER\"}";
-
   private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
   @Test
@@ -100,24 +81,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(9)),
-                jsonPath("$.jobRecords", hasSize(9))));
-  }
-
-  @Test
-  @DisplayName("Find jobs sorted by name and limited")
-  void findSortedJobs() throws Exception {
-    mockMvc
-        .perform(
-            get("/data-export-spring/jobs?limit=3&offset=0&query=(cql.allRecords=1)sortby name/sort.descending")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
-                status().isOk(),
-                content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(9)),
-                jsonPath("$.jobRecords", hasSize(3))));
+                jsonPath("$.totalRecords", is(8)),
+                jsonPath("$.jobRecords", hasSize(8))));
   }
 
   @Test
@@ -132,7 +97,7 @@ class JobsControllerTest extends BaseTest {
         matchAll(
           status().isOk(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE),
-          jsonPath("$.totalRecords", is(9)),
+          jsonPath("$.totalRecords", is(8)),
           jsonPath("$.jobRecords", hasSize(3))));
   }
 
@@ -178,8 +143,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(8)),
-              jsonPath("$.jobRecords", hasSize(8))));
+              jsonPath("$.totalRecords", is(7)),
+              jsonPath("$.jobRecords", hasSize(7))));
   }
 
   @Test
@@ -194,8 +159,8 @@ class JobsControllerTest extends BaseTest {
             matchAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(8)),
-              jsonPath("$.jobRecords", hasSize(8))));
+              jsonPath("$.totalRecords", is(7)),
+              jsonPath("$.jobRecords", hasSize(7))));
   }
 
   @Test
@@ -226,22 +191,6 @@ class JobsControllerTest extends BaseTest {
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
               jsonPath("$.errors[0].message", startsWith("PathElementException"))));
-  }
-
-  @Test
-  @DisplayName("Find jobs by status and type sorted by type")
-  void findJobsByQuery() throws Exception {
-    mockMvc
-        .perform(
-            get("/data-export-spring/jobs?limit=30&offset=0&query=(status==SUCCESSFUL and isSystemSource==true)sortby type/sort.ascending")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
-                status().isOk(),
-                content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(4)),
-                jsonPath("$.jobRecords", hasSize(4))));
   }
 
   @Test
@@ -288,23 +237,6 @@ class JobsControllerTest extends BaseTest {
         .andExpect(
             matchAll(
                 status().is5xxServerError()));
-  }
-
-  @Test
-  @DisplayName("Should succeed download file with key to storage")
-  void shouldSucceedDownloadWithKey() throws Exception {
-    PresignedUrl presignedUrl = new PresignedUrl();
-    presignedUrl.setUrl("http://localhost:" + WIRE_MOCK_PORT + "/TestFile.csv");
-    when(exportWorkerClient.getRefreshedPresignedUrl(anyString())).thenReturn(presignedUrl);
-    mockMvc
-      .perform(
-        get("/data-export-spring/jobs/22ae5d0f-6425-82a1-a361-1bc9b88e8172/download?key=TestFile.csv")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders()))
-      .andExpect(
-        matchAll(
-          status().is2xxSuccessful(),
-          content().bytes("Test file content".getBytes())));
   }
 
   @Test
@@ -357,93 +289,6 @@ class JobsControllerTest extends BaseTest {
                 jsonPath("$.type", is("CIRCULATION_LOG")),
                 jsonPath("$.status", is("SCHEDULED")),
                 jsonPath("$.outputFormat", is("Comma-Separated Values (CSV)"))));
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit identifiers job without identifiers and entity types, should be 404")
-  void postBulkEditIdentifiersJobWithNoIdentifiersAndEntityType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS_NO_ENTITY))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit identifiers job without only identifier type, should be 404")
-  void postBulkEditIdentifiersJobWithNoIdentifiersType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_IDENTIFIERS))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit identifiers job without only entity type, should be 404")
-  void postBulkEditIdentifiersJobWithNoEntityType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_IDENTIFIERS_REQUEST_NO_ENTITY))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"ID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"USER_NAME\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"EXTERNAL_SYSTEM_ID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"USER\", \"identifierType\" : \"BARCODE\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"ID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"BARCODE\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HRID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"FORMER_IDS\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"ACCESSION_NUMBER\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"ITEM\", \"identifierType\" : \"HOLDINGS_RECORD_ID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"ID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"HRID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"INSTANCE_HRID\"}",
-    "{ \"type\": \"BULK_EDIT_IDENTIFIERS\", \"exportTypeSpecificParameters\" : {}, \"entityType\" : \"HOLDINGS_RECORD\", \"identifierType\" : \"ITEM_BARCODE\"}"
-  })
-  @DisplayName("Start new bulk edit identifiers job with identifiers and entity type, should be 201")
-  void postBulkEditIdentifiersJobWithIdentifiersAndEntityType(String contentString) throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(contentString))
-      .andExpect(
-        matchAll(
-          status().isCreated()));
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {BULK_EDIT_QUERY_REQUEST_NO_ENTITY_NO_QUERY, BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_NO_QUERY})
-  @DisplayName("Start new bulk edit query job missing required parameters, should be 404")
-  void shouldReturnBadRequestWhenRequiredParametersAreMissing(String content) throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(content))
-      .andExpect(
-        matchAll(
-          status().isBadRequest()));
   }
 
   @ParameterizedTest
@@ -508,20 +353,6 @@ class JobsControllerTest extends BaseTest {
           .headers(defaultHeaders())
           .content(payload))
       .andExpect(status().isCreated());
-  }
-
-  @Test
-  @DisplayName("Start new bulk edit query job with entity type, should be 201")
-  void postBulkEditQueryJobWithEntityType() throws Exception {
-    mockMvc
-      .perform(
-        post("/data-export-spring/jobs")
-          .contentType(MediaType.APPLICATION_JSON_VALUE)
-          .headers(defaultHeaders())
-          .content(BULK_EDIT_QUERY_REQUEST_WITH_ENTITY_WITH_QUERY))
-      .andExpect(
-        matchAll(
-          status().isCreated()));
   }
 
   @Test

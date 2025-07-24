@@ -57,7 +57,6 @@ class JobCommandBuilderResolverTest {
   @CsvSource({
     "BURSAR_FEES_FINES, BursarFeeFinesJobCommandBuilder",
     "CIRCULATION_LOG, CirculationLogJobCommandBuilder",
-    "BULK_EDIT_QUERY, BulkEditQueryJobCommandBuilder",
     "EDIFACT_ORDERS_EXPORT, EdifactOrdersJobCommandBuilder",
     "E_HOLDINGS, EHoldingsJobCommandBuilder",
     "AUTH_HEADINGS_UPDATES, AuthorityControlJobCommandBuilder"
@@ -86,7 +85,6 @@ class JobCommandBuilderResolverTest {
   @CsvSource({
     "BURSAR_FEES_FINES, bursarFeeFines",
     "CIRCULATION_LOG, query",
-    "BULK_EDIT_QUERY, query",
     "EDIFACT_ORDERS_EXPORT, edifactOrdersExport",
     "E_HOLDINGS, eHoldingsExportConfig",
     "AUTH_HEADINGS_UPDATES, authorityControlExportConfig"
