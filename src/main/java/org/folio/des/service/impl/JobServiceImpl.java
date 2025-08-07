@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -230,12 +231,18 @@ public class JobServiceImpl implements JobService {
 
   public void deleteJobs(List<Job> jobs) {
     if (CollectionUtils.isEmpty(jobs)) {
-      log.info("No old jobs were found.");
+      log.info("deleteJobs:: No old jobs were found.");
       return;
     }
 
     repository.deleteAllInBatch(jobs);
-    log.info("Deleted old jobs [{}].", StringUtils.join(jobs, ','));
+    log.info("deleteJobs:: Deleted {} old jobs [{}].", jobs.size(), jobs.stream()
+      .map(job -> String.format("ID: %s, Name: %s, Type: %s, Status: %s",
+        job.getId(),
+        job.getName(),
+        job.getType(),
+        job.getStatus()))
+      .collect(Collectors.joining("; ")));
 
     jobExecutionService.deleteJobs(jobs);
   }
