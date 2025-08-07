@@ -25,7 +25,7 @@ public class OldDeleteJob implements org.quartz.Job {
       jobService.deleteOldJobs();
       return null;
     });
-    log.info("execute:: deleteOldJobs executed");
+    log.info("execute:: deleteOldJobs executed for tenant: {}", tenantId);
   }
 
   private String getTenantId(JobExecutionContext jobExecutionContext) {
