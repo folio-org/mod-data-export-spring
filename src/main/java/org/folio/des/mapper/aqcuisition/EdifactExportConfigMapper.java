@@ -12,6 +12,7 @@ import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.service.config.ExportConfigConstants;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -28,8 +29,9 @@ public abstract class EdifactExportConfigMapper extends BaseExportConfigMapper {
   @Autowired
   private EdifactOrdersExportParametersValidator validator;
 
-  protected String getConfigName(ExportConfig exportConfig) {
-    Errors errors = new BeanPropertyBindingResult(exportConfig.getExportTypeSpecificParameters(), "specificParameters");
+  @BeforeMapping
+  protected void validateConfig(ExportConfig exportConfig) {
+    var errors = new BeanPropertyBindingResult(exportConfig.getExportTypeSpecificParameters(), "specificParameters");
     validator.validate(exportConfig.getExportTypeSpecificParameters(), errors);
 
     var ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
@@ -40,11 +42,16 @@ public abstract class EdifactExportConfigMapper extends BaseExportConfigMapper {
         log.warn(INCORRECT_UUID_FOR_SCHEDULED_PARAMETER_MSG, exportConfig.getId());
         scheduleParameters.setId(UUID.fromString(exportConfig.getId()));
       });
-    return exportConfig.getType().getValue() + "_" + ediOrdersExportConfig.getVendorId().toString() + "_" + exportConfig.getId();
   }
 
   private boolean isScheduledParameterIdNotValid(ExportConfig exportConfig, ScheduleParameters scheduleParameters) {
     return Objects.isNull(scheduleParameters.getId()) || !UUID.fromString(exportConfig.getId()).equals(scheduleParameters.getId());
+  }
+
+  @Override
+  protected String getConfigName(ExportConfig exportConfig) {
+    var ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
+    return exportConfig.getType().getValue() + "_" + ediOrdersExportConfig.getVendorId().toString() + "_" + exportConfig.getId();
   }
 
 }

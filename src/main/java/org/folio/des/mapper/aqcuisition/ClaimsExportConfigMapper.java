@@ -6,6 +6,7 @@ import org.folio.des.domain.dto.ExportTypeSpecificParametersWithLegacyBursar;
 import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.service.config.ExportConfigConstants;
 import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
+import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -16,10 +17,14 @@ public abstract class ClaimsExportConfigMapper extends BaseExportConfigMapper {
   @Autowired
   private ClaimsExportParametersValidator validator;
 
-  protected String getConfigName(ExportConfig exportConfig) {
+  @BeforeMapping
+  protected void validateConfig(ExportConfig exportConfig) {
     var errors = new BeanPropertyBindingResult(exportConfig.getExportTypeSpecificParameters(), "specificParameters");
     validator.validate(exportConfig.getExportTypeSpecificParameters(), errors);
+  }
 
+  @Override
+  protected String getConfigName(ExportConfig exportConfig) {
     var ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
     return exportConfig.getType().getValue() + "_" + ediOrdersExportConfig.getVendorId().toString() + "_" + exportConfig.getId();
   }
