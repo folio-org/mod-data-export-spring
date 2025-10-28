@@ -21,6 +21,7 @@ public abstract class BaseExportConfigMapper {
   @Autowired
   protected ObjectMapper objectMapper;
 
+  @Mapping(target = "configName", expression = "java(getConfigName(dto))")
   @Mapping(target = "createdDate", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "updatedDate", ignore = true)
