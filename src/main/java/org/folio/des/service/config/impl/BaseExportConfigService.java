@@ -1,18 +1,23 @@
 package org.folio.des.service.config.impl;
 
-import java.util.Optional;
+import static org.folio.des.service.config.impl.ExportTypeBasedConfigManager.EXPORT_CONFIGURATION_NOT_FOUND;
 
-import org.apache.commons.lang3.StringUtils;
-import org.folio.des.client.ConfigurationClient;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.converter.ExportConfigConverterResolver;
-import org.folio.des.domain.dto.ConfigurationCollection;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.folio.de.entity.ExportConfigEntity;
+import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
+import org.folio.spring.exception.NotFoundException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
@@ -24,60 +29,71 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 public class BaseExportConfigService implements ExportConfigService {
 
-  protected final ConfigurationClient client;
-  protected final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
-  protected final ExportConfigConverterResolver exportConfigConverterResolver;
+  protected final ExportConfigRepository repository;
+  protected final DefaultExportConfigMapper defaultExportConfigMapper;
+  protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
   @Override
+  @Transactional
   public void updateConfig(String configId, ExportConfig exportConfig) {
-    log.info("Putting {} {}.", configId, exportConfig);
+    log.info("updateConfig:: configId={}, exportConfig={}", configId, exportConfig);
     validateIncomingExportConfig(exportConfig);
-    var config = createConfigModel(exportConfig);
-    client.putConfiguration(config, configId);
-    log.info("Put {} {}.", configId, config);
+    getExportConfigEntityOrThrow(configId);
+
+    var entity = defaultExportConfigMapper.toEntity(exportConfig);
+    repository.save(entity);
+    log.info("updateConfig:: Successfully updated config with id={}", configId);
   }
 
   @Override
+  @Transactional
   public ModelConfiguration postConfig(ExportConfig exportConfig) {
-    log.info("Posting {}.", exportConfig);
+    log.info("postConfig:: exportConfig={}", exportConfig);
     validateIncomingExportConfig(exportConfig);
-    var preparedConfig = createConfigModel(exportConfig);
-    ModelConfiguration config = client.postConfiguration(preparedConfig);
-    log.info("Posted {}.", config);
-    return config;
+
+    var entity = defaultExportConfigMapper.toEntity(exportConfig);
+    repository.save(entity);
+    log.info("postConfig:: Successfully created config with id={}", exportConfig.getId());
+
+    return createConfigModel(entity);
   }
 
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
-    log.info("getConfigCollection:: by query={} with limit={}.", query, limit);
-    ConfigurationCollection configurationCollection = client.getConfigurations(query, limit);
-    if (configurationCollection.getTotalRecords() > 0) {
-      var exportConfigCollection = new ExportConfigCollection();
-      configurationCollection.getConfigs().forEach(modelConfig -> exportConfigCollection
-        .addConfigsItem(defaultModelConfigToExportConfigConverter.convert(modelConfig))
-      );
-      ExportConfigCollection totalRecords = exportConfigCollection.totalRecords(exportConfigCollection.getConfigs().size());
-      log.info("getConfigCollection:: totalRecords={}.", totalRecords);
-      return totalRecords;
-    }
-    log.debug("getConfigCollection:: returned empty result set.");
-    return new ExportConfigCollection().totalRecords(0);
+    log.info("getConfigCollection:: query={}, limit={}", query, limit);
+    var page = repository.findByCql(query, PageRequest.of(0, limit));
+    return new ExportConfigCollection().totalRecords(page.getNumberOfElements())
+      .configs(page.getContent().stream()
+        .map(defaultExportConfigMapper::toDto)
+        .toList());
   }
 
   @Override
   public Optional<ExportConfig> getFirstConfig() {
-    var configurationCollection = getConfigCollection(StringUtils.EMPTY, 1);
-    if (configurationCollection.getTotalRecords() == 0) {
-      return Optional.empty();
-    }
-    return Optional.of(configurationCollection.getConfigs().get(0));
+    return repository.findAll(PageRequest.of(0, 1))
+      .getContent().stream()
+      .map(defaultExportConfigMapper::toDto)
+      .findFirst();
+  }
+
+  @Override
+  public ExportConfig getConfigById(String configId) {
+    return repository.findById(UUID.fromString(configId))
+      .map(defaultExportConfigMapper::toDto)
+      .orElseThrow(() -> new NotFoundException(EXPORT_CONFIGURATION_NOT_FOUND.formatted(configId)));
+  }
+
+  @Override
+  public void deleteConfigById(String configId) {
+    var config = getExportConfigEntityOrThrow(configId);
+    repository.delete(config);
+    log.info("deleteConfigById:: Successfully deleted config with id={}", configId);
   }
 
   @SneakyThrows
-  protected ModelConfiguration createConfigModel(ExportConfig exportConfig) {
-    var converter = exportConfigConverterResolver.resolve(exportConfig.getType());
-    return converter.convert(exportConfig);
+  protected ModelConfiguration createConfigModel(ExportConfigEntity exportConfigEntity) {
+    return exportConfigMapperResolver.resolve(exportConfigEntity.getType()).toModelConfiguration(exportConfigEntity);
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {
@@ -86,4 +102,10 @@ public class BaseExportConfigService implements ExportConfigService {
       validator.validate(exportConfig.getExportTypeSpecificParameters(), errors);
     });
   }
+
+  private ExportConfigEntity getExportConfigEntityOrThrow(String id) {
+    return repository.findById(UUID.fromString(id))
+      .orElseThrow(() -> new NotFoundException(String.format(EXPORT_CONFIGURATION_NOT_FOUND, id)));
+  }
+
 }

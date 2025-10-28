@@ -1,12 +1,13 @@
 package org.folio.des.service.config.acquisition;
 
 import lombok.extern.log4j.Log4j2;
-import org.folio.des.client.ConfigurationClient;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.converter.ExportConfigConverterResolver;
+import org.folio.des.mapper.BaseExportConfigMapper;
+import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
@@ -16,11 +17,9 @@ import java.util.UUID;
 @Log4j2
 public class ClaimsExportService extends BaseExportConfigService {
 
-  public ClaimsExportService(ConfigurationClient client,
-                             DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                             ExportConfigConverterResolver exportConfigConverterResolver,
-                             ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
+  public ClaimsExportService(ExportConfigRepository repository, DefaultExportConfigMapper defaultExportConfigMapper,
+                             ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver) {
+    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
   }
 
   @Override

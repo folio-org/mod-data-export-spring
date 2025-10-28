@@ -7,6 +7,7 @@ import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ModelConfiguration;
 
 public interface ExportConfigService {
+
   void updateConfig(String configId, ExportConfig exportConfig);
 
   ModelConfiguration postConfig(ExportConfig exportConfig);
@@ -14,4 +15,9 @@ public interface ExportConfigService {
   ExportConfigCollection getConfigCollection(String query, Integer limit);
 
   Optional<ExportConfig> getFirstConfig();
+
+  ExportConfig getConfigById(String configId);
+
+  void deleteConfigById(String configId);
+
 }
