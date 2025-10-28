@@ -7,11 +7,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.folio.de.entity.ExportConfigEntity;
-import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfigWithLegacyBursar;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
@@ -41,11 +39,11 @@ public class BursarFeesFinesExportConfigService extends BaseExportConfigService 
   }
 
   @Override
-  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+  public ExportConfig postConfig(ExportConfig exportConfig) {
     log.info("postConfig:: starting Bursar postConfig with configId:{}", exportConfig.getId());
-    ModelConfiguration modelConfiguration = super.postConfig(exportConfig);
+    exportConfig = super.postConfig(exportConfig);
     bursarExportScheduler.scheduleBursarJob(exportConfig);
-    return modelConfiguration;
+    return exportConfig;
   }
 
   @Override

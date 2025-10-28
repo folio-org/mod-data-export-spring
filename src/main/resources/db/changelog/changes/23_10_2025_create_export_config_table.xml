@@ -11,7 +11,7 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="config_name" type="TEXT">
-        <constraints nullable="false" unique="true"/>
+        <constraints nullable="false"/>
       </column>
       <column name="type" type="TEXT">
         <constraints nullable="false"/>

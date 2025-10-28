@@ -11,7 +11,6 @@ import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
@@ -48,7 +47,7 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @Override
   @Transactional
-  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+  public ExportConfig postConfig(ExportConfig exportConfig) {
     log.info("postConfig:: exportConfig={}", exportConfig);
     validateIncomingExportConfig(exportConfig);
 
@@ -56,7 +55,7 @@ public class BaseExportConfigService implements ExportConfigService {
     repository.save(entity);
     log.info("postConfig:: Successfully created config with id={}", exportConfig.getId());
 
-    return createConfigModel(entity);
+    return toDto(entity);
   }
 
   @Override
@@ -92,8 +91,8 @@ public class BaseExportConfigService implements ExportConfigService {
   }
 
   @SneakyThrows
-  protected ModelConfiguration createConfigModel(ExportConfigEntity exportConfigEntity) {
-    return exportConfigMapperResolver.resolve(exportConfigEntity.getType()).toModelConfiguration(exportConfigEntity);
+  protected ExportConfig toDto(ExportConfigEntity exportConfigEntity) {
+    return exportConfigMapperResolver.resolve(exportConfigEntity.getType()).toDto(exportConfigEntity);
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {

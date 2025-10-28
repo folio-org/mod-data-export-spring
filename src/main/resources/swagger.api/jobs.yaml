@@ -236,8 +236,6 @@ components:
       $ref: '../../../../folio-export-common/schemas/jobCollection.json#/JobCollection'
     userdataCollection:
       $ref: '../../../../folio-export-common/schemas/user/userCollection.json#/UserCollection'
-    configurationdataCollection:
-      $ref: '../../../../folio-export-common/schemas/configuration/configurationCollection.json#/ConfigurationCollection'
     errors:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
     identifierType:

@@ -27,7 +27,7 @@ public class ExportConfigEntity extends AuditableEntity {
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 
-  @Column(name = "config_name", nullable = false, unique = true)
+  @Column(name = "config_name", nullable = false)
   private String configName;
 
   @Enumerated(EnumType.STRING)

@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.service.config.ExportConfigService;
@@ -51,7 +50,7 @@ public class ExportTypeBasedConfigManager {
       () -> defaultExportConfigService.updateConfig(configId, exportConfig));
   }
 
-  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+  public ExportConfig postConfig(ExportConfig exportConfig) {
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
