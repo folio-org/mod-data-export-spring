@@ -11,16 +11,14 @@ import org.folio.des.builder.job.EHoldingsJobCommandBuilder;
 import org.folio.des.builder.job.EdifactOrdersJobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilder;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
-import org.folio.des.client.ConfigurationClient;
-import org.folio.des.converter.DefaultExportConfigToModelConfigConverter;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.converter.ExportConfigConverterResolver;
-import org.folio.des.converter.aqcuisition.ClaimsExportConfigToModelConfigConverter;
-import org.folio.des.converter.aqcuisition.EdifactExportConfigToModelConfigConverter;
-import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.mapper.BaseExportConfigMapper;
+import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.ExportConfigMapperResolver;
+import org.folio.des.mapper.aqcuisition.ClaimsExportConfigMapper;
+import org.folio.des.mapper.aqcuisition.EdifactExportConfigMapper;
+import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
@@ -45,21 +43,21 @@ import org.quartz.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.validation.Validator;
 
 @Configuration
 @ComponentScan("org.folio.des")
 public class ServiceConfiguration {
+
   @Bean
-  ExportConfigConverterResolver exportConfigConverterResolver(DefaultExportConfigToModelConfigConverter defaultExportConfigToModelConfigConverter,
-                                                              EdifactExportConfigToModelConfigConverter edifactExportConfigToModelConfigConverter,
-                                                              ClaimsExportConfigToModelConfigConverter claimsExportConfigToModelConfigConverter) {
-    var converters = new HashMap<ExportType, Converter<ExportConfig, ModelConfiguration>>();
-    converters.put(ExportType.BURSAR_FEES_FINES, defaultExportConfigToModelConfigConverter);
-    converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactExportConfigToModelConfigConverter);
-    converters.put(ExportType.CLAIMS, claimsExportConfigToModelConfigConverter);
-    return new ExportConfigConverterResolver(converters, defaultExportConfigToModelConfigConverter);
+  ExportConfigMapperResolver exportConfigConverterResolver(DefaultExportConfigMapper defaultExportConfigMapper,
+                                                           EdifactExportConfigMapper edifactExportConfigMapper,
+                                                           ClaimsExportConfigMapper claimsExportConfigMapper) {
+    var converters = new HashMap<ExportType, BaseExportConfigMapper>();
+    converters.put(ExportType.BURSAR_FEES_FINES, defaultExportConfigMapper);
+    converters.put(ExportType.EDIFACT_ORDERS_EXPORT, edifactExportConfigMapper);
+    converters.put(ExportType.CLAIMS, claimsExportConfigMapper);
+    return new ExportConfigMapperResolver(converters, defaultExportConfigMapper);
   }
 
   @Bean
@@ -74,47 +72,44 @@ public class ServiceConfiguration {
   }
 
   @Bean
-  ExportTypeBasedConfigManager exportTypeBasedConfigManager(ConfigurationClient client,
-                      ExportConfigServiceResolver exportConfigServiceResolver,
-                      BaseExportConfigService baseExportConfigService,
-                      DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter) {
-    return new ExportTypeBasedConfigManager(client, exportConfigServiceResolver,
-                      baseExportConfigService, defaultModelConfigToExportConfigConverter);
+  ExportTypeBasedConfigManager exportTypeBasedConfigManager(ExportConfigServiceResolver exportConfigServiceResolver,
+                                                            BaseExportConfigService defaultExportConfigService) {
+    return new ExportTypeBasedConfigManager(exportConfigServiceResolver, defaultExportConfigService);
   }
 
   @Bean
-  BursarFeesFinesExportConfigService bursarExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
-            DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-            ExportConfigConverterResolver  exportConfigConverterResolver, BursarExportScheduler bursarExportScheduler) {
-    return new BursarFeesFinesExportConfigService(client, defaultModelConfigToExportConfigConverter,
-            exportConfigConverterResolver, exportConfigValidatorResolver, bursarExportScheduler);
+  BursarFeesFinesExportConfigService bursarExportConfigService(ExportConfigRepository repository,
+                                                               DefaultExportConfigMapper defaultExportConfigMapper,
+                                                               ExportConfigMapperResolver exportConfigMapperResolver,
+                                                               ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                                               BursarExportScheduler bursarExportScheduler) {
+    return new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, bursarExportScheduler);
   }
 
   @Bean
-  EdifactOrdersExportService edifactOrdersExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
-           DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-           ExportConfigConverterResolver  exportConfigConverterResolver,
-           ExportJobScheduler exportJobScheduler) {
-    return new EdifactOrdersExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver, exportJobScheduler);
+  EdifactOrdersExportService edifactOrdersExportService(ExportConfigRepository repository,
+                                                        DefaultExportConfigMapper defaultExportConfigMapper,
+                                                        ExportConfigMapperResolver exportConfigMapperResolver,
+                                                        ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                                        ExportJobScheduler exportJobScheduler) {
+    return new EdifactOrdersExportService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportJobScheduler);
   }
 
   @Bean
-  ClaimsExportService claimsExportService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
-                                          DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                          ExportConfigConverterResolver exportConfigConverterResolver) {
-    return new ClaimsExportService(client, defaultModelConfigToExportConfigConverter,
-      exportConfigConverterResolver, exportConfigValidatorResolver);
+  ClaimsExportService claimsExportService(ExportConfigRepository repository,
+                                          DefaultExportConfigMapper defaultExportConfigMapper,
+                                          ExportConfigMapperResolver exportConfigMapperResolver,
+                                          ExportConfigValidatorResolver exportConfigValidatorResolver) {
+    return new ClaimsExportService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
   }
 
   @Bean
-  BaseExportConfigService baseExportConfigService(ConfigurationClient client, ExportConfigValidatorResolver exportConfigValidatorResolver,
-                        DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                        ExportConfigConverterResolver exportConfigConverterResolver) {
-    return new BaseExportConfigService(client, defaultModelConfigToExportConfigConverter,
-                        exportConfigConverterResolver, exportConfigValidatorResolver);
+  BaseExportConfigService defaultExportConfigService(ExportConfigRepository repository,
+                                                     DefaultExportConfigMapper defaultExportConfigMapper,
+                                                     ExportConfigMapperResolver exportConfigMapperResolver,
+                                                     ExportConfigValidatorResolver exportConfigValidatorResolver) {
+    return new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
   }
-
 
   @Bean
   ExportConfigServiceResolver exportConfigServiceResolver(BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
@@ -127,11 +122,12 @@ public class ServiceConfiguration {
     return new ExportConfigServiceResolver(exportConfigServiceMap);
   }
 
-  @Bean JobCommandBuilderResolver jobCommandBuilderResolver(BursarFeeFinesJobCommandBuilder bursarFeeFinesJobCommandBuilder,
-                                                            CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
-                                                            EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
-                                                            EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder,
-                                                            AuthorityControlJobCommandBuilder authorityControlJobCommandBuilder) {
+  @Bean
+  JobCommandBuilderResolver jobCommandBuilderResolver(BursarFeeFinesJobCommandBuilder bursarFeeFinesJobCommandBuilder,
+                                                      CirculationLogJobCommandBuilder circulationLogJobCommandBuilder,
+                                                      EdifactOrdersJobCommandBuilder edifactOrdersJobCommandBuilder,
+                                                      EHoldingsJobCommandBuilder eHoldingsJobCommandBuilder,
+                                                      AuthorityControlJobCommandBuilder authorityControlJobCommandBuilder) {
     Map<ExportType, JobCommandBuilder> converters = new HashMap<>();
     converters.put(ExportType.BURSAR_FEES_FINES, bursarFeeFinesJobCommandBuilder);
     converters.put(ExportType.CIRCULATION_LOG, circulationLogJobCommandBuilder);
@@ -144,17 +140,16 @@ public class ServiceConfiguration {
 
   @Bean
   EdifactScheduledJobInitializer edifactScheduledJobInitializer(ExportTypeBasedConfigManager exportTypeBasedConfigManager,
-                          ExportJobScheduler exportJobScheduler) {
+                                                                ExportJobScheduler exportJobScheduler) {
     return new EdifactScheduledJobInitializer(exportTypeBasedConfigManager, exportJobScheduler);
   }
 
   @Bean
   public ExportJobScheduler edifactOrdersExportJobScheduler(Scheduler scheduler,
-                          ExportConfigToEdifactTriggerConverter edifactTriggerConverter,
-                          ExportConfigToEdifactJobDetailConverter edifactJobDetailConverter,
-                          EdifactJobKeyResolver edifactJobKeyResolver) {
-    return new QuartzExportJobScheduler(scheduler, edifactTriggerConverter, edifactJobDetailConverter,
-      edifactJobKeyResolver);
+                                                            ExportConfigToEdifactTriggerConverter edifactTriggerConverter,
+                                                            ExportConfigToEdifactJobDetailConverter edifactJobDetailConverter,
+                                                            EdifactJobKeyResolver edifactJobKeyResolver) {
+    return new QuartzExportJobScheduler(scheduler, edifactTriggerConverter, edifactJobDetailConverter, edifactJobKeyResolver);
   }
 
   @Bean
@@ -162,3 +157,4 @@ public class ServiceConfiguration {
     return new ScheduledJobsRemover(scheduler, List.of(QuartzConstants.EDIFACT_ORDERS_EXPORT_GROUP_NAME, QuartzConstants.BURSAR_EXPORT_GROUP_NAME));
   }
 }
+
