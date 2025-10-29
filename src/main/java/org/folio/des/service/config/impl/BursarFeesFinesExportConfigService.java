@@ -55,11 +55,11 @@ public class BursarFeesFinesExportConfigService extends BaseExportConfigService 
 
   @Override
   public Optional<ExportConfig> getFirstConfig() {
-    return getFirstConfigGeneric(defaultExportConfigMapper::toDto);
+    return getFirstConfigGeneric(exportConfigMapper::toDto);
   }
 
   public Optional<ExportConfigWithLegacyBursar> getFirstConfigLegacy() {
-    return getFirstConfigGeneric(defaultExportConfigMapper::toDtoLegacy);
+    return getFirstConfigGeneric(exportConfigMapper::toDtoLegacy);
   }
 
   private  <T> Optional<T> getFirstConfigGeneric(Function<ExportConfigEntity, T> converter) {

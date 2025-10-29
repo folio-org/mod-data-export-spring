@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.de.entity.ExportConfigEntity;
-import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 public class BaseExportConfigService implements ExportConfigService {
 
   protected final ExportConfigRepository repository;
-  protected final DefaultExportConfigMapper defaultExportConfigMapper;
+  protected final BaseExportConfigMapper exportConfigMapper;
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
 
@@ -40,7 +40,7 @@ public class BaseExportConfigService implements ExportConfigService {
     validateIncomingExportConfig(exportConfig);
     getExportConfigEntityOrThrow(configId);
 
-    var entity = defaultExportConfigMapper.toEntity(exportConfig);
+    var entity = exportConfigMapper.toEntity(exportConfig);
     repository.save(entity);
     log.info("updateConfig:: Successfully updated config with id={}", configId);
   }
@@ -51,8 +51,8 @@ public class BaseExportConfigService implements ExportConfigService {
     log.info("postConfig:: exportConfig={}", exportConfig);
     validateIncomingExportConfig(exportConfig);
 
-    var entity = defaultExportConfigMapper.toEntity(exportConfig);
-    repository.save(entity);
+    var entity = exportConfigMapper.toEntity(exportConfig);
+    entity = repository.save(entity);
     log.info("postConfig:: Successfully created config with id={}", exportConfig.getId());
 
     return toDto(entity);
@@ -64,7 +64,7 @@ public class BaseExportConfigService implements ExportConfigService {
     var page = repository.findByCql(query, PageRequest.of(0, limit));
     return new ExportConfigCollection().totalRecords(page.getNumberOfElements())
       .configs(page.getContent().stream()
-        .map(defaultExportConfigMapper::toDto)
+        .map(exportConfigMapper::toDto)
         .toList());
   }
 
@@ -72,14 +72,14 @@ public class BaseExportConfigService implements ExportConfigService {
   public Optional<ExportConfig> getFirstConfig() {
     return repository.findAll(PageRequest.of(0, 1))
       .getContent().stream()
-      .map(defaultExportConfigMapper::toDto)
+      .map(exportConfigMapper::toDto)
       .findFirst();
   }
 
   @Override
   public ExportConfig getConfigById(String configId) {
     return repository.findById(UUID.fromString(configId))
-      .map(defaultExportConfigMapper::toDto)
+      .map(exportConfigMapper::toDto)
       .orElseThrow(() -> new NotFoundException(EXPORT_CONFIGURATION_NOT_FOUND.formatted(configId)));
   }
 

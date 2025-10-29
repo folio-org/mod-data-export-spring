@@ -3,6 +3,7 @@ package org.folio.des.service.config.acquisition;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
@@ -19,7 +20,7 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
 
   private final ExportJobScheduler exportJobScheduler;
 
-  public EdifactOrdersExportService(ExportConfigRepository repository, DefaultExportConfigMapper defaultExportConfigMapper,
+  public EdifactOrdersExportService(ExportConfigRepository repository, BaseExportConfigMapper defaultExportConfigMapper,
                                     ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
                                     ExportJobScheduler exportJobScheduler) {
     super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);

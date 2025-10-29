@@ -1,6 +1,8 @@
 package org.folio.des.service.config.acquisition;
 
 import lombok.extern.log4j.Log4j2;
+
+import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
@@ -15,7 +17,7 @@ import java.util.UUID;
 @Log4j2
 public class ClaimsExportService extends BaseExportConfigService {
 
-  public ClaimsExportService(ExportConfigRepository repository, DefaultExportConfigMapper defaultExportConfigMapper,
+  public ClaimsExportService(ExportConfigRepository repository, BaseExportConfigMapper defaultExportConfigMapper,
                              ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver) {
     super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
   }

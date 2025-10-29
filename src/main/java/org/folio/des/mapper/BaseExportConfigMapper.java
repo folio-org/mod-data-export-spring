@@ -13,15 +13,24 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Mapper(imports = {ExportConfigConstants.class, ExportTypeSpecificParameters.class, ExportTypeSpecificParametersWithLegacyBursar.class}, implementationName = "DefaultExportConfigMapper")
+import jakarta.annotation.PostConstruct;
+
+@Mapper(implementationName = "DefaultExportConfigMapper", imports = {ExportConfigConstants.class, ExportTypeSpecificParameters.class, ExportTypeSpecificParametersWithLegacyBursar.class})
 public abstract class BaseExportConfigMapper {
 
   @Autowired
   protected ObjectMapper objectMapper;
 
+  @PostConstruct
+  public void init() {
+    objectMapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.ALWAYS);
+  }
+
   @Mapping(target = "configName", expression = "java(getConfigName(dto))")
+  @Mapping(target = "exportTypeSpecificParameters", expression = "java(objectMapper.convertValue(dto.getExportTypeSpecificParameters(), ExportTypeSpecificParameters.class))")
   @Mapping(target = "createdDate", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "updatedDate", ignore = true)

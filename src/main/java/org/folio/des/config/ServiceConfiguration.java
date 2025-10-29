@@ -88,19 +88,19 @@ public class ServiceConfiguration {
 
   @Bean
   EdifactOrdersExportService edifactOrdersExportService(ExportConfigRepository repository,
-                                                        DefaultExportConfigMapper defaultExportConfigMapper,
+                                                        EdifactExportConfigMapper edifactExportConfigMapper,
                                                         ExportConfigMapperResolver exportConfigMapperResolver,
                                                         ExportConfigValidatorResolver exportConfigValidatorResolver,
                                                         ExportJobScheduler exportJobScheduler) {
-    return new EdifactOrdersExportService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportJobScheduler);
+    return new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportJobScheduler);
   }
 
   @Bean
   ClaimsExportService claimsExportService(ExportConfigRepository repository,
-                                          DefaultExportConfigMapper defaultExportConfigMapper,
+                                          ClaimsExportConfigMapper claimsExportConfigMapper,
                                           ExportConfigMapperResolver exportConfigMapperResolver,
                                           ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    return new ClaimsExportService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+    return new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
   }
 
   @Bean
