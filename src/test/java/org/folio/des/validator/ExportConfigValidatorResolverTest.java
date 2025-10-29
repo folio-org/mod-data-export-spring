@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
-import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
@@ -27,8 +26,6 @@ class ExportConfigValidatorResolverTest {
 
   @Autowired
   private ExportConfigValidatorResolver resolver;
-  @MockitoBean
-  private ConfigurationClient client;
   @MockitoBean
   private Scheduler scheduler;
   @MockitoBean

@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.de.entity.Job;
-import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
@@ -45,8 +44,6 @@ class JobCommandBuilderResolverTest {
 
   @Autowired
   private JobCommandBuilderResolver resolver;
-  @MockitoBean
-  private ConfigurationClient client;
   @MockitoBean
   private Scheduler scheduler;
   @MockitoBean
