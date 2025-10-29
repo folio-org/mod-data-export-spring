@@ -4,12 +4,13 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-  <changeSet id="MODEXPS-XXX@@create-export-config-table" author="saba_zedginidze">
+  <changeSet id="MODEXPS-296@@create-export-config-table" author="saba_zedginidze">
 
-    <createTable tableName="export_config">
+    <createTable tableName="export_configs">
       <column name="id" type="UUID">
         <constraints primaryKey="true" nullable="false"/>
       </column>
+
       <column name="config_name" type="TEXT">
         <constraints nullable="false"/>
       </column>
@@ -22,30 +23,16 @@
       <column name="export_type_specific_parameters" type="JSONB">
         <constraints nullable="false"/>
       </column>
-      <column name="schedule_frequency" type="INTEGER">
-        <constraints nullable="true"/>
-      </column>
-      <column name="schedule_period" type="TEXT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="schedule_time" type="TEXT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="week_days" type="JSONB">
-        <constraints nullable="true"/>
-      </column>
-      <column name="created_date" type="TIMESTAMP" defaultValueComputed="now()">
-        <constraints nullable="false"/>
-      </column>
-      <column name="created_by" type="UUID">
-        <constraints nullable="false"/>
-      </column>
-      <column name="updated_date" type="TIMESTAMP">
-        <constraints nullable="true"/>
-      </column>
-      <column name="updated_by" type="UUID">
-        <constraints nullable="true"/>
-      </column>
+
+      <column name="schedule_frequency" type="INTEGER" />
+      <column name="schedule_period" type="TEXT" />
+      <column name="schedule_time" type="TEXT" />
+      <column name="week_days" type="JSONB" />
+
+      <column name="created_date" type="TIMESTAMP" defaultValueComputed="now()"/>
+      <column name="created_by" type="UUID"/>
+      <column name="updated_date" type="TIMESTAMP"/>
+      <column name="updated_by" type="UUID"/>
     </createTable>
 
   </changeSet>
