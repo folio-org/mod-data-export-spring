@@ -17,8 +17,6 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
-import org.folio.des.mapper.aqcuisition.EdifactExportConfigMapper;
-import org.folio.des.mapper.aqcuisition.EdifactExportConfigMapperImpl;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.folio.des.validator.acquisition.EdifactOrdersScheduledParamsValidator;
 import org.junit.jupiter.api.DisplayName;

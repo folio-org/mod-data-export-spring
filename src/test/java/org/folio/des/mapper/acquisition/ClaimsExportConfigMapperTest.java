@@ -18,8 +18,6 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
-import org.folio.des.mapper.aqcuisition.ClaimsExportConfigMapper;
-import org.folio.des.mapper.aqcuisition.ClaimsExportConfigMapperImpl;
 import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

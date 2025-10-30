@@ -12,22 +12,16 @@ import org.folio.des.service.config.ExportConfigConstants;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.annotation.PostConstruct;
 
 @Mapper(implementationName = "DefaultExportConfigMapper", imports = {ExportConfigConstants.class, ExportTypeSpecificParameters.class, ExportTypeSpecificParametersWithLegacyBursar.class})
 public abstract class BaseExportConfigMapper {
 
   @Autowired
+  @Qualifier("entityObjectMapper")
   protected ObjectMapper objectMapper;
-
-  @PostConstruct
-  public void init() {
-    objectMapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.ALWAYS);
-  }
 
   @Mapping(target = "configName", expression = "java(getConfigName(dto))")
   @Mapping(target = "exportTypeSpecificParameters", expression = "java(objectMapper.convertValue(dto.getExportTypeSpecificParameters(), ExportTypeSpecificParameters.class))")

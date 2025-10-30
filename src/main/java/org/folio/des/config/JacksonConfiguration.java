@@ -22,13 +22,16 @@ import java.util.UUID;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobParameter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class JacksonConfiguration implements ObjectMapperSupplier {
 
   private static final ObjectMapper OBJECT_MAPPER;
+  private static final ObjectMapper ENTITY_OBJECT_MAPPER;
 
   static {
     OBJECT_MAPPER =
@@ -42,6 +45,8 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    ENTITY_OBJECT_MAPPER = OBJECT_MAPPER.copy()
+      .setSerializationInclusion(JsonInclude.Include.ALWAYS);
   }
 
   static class ExitStatusDeserializer extends StdDeserializer<ExitStatus> {
@@ -111,8 +116,15 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
   }
 
   @Bean
+  @Primary
   public ObjectMapper objectMapper() {
     return OBJECT_MAPPER;
+  }
+
+  @Bean
+  @Qualifier("entityObjectMapper")
+  public ObjectMapper entityObjectMapper() {
+    return ENTITY_OBJECT_MAPPER;
   }
 
   @Override

@@ -1,4 +1,4 @@
-package org.folio.des.mapper.aqcuisition;
+package org.folio.des.mapper.acquisition;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -16,7 +16,6 @@ import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +32,10 @@ public abstract class EdifactExportConfigMapper extends BaseExportConfigMapper {
   protected void validateConfig(ExportConfig exportConfig) {
     var errors = new BeanPropertyBindingResult(exportConfig.getExportTypeSpecificParameters(), "specificParameters");
     validator.validate(exportConfig.getExportTypeSpecificParameters(), errors);
+    normalizeScheduledParameterIds(exportConfig);
+  }
 
+  private void normalizeScheduledParameterIds(ExportConfig exportConfig) {
     var ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
     Optional.ofNullable(ediOrdersExportConfig.getEdiSchedule())
       .map(EdiSchedule::getScheduleParameters)
@@ -51,7 +53,10 @@ public abstract class EdifactExportConfigMapper extends BaseExportConfigMapper {
   @Override
   protected String getConfigName(ExportConfig exportConfig) {
     var ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
-    return exportConfig.getType().getValue() + "_" + ediOrdersExportConfig.getVendorId().toString() + "_" + exportConfig.getId();
+    return "%s_%s_%s".formatted(
+      exportConfig.getType().getValue(),
+      ediOrdersExportConfig.getVendorId(),
+      exportConfig.getId());
   }
 
 }

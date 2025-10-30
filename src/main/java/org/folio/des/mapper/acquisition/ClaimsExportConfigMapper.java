@@ -1,4 +1,4 @@
-package org.folio.des.mapper.aqcuisition;
+package org.folio.des.mapper.acquisition;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -26,7 +26,10 @@ public abstract class ClaimsExportConfigMapper extends BaseExportConfigMapper {
   @Override
   protected String getConfigName(ExportConfig exportConfig) {
     var ediOrdersExportConfig = exportConfig.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig();
-    return exportConfig.getType().getValue() + "_" + ediOrdersExportConfig.getVendorId().toString() + "_" + exportConfig.getId();
+    return "%s_%s_%s".formatted(
+      exportConfig.getType().getValue(),
+      ediOrdersExportConfig.getVendorId(),
+      exportConfig.getId());
   }
 
 }

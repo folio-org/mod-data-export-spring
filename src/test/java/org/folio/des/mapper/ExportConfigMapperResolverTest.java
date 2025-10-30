@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.folio.des.CopilotGenerated;
 import org.folio.des.domain.dto.ExportType;
-import org.folio.des.mapper.aqcuisition.ClaimsExportConfigMapper;
-import org.folio.des.mapper.aqcuisition.EdifactExportConfigMapper;
+import org.folio.des.mapper.acquisition.ClaimsExportConfigMapper;
+import org.folio.des.mapper.acquisition.EdifactExportConfigMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

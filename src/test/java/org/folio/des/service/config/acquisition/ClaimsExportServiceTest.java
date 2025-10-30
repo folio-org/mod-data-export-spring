@@ -16,7 +16,7 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
-import org.folio.des.mapper.aqcuisition.ClaimsExportConfigMapperImpl;
+import org.folio.des.mapper.acquisition.ClaimsExportConfigMapperImpl;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
@@ -53,9 +53,8 @@ class ClaimsExportServiceTest {
     var defaultExportConfigMapper = new DefaultExportConfigMapper();
     var claimsExportConfigMapper = new ClaimsExportConfigMapperImpl();
     var exportConfigMapperResolver = new ExportConfigMapperResolver(Map.of(ExportType.CLAIMS, claimsExportConfigMapper), defaultExportConfigMapper);
-    setInternalState(claimsExportConfigMapper, "objectMapper", new JacksonConfiguration().get());
+    setInternalState(claimsExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
     setInternalState(claimsExportConfigMapper, "validator", validator);
-    claimsExportConfigMapper.init();
 
     repository = Mockito.mock(ExportConfigRepository.class);
     service = new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);

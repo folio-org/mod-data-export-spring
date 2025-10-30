@@ -55,8 +55,7 @@ class BaseExportConfigServiceTest {
 
     var defaultExportConfigMapper = new DefaultExportConfigMapper();
     var exportConfigMapperResolver = new ExportConfigMapperResolver(Map.of(), defaultExportConfigMapper);
-    setInternalState(defaultExportConfigMapper, "objectMapper", new JacksonConfiguration().get());
-    defaultExportConfigMapper.init();
+    setInternalState(defaultExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
 
     repository = Mockito.mock(ExportConfigRepository.class);
     service = new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
