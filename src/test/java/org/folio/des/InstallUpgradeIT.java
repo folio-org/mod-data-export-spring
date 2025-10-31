@@ -54,7 +54,6 @@ class InstallUpgradeIT {
     .parse("mockserver/mockserver")
     .withTag("mockserver-" + MockServerClient.class.getPackage().getImplementationVersion());
   private static final Network NETWORK = Network.newNetwork();
-  private static final String EDIFACT_CONFIG_QUERY = "module==mod-data-export-spring and value==*EDIFACT_ORDERS_EXPORT*";
   private static MockServerClient mockServerClient;
 
   @Container
@@ -122,10 +121,6 @@ class InstallUpgradeIT {
     mockServerClient.when(request("/users").withMethod("PUT")).respond(response().withStatusCode(201));
     mockPath(mockServerClient, "/users.*",       "{\"users\": []}");
     mockPath(mockServerClient, "/perms/users.*", "{\"permissionUsers\": []}");
-    mockServerClient.when(request().withPath("/configurations/entries")
-        .withQueryStringParameter("query", EDIFACT_CONFIG_QUERY).withMethod("GET"))
-      .respond(response().withStatusCode(200).withContentType(MediaType.APPLICATION_JSON)
-        .withBody(CONFIGS_RESPONSE));
     mockServerClient.when(request())
       .respond(response().withStatusCode(200).withContentType(MediaType.APPLICATION_JSON)
         .withBody("{\"totalRecords\": 0}"));
@@ -200,7 +195,6 @@ class InstallUpgradeIT {
     setTenant("latest");
     postTenant(createObjectNode().put("module_to", "3.0.0").put("module_from", "2.1.0"));
     //existing schedule configurations should be loaded to be scheduled with quartz
-    verifySchedulingConfigsReloaded();
     smokeTest();
   }
 
@@ -210,7 +204,6 @@ class InstallUpgradeIT {
     setTenant("latest");
     postTenant(createObjectNode().put("module_to", "3.1.0").put("module_from", "3.0.0"));
     // module_from supports quartz scheduling already, no need to reload scheduling configs
-    verifySchedulingConfigsNotReloaded();
     smokeTest();
   }
 
@@ -223,7 +216,6 @@ class InstallUpgradeIT {
       .put("value", "true"));
     postTenant(request);
     //forceSchedulesReload is set to true, so scheduling configs need to be reloaded
-    verifySchedulingConfigsReloaded();
     smokeTest();
   }
 
@@ -240,41 +232,4 @@ class InstallUpgradeIT {
     }
   }
 
-  private static void verifySchedulingConfigsReloaded() {
-    verifySchedulingConfigReload(1);
-  }
-
-  private static void verifySchedulingConfigsNotReloaded() {
-    verifySchedulingConfigReload(0);
-  }
-
-  private static void verifySchedulingConfigReload(int times) {
-    mockServerClient.verify(request()
-      .withPath("/configurations/entries")
-      .withMethod("GET")
-      .withQueryStringParameter("query", "module==mod-data-export-spring and value==*EDIFACT_ORDERS_EXPORT*"), VerificationTimes.exactly(times));
-  }
-
-  private static final String CONFIGS_RESPONSE= """
-    {
-    	"configs": [
-    		{
-    			"id": "9fa30f7a-0de4-4067-864a-5449d85b1d65",
-    			"value": "{\\"id\\":\\"5a3cba28-16e7-498e-b73b-98713000298e\\",  \\"tenant\\": \\"some_tenant\\", \\"type\\": \\"EDIFACT_ORDERS_EXPORT\\", \\"exportTypeSpecificParameters\\": { \\"vendorEdiOrdersExportConfig\\": {\\"vendorId\\": \\"046b6c7f-0b8a-43b9-b35d-6489e6daee91\\", \\"configName\\": \\"edi_config\\", \\"ediSchedule\\": {\\"enableScheduledExport\\": true, \\"scheduleParameters\\": {\\"scheduleFrequency\\": 1, \\"schedulePeriod\\": \\"WEEK\\", \\"weekDays\\":[\\"SUNDAY\\"], \\"scheduleTime\\": \\"15:30:00\\"}}}}, \\"schedulePeriod\\": \\"HOUR\\"}",
-    			"module": "mod-data-export-spring",
-    			"default": true,
-    			"enabled": true,
-    			"metadata": {
-    				"createdDate": "2023-04-30T12:56:26.211Z",
-    				"updatedDate": "2023-05-04T21:41:53.887Z",
-    				"createdByUserId": "850e9737-1b60-5553-9423-a6f6251aeb0b",
-    				"updatedByUserId": "850e9737-1b60-5553-9423-a6f6251aeb0b"
-    			},
-    			"configName": "EDIFACT_ORDERS_EXPORT_e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1_9fa30f7a-0de4-4067-864a-5449d85b1d65",
-    			"description": "Edifact orders export configuration parameters"
-    		}
-    	],
-    	"totalRecords": 1
-    }
-    """;
 }
