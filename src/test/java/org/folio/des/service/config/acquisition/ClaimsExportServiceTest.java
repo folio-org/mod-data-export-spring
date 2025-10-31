@@ -3,6 +3,7 @@ package org.folio.des.service.config.acquisition;
 import static org.folio.des.support.TestUtils.setInternalState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -77,6 +78,8 @@ class ClaimsExportServiceTest {
       .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
 
     service.updateConfig(CLAIMS_EXPORT_CONFIG.getId(), CLAIMS_EXPORT_CONFIG);
+
+    verify(repository).save(any());
   }
 
 }

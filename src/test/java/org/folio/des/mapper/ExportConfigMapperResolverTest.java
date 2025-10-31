@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,11 +32,11 @@ class ExportConfigMapperResolverTest {
   private DefaultExportConfigMapper defaultMapper;
 
   private ExportConfigMapperResolver resolver;
-  private Map<ExportType, BaseExportConfigMapper> mappers;
+  private EnumMap<ExportType, BaseExportConfigMapper> mappers;
 
   @BeforeEach
   void setUp() {
-    mappers = new HashMap<>();
+    mappers = new EnumMap<>(ExportType.class);
   }
 
   @Test
@@ -106,7 +107,7 @@ class ExportConfigMapperResolverTest {
   @DisplayName("Should return default mapper when map is empty")
   void testReturnDefaultMapperWhenMapIsEmpty() {
     // Given
-    resolver = new ExportConfigMapperResolver(new HashMap<>(), defaultMapper);
+    resolver = new ExportConfigMapperResolver(new EnumMap<>(ExportType.class), defaultMapper);
 
     // When
     BaseExportConfigMapper result = resolver.resolve(ExportType.EDIFACT_ORDERS_EXPORT);

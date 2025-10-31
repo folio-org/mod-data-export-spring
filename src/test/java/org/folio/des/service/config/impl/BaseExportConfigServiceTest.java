@@ -101,6 +101,8 @@ class BaseExportConfigServiceTest {
       .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
 
     service.updateConfig(exportConfig.getId(), exportConfig);
+
+    verify(repository).save(any());
   }
 
   @Test
