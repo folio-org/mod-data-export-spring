@@ -63,7 +63,7 @@ class ClaimsExportConfigMapperTest {
     // Then
     assertNotNull(entity);
     assertEquals(UUID.fromString(exportId), entity.getId());
-    assertEquals(ExportType.EDIFACT_ORDERS_EXPORT, entity.getType());
+    assertEquals(ExportType.EDIFACT_ORDERS_EXPORT.getValue(), entity.getType());
     assertEquals("test-tenant", entity.getTenant());
 
     // Verify config name format: TYPE_VENDORID_EXPORTID

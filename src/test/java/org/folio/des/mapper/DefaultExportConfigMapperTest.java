@@ -50,7 +50,7 @@ class DefaultExportConfigMapperTest {
     // Then
     assertNotNull(entity);
     assertEquals(UUID.fromString(id), entity.getId());
-    assertEquals(ExportType.BURSAR_FEES_FINES, entity.getType());
+    assertEquals(ExportType.BURSAR_FEES_FINES.getValue(), entity.getType());
     assertEquals("test-tenant", entity.getTenant());
     assertEquals(7, entity.getScheduleFrequency());
     assertEquals("WEEK", entity.getSchedulePeriod());
