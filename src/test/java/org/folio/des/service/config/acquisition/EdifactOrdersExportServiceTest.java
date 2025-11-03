@@ -1,126 +1,96 @@
 package org.folio.des.service.config.acquisition;
 
+import static org.folio.des.support.TestUtils.setInternalState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.UUID;
 
-import org.folio.des.client.ConfigurationClient;
+import org.folio.de.entity.ExportConfigEntity;
 import org.folio.des.config.JacksonConfiguration;
-import org.folio.des.config.ServiceConfiguration;
-import org.folio.des.config.scheduling.QuartzSchemaInitializer;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.ExportConfigMapperResolver;
+import org.folio.des.mapper.acquisition.EdifactExportConfigMapperImpl;
+import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.ExportJobScheduler;
-import org.junit.jupiter.api.Assertions;
+import org.folio.des.validator.ExportConfigValidatorResolver;
+import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
+import org.folio.des.validator.acquisition.EdifactOrdersScheduledParamsValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.quartz.Scheduler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-@SpringBootTest(classes = {DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class,
-  ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
+@ExtendWith(MockitoExtension.class)
 class EdifactOrdersExportServiceTest {
 
-  public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
+  private static final ExportConfig EDIFACT_EXPORT_CONFIG = new ExportConfig()
+    .id(UUID.randomUUID().toString())
+    .type(ExportType.EDIFACT_ORDERS_EXPORT)
+    .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
+      .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
+        .configName("edi_test_config")
+        .vendorId(UUID.fromString("046b6c7f-0b8a-43b9-b35d-6489e6daee91"))
+        .ediSchedule(new EdiSchedule()
+          .enableScheduledExport(true)
+          .scheduleParameters(new ScheduleParameters()
+            .schedulePeriod(ScheduleParameters.SchedulePeriodEnum.HOUR)
+            .scheduleFrequency(1)
+            .scheduleTime("15:00:00")))));
 
-  @Autowired
+  private ExportConfigRepository repository;
+  private ExportJobScheduler edifactOrdersExportJobScheduler;
   private EdifactOrdersExportService service;
-  @MockitoBean
-  private ConfigurationClient client;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @MockitoBean
-  @Qualifier("edifactOrdersExportJobScheduler")
-  private ExportJobScheduler exportJobScheduler;
-  @MockitoBean
-  private Scheduler scheduler;
-  @MockitoBean
-  private QuartzSchemaInitializer quartzSchemaInitializer;
 
+  @BeforeEach
+  void setUp() {
+    var validatorKey = "%s-%s".formatted(ExportType.EDIFACT_ORDERS_EXPORT, ExportTypeSpecificParameters.class.getName());
+    var validator = new EdifactOrdersExportParametersValidator(new EdifactOrdersScheduledParamsValidator());
+    var exportConfigValidatorResolver = new ExportConfigValidatorResolver(Map.of(validatorKey, validator));
+
+    var defaultExportConfigMapper = new DefaultExportConfigMapper();
+    var edifactExportConfigMapper = new EdifactExportConfigMapperImpl();
+    var exportConfigMapperResolver = new ExportConfigMapperResolver(Map.of(ExportType.EDIFACT_ORDERS_EXPORT, edifactExportConfigMapper), defaultExportConfigMapper);
+    setInternalState(edifactExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
+    setInternalState(edifactExportConfigMapper, "validator", validator);
+
+    repository = Mockito.mock(ExportConfigRepository.class);
+    edifactOrdersExportJobScheduler = Mockito.mock(ExportJobScheduler.class);
+    service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, edifactOrdersExportJobScheduler);
+  }
 
   @Test
   @DisplayName("Set new configuration")
-  void addConfig() throws JsonProcessingException {
-    ExportConfig edifactOrdersExportConfig = new ExportConfig();
-    edifactOrdersExportConfig.setId(UUID.randomUUID().toString());
-    ExportTypeSpecificParameters parameters = new ExportTypeSpecificParameters();
-    VendorEdiOrdersExportConfig vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    EdiSchedule ediSchedule = new EdiSchedule();
-    ScheduleParameters scheduleParameters = new ScheduleParameters();
+  void testPostConfig() {
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-    scheduleParameters.scheduleFrequency(1);
-    scheduleParameters.schedulePeriod(ScheduleParameters.SchedulePeriodEnum.HOUR);
-    scheduleParameters.scheduleTime("15:00:00");
+    var response = service.postConfig(EDIFACT_EXPORT_CONFIG);
 
-    ediSchedule.enableScheduledExport(true);
-    ediSchedule.scheduleParameters(scheduleParameters);
-
-    vendorEdiOrdersExportConfig.setConfigName("edi_test_config");
-    vendorEdiOrdersExportConfig.vendorId(UUID.fromString("046b6c7f-0b8a-43b9-b35d-6489e6daee91"));
-    vendorEdiOrdersExportConfig.ediSchedule(ediSchedule);
-
-
-    parameters.vendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    edifactOrdersExportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-    edifactOrdersExportConfig.exportTypeSpecificParameters(parameters);
-    ModelConfiguration mockResponse = mockResponse(edifactOrdersExportConfig);
-    Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
-
-    var response = service.postConfig(edifactOrdersExportConfig);
-
-    Assertions.assertAll(
-      () -> assertNotNull(response.getId()),
-      () -> assertEquals(mockResponse.getConfigName(), response.getConfigName()),
-      () -> assertEquals(mockResponse.getModule(), response.getModule()),
-      () -> assertEquals(mockResponse.getDescription(), response.getDescription()),
-      () -> assertEquals(mockResponse.getDefault(), response.getDefault()),
-      () -> assertEquals(mockResponse.getEnabled(), response.getEnabled())
-    );
+    assertEquals(EDIFACT_EXPORT_CONFIG, response);
+    verify(edifactOrdersExportJobScheduler, times(1)).scheduleExportJob(EDIFACT_EXPORT_CONFIG);
   }
 
   @Test
-  @DisplayName("Config is not set")
-  void noConfig() throws JsonProcessingException {
-    final ConfigurationCollection mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
+  @DisplayName("Update configuration")
+  void testUpdateConfig() {
+    when(repository.findById(UUID.fromString(EDIFACT_EXPORT_CONFIG.getId())))
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
 
-    var config = service.getFirstConfig();
+    service.updateConfig(EDIFACT_EXPORT_CONFIG.getId(), EDIFACT_EXPORT_CONFIG);
 
-    assertTrue(config.isEmpty());
-  }
-
-  private ModelConfiguration mockResponse(ExportConfig edifactOrdersExportConfig)
-    throws JsonProcessingException {
-    var mockResponse = new ModelConfiguration();
-    mockResponse.setId(UUID.randomUUID().toString());
-    mockResponse.setModule("test_module");
-    mockResponse.setConfigName("edifact_orders_Config");
-    mockResponse.setDescription("test description");
-    mockResponse.setEnabled(true);
-    mockResponse.setDefault(true);
-    mockResponse.setValue(objectMapper.writeValueAsString(edifactOrdersExportConfig));
-    return mockResponse;
+    verify(edifactOrdersExportJobScheduler, times(1)).scheduleExportJob(EDIFACT_EXPORT_CONFIG);
   }
 
 }

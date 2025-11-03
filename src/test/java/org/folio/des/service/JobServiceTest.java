@@ -23,10 +23,8 @@ import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.CopilotGenerated;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
-import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.EdiFtp;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -35,6 +33,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.domain.dto.delete_interval.JobDeletionInterval;
 import org.folio.des.domain.dto.delete_interval.JobDeletionIntervalCollection;
 import org.folio.des.repository.JobDataExportRepository;
+import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.service.impl.JobServiceImpl;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -64,8 +63,6 @@ class JobServiceTest {
   @Mock
   private JobExecutionService jobExecutionService;
   @Mock
-  private ConfigurationClient client;
-  @Mock
   private ExportWorkerClient exportWorkerClient;
   @Mock
   private FolioModuleMetadata folioModuleMetadata;
@@ -74,7 +71,7 @@ class JobServiceTest {
   @Mock
   private ExportConfigValidatorResolver exportConfigValidatorResolver;
   @Mock
-  private DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
+  private BaseExportConfigService defaultExportConfigService;
   @Mock
   private KafkaService kafka;
   @Mock
@@ -113,8 +110,8 @@ class JobServiceTest {
     Map<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put(XOkapiHeaders.TENANT, List.of("diku"));
     var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, okapiHeaders);
-    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultModelConfigToExportConfigConverter, client, objectMapper);
-    var internalJobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, client, deletionIntervalService);
+    var jobExecutionService = new JobExecutionService(kafka, exportConfigValidatorResolver, jobCommandBuilderResolver, defaultExportConfigService, objectMapper);
+    var internalJobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext, null, deletionIntervalService, defaultExportConfigService);
     var config = new ExportConfig();
     config.setId(configId.toString());
     org.folio.des.domain.dto.Job jobDto = new org.folio.des.domain.dto.Job();
@@ -122,13 +119,9 @@ class JobServiceTest {
     jobDto.setId(UUID.randomUUID());
     jobDto.setExportTypeSpecificParameters(exportTypeSpecificParameters);
 
-    when(defaultModelConfigToExportConfigConverter.convert(any())).then(invocationOnMock -> {
-      ExportConfig exportConfig = new ExportConfig();
-      exportConfig.setType(ExportType.EDIFACT_ORDERS_EXPORT);
-      exportConfig.setExportTypeSpecificParameters(exportTypeSpecificParameters);
-
-      return exportConfig;
-    });
+    when(defaultExportConfigService.getConfigById(any())).then(invocationOnMock ->
+      new ExportConfig().type(ExportType.EDIFACT_ORDERS_EXPORT)
+        .exportTypeSpecificParameters(exportTypeSpecificParameters));
     when(repository.findById(any())).thenReturn(java.util.Optional.of(job));
     assertThrows(NotFoundException.class, () -> internalJobService.resendExportedFile(configId));
     job.setFileNames(list);

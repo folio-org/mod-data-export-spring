@@ -27,10 +27,6 @@
       "version": "1.2"
     },
     {
-      "id": "configuration",
-      "version": "2.0"
-    },
-    {
       "id" :  "bulk-edit",
       "version": "4.1"
     }
@@ -83,11 +79,6 @@
             "feesfines.accounts-bulk.transfer.post",
             "accounts.collection.get",
             "circulation-logs.collection.get",
-            "configuration.entries.collection.get",
-            "configuration.entries.item.get",
-            "configuration.entries.item.post",
-            "configuration.entries.item.put",
-            "configuration.entries.item.delete",
             "data-export.job.collection.get",
             "data-export.config.collection.get",
             "feefineactions.collection.get",
@@ -138,9 +129,7 @@
           "permissionsRequired": [
             "data-export.config.collection.get"
           ],
-          "modulePermissions": [
-            "configuration.entries.collection.get"
-          ]
+          "modulePermissions": []
         },
         {
           "methods": [
@@ -150,9 +139,7 @@
           "permissionsRequired": [
             "data-export.config.item.get"
           ],
-          "modulePermissions": [
-            "configuration.entries.item.get"
-          ]
+          "modulePermissions": []
         },
         {
           "methods": [
@@ -162,9 +149,7 @@
           "permissionsRequired": [
             "data-export.config.item.post"
           ],
-          "modulePermissions": [
-            "configuration.entries.item.post"
-          ]
+          "modulePermissions": []
         },
         {
           "methods": [
@@ -174,9 +159,7 @@
           "permissionsRequired": [
             "data-export.config.item.put"
           ],
-          "modulePermissions": [
-            "configuration.entries.item.put"
-          ]
+          "modulePermissions": []
         },
         {
           "methods": [
@@ -186,9 +169,7 @@
           "permissionsRequired": [
             "data-export.config.item.delete"
           ],
-          "modulePermissions": [
-            "configuration.entries.item.delete"
-          ]
+          "modulePermissions": []
         },
         {
           "methods": [
@@ -203,11 +184,6 @@
             "feesfines.accounts-bulk.transfer.post",
             "accounts.collection.get",
             "circulation-logs.collection.get",
-            "configuration.entries.collection.get",
-            "configuration.entries.item.get",
-            "configuration.entries.item.post",
-            "configuration.entries.item.put",
-            "configuration.entries.item.delete",
             "data-export.job.collection.get",
             "data-export.config.collection.get",
             "feefineactions.collection.get",
@@ -296,9 +272,6 @@
             "login.item.delete",
             "perms.users.item.post",
             "perms.users.get",
-            "configuration.entries.collection.get",
-            "configuration.entries.item.post",
-            "configuration.entries.item.put",
             "perms.users.assign.immutable",
             "data-export.job.collection.get",
             "data-export.config.collection.get"
@@ -413,8 +386,6 @@
       "displayName": "Edifact export create permission",
       "description": "Edifact export create permission",
       "subPermissions": [
-        "configuration.entries.collection.get",
-        "configuration.entries.item.get",
         "data-export.job.item.post",
         "finance.expense-classes.item.get",
         "inventory-storage.holdings.item.get",
@@ -476,11 +447,6 @@
         "feesfines.accounts-bulk.transfer.post",
         "accounts.collection.get",
         "circulation-logs.collection.get",
-        "configuration.entries.collection.get",
-        "configuration.entries.item.get",
-        "configuration.entries.item.post",
-        "configuration.entries.item.put",
-        "configuration.entries.item.delete",
         "data-export.job.collection.get",
         "data-export.config.collection.get",
         "feefineactions.collection.get",

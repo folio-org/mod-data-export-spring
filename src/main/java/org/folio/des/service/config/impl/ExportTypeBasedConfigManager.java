@@ -1,11 +1,8 @@
 package org.folio.des.service.config.impl;
 
-import static org.folio.des.domain.FilterOperator.AND_OPERATOR;
 import static org.folio.des.domain.FilterOperator.OR_OPERATOR;
 import static org.folio.des.domain.FilterPredicate.BY_TYPE_CONDITION;
 import static org.folio.des.domain.FilterPredicate.BY_VALUE_CONDITION;
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_NAME;
-import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_MODULE_QUERY;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -19,16 +16,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.des.client.ConfigurationClient;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.service.config.ExportConfigService;
-import org.folio.spring.exception.NotFoundException;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -43,10 +36,8 @@ public class ExportTypeBasedConfigManager {
   private final Pattern exportTypePattern = Pattern.compile(EnumSet.allOf(ExportType.class).stream()
     .map(ExportType::toString).collect(Collectors.joining("|")));
 
-  private final ConfigurationClient client;
   private final ExportConfigServiceResolver exportConfigServiceResolver;
   private final ExportConfigService defaultExportConfigService;
-  private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
 
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("updateConfig:: configId={}", configId);
@@ -54,12 +45,12 @@ public class ExportTypeBasedConfigManager {
       log.error(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY.getDescription());
       throw new RequestValidationException(ErrorCodes.MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY);
     }
-    exportConfigServiceResolver.resolve(exportConfig.getType())
-      .ifPresentOrElse(service -> service.updateConfig(configId, exportConfig),
-        () -> defaultExportConfigService.updateConfig(configId, exportConfig));
+    exportConfigServiceResolver.resolve(exportConfig.getType()).ifPresentOrElse(
+      service -> service.updateConfig(configId, exportConfig),
+      () -> defaultExportConfigService.updateConfig(configId, exportConfig));
   }
 
-  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+  public ExportConfig postConfig(ExportConfig exportConfig) {
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
@@ -129,16 +120,10 @@ public class ExportTypeBasedConfigManager {
   }
 
   private String normalizeQuery(ExportType exportType) {
-    return String.format("%s AND value==*%s*", DEFAULT_MODULE_QUERY, exportType);
+    return String.format("type==*%s*", exportType);
   }
 
   private String normalizeQuery(List<ExportType> exportTypes, String query) {
-    if (StringUtils.isEmpty(query)) {
-      return DEFAULT_MODULE_QUERY;
-    }
-    if (!query.contains(DEFAULT_MODULE_NAME)) {
-      query = DEFAULT_MODULE_QUERY + AND_OPERATOR.getValue() + query;
-    }
     if (isFilterByType(query) && CollectionUtils.isNotEmpty(exportTypes)) {
       query = query.replace(BY_TYPE_CONDITION.getValue(), BY_VALUE_CONDITION.getValue());
       for (ExportType exportType : exportTypes) {
@@ -149,17 +134,13 @@ public class ExportTypeBasedConfigManager {
   }
 
   public ExportConfig getConfigById(String exportConfigId) {
-    var configuration = client.getConfigById(exportConfigId);
-    if (configuration == null) {
-      log.error("Export configuration not found or parse error : {}}", exportConfigId);
-      throw new NotFoundException(String.format(EXPORT_CONFIGURATION_NOT_FOUND, exportConfigId));
-    }
-    ExportConfig exportConfig = defaultModelConfigToExportConfigConverter.convert(configuration);
+    var exportConfig = defaultExportConfigService.getConfigById(exportConfigId);
     log.info("getConfigById:: result={}.", exportConfigId);
     return exportConfig;
   }
 
   public void deleteConfigById(String exportConfigId) {
-    client.deleteConfigById(exportConfigId);
+    defaultExportConfigService.deleteConfigById(exportConfigId);
   }
+
 }

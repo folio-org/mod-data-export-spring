@@ -1,143 +1,85 @@
 package org.folio.des.service.config.acquisition;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.folio.des.client.ConfigurationClient;
+import static org.folio.des.support.TestUtils.setInternalState;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
+import java.util.UUID;
+
+import org.folio.de.entity.ExportConfigEntity;
 import org.folio.des.config.JacksonConfiguration;
-import org.folio.des.config.ServiceConfiguration;
-import org.folio.des.config.scheduling.QuartzSchemaInitializer;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.domain.dto.ConfigurationCollection;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
-import org.junit.jupiter.api.Assertions;
+import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.ExportConfigMapperResolver;
+import org.folio.des.mapper.acquisition.ClaimsExportConfigMapperImpl;
+import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.validator.ExportConfigValidatorResolver;
+import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.quartz.Scheduler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-
-@SpringBootTest(classes = { DefaultModelConfigToExportConfigConverter.class, JacksonConfiguration.class, ServiceConfiguration.class })
-@EnableAutoConfiguration(exclude = { BatchAutoConfiguration.class })
+@ExtendWith(MockitoExtension.class)
 class ClaimsExportServiceTest {
 
-  public static final String EMPTY_CONFIG_RESPONSE = "{\"configs\": [], \"totalRecords\": 0}";
+  private static final ExportConfig CLAIMS_EXPORT_CONFIG = new ExportConfig()
+    .id(UUID.randomUUID().toString())
+    .type(ExportType.CLAIMS)
+    .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
+      .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
+        .configName("name")
+        .vendorId(UUID.randomUUID())
+        .integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING)
+        .transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD)
+        .fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV)));
 
-  @Autowired
+  private ExportConfigRepository repository;
   private ClaimsExportService service;
-  @MockitoBean
-  private ConfigurationClient client;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @MockitoBean
-  private Scheduler scheduler;
-  @MockitoBean
-  private QuartzSchemaInitializer quartzSchemaInitializer;
+
+  @BeforeEach
+  void setUp() {
+    var validatorKey = "%s-%s".formatted(ExportType.CLAIMS, ExportTypeSpecificParameters.class.getName());
+    var validator = new ClaimsExportParametersValidator();
+    var exportConfigValidatorResolver = new ExportConfigValidatorResolver(Map.of(validatorKey, validator));
+
+    var defaultExportConfigMapper = new DefaultExportConfigMapper();
+    var claimsExportConfigMapper = new ClaimsExportConfigMapperImpl();
+    var exportConfigMapperResolver = new ExportConfigMapperResolver(Map.of(ExportType.CLAIMS, claimsExportConfigMapper), defaultExportConfigMapper);
+    setInternalState(claimsExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
+    setInternalState(claimsExportConfigMapper, "validator", validator);
+
+    repository = Mockito.mock(ExportConfigRepository.class);
+    service = new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+  }
 
   @Test
   @DisplayName("Set new configuration")
-  void addConfig() throws JsonProcessingException {
-    var edifactOrdersExportConfig = new ExportConfig();
-    edifactOrdersExportConfig.setId(UUID.randomUUID().toString());
+  void testPostConfig() {
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-    var vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    vendorEdiOrdersExportConfig.setConfigName("name");
-    vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
-    vendorEdiOrdersExportConfig.integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
-    vendorEdiOrdersExportConfig.transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
-    vendorEdiOrdersExportConfig.fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
+    var response = service.postConfig(CLAIMS_EXPORT_CONFIG);
 
-    var parameters = new ExportTypeSpecificParameters();
-    parameters.vendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    edifactOrdersExportConfig.setType(ExportType.CLAIMS);
-    edifactOrdersExportConfig.exportTypeSpecificParameters(parameters);
-
-    var mockResponse = mockResponse(edifactOrdersExportConfig);
-    Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
-
-    var response = service.postConfig(edifactOrdersExportConfig);
-    Assertions.assertAll(
-      () -> assertNotNull(response.getId()),
-      () -> assertEquals(mockResponse.getConfigName(), response.getConfigName()),
-      () -> assertEquals(mockResponse.getModule(), response.getModule()),
-      () -> assertEquals(mockResponse.getDescription(), response.getDescription()),
-      () -> assertEquals(mockResponse.getDefault(), response.getDefault()),
-      () -> assertEquals(mockResponse.getEnabled(), response.getEnabled())
-    );
+    assertEquals(CLAIMS_EXPORT_CONFIG, response);
   }
 
   @Test
-  @DisplayName("Set existing configuration")
-  void updateConfig() throws JsonProcessingException {
-    var configId = UUID.randomUUID().toString();
+  @DisplayName("Update configuration")
+  void testUpdateConfig() {
+    when(repository.findById(UUID.fromString(CLAIMS_EXPORT_CONFIG.getId())))
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
 
-    var edifactOrdersExportConfig = new ExportConfig();
-    edifactOrdersExportConfig.setId(configId);
+    service.updateConfig(CLAIMS_EXPORT_CONFIG.getId(), CLAIMS_EXPORT_CONFIG);
 
-    var vendorEdiOrdersExportConfig = new VendorEdiOrdersExportConfig();
-    vendorEdiOrdersExportConfig.setConfigName("name");
-    vendorEdiOrdersExportConfig.vendorId(UUID.randomUUID());
-    vendorEdiOrdersExportConfig.integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING);
-    vendorEdiOrdersExportConfig.transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
-    vendorEdiOrdersExportConfig.fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
-
-    var parameters = new ExportTypeSpecificParameters();
-    parameters.vendorEdiOrdersExportConfig(vendorEdiOrdersExportConfig);
-    edifactOrdersExportConfig.setType(ExportType.CLAIMS);
-    edifactOrdersExportConfig.exportTypeSpecificParameters(parameters);
-
-    var mockResponse = mockResponse(edifactOrdersExportConfig);
-    Mockito.when(client.postConfiguration(any())).thenReturn(mockResponse);
-    Mockito.doNothing().when(client).putConfiguration(any(), any());
-
-    var postResponse = service.postConfig(edifactOrdersExportConfig);
-    Assertions.assertAll(
-      () -> assertNotNull(postResponse.getId()),
-      () -> assertEquals(mockResponse.getConfigName(), postResponse.getConfigName()),
-      () -> assertEquals(mockResponse.getModule(), postResponse.getModule()),
-      () -> assertEquals(mockResponse.getDescription(), postResponse.getDescription()),
-      () -> assertEquals(mockResponse.getDefault(), postResponse.getDefault()),
-      () -> assertEquals(mockResponse.getEnabled(), postResponse.getEnabled())
-    );
-
-    vendorEdiOrdersExportConfig.setConfigName("test_claims_config_update");
-    service.updateConfig(configId, edifactOrdersExportConfig);
+    verify(repository).save(any());
   }
 
-  @Test
-  @DisplayName("Config is not set")
-  void noConfig() throws JsonProcessingException {
-    final var mockedResponse = objectMapper.readValue(EMPTY_CONFIG_RESPONSE, ConfigurationCollection.class);
-    Mockito.when(client.getConfigurations(any(), eq(1))).thenReturn(mockedResponse);
-    var config = service.getFirstConfig();
-    assertTrue(config.isEmpty());
-  }
-
-  private ModelConfiguration mockResponse(ExportConfig edifactOrdersExportConfig) throws JsonProcessingException {
-    var mockResponse = new ModelConfiguration();
-    mockResponse.setId(UUID.randomUUID().toString());
-    mockResponse.setModule("test_module");
-    mockResponse.setConfigName("test_claims_config");
-    mockResponse.setDescription("test description");
-    mockResponse.setEnabled(true);
-    mockResponse.setDefault(true);
-    mockResponse.setValue(objectMapper.writeValueAsString(edifactOrdersExportConfig));
-
-    return mockResponse;
-  }
 }

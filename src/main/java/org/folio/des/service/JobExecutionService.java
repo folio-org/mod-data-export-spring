@@ -13,14 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
-import org.folio.des.client.ConfigurationClient;
 import org.folio.des.config.kafka.KafkaService;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
 import org.folio.des.domain.JobParameterNames;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ModelConfiguration;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -38,14 +36,14 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 public class  JobExecutionService {
 
+  public static final String EDIFACT_ORDERS_EXPORT_KEY = "EDIFACT_ORDERS_EXPORT";
+  public static final String FILE_NAME_KEY = "FILE_NAME";
+
   private final KafkaService kafka;
   private final ExportConfigValidatorResolver exportConfigValidatorResolver;
   private final JobCommandBuilderResolver jobCommandBuilderResolver;
-  private final DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter;
-  private final ConfigurationClient manager;
+  private final ExportConfigService defaultExportConfigService;
   private final ObjectMapper objectMapper;
-  public static final String EDIFACT_ORDERS_EXPORT_KEY = "EDIFACT_ORDERS_EXPORT";
-  public static final String FILE_NAME_KEY = "FILE_NAME";
 
   public JobCommand prepareStartJobCommand(Job job) {
     log.info("prepareStartJobCommand:: job={}.", job);
@@ -72,8 +70,7 @@ public class  JobExecutionService {
       .getVendorEdiOrdersExportConfig()
       .getExportConfigId().toString();
 
-    ModelConfiguration modelConfiguration = manager.getConfigById(exportConfigId);
-    ExportConfig config = defaultModelConfigToExportConfigConverter.convert(modelConfiguration);
+    ExportConfig config = defaultExportConfigService.getConfigById(exportConfigId);
     Optional.ofNullable(config.getExportTypeSpecificParameters()).
       map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(paramsBuilder, vendorEdiOrdersExportConfig));

@@ -3,12 +3,12 @@ package org.folio.des.service.config.acquisition;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.folio.des.client.ConfigurationClient;
-import org.folio.des.converter.DefaultModelConfigToExportConfigConverter;
-import org.folio.des.converter.ExportConfigConverterResolver;
+import org.folio.des.mapper.BaseExportConfigMapper;
+import org.folio.des.mapper.DefaultExportConfigMapper;
+import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
-import org.folio.des.domain.dto.ModelConfiguration;
+import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.ExportJobScheduler;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
@@ -20,12 +20,10 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
 
   private final ExportJobScheduler exportJobScheduler;
 
-  public EdifactOrdersExportService(ConfigurationClient client,
-                                    DefaultModelConfigToExportConfigConverter defaultModelConfigToExportConfigConverter,
-                                    ExportConfigConverterResolver exportConfigConverterResolver,
-                                    ExportConfigValidatorResolver exportConfigValidatorResolver,
+  public EdifactOrdersExportService(ExportConfigRepository repository, BaseExportConfigMapper defaultExportConfigMapper,
+                                    ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
                                     ExportJobScheduler exportJobScheduler) {
-    super(client, defaultModelConfigToExportConfigConverter, exportConfigConverterResolver, exportConfigValidatorResolver);
+    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
     this.exportJobScheduler = exportJobScheduler;
   }
 
@@ -38,16 +36,16 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
   }
 
   @Override
-  public ModelConfiguration postConfig(ExportConfig exportConfig) {
+  public ExportConfig postConfig(ExportConfig exportConfig) {
     if (exportConfig.getId() == null) {
       exportConfig.setId(UUID.randomUUID().toString());
     }
     setExportConfigId(exportConfig);
     log.debug("postConfig:: by exportConfig={}", exportConfig);
-    ModelConfiguration result = super.postConfig(exportConfig);
+    exportConfig = super.postConfig(exportConfig);
     exportJobScheduler.scheduleExportJob(exportConfig);
     log.info("postConfig:: initial jobs prepared for export config id '{}'", exportConfig.getId());
-    return result;
+    return exportConfig;
   }
 
   private void setExportConfigId(ExportConfig exportConfig) {

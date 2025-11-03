@@ -20,7 +20,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
-import org.folio.des.client.ConfigurationClient;
 import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -37,6 +36,7 @@ import org.folio.des.security.JWTokenUtils;
 import org.folio.des.service.JobDeletionIntervalService;
 import org.folio.des.service.JobExecutionService;
 import org.folio.des.service.JobService;
+import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.util.JobMapperUtil;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -73,8 +73,8 @@ public class JobServiceImpl implements JobService {
   private final JobDataExportRepository repository;
   private final FolioExecutionContext context;
   private final CQLService cqlService;
-  private final ConfigurationClient client;
   private final JobDeletionIntervalService deletionIntervalService;
+  private final ExportConfigService defaultExportConfigService;
 
   @Transactional(readOnly = true)
   @Override
@@ -128,7 +128,7 @@ public class JobServiceImpl implements JobService {
         .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
         .map(VendorEdiOrdersExportConfig::getExportConfigId).ifPresent(configId -> {
           try {
-            client.getConfigById(configId.toString());
+            defaultExportConfigService.getConfigById(configId.toString());
           } catch (NotFoundException e) {
             log.error("Config with id {} not found", configId.toString());
             jobDto.getExportTypeSpecificParameters()

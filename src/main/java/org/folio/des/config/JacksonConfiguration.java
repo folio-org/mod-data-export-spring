@@ -1,28 +1,37 @@
 package org.folio.des.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
 import io.hypersistence.utils.hibernate.type.util.ObjectMapperSupplier;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobParameter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class JacksonConfiguration implements ObjectMapperSupplier {
 
   private static final ObjectMapper OBJECT_MAPPER;
+  private static final ObjectMapper ENTITY_OBJECT_MAPPER;
 
   static {
     OBJECT_MAPPER =
@@ -30,11 +39,14 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
             .findAndRegisterModules()
             .registerModule(
                 new SimpleModule()
-                    .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
-                    .addDeserializer(JobParameter.class, new JobParameterDeserializer()))
+                  .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
+                  .addDeserializer(JobParameter.class, new JobParameterDeserializer())
+                  .addSerializer(UUID.class, new UUIDSerializer(UUID.class)))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    ENTITY_OBJECT_MAPPER = OBJECT_MAPPER.copy()
+      .setSerializationInclusion(JsonInclude.Include.ALWAYS);
   }
 
   static class ExitStatusDeserializer extends StdDeserializer<ExitStatus> {
@@ -92,9 +104,27 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
     }
   }
 
+  static class UUIDSerializer extends StdSerializer<UUID> {
+    public UUIDSerializer(Class<UUID> t) {
+      super(t);
+    }
+
+    @Override
+    public void serialize(UUID value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeString(value.toString());
+    }
+  }
+
   @Bean
+  @Primary
   public ObjectMapper objectMapper() {
     return OBJECT_MAPPER;
+  }
+
+  @Bean
+  @Qualifier("entityObjectMapper")
+  public ObjectMapper entityObjectMapper() {
+    return ENTITY_OBJECT_MAPPER;
   }
 
   @Override
