@@ -36,8 +36,8 @@
     </createTable>
 
     <sql>
-      CREATE EXTENSION IF NOT EXISTS pg_trgm;
-      CREATE INDEX idx_export_config_type_gin_trgm ON export_config USING GIN (type gin_trgm_ops);
+      CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;
+      CREATE INDEX idx_export_config_type_gin_trgm ON export_config USING GIN (type public.gin_trgm_ops);
     </sql>
 
   </changeSet>
