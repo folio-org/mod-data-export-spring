@@ -80,7 +80,7 @@ class ClaimsExportConfigMapperTest {
     UUID id = UUID.randomUUID();
     ExportConfigEntity entity = new ExportConfigEntity();
     entity.setId(id);
-    entity.setType(ExportType.EDIFACT_ORDERS_EXPORT);
+    entity.setType(ExportType.EDIFACT_ORDERS_EXPORT.getValue());
     entity.setTenant("test-tenant");
     entity.setConfigName("test-config");
 

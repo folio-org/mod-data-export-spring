@@ -65,7 +65,7 @@ class DefaultExportConfigMapperTest {
     UUID id = UUID.randomUUID();
     ExportConfigEntity entity = new ExportConfigEntity();
     entity.setId(id);
-    entity.setType(ExportType.BURSAR_FEES_FINES);
+    entity.setType(ExportType.BURSAR_FEES_FINES.getValue());
     entity.setTenant("test-tenant");
     entity.setConfigName("test-config");
     entity.setScheduleFrequency(7);

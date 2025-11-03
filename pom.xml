@@ -56,6 +56,7 @@
     <copy-rename-maven-plugin>1.0.1</copy-rename-maven-plugin>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
 
     <sonar.exclusions>
       **/src/main/java/org/folio/des/ModDataExportSpringApplication.java,
@@ -296,7 +297,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
+          <release>${java.version}</release>
           <annotationProcessorPaths>
             <path>
               <groupId>org.projectlombok</groupId>

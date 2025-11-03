@@ -6,13 +6,13 @@
 
   <changeSet id="MODEXPS-296@@create-export-config-table" author="saba_zedginidze">
 
-    <createTable tableName="export_configs">
+    <createTable tableName="export_config">
       <column name="id" type="UUID">
         <constraints primaryKey="true" nullable="false"/>
       </column>
 
       <column name="config_name" type="TEXT">
-        <constraints nullable="false"/>
+        <constraints nullable="false" unique="true"/>
       </column>
       <column name="type" type="TEXT">
         <constraints nullable="false"/>
@@ -34,6 +34,10 @@
       <column name="updated_date" type="TIMESTAMP"/>
       <column name="updated_by" type="UUID"/>
     </createTable>
+
+    <sql>
+      CREATE INDEX idx_export_config_type_gin_trgm ON export_config USING GIN (type gin_trgm_ops);
+    </sql>
 
   </changeSet>
 

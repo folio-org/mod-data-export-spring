@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.de.entity.ExportConfigEntity;
+import org.folio.des.domain.dto.ExportType;
 import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
@@ -92,7 +93,7 @@ public class BaseExportConfigService implements ExportConfigService {
 
   @SneakyThrows
   protected ExportConfig toDto(ExportConfigEntity exportConfigEntity) {
-    return exportConfigMapperResolver.resolve(exportConfigEntity.getType()).toDto(exportConfigEntity);
+    return exportConfigMapperResolver.resolve(ExportType.fromValue(exportConfigEntity.getType())).toDto(exportConfigEntity);
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {

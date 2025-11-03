@@ -4,14 +4,11 @@ import java.util.List;
 import java.util.UUID;
 
 import org.folio.de.entity.base.AuditableEntity;
-import org.folio.des.domain.dto.ExportType;
 import org.hibernate.annotations.Type;
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -19,7 +16,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 @Entity
-@Table(name = "export_configs")
+@Table(name = "export_config")
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -32,9 +29,8 @@ public class ExportConfigEntity extends AuditableEntity {
   @Column(name = "config_name", nullable = false)
   private String configName;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false)
-  private ExportType type;
+  private String type;
 
   @Column(name = "tenant", nullable = false)
   private String tenant;

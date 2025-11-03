@@ -6,8 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.folio.des.CopilotGenerated;
 import org.folio.des.domain.dto.ExportType;
