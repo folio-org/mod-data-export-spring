@@ -1,5 +1,7 @@
 package org.folio.des.support;
 
+import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_NAME;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,7 @@ public class TestUtils {
   public static ExportConfig getBursarExportConfig() {
     return new ExportConfig()
       .id(UUID.randomUUID().toString())
+      .configName(DEFAULT_CONFIG_NAME)
       .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
         .bursarFeeFines(new BursarExportJob()
           .filter(new BursarExportFilterCondition()
