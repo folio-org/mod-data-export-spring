@@ -31,13 +31,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ClaimsExportServiceTest {
 
+  private static final UUID CONFIG_ID = UUID.randomUUID();
+  private static final UUID VENDOR_ID = UUID.randomUUID();
   private static final ExportConfig CLAIMS_EXPORT_CONFIG = new ExportConfig()
-    .id(UUID.randomUUID().toString())
+    .id(CONFIG_ID.toString())
     .type(ExportType.CLAIMS)
+    .configName("%s_%s_%s".formatted(ExportType.CLAIMS, VENDOR_ID, CONFIG_ID))
     .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
       .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
         .configName("name")
-        .vendorId(UUID.randomUUID())
+        .vendorId(VENDOR_ID)
         .integrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.CLAIMING)
         .transmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD)
         .fileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV)));

@@ -51,7 +51,8 @@ class ExportTypeBasedConfigManagerTest extends BaseTest {
   @ValueSource(strings = {"BATCH_VOUCHER_EXPORT", "BURSAR_FEES_FINES"})
   @DisplayName("Set new configuration")
   void testPostConfig(ExportType exportType) {
-    var exportConfig = getBursarExportConfig().tenant("diku").type(exportType);
+    var exportConfig = getBursarExportConfig().tenant("diku").type(exportType)
+      .configName(exportType == ExportType.BURSAR_FEES_FINES ? DEFAULT_CONFIG_NAME : exportType.getValue());
 
     var response = service.postConfig(exportConfig);
 

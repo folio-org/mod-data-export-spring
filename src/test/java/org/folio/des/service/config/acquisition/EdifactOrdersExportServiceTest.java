@@ -36,13 +36,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class EdifactOrdersExportServiceTest {
 
+  private static final UUID CONFIG_ID = UUID.randomUUID();
+  private static final UUID VENDOR_ID = UUID.fromString("046b6c7f-0b8a-43b9-b35d-6489e6daee91");
   private static final ExportConfig EDIFACT_EXPORT_CONFIG = new ExportConfig()
-    .id(UUID.randomUUID().toString())
+    .id(CONFIG_ID.toString())
     .type(ExportType.EDIFACT_ORDERS_EXPORT)
+    .configName("%s_%s_%s".formatted(ExportType.EDIFACT_ORDERS_EXPORT.getValue(), VENDOR_ID, CONFIG_ID))
     .exportTypeSpecificParameters(new ExportTypeSpecificParameters()
       .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig()
         .configName("edi_test_config")
-        .vendorId(UUID.fromString("046b6c7f-0b8a-43b9-b35d-6489e6daee91"))
+        .vendorId(VENDOR_ID)
         .ediSchedule(new EdiSchedule()
           .enableScheduledExport(true)
           .scheduleParameters(new ScheduleParameters()
