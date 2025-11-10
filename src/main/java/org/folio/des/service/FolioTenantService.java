@@ -64,29 +64,11 @@ public class FolioTenantService extends TenantService {
     this.folioExecutionContext = folioExecutionContext;
   }
 
-  /*
-   * Because of the liquibase.Scope implementation for the SpringLiquibase it is not possible to run several
-   * SpringLiquibase executions simultaneously. That is why this method must be synchronized.
-   */
   @Override
-  public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
-    if (folioSpringLiquibase != null) {
-      var params = Map.of(TENANT_NAME_PARAMETER, folioExecutionContext.getTenantId());
-      folioSpringLiquibase.setChangeLogParameters(params);
-      log.info("Set ChangeLog parameters: {}", params);
-
-      folioSpringLiquibase.setDefaultSchema(getSchemaName());
-      log.info("About to start liquibase update for tenant [{}]", context.getTenantId());
-
-      try {
-        folioSpringLiquibase.performLiquibaseUpdate();
-      } catch (LiquibaseException | UnexpectedLiquibaseException e) {
-        throw new TenantUpgradeException(e);
-      }
-      log.info("Liquibase update for tenant [{}] executed successfully", context.getTenantId());
-    }
-
-    afterTenantUpdate(tenantAttributes);
+  protected void beforeLiquibaseUpdate(TenantAttributes tenantAttributes) {
+    var params = Map.of(TENANT_NAME_PARAMETER, folioExecutionContext.getTenantId());
+    folioSpringLiquibase.setChangeLogParameters(params);
+    log.info("Set ChangeLog parameters: {}", params);
   }
 
   @Override
