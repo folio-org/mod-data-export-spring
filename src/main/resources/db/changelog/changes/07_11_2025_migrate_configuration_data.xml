@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+
+  <changeSet id="MODEXPS-301@@migrate-configuration-data" author="saba_zedginidze">
+    <sql>
+      DO '
+      DECLARE
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.tables
+          WHERE table_schema = ''${tenantname}_mod_configuration'' AND table_name = ''config_data'')
+        THEN
+          INSERT INTO ${tenantname}_mod_data_export_spring.export_config (
+            id, config_name,
+            type, tenant, export_type_specific_parameters, schedule_frequency, schedule_period, schedule_time, week_days,
+            created_date, created_by, updated_date, updated_by
+          )
+          SELECT
+            C.id::uuid,
+            C.jsonb->>''configName'',
+            (C.jsonb->>''value'')::jsonb->>''type'',
+            (C.jsonb->>''value'')::jsonb->>''tenant'',
+            (C.jsonb->>''value'')::jsonb->''exportTypeSpecificParameters'',
+            ((C.jsonb->>''value'')::jsonb->>''scheduleFrequency'')::integer,
+            (C.jsonb->>''value'')::jsonb->>''schedulePeriod'',
+            (C.jsonb->>''value'')::jsonb->>''scheduleTime'',
+            (C.jsonb->>''value'')::jsonb->''weekDays'',
+            (C.jsonb->''metadata''->>''createdDate'')::timestamp,
+            (C.jsonb->''metadata''->>''createdByUserId'')::uuid,
+            (C.jsonb->''metadata''->>''updatedDate'')::timestamp,
+            (C.jsonb->''metadata''->>''updatedByUserId'')::uuid
+          FROM ${tenantname}_mod_configuration.config_data C
+          WHERE C.jsonb->>''module'' = ''mod-data-export-spring''
+            AND NOT EXISTS (
+              SELECT 1 FROM ${tenantname}_mod_data_export_spring.export_config EC
+              WHERE EC.config_name = C.jsonb->>''configName''
+            )
+          ON CONFLICT (id) DO NOTHING;
+        END IF;
+      END;
+      ' LANGUAGE plpgsql;
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

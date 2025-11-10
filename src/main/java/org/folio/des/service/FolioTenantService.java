@@ -1,5 +1,7 @@
 package org.folio.des.service;
 
+import java.util.Map;
+
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.scheduling.acquisition.EdifactScheduledJobInitializer;
 import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
@@ -9,6 +11,7 @@ import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.exception.TenantUpgradeException;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
@@ -17,12 +20,16 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
 @Primary
 public class FolioTenantService extends TenantService {
+
+  private static final String TENANT_NAME_PARAMETER = "tenantname";
 
   private final KafkaService kafka;
   private final EdifactScheduledJobInitializer edifactScheduledJobInitializer;
@@ -34,13 +41,15 @@ public class FolioTenantService extends TenantService {
   private final PrepareSystemUserService prepareSystemUserService;
   private final BursarMigrationService bursarMigrationService;
   private final BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService;
+  private final FolioExecutionContext folioExecutionContext;
 
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
-      PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
-      EdifactScheduledJobInitializer edifactScheduledJobInitializer, ScheduledJobsRemover scheduledJobsRemover,
-      BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler,
-      BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService,
-      BursarMigrationService bursarMigrationService, BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService) {
+                            PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
+                            EdifactScheduledJobInitializer edifactScheduledJobInitializer, ScheduledJobsRemover scheduledJobsRemover,
+                            BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler,
+                            BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService,
+                            BursarMigrationService bursarMigrationService, BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
+                            FolioExecutionContext folioExecutionContext) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
@@ -52,6 +61,14 @@ public class FolioTenantService extends TenantService {
     this.jobService = jobService;
     this.bursarMigrationService = bursarMigrationService;
     this.bursarFeesFinesExportConfigService = bursarFeesFinesExportConfigService;
+    this.folioExecutionContext = folioExecutionContext;
+  }
+
+  @Override
+  protected void beforeLiquibaseUpdate(TenantAttributes tenantAttributes) {
+    var params = Map.of(TENANT_NAME_PARAMETER, folioExecutionContext.getTenantId());
+    folioSpringLiquibase.setChangeLogParameters(params);
+    log.info("Set ChangeLog parameters: {}", params);
   }
 
   @Override
