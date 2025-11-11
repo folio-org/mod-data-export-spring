@@ -62,7 +62,10 @@ public class BaseExportConfigService implements ExportConfigService {
   @Override
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {
     log.info("getConfigCollection:: query={}, limit={}", query, limit);
-    var page = repository.findByCql(query, PageRequest.of(0, limit));
+    var pageable = PageRequest.of(0, limit);
+    var page = Optional.ofNullable(query)
+      .map(cql -> repository.findByCql(cql, pageable))
+      .orElseGet(() -> repository.findAll(pageable));
     return new ExportConfigCollection().totalRecords(page.getNumberOfElements())
       .configs(page.getContent().stream()
         .map(exportConfigMapper::toDto)
