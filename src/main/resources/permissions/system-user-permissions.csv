@@ -4,11 +4,6 @@ feesfines.accounts.transfer.post
 feesfines.accounts-bulk.transfer.post
 accounts.collection.get
 circulation-logs.collection.get
-configuration.entries.collection.get
-configuration.entries.item.get
-configuration.entries.item.post
-configuration.entries.item.put
-configuration.entries.item.delete
 data-export.job.collection.get
 data-export.config.collection.get
 feefineactions.collection.get
@@ -27,4 +22,6 @@ transfers.collection.get
 users.collection.get
 users.item.post
 users.item.put
+mod-settings.entries.collection.get
 mod-settings.global.read.stripes-core.prefs.manage
+mod-settings.global.read.ui-tenant-settings.addresses.manage
