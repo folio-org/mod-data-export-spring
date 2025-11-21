@@ -11,17 +11,13 @@ import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
 import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.exception.TenantUpgradeException;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
-import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -38,20 +34,18 @@ public class FolioTenantService extends TenantService {
   private final OldJobDeleteScheduler oldJobDeleteScheduler;
   private final BursarExportLegacyJobService bursarExportLegacyJobService;
   private final JobService jobService;
-  private final PrepareSystemUserService prepareSystemUserService;
   private final BursarMigrationService bursarMigrationService;
   private final BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService;
   private final FolioExecutionContext folioExecutionContext;
 
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
-                            PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
+                            KafkaService kafka,
                             EdifactScheduledJobInitializer edifactScheduledJobInitializer, ScheduledJobsRemover scheduledJobsRemover,
                             BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler,
                             BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService,
                             BursarMigrationService bursarMigrationService, BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
                             FolioExecutionContext folioExecutionContext) {
     super(jdbcTemplate, context, folioSpringLiquibase);
-    this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
     this.edifactScheduledJobInitializer = edifactScheduledJobInitializer;
     this.scheduledJobsRemover = scheduledJobsRemover;
@@ -74,7 +68,6 @@ public class FolioTenantService extends TenantService {
   @Override
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
     try {
-      prepareSystemUserService.setupSystemUser();
       bursarMigrationService.updateLegacyBursarIfNeeded(tenantAttributes, bursarFeesFinesExportConfigService,
           bursarExportLegacyJobService, jobService);
       bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
