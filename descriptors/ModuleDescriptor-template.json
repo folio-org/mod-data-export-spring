@@ -465,9 +465,8 @@
         "users.collection.get",
         "users.item.post",
         "users.item.put",
-        "mod-settings.entries.collection.get",
-        "mod-settings.global.read.stripes-core.prefs.manage",
-        "mod-settings.global.read.ui-tenant-settings.addresses.manage"
+        "tenant-addresses.collection.get",
+        "locale.item.get"
       ]
     }
   },
