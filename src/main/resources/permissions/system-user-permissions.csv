@@ -22,5 +22,5 @@ transfers.collection.get
 users.collection.get
 users.item.post
 users.item.put
-tenant-addresses.collection.get
+tenant-addresses.item.get
 locale.item.get
