@@ -2,10 +2,10 @@ package org.folio.des.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -26,7 +26,7 @@ public class JWTokenUtils {
     }
   }
 
-  private static UserInfo parse(String strEncoded) throws JsonProcessingException {
+  private static UserInfo parse(String strEncoded) throws JacksonException {
     byte[] decodedBytes = Base64.getDecoder().decode(strEncoded);
     var json = new String(decodedBytes, StandardCharsets.UTF_8);
     return OBJECT_MAPPER.readValue(json, UserInfo.class);

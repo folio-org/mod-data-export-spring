@@ -15,8 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @CopilotGenerated(model = "Claude Sonnet 4.5")
 @SpringBootTest(classes = {JacksonConfiguration.class, DefaultExportConfigMapper.class})

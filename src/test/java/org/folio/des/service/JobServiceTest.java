@@ -2,7 +2,7 @@ package org.folio.des.service;
 
 import static org.folio.des.domain.dto.ExportType.BURSAR_FEES_FINES;
 import static org.folio.des.domain.dto.ExportType.CLAIMS;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -48,10 +48,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.SneakyThrows;
 import org.springframework.test.util.ReflectionTestUtils;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class JobServiceTest {
@@ -127,8 +126,8 @@ class JobServiceTest {
     job.setFileNames(list);
     internalJobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").getValue());
-    Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
+    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameter("FILE_NAME").value());
+    Assertions.assertNotNull(command.getJobParameters().getParameter("EDIFACT_ORDERS_EXPORT"));
   }
 
   @Test

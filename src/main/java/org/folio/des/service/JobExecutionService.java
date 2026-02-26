@@ -2,12 +2,11 @@ package org.folio.des.service;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.Job;
@@ -20,9 +19,9 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.job.parameters.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -30,6 +29,7 @@ import org.springframework.validation.Errors;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Log4j2
@@ -55,7 +55,7 @@ public class  JobExecutionService {
         JobParameters jobParameters = builder.buildJobCommand(job);
         jobCommand.setJobParameters(jobParameters);
       },
-      () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
+      () -> jobCommand.setJobParameters(new JobParameters(new HashSet<>())));
     return jobCommand;
   }
 
@@ -76,7 +76,7 @@ public class  JobExecutionService {
         .ifPresent(vendorEdiOrdersExportConfig -> addToParamsEdiExportConfig(paramsBuilder, vendorEdiOrdersExportConfig));
     Optional.ofNullable(job.getFileNames())
         .ifPresent(fileNames->
-          paramsBuilder.addString(FILE_NAME_KEY, fileNames.get(0)));
+          paramsBuilder.addString(FILE_NAME_KEY, fileNames.getFirst()));
 
     jobCommand.setJobParameters(paramsBuilder.toJobParameters());
    return jobCommand;
@@ -104,8 +104,8 @@ public class  JobExecutionService {
     var jobCommand = new JobCommand();
     jobCommand.setType(JobCommand.Type.DELETE);
     jobCommand.setId(UUID.randomUUID());
-    jobCommand.setJobParameters(new JobParameters(
-        Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter<>(StringUtils.join(files, ';'), String.class))));
+    jobCommand.setJobParameters(new JobParameters(Collections.singleton(
+      new JobParameter<>(JobParameterNames.OUTPUT_FILES_IN_STORAGE, StringUtils.join(files, ';'), String.class))));
     sendJobCommand(jobCommand);
   }
 

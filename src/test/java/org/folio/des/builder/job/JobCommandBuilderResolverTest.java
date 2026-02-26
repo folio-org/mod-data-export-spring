@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,15 +32,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.quartz.Scheduler;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
+@EnableAutoConfiguration
 class JobCommandBuilderResolverTest {
 
   @Autowired
@@ -131,6 +131,6 @@ class JobCommandBuilderResolverTest {
 
     JobParameters jobParameters = builder.get().buildJobCommand(job);
 
-    assertNotEquals("null", jobParameters.getParameters().get(paramsKey).getValue());
+    assertNotEquals("null", Objects.requireNonNull(jobParameters.getParameter(paramsKey)).value());
   }
 }

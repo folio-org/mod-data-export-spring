@@ -1,6 +1,5 @@
 package org.folio.de.entity;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,7 +14,8 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.IdentifierType;
 import org.folio.des.domain.dto.JobStatus;
 import org.folio.des.domain.dto.Progress;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 
@@ -42,11 +42,11 @@ public abstract class BaseJob {
   @Enumerated(EnumType.STRING)
   private JobStatus status;
 
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private List<String> files = null;
 
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private List<String> fileNames = null;
 
@@ -73,7 +73,7 @@ public abstract class BaseJob {
   @Enumerated(EnumType.STRING)
   private BatchStatus batchStatus;
 
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private ExitStatus exitStatus;
 
@@ -83,7 +83,7 @@ public abstract class BaseJob {
   @Enumerated(EnumType.STRING)
   private EntityType entityType;
 
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private Progress progress;
 }

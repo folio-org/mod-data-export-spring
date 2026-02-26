@@ -1,14 +1,13 @@
 package org.folio.des.builder.job;
 
 import org.folio.de.entity.JobCommand;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Log4j2
@@ -25,7 +24,7 @@ public class EdifactOrdersJobCommandSchedulerBuilder implements JobCommandSchedu
         objectMapper.writeValueAsString(job.getExportTypeSpecificParameters().getVendorEdiOrdersExportConfig()));
       jobCommand.setJobParameters(paramsBuilder.toJobParameters());
       return jobCommand;
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new IllegalArgumentException(e);
     }
   }
