@@ -1,52 +1,52 @@
 package org.folio.des.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+import io.hypersistence.utils.hibernate.type.util.ObjectMapperSupplier;
+import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.job.parameters.JobParameter;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.core.JsonParser;
-import tools.jackson.databind.*;
-import tools.jackson.databind.cfg.DateTimeFeature;
-import tools.jackson.databind.deser.std.StdDeserializer;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.module.SimpleModule;
-import tools.jackson.databind.ser.std.StdSerializer;
 
 @Configuration
-public class JacksonConfiguration {
+public class JacksonConfiguration implements ObjectMapperSupplier {
 
   private static final ObjectMapper OBJECT_MAPPER;
   private static final ObjectMapper ENTITY_OBJECT_MAPPER;
 
   static {
     OBJECT_MAPPER =
-        JsonMapper.builder()
-            .findAndAddModules()
-            .addModule(
+        new ObjectMapper()
+            .findAndRegisterModules()
+            .registerModule(
                 new SimpleModule()
                   .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
                   .addDeserializer(JobParameter.class, new JobParameterDeserializer())
                   .addSerializer(UUID.class, new UUIDSerializer(UUID.class)))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-          .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
-          .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
-          .build();
-    ENTITY_OBJECT_MAPPER = OBJECT_MAPPER.rebuild()
-      .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.ALWAYS))
-      .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.ALWAYS))
-      .build();
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    ENTITY_OBJECT_MAPPER = OBJECT_MAPPER.copy()
+      .setSerializationInclusion(JsonInclude.Include.ALWAYS);
   }
 
   static class ExitStatusDeserializer extends StdDeserializer<ExitStatus> {
@@ -63,7 +63,7 @@ public class JacksonConfiguration {
     }
 
     public ExitStatusDeserializer() {
-      this(JavaType.class);
+      this(null);
     }
 
     public ExitStatusDeserializer(Class<?> vc) {
@@ -71,8 +71,8 @@ public class JacksonConfiguration {
     }
 
     @Override
-    public ExitStatus deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
-      return EXIT_STATUSES.get(((JsonNode) jp.objectReadContext().readTree(jp)).get("exitCode").asString());
+    public ExitStatus deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+      return EXIT_STATUSES.get(((JsonNode) jp.getCodec().readTree(jp)).get("exitCode").asText());
     }
 
   }
@@ -82,7 +82,7 @@ public class JacksonConfiguration {
     private static final String VALUE_PARAMETER_PROPERTY = "value";
 
     public JobParameterDeserializer() {
-      this(JavaType.class);
+      this(null);
     }
 
     public JobParameterDeserializer(Class<?> vc) {
@@ -90,18 +90,15 @@ public class JacksonConfiguration {
     }
 
     @Override
-    public JobParameter<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
-      JsonNode jsonNode = jp.objectReadContext().readTree(jp);
+    public JobParameter<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+      JsonNode jsonNode = jp.getCodec().readTree(jp);
       var identifying = jsonNode.get("identifying").asBoolean();
-      switch (jsonNode.get("type").asString()) {
-        case "STRING" -> new JobParameter<>("STRING", jsonNode.get(VALUE_PARAMETER_PROPERTY).asString(),
-          String.class, identifying);
-        case "DATE" -> new JobParameter<>("DATE",
-          Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asString()), Date.class, identifying);
-        case "LONG" -> new JobParameter<>("LONG", jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(),
-          Long.class, identifying);
-        case "DOUBLE" -> new JobParameter<>("DOUBLE", jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(),
-          Double.class, identifying);
+      switch (jsonNode.get("type").asText()) {
+        case "STRING" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
+        case "DATE" -> new JobParameter<>(
+          Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
+        case "LONG" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
+        case "DOUBLE" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
       }
       return null;
     }
@@ -113,7 +110,7 @@ public class JacksonConfiguration {
     }
 
     @Override
-    public void serialize(UUID value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
+    public void serialize(UUID value, JsonGenerator gen, SerializerProvider provider) throws IOException {
       gen.writeString(value.toString());
     }
   }
@@ -130,6 +127,7 @@ public class JacksonConfiguration {
     return ENTITY_OBJECT_MAPPER;
   }
 
+  @Override
   public ObjectMapper get() {
     return OBJECT_MAPPER;
   }

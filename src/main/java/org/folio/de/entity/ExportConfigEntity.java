@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.folio.de.entity.base.AuditableEntity;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -13,7 +14,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "export_config")
@@ -35,7 +35,7 @@ public class ExportConfigEntity extends AuditableEntity {
   @Column(name = "tenant", nullable = false)
   private String tenant;
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType.class)
   @Column(name = "export_type_specific_parameters", columnDefinition = "jsonb", nullable = false)
   private Object exportTypeSpecificParameters;
 
@@ -48,7 +48,7 @@ public class ExportConfigEntity extends AuditableEntity {
   @Column(name = "schedule_time")
   private String scheduleTime;
 
-  @JdbcTypeCode(SqlTypes.JSON)
+  @Type(JsonBinaryType.class)
   @Column(name = "week_days", columnDefinition = "jsonb")
   private List<String> weekDays;
 

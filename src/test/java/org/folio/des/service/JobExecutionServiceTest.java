@@ -30,6 +30,6 @@ class JobExecutionServiceTest {
 
     var command = jobExecutionService.prepareStartJobCommand(job);
 
-    assertEquals(new HashMap<>(), command.getJobParameters().parameters());
+    assertEquals(new HashMap<>(), command.getJobParameters().getParameters());
   }
 }

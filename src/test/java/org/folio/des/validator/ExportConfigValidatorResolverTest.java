@@ -15,12 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.Validator;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
 class ExportConfigValidatorResolverTest {
 
   @Autowired

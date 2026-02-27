@@ -10,12 +10,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.validation.constraints.NotNull;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.scheduling.quartz.QuartzConstants;
 import org.folio.des.scheduling.quartz.converter.ScheduleParametersToTriggerConverter;
 import org.folio.des.scheduling.quartz.trigger.ExportTrigger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;

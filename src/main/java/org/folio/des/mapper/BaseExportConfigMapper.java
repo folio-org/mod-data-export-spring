@@ -13,7 +13,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import tools.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Mapper(implementationName = "DefaultExportConfigMapper", imports = {ExportConfigConstants.class, ExportTypeSpecificParameters.class, ExportTypeSpecificParametersWithLegacyBursar.class})
 public abstract class BaseExportConfigMapper {
