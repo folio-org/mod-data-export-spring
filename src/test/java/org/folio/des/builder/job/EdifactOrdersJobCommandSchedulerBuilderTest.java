@@ -28,7 +28,7 @@ import org.folio.des.domain.dto.Progress;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -65,9 +65,9 @@ class EdifactOrdersJobCommandSchedulerBuilderTest {
     job.setExportTypeSpecificParameters(parameters);
     JobCommand actJobCommand = builder.buildJobCommand(job);
 
-    JobParameter<?> actJobParameter = actJobCommand.getJobParameters().getParameters().get("edifactOrdersExport");
+    JobParameter<?> actJobParameter = actJobCommand.getJobParameters().getParameter("edifactOrdersExport");
     assertEquals(id, actJobCommand.getId());
-    assertTrue(actJobParameter.getValue().toString().contains(vendorId.toString()));
+    assertTrue(actJobParameter.value().toString().contains(vendorId.toString()));
   }
 
   public static class MockSpringContext {
@@ -141,12 +141,12 @@ class EdifactOrdersJobCommandSchedulerBuilderTest {
         var identifying = jsonNode.get("identifying").asBoolean();
         switch (jsonNode.get("type").asText()) {
           case "STRING" ->
-            new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
+            new JobParameter<>("STRING", jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
           case "DATE" -> new JobParameter<>(
-            Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
-          case "LONG" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
+            "DATE", Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
+          case "LONG" -> new JobParameter<>("LONG", jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
           case "DOUBLE" ->
-            new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
+            new JobParameter<>("DOUBLE", jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
         }
         return null;
       }

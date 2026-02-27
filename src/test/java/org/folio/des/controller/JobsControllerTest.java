@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -77,12 +76,11 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.totalRecords", is(8)),
-                jsonPath("$.jobRecords", hasSize(8))));
+                jsonPath("$.jobRecords", hasSize(8)));
   }
 
   @Test
@@ -93,12 +91,11 @@ class JobsControllerTest extends BaseTest {
         get("/data-export-spring/jobs?limit=3&offset=0&query=(cql.allRecords=1)sortby jsonb.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.configName/sort.descending")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders()))
-      .andExpect(
-        matchAll(
+      .andExpectAll(
           status().isOk(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE),
           jsonPath("$.totalRecords", is(8)),
-          jsonPath("$.jobRecords", hasSize(3))));
+          jsonPath("$.jobRecords", hasSize(3)));
   }
 
   @Test
@@ -109,11 +106,10 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs?limit=3&offset=0&query=!!sortby name/sort.descending")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.errors[0].message", startsWith("IllegalArgumentException"))));
+                jsonPath("$.errors[0].message", startsWith("IllegalArgumentException")));
   }
 
   @Test
@@ -124,11 +120,10 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs?limit=30&offset=0&query=(endTime>=2020-12-12T00:00:00.000 and endTime<=2020-12-13T23:59:59.999) sortby name/sort.descending")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.totalRecords", is(0))));
+                jsonPath("$.totalRecords", is(0)));
   }
 
   @Test
@@ -139,12 +134,11 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs?limit=30&offset=0&query=(id<>12ae5d0f-1525-44a1-a361-0bc9b88e8179 or name=*)")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
               jsonPath("$.totalRecords", is(7)),
-              jsonPath("$.jobRecords", hasSize(7))));
+              jsonPath("$.jobRecords", hasSize(7)));
   }
 
   @Test
@@ -155,12 +149,11 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs?limit=30&offset=0&query=(source<>data-export-system-user or description==test-desc)")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
               jsonPath("$.totalRecords", is(7)),
-              jsonPath("$.jobRecords", hasSize(7))));
+              jsonPath("$.jobRecords", hasSize(7)));
   }
 
   @Test
@@ -171,11 +164,10 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs?limit=30&offset=0&query=(endTime>2020-12-12T00:00:00.000 and endTime<2020-12-13T23:59:59.999)")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.totalRecords", is(0))));
+              jsonPath("$.totalRecords", is(0)));
   }
 
   @Test
@@ -186,11 +178,10 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs?limit=30&offset=0&query=(metadata.endTime>2020-12-12T00:00:00.000)")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-              jsonPath("$.errors[0].message", startsWith("PathElementException"))));
+              jsonPath("$.errors[0].message", startsWith("PathElementException")));
   }
 
   @Test
@@ -201,13 +192,12 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs/12ae5d0f-1525-44a1-a361-0bc9b88e8179")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.id", is("12ae5d0f-1525-44a1-a361-0bc9b88e8179")),
                 jsonPath("$.status", is("SUCCESSFUL")),
-                jsonPath("$.outputFormat", is("Fees & Fines Bursar Report"))));
+                jsonPath("$.outputFormat", is("Fees & Fines Bursar Report")));
   }
 
   @Test
@@ -218,9 +208,8 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs/35ae5d0f-1525-42a1-a361-1bc9b88e8180/download")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
-                status().is4xxClientError()));
+        .andExpectAll(
+                status().is4xxClientError());
   }
 
   @Test
@@ -234,9 +223,8 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs/42ae5d0f-6425-82a1-a361-1bc9b88e8172/download")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
-                status().is5xxServerError()));
+        .andExpectAll(
+                status().is5xxServerError());
   }
 
   @Test
@@ -247,11 +235,10 @@ class JobsControllerTest extends BaseTest {
             get("/data-export-spring/jobs/12ae5d0f-1525-44a1-a361-0bc9b88eeeee")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders()))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isNotFound(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
-                jsonPath("$.errors[0].message", startsWith("NotFoundException"))));
+                jsonPath("$.errors[0].message", startsWith("NotFoundException")));
   }
 
   @Test
@@ -263,13 +250,12 @@ class JobsControllerTest extends BaseTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders())
                 .content(JOB_BURSAR_REQUEST))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isCreated(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.type", is("BURSAR_FEES_FINES")),
                 jsonPath("$.status", is("SCHEDULED")),
-                jsonPath("$.outputFormat", is("Fees & Fines Bursar Report"))));
+                jsonPath("$.outputFormat", is("Fees & Fines Bursar Report")));
   }
 
   @Test
@@ -282,13 +268,12 @@ class JobsControllerTest extends BaseTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .headers(defaultHeaders())
                 .content(JOB_CIRCULATION_REQUEST))
-        .andExpect(
-            matchAll(
+        .andExpectAll(
                 status().isCreated(),
                 content().contentType(MediaType.APPLICATION_JSON_VALUE),
                 jsonPath("$.type", is("CIRCULATION_LOG")),
                 jsonPath("$.status", is("SCHEDULED")),
-                jsonPath("$.outputFormat", is("Comma-Separated Values (CSV)"))));
+                jsonPath("$.outputFormat", is("Comma-Separated Values (CSV)")));
   }
 
   @ParameterizedTest
@@ -385,12 +370,11 @@ class JobsControllerTest extends BaseTest {
         get("/data-export-spring/jobs?limit=30&offset=0&query=" + query)
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders()))
-      .andExpect(
-        matchAll(
+      .andExpectAll(
           status().isOk(),
           content().contentType(MediaType.APPLICATION_JSON_VALUE),
           jsonPath("$.totalRecords", is(1)),
-          jsonPath("$.jobRecords", hasSize(1))));
+          jsonPath("$.jobRecords", hasSize(1)));
   }
 
   @Test
@@ -401,10 +385,9 @@ class JobsControllerTest extends BaseTest {
         get("/data-export-spring/jobs?limit=30&offset=0&query=jsonb==1 and type==\"EDIFACT_ORDERS_EXPORT\"")
           .contentType(MediaType.APPLICATION_JSON_VALUE)
           .headers(defaultHeaders()))
-      .andExpect(
-        matchAll(
+      .andExpectAll(
           status().isBadRequest(),
-          content().contentType(MediaType.APPLICATION_JSON_VALUE)));
+          content().contentType(MediaType.APPLICATION_JSON_VALUE));
   }
 
   private static Stream<Arguments> getPayloadForJobWithoutRequiredParameters() {

@@ -5,7 +5,7 @@ import org.folio.des.domain.dto.EntityType;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.IdentifierType;
 import org.folio.des.domain.dto.Progress;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParameters;
 
 import java.util.UUID;
 

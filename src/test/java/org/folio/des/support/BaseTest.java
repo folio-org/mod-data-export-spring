@@ -17,9 +17,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -43,8 +42,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 
 import lombok.SneakyThrows;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+  properties = {"spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}", "spring.liquibase.enabled=true"})
 @ContextConfiguration(initializers = BaseTest.DockerPostgreDataSourceInitializer.class)
 @AutoConfigureMockMvc
 @Testcontainers

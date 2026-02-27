@@ -1,7 +1,7 @@
 package org.folio.des.builder.job;
 
 import org.folio.de.entity.JobCommand;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
