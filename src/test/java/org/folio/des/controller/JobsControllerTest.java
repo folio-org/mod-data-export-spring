@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.folio.des.client.ExportWorkerClient;
+import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.domain.dto.AuthorityControlExportConfig;
 import org.folio.des.domain.dto.EHoldingsExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -32,6 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -40,6 +42,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 @Sql(executionPhase = ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:job.sql")
 @Sql(executionPhase = ExecutionPhase.AFTER_TEST_METHOD, scripts = "classpath:clearDb.sql")
+@Import(JacksonConfiguration.class)
 class JobsControllerTest extends BaseTest {
 
   @MockitoBean

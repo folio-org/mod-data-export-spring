@@ -9,6 +9,7 @@ import java.util.List;
 import org.folio.spring.config.properties.FolioEnvironment;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,10 +18,14 @@ import org.junit.jupiter.api.TestInstance;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -32,6 +37,9 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.util.TestSocketUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -51,6 +59,7 @@ import lombok.SneakyThrows;
 @EnableKafka
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@AutoConfigureRestTestClient
 public abstract class BaseTest {
 
   public static final int WIRE_MOCK_PORT = TestSocketUtils.findAvailableTcpPort();
@@ -137,8 +146,32 @@ public abstract class BaseTest {
     wireMockServer.stop();
   }
 
-  @DynamicPropertySource
-  static void setFolioOkapiUrl(DynamicPropertyRegistry registry) {
-    registry.add("folio.okapi.url", () -> "http://localhost:" + WIRE_MOCK_PORT);
-  }
+    @DynamicPropertySource
+    static void setFolioOkapiUrl(DynamicPropertyRegistry registry) {
+        registry.add("folio.okapi.url", () -> "http://localhost:" + WIRE_MOCK_PORT);
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public HttpServiceProxyFactory httpServiceProxyFactory(RestClient restClient) {
+            return HttpServiceProxyFactory
+                    .builderFor(RestClientAdapter.create(restClient))
+                    .build();
+        }
+
+        @Bean
+        public RestClient.Builder restClientBuilder() {
+            return RestClient.builder().baseUrl("http://localhost:" + WIRE_MOCK_PORT);
+        }
+
+        @Bean
+        public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(ObjectMapper objectMapper) {
+            return hibernateProperties -> hibernateProperties.put(
+                    "hibernate.type.json_format_mapper",
+                    new JacksonJsonFormatMapper(objectMapper)
+            );
+        }
+    }
 }
