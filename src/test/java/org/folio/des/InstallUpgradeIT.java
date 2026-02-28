@@ -15,6 +15,11 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.model.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
@@ -45,6 +50,11 @@ import static org.mockserver.model.HttpResponse.response;
  */
 @Testcontainers
 @DirtiesContext
+@SpringBootTest
+@EnableAutoConfiguration
+@AutoConfigureRestTestClient
+@AutoConfigureMockMvc
+@ImportAutoConfiguration
 class InstallUpgradeIT {
 
   private static final Logger LOG = LoggerFactory.getLogger(InstallUpgradeIT.class);
