@@ -26,6 +26,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -146,32 +147,33 @@ public abstract class BaseTest {
     wireMockServer.stop();
   }
 
-    @DynamicPropertySource
-    static void setFolioOkapiUrl(DynamicPropertyRegistry registry) {
-        registry.add("folio.okapi.url", () -> "http://localhost:" + WIRE_MOCK_PORT);
+  @DynamicPropertySource
+  static void setFolioOkapiUrl(DynamicPropertyRegistry registry) {
+    registry.add("folio.okapi.url", () -> "http://localhost:" + WIRE_MOCK_PORT);
+  }
+
+  @TestConfiguration
+  static class TestConfig {
+
+    @Bean
+    public HttpServiceProxyFactory httpServiceProxyFactory(RestClient restClient) {
+      return HttpServiceProxyFactory
+            .builderFor(RestClientAdapter.create(restClient))
+            .build();
     }
 
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public HttpServiceProxyFactory httpServiceProxyFactory(RestClient restClient) {
-            return HttpServiceProxyFactory
-                    .builderFor(RestClientAdapter.create(restClient))
-                    .build();
-        }
-
-        @Bean
-        public RestClient.Builder restClientBuilder() {
-            return RestClient.builder().baseUrl("http://localhost:" + WIRE_MOCK_PORT);
-        }
-
-        @Bean
-        public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(ObjectMapper objectMapper) {
-            return hibernateProperties -> hibernateProperties.put(
-                    "hibernate.type.json_format_mapper",
-                    new JacksonJsonFormatMapper(objectMapper)
-            );
-        }
+    @Primary
+    @Bean
+    public RestClient.Builder restClientBuilder() {
+      return RestClient.builder().baseUrl("http://localhost:" + WIRE_MOCK_PORT);
     }
+
+    @Bean
+    public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(ObjectMapper objectMapper) {
+      return hibernateProperties -> hibernateProperties.put(
+            "hibernate.type.json_format_mapper",
+            new JacksonJsonFormatMapper(objectMapper)
+      );
+    }
+  }
 }

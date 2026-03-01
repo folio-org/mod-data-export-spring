@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Configuration
@@ -42,5 +43,18 @@ public class HttpClientConfiguration {
             })
         .defaultStatusHandler(HttpStatusCode::isError, errorHandler::handle)
         .build();
+  }
+
+  @Bean
+  public RestClient.Builder builder() {
+    return RestClient.builder();
+  }
+
+  @Bean
+  public HttpServiceProxyFactory factory(RestClient restClient) {
+    return HttpServiceProxyFactory
+          .builder()
+          .exchangeAdapter(RestClientAdapter.create(restClient))
+          .build();
   }
 }

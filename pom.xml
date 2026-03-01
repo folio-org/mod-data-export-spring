@@ -44,9 +44,9 @@
     <openapi-generator.version>6.2.1</openapi-generator.version>
 
     <!-- Test properties-->
-    <testcontainers-bom.version>1.20.5</testcontainers-bom.version>
+    <testcontainers-bom.version>1.21.4</testcontainers-bom.version>
     <junit-extensions.version>2.4.0</junit-extensions.version>
-    <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
+    <wiremock-standalone.version>3.13.0</wiremock-standalone.version>
     <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
 
@@ -258,7 +258,7 @@
     </dependency>
 
     <dependency>
-      <groupId>com.github.tomakehurst</groupId>
+      <groupId>org.wiremock</groupId>
       <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock-standalone.version}</version>
       <scope>test</scope>
@@ -267,7 +267,7 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <version>5.5.7</version>
+      <version>6.0.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
