@@ -2,7 +2,7 @@ package org.folio.des.service;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,9 +20,9 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.job.parameters.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -55,7 +55,7 @@ public class  JobExecutionService {
         JobParameters jobParameters = builder.buildJobCommand(job);
         jobCommand.setJobParameters(jobParameters);
       },
-      () -> jobCommand.setJobParameters(new JobParameters(new HashMap<>())));
+      () -> jobCommand.setJobParameters(new JobParameters(new HashSet<>())));
     return jobCommand;
   }
 
@@ -104,8 +104,8 @@ public class  JobExecutionService {
     var jobCommand = new JobCommand();
     jobCommand.setType(JobCommand.Type.DELETE);
     jobCommand.setId(UUID.randomUUID());
-    jobCommand.setJobParameters(new JobParameters(
-        Collections.singletonMap(JobParameterNames.OUTPUT_FILES_IN_STORAGE, new JobParameter<>(StringUtils.join(files, ';'), String.class))));
+    jobCommand.setJobParameters(new JobParameters(Collections.singleton(
+      new JobParameter<>(JobParameterNames.OUTPUT_FILES_IN_STORAGE, StringUtils.join(files, ';'), String.class))));
     sendJobCommand(jobCommand);
   }
 

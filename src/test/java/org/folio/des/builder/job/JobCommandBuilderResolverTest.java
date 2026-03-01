@@ -11,6 +11,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.de.entity.Job;
+import org.folio.des.client.DataExportSpringClient;
+import org.folio.des.client.ExportWorkerClient;
+import org.folio.des.config.HttpClientConfiguration;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
@@ -26,20 +29,23 @@ import org.folio.des.domain.dto.EntityType;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.spring.client.AuthnClient;
+import org.folio.spring.client.PermissionsClient;
+import org.folio.spring.client.UsersClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.quartz.Scheduler;
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.RestClient;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
+@EnableAutoConfiguration
 class JobCommandBuilderResolverTest {
 
   @Autowired
@@ -48,6 +54,18 @@ class JobCommandBuilderResolverTest {
   private Scheduler scheduler;
   @MockitoBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
+  @MockitoBean
+  private ExportWorkerClient exportWorkerClient;
+  @MockitoBean
+  private DataExportSpringClient dataExportSpringClient;
+  @MockitoBean
+  private RestClient restClient;
+  @MockitoBean
+  private AuthnClient authnClient;
+  @MockitoBean
+  private UsersClient usersClient;
+  @MockitoBean
+  private PermissionsClient permissionsClient;
 
   @ParameterizedTest
   @DisplayName("Should retrieve builder for specific export type if builder is registered in the resolver")
@@ -131,6 +149,6 @@ class JobCommandBuilderResolverTest {
 
     JobParameters jobParameters = builder.get().buildJobCommand(job);
 
-    assertNotEquals("null", jobParameters.getParameters().get(paramsKey).getValue());
+    assertNotEquals("null", jobParameters.getParameter(paramsKey).value());
   }
 }

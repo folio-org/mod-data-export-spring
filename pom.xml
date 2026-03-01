@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.3</version>
+    <version>4.0.2</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -34,10 +34,9 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
     <job-deletion-intervals.yaml.file>${project.basedir}/src/main/resources/swagger.api/job-deletion-intervals.yaml</job-deletion-intervals.yaml.file>
 
-    <folio-spring-base.version>9.0.0</folio-spring-base.version>
+    <folio-spring-base.version>10.0.0-RC1</folio-spring-base.version>
     <folio-service-tools.version>4.1.1</folio-service-tools.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
-    <hypersistence-utils-hibernate-63.version>3.9.2</hypersistence-utils-hibernate-63.version>
     <lombok.version>1.18.42</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <mapstruct-binding.version>0.2.0</mapstruct-binding.version>
@@ -45,9 +44,9 @@
     <openapi-generator.version>6.2.1</openapi-generator.version>
 
     <!-- Test properties-->
-    <testcontainers-bom.version>1.20.5</testcontainers-bom.version>
+    <testcontainers-bom.version>1.21.4</testcontainers-bom.version>
     <junit-extensions.version>2.4.0</junit-extensions.version>
-    <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
+    <wiremock-standalone.version>3.13.0</wiremock-standalone.version>
     <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
 
@@ -112,12 +111,6 @@
     </dependency>
 
     <dependency>
-      <groupId>io.hypersistence</groupId>
-      <artifactId>hypersistence-utils-hibernate-63</artifactId>
-      <version>${hypersistence-utils-hibernate-63.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.springframework.batch</groupId>
       <artifactId>spring-batch-core</artifactId>
     </dependency>
@@ -139,8 +132,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.kafka</groupId>
-      <artifactId>spring-kafka</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-kafka</artifactId>
     </dependency>
 
     <dependency>
@@ -216,6 +209,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-inline</artifactId>
       <version>${mockito-inline.version}</version>
@@ -257,16 +255,10 @@
       <artifactId>mockserver-client-java</artifactId>
       <version>${mockserver-client-java.version}</version>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk18on</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
-      <groupId>com.github.tomakehurst</groupId>
+      <groupId>org.wiremock</groupId>
       <artifactId>wiremock-standalone</artifactId>
       <version>${wiremock-standalone.version}</version>
       <scope>test</scope>
@@ -275,6 +267,7 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
+      <version>6.0.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

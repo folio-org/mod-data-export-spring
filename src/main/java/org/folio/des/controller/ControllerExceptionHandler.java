@@ -17,9 +17,9 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 
 @RestControllerAdvice
@@ -33,7 +33,7 @@ public class ControllerExceptionHandler {
     MissingServletRequestParameterException.class,
     MethodArgumentTypeMismatchException.class,
     MethodArgumentNotValidException.class,
-    FeignException.class
+    RestClientException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public Errors handleIllegalArgumentException(Exception exception) {
