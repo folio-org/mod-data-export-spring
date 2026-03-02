@@ -127,8 +127,8 @@ class JobServiceTest {
     job.setFileNames(list);
     internalJobService.resendExportedFile(jobDto.getId());
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
-    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameters().get("FILE_NAME").getValue());
-    Assertions.assertNotNull(command.getJobParameters().getParameters().get("EDIFACT_ORDERS_EXPORT"));
+    Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameter("FILE_NAME").value());
+    Assertions.assertNotNull(command.getJobParameters().getParameter("EDIFACT_ORDERS_EXPORT"));
   }
 
   @Test

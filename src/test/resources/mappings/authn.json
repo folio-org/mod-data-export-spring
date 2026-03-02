@@ -51,7 +51,12 @@
     {
       "request": {
         "method": "POST",
-        "url": "/perms/users/a85c45b7-d427-4122-8532-5570219c5e59/permissions?indexField=userId"
+        "urlPathPattern": "/perms/users/.*?/permissions",
+        "queryParameters": {
+          "indexField": {
+            "equalTo": "userId"
+          }
+        }
       },
       "response": {
         "status": 200,
@@ -63,10 +68,10 @@
     {
       "request": {
         "method": "GET",
-        "urlPathPattern": "/perms/users",
+        "urlPathPattern": "/perms/users/.*?/permissions",
         "queryParameters": {
-          "query": {
-            "matches": ".*"
+          "indexField": {
+            "equalTo": "userId"
           }
         }
       },
@@ -75,7 +80,7 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "body": "{\n  \"permissionUsers\": [\n    {\n      \"id\": \"c3795dfc-76d6-4f25-83ac-05f5107fa281\",\n      \"userId\": \"a85c45b7-d427-4122-8532-5570219c5e59\",\n      \"permissions\": [],\n      \"metadata\": {\n        \"createdDate\": \"2021-02-03T11:02:42.457+00:00\",\n        \"updatedDate\": \"2021-02-03T11:02:42.457+00:00\"\n      }\n    }\n  ],\n  \"totalRecords\": 1,\n  \"resultInfo\": {\n    \"totalRecords\": 1,\n    \"facets\": [],\n    \"diagnostics\": []\n  }\n}"
+        "body": "{\n  \"results\": [\n    \"a85c45b7-d427-4122-8532-5570219c5e59\"\n  ],\n  \"totalRecords\": 1\n}"
       }
     }
   ]

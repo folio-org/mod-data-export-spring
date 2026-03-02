@@ -13,22 +13,23 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import io.hypersistence.utils.hibernate.type.util.ObjectMapperSupplier;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class JacksonConfiguration implements ObjectMapperSupplier {
+public class JacksonConfiguration {
 
   private static final ObjectMapper OBJECT_MAPPER;
   private static final ObjectMapper ENTITY_OBJECT_MAPPER;
@@ -94,11 +95,11 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
       JsonNode jsonNode = jp.getCodec().readTree(jp);
       var identifying = jsonNode.get("identifying").asBoolean();
       switch (jsonNode.get("type").asText()) {
-        case "STRING" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
+        case "STRING" -> new JobParameter<>("STRING", jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
         case "DATE" -> new JobParameter<>(
-          Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
-        case "LONG" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
-        case "DOUBLE" -> new JobParameter<>(jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
+          "DATE", Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
+        case "LONG" -> new JobParameter<>("LONG", jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
+        case "DOUBLE" -> new JobParameter<>("DOUBLE", jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
       }
       return null;
     }
@@ -124,12 +125,15 @@ public class JacksonConfiguration implements ObjectMapperSupplier {
   @Bean
   @Qualifier("entityObjectMapper")
   public ObjectMapper entityObjectMapper() {
-    return ENTITY_OBJECT_MAPPER;
+      return ENTITY_OBJECT_MAPPER;
   }
 
-  @Override
-  public ObjectMapper get() {
-    return OBJECT_MAPPER;
+  @Bean
+  public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(ObjectMapper objectMapper) {
+    return hibernateProperties -> hibernateProperties.put(
+            "hibernate.type.json_format_mapper",
+            new JacksonJsonFormatMapper(objectMapper)
+    );
   }
 
 }

@@ -1,3 +1,5 @@
 folio:
   system:
     password: testpassword
+  exchange:
+    enabled: true

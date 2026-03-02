@@ -6,12 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.de.entity.JobCommand;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 
-@SpringBootApplication(exclude = BatchAutoConfiguration.class)
-@EnableFeignClients
+@SpringBootApplication
 @EntityScan(basePackageClasses = JobCommand.class)
 public class ModDataExportSpringApplication {
   public static final String SYSTEM_USER_PASSWORD = "SYSTEM_USER_PASSWORD";
@@ -19,7 +16,7 @@ public class ModDataExportSpringApplication {
 
   public static void main(String[] args) {
     String systemUserEnabled = Optional.ofNullable(System.getenv(SYSTEM_USER_ENABLED)).orElse("true");
-  
+
     if (
       Boolean.parseBoolean(systemUserEnabled)
       && StringUtils.isEmpty(System.getenv(SYSTEM_USER_PASSWORD))
