@@ -19,9 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.job.parameters.JobParameter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -123,7 +125,15 @@ public class JacksonConfiguration {
   @Bean
   @Qualifier("entityObjectMapper")
   public ObjectMapper entityObjectMapper() {
-    return ENTITY_OBJECT_MAPPER;
+      return ENTITY_OBJECT_MAPPER;
+  }
+
+  @Bean
+  public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(ObjectMapper objectMapper) {
+    return hibernateProperties -> hibernateProperties.put(
+            "hibernate.type.json_format_mapper",
+            new JacksonJsonFormatMapper(objectMapper)
+    );
   }
 
 }
