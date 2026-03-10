@@ -18,6 +18,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
@@ -123,14 +124,16 @@ public class JacksonConfiguration {
       
       if (value != null && !value.isEmpty()) {
         try {
-          // Use reflection to access the internal map in Spring Batch 5 JobParameters
+          // Use reflection to access the internal Set in Spring Batch 5 JobParameters
           java.lang.reflect.Field parametersField = JobParameters.class.getDeclaredField("parameters");
           parametersField.setAccessible(true);
-          Map<String, JobParameter<?>> parametersMap = (Map<String, JobParameter<?>>) parametersField.get(value);
+          Set<JobParameter<?>> parametersSet = (Set<JobParameter<?>>) parametersField.get(value);
           
-          for (Map.Entry<String, JobParameter<?>> entry : parametersMap.entrySet()) {
-            String paramName = entry.getKey();
-            JobParameter<?> param = entry.getValue();
+          for (JobParameter<?> param : parametersSet) {
+            // Use reflection to access the name field
+            java.lang.reflect.Field nameField = JobParameter.class.getDeclaredField("name");
+            nameField.setAccessible(true);
+            String paramName = (String) nameField.get(param);
             
             gen.writeObjectFieldStart(paramName);
             
