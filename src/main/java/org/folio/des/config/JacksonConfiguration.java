@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.job.parameters.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +44,8 @@ public class JacksonConfiguration {
                 new SimpleModule()
                   .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
                   .addDeserializer(JobParameter.class, new JobParameterDeserializer())
+                  .addSerializer(JobParameters.class, new JobParametersSerializer())
+                  .addSerializer(new JobParameterSerializer())
                   .addSerializer(UUID.class, new UUIDSerializer(UUID.class)))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
@@ -102,6 +106,94 @@ public class JacksonConfiguration {
         case "DOUBLE" -> new JobParameter<>("DOUBLE", jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
         default -> null;
       };
+    }
+  }
+
+  static class JobParametersSerializer extends StdSerializer<JobParameters> {
+
+    public JobParametersSerializer() {
+      super(JobParameters.class);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void serialize(JobParameters value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeStartObject();
+      gen.writeObjectFieldStart("parameters");
+      
+      if (value != null && !value.isEmpty()) {
+        try {
+          // Use reflection to access the internal map in Spring Batch 5 JobParameters
+          java.lang.reflect.Field parametersField = JobParameters.class.getDeclaredField("parameters");
+          parametersField.setAccessible(true);
+          Map<String, JobParameter<?>> parametersMap = (Map<String, JobParameter<?>>) parametersField.get(value);
+          
+          for (Map.Entry<String, JobParameter<?>> entry : parametersMap.entrySet()) {
+            String paramName = entry.getKey();
+            JobParameter<?> param = entry.getValue();
+            
+            gen.writeObjectFieldStart(paramName);
+            
+            // Use reflection to access the type field
+            java.lang.reflect.Field typeField = JobParameter.class.getDeclaredField("type");
+            typeField.setAccessible(true);
+            Class<?> type = (Class<?>) typeField.get(param);
+            gen.writeStringField("type", type.getName());
+            
+            // Serialize value based on type
+            Object paramValue = param.value();
+            if (paramValue instanceof java.util.Date) {
+              SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+              gen.writeStringField("value", sdf.format(paramValue));
+            } else {
+              gen.writeObjectField("value", paramValue);
+            }
+            
+            gen.writeBooleanField("identifying", param.identifying());
+            gen.writeEndObject();
+          }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+          throw new IOException("Failed to serialize JobParameters", e);
+        }
+      }
+      
+      gen.writeEndObject();
+      gen.writeEndObject();
+    }
+  }
+
+  static class JobParameterSerializer extends StdSerializer<JobParameter<?>> {
+
+    @SuppressWarnings("unchecked")
+    public JobParameterSerializer() {
+      super((Class<JobParameter<?>>) (Class<?>) JobParameter.class);
+    }
+
+    @Override
+    public void serialize(JobParameter<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeStartObject();
+      
+      try {
+        // Use reflection to access the type field
+        java.lang.reflect.Field typeField = JobParameter.class.getDeclaredField("type");
+        typeField.setAccessible(true);
+        Class<?> type = (Class<?>) typeField.get(value);
+        gen.writeStringField("type", type.getName());
+      } catch (NoSuchFieldException | IllegalAccessException e) {
+        throw new IOException("Failed to get type from JobParameter", e);
+      }
+      
+      // Serialize value based on type
+      Object paramValue = value.value();
+      if (paramValue instanceof java.util.Date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        gen.writeStringField("value", sdf.format(paramValue));
+      } else {
+        gen.writeObjectField("value", paramValue);
+      }
+      
+      gen.writeBooleanField("identifying", value.identifying());
+      gen.writeEndObject();
     }
   }
 
