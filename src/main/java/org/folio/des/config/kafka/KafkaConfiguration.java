@@ -54,13 +54,15 @@ public class KafkaConfiguration {
 
   @Bean
   public <V> ProducerFactory<String, V> producerFactory(
-      FolioExecutionContext folioExecutionContext) {
+      FolioExecutionContext folioExecutionContext,
+      ObjectMapper objectMapper) {
     Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties());
+    var serializer = new JsonSerializer<V>(objectMapper);
     props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, serializer);
     props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, KafkaProducerInterceptor.class.getName());
     props.put("folioExecutionContext", folioExecutionContext);
-    return new DefaultKafkaProducerFactory<>(props);
+    return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), serializer);
   }
 
   @Bean
