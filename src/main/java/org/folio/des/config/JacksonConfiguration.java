@@ -94,14 +94,14 @@ public class JacksonConfiguration {
     public JobParameter<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
       JsonNode jsonNode = jp.getCodec().readTree(jp);
       var identifying = jsonNode.get("identifying").asBoolean();
-      return switch (jsonNode.get("type").asText()) {
+      switch (jsonNode.get("type").asText()) {
         case "STRING" -> new JobParameter<>("STRING", jsonNode.get(VALUE_PARAMETER_PROPERTY).asText(), String.class, identifying);
         case "DATE" -> new JobParameter<>(
           "DATE", Date.valueOf(jsonNode.get(VALUE_PARAMETER_PROPERTY).asText()), Date.class, identifying);
         case "LONG" -> new JobParameter<>("LONG", jsonNode.get(VALUE_PARAMETER_PROPERTY).asLong(), Long.class, identifying);
         case "DOUBLE" -> new JobParameter<>("DOUBLE", jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
-        default -> null;
       };
+      return null;
     }
   }
 
