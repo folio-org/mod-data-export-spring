@@ -45,7 +45,8 @@ public class JacksonConfiguration {
                   .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
                   .addDeserializer(JobParameter.class, new JobParameterDeserializer())
                   .addSerializer(UUID.class, new UUIDSerializer(UUID.class))
-                  .addSerializer(JobParameters.class, new JobParametersSerializer()))
+                  .addSerializer(JobParameters.class, new JobParametersSerializer())
+                  .addSerializer(new JobParameterSerializer()))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -105,6 +106,33 @@ public class JacksonConfiguration {
         case "DOUBLE" -> new JobParameter<>("DOUBLE", jsonNode.get(VALUE_PARAMETER_PROPERTY).asDouble(), Double.class, identifying);
       };
       return null;
+    }
+  }
+
+  static class JobParameterSerializer extends StdSerializer<JobParameter<?>> {
+
+    @SuppressWarnings("unchecked")
+    public JobParameterSerializer() {
+      super((Class<JobParameter<?>>) (Class<?>) JobParameter.class);
+    }
+
+    @Override
+    public void serialize(JobParameter<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeStartObject();
+
+      gen.writeStringField("type", value.type().getName());
+
+      // Serialize value based on type
+      Object paramValue = value.value();
+      if (paramValue instanceof java.util.Date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        gen.writeStringField("value", sdf.format(paramValue));
+      } else {
+        gen.writeObjectField("value", paramValue);
+      }
+
+      gen.writeBooleanField("identifying", value.identifying());
+      gen.writeEndObject();
     }
   }
 
