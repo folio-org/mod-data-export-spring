@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.job.parameters.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +44,8 @@ public class JacksonConfiguration {
                 new SimpleModule()
                   .addDeserializer(ExitStatus.class, new ExitStatusDeserializer())
                   .addDeserializer(JobParameter.class, new JobParameterDeserializer())
-                  .addSerializer(UUID.class, new UUIDSerializer(UUID.class)))
+                  .addSerializer(UUID.class, new UUIDSerializer(UUID.class))
+                  .addSerializer(JobParameters.class, new JobParametersSerializer()))
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -113,6 +116,41 @@ public class JacksonConfiguration {
     @Override
     public void serialize(UUID value, JsonGenerator gen, SerializerProvider provider) throws IOException {
       gen.writeString(value.toString());
+    }
+  }
+
+  static class JobParametersSerializer extends StdSerializer<JobParameters> {
+
+    public JobParametersSerializer() {
+      super(JobParameters.class);
+    }
+
+    @Override
+    public void serialize(JobParameters value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+      gen.writeStartObject();
+      gen.writeObjectFieldStart("parameters");
+
+      if (value != null && !value.isEmpty()) {
+        for (JobParameter<?> param : value.parameters()) {
+          gen.writeObjectFieldStart(param.name());
+          gen.writeStringField("type", param.type().getName());
+
+          // Serialize value based on type
+          Object paramValue = param.value();
+          if (paramValue instanceof java.util.Date) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            gen.writeStringField("value", sdf.format(paramValue));
+          } else {
+            gen.writeObjectField("value", paramValue);
+          }
+
+          gen.writeBooleanField("identifying", param.identifying());
+          gen.writeEndObject();
+        }
+      }
+
+      gen.writeEndObject();
+      gen.writeEndObject();
     }
   }
 
