@@ -1,16 +1,15 @@
 package org.folio.des.client;
 
-import org.folio.des.config.feign.FeignClientConfiguration;
 import org.folio.des.domain.dto.Job;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
-@FeignClient(name = "data-export-spring", configuration = FeignClientConfiguration.class)
+@HttpExchange(url = "data-export-spring")
 public interface DataExportSpringClient {
-  @PostMapping(value = "/jobs")
+  @PostExchange(value = "/jobs")
   Job upsertJob(@RequestBody Job job);
 
-  @PostMapping(value = "/jobs/send")
+  @PostExchange(value = "/jobs/send")
   void sendJob(@RequestBody Job job);
 }

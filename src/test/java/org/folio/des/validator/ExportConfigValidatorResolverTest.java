@@ -5,23 +5,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
+import org.folio.des.client.DataExportSpringClient;
+import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.spring.client.AuthnClient;
+import org.folio.spring.client.PermissionsClient;
+import org.folio.spring.client.UsersClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.Validator;
+import org.springframework.web.client.RestClient;
 
 @SpringBootTest(classes = {JacksonConfiguration.class, ServiceConfiguration.class})
-@EnableAutoConfiguration(exclude = {BatchAutoConfiguration.class})
+@EnableAutoConfiguration
 class ExportConfigValidatorResolverTest {
 
   @Autowired
@@ -30,6 +35,18 @@ class ExportConfigValidatorResolverTest {
   private Scheduler scheduler;
   @MockitoBean
   private QuartzSchemaInitializer quartzSchemaInitializer;
+  @MockitoBean
+  private ExportWorkerClient exportWorkerClient;
+  @MockitoBean
+  private DataExportSpringClient dataExportSpringClient;
+  @MockitoBean
+  private RestClient restClient;
+  @MockitoBean
+  private AuthnClient authnClient;
+  @MockitoBean
+  private UsersClient usersClient;
+  @MockitoBean
+  private PermissionsClient permissionsClient;
 
   @Test
   @DisplayName("Should retrieve validator for specific configuration parameter if validator is registered in the resolver")

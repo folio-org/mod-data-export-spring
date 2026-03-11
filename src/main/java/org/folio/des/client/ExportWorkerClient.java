@@ -1,13 +1,13 @@
 package org.folio.des.client;
 
 import org.folio.des.domain.dto.PresignedUrl;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@FeignClient("refresh-presigned-url")
+@HttpExchange("refresh-presigned-url")
 public interface ExportWorkerClient {
 
-  @GetMapping
+  @GetExchange
   PresignedUrl getRefreshedPresignedUrl(@RequestParam("filePath") String filePath);
 }

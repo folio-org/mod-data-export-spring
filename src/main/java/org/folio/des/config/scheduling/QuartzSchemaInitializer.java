@@ -3,7 +3,7 @@ package org.folio.des.config.scheduling;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;
 import org.springframework.stereotype.Component;
 
 import liquibase.exception.LiquibaseException;

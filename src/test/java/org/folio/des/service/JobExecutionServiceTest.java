@@ -2,7 +2,8 @@ package org.folio.des.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
+import java.util.HashSet;
+
 import org.folio.de.entity.Job;
 import org.folio.des.builder.job.JobCommandBuilderResolver;
 import org.folio.des.domain.dto.ExportType;
@@ -30,6 +31,6 @@ class JobExecutionServiceTest {
 
     var command = jobExecutionService.prepareStartJobCommand(job);
 
-    assertEquals(new HashMap<>(), command.getJobParameters().getParameters());
+    assertEquals(new HashSet<>(), command.getJobParameters().parameters());
   }
 }
