@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -35,16 +35,16 @@
     <job-deletion-intervals.yaml.file>${project.basedir}/src/main/resources/swagger.api/job-deletion-intervals.yaml</job-deletion-intervals.yaml.file>
 
     <folio-spring-base.version>10.0.0-RC1</folio-spring-base.version>
-    <folio-service-tools.version>4.1.1</folio-service-tools.version>
+    <folio-service-tools.version>5.0.1</folio-service-tools.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
-    <lombok.version>1.18.42</lombok.version>
+    <lombok.version>1.18.44</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <mapstruct-binding.version>0.2.0</mapstruct-binding.version>
-    <commons-collections4.version>4.4</commons-collections4.version>
+    <commons-collections4.version>4.5.0</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
 
     <!-- Test properties-->
-    <testcontainers-bom.version>1.21.4</testcontainers-bom.version>
+    <testcontainers-bom.version>2.0.3</testcontainers-bom.version>
     <junit-extensions.version>2.4.0</junit-extensions.version>
     <wiremock-standalone.version>3.13.0</wiremock-standalone.version>
     <mockserver-client-java.version>5.15.0</mockserver-client-java.version>
