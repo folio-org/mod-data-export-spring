@@ -2,6 +2,7 @@ package org.folio.des.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.client.ConfigurationClient;
 import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.client.ExportWorkerClient;
 import org.folio.des.exceptions.RestClientErrorHandler;
@@ -19,6 +20,11 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class HttpClientConfiguration {
 
   private final RestClientErrorHandler errorHandler;
+
+  @Bean
+  public ConfigurationClient configurationClient(HttpServiceProxyFactory factory) {
+    return factory.createClient(ConfigurationClient.class);
+  }
 
   @Bean
   public DataExportSpringClient dataExportSpringClient(HttpServiceProxyFactory factory) {

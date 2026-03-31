@@ -13,6 +13,7 @@ import org.folio.des.scheduling.bursar.BursarScheduledJobInitializer;
 import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
+import org.folio.des.service.config.ConfigurationMigrationService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -52,6 +53,9 @@ class FolioTenantServiceTest {
   @Mock
   BursarMigrationService bursarMigrationService;
 
+  @Mock
+  ConfigurationMigrationService configurationMigrationService;
+
   @Test
   void shouldDoProcessAfterTenantUpdating() {
     TenantAttributes tenantAttributes = createTenantAttributes();
@@ -70,6 +74,8 @@ class FolioTenantServiceTest {
       .scheduleOldJobDeletion(any());
     doNothing().when(bursarMigrationService)
       .updateLegacyBursarIfNeeded(eq(tenantAttributes), any(), any(), any());
+    doNothing().when(configurationMigrationService)
+      .migrateConfigurationData(any(), any());
 
     folioTenantService.afterTenantUpdate(tenantAttributes);
 
@@ -78,6 +84,7 @@ class FolioTenantServiceTest {
     verify(bursarScheduledJobInitializer, times(1)).initAllScheduledJob(tenantAttributes);
     verify(oldJobDeleteScheduler, times(1)).scheduleOldJobDeletion(any());
     verify(bursarMigrationService, times(1)).updateLegacyBursarIfNeeded(eq(tenantAttributes), any(), any(), any());
+    verify(configurationMigrationService, times(1)).migrateConfigurationData(any(), any());
     verify(kafka, times(1)).createKafkaTopics();
     verify(kafka, times(1)).restartEventListeners();
   }

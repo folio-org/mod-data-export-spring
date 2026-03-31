@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.folio.client.ConfigurationClient;
 import org.folio.de.entity.Job;
 import org.folio.des.client.DataExportSpringClient;
 import org.folio.des.client.ExportWorkerClient;
-import org.folio.des.config.HttpClientConfiguration;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.config.ServiceConfiguration;
 import org.folio.des.config.scheduling.QuartzSchemaInitializer;
@@ -29,6 +29,7 @@ import org.folio.des.domain.dto.EntityType;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
+import org.folio.des.service.config.ConfigurationMigrationService;
 import org.folio.spring.client.AuthnClient;
 import org.folio.spring.client.PermissionsClient;
 import org.folio.spring.client.UsersClient;
@@ -66,6 +67,10 @@ class JobCommandBuilderResolverTest {
   private UsersClient usersClient;
   @MockitoBean
   private PermissionsClient permissionsClient;
+  @MockitoBean
+  private ConfigurationClient configurationClient;
+  @MockitoBean
+  private ConfigurationMigrationService configurationMigrationService;
 
   @ParameterizedTest
   @DisplayName("Should retrieve builder for specific export type if builder is registered in the resolver")

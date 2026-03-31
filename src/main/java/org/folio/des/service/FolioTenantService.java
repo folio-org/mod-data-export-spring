@@ -9,9 +9,9 @@ import org.folio.des.scheduling.quartz.OldJobDeleteScheduler;
 import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.service.bursarlegacy.BursarExportLegacyJobService;
 import org.folio.des.service.bursarlegacy.BursarMigrationService;
+import org.folio.des.service.config.ConfigurationMigrationService;
 import org.folio.des.service.config.impl.BursarFeesFinesExportConfigService;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.exception.TenantUpgradeException;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.PrepareSystemUserService;
 import org.folio.spring.service.TenantService;
@@ -20,8 +20,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -42,6 +40,7 @@ public class FolioTenantService extends TenantService {
   private final BursarMigrationService bursarMigrationService;
   private final BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService;
   private final FolioExecutionContext folioExecutionContext;
+  private final ConfigurationMigrationService configurationMigrationService;
 
   public FolioTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                             PrepareSystemUserService prepareSystemUserService, KafkaService kafka,
@@ -49,7 +48,7 @@ public class FolioTenantService extends TenantService {
                             BursarScheduledJobInitializer bursarScheduledJobInitializer, OldJobDeleteScheduler oldJobDeleteScheduler,
                             BursarExportLegacyJobService bursarExportLegacyJobService, JobService jobService,
                             BursarMigrationService bursarMigrationService, BursarFeesFinesExportConfigService bursarFeesFinesExportConfigService,
-                            FolioExecutionContext folioExecutionContext) {
+                            FolioExecutionContext folioExecutionContext, ConfigurationMigrationService configurationMigrationService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.prepareSystemUserService = prepareSystemUserService;
     this.kafka = kafka;
@@ -62,6 +61,7 @@ public class FolioTenantService extends TenantService {
     this.bursarMigrationService = bursarMigrationService;
     this.bursarFeesFinesExportConfigService = bursarFeesFinesExportConfigService;
     this.folioExecutionContext = folioExecutionContext;
+    this.configurationMigrationService = configurationMigrationService;
   }
 
   @Override
@@ -75,6 +75,7 @@ public class FolioTenantService extends TenantService {
   protected void afterTenantUpdate(TenantAttributes tenantAttributes) {
     try {
       prepareSystemUserService.setupSystemUser();
+      configurationMigrationService.migrateConfigurationData(tenantAttributes, context.getTenantId());
       bursarMigrationService.updateLegacyBursarIfNeeded(tenantAttributes, bursarFeesFinesExportConfigService,
           bursarExportLegacyJobService, jobService);
       bursarScheduledJobInitializer.initAllScheduledJob(tenantAttributes);
