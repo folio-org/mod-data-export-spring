@@ -68,7 +68,7 @@ public class ConfigurationMigrationService {
   }
 
   private JsonNode fetchConfigurationEntries() {
-    return configurationClient.getConfigurations(CONFIGURATION_QUERY, 1000);
+    return configurationClient.getConfigurations(CONFIGURATION_QUERY, Integer.MAX_VALUE);
   }
 
   private void migrateConfigEntry(String tenantId, JsonNode config) {
