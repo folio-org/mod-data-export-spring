@@ -68,7 +68,7 @@ public final class ScheduleUtil {
       (moduleFromSemVer == null || moduleFromSemVer.compareTo(minQuartzSupportVersion) < 0);
   }
 
-  private static SemVer moduleVersionToSemVer(String version) {
+  public static SemVer moduleVersionToSemVer(String version) {
     try {
       return new SemVer(version);
     } catch (IllegalArgumentException ex) {

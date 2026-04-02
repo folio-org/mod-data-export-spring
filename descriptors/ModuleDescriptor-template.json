@@ -11,6 +11,10 @@
       "version": "2.0"
     },
     {
+      "id": "configuration",
+      "version": "2.0"
+    },
+    {
       "id": "permissions",
       "version": "5.3"
     },
@@ -274,7 +278,8 @@
             "perms.users.get",
             "perms.users.assign.immutable",
             "data-export.job.collection.get",
-            "data-export.config.collection.get"
+            "data-export.config.collection.get",
+            "configuration.entries.collection.get"
           ]
         },
         {

@@ -1,0 +1,17 @@
+{
+  "configs": [
+    {
+      "id": "e5555555-5555-5555-5555-555555555555",
+      "configName": "some_config",
+      "module": "mod-data-export-spring",
+      "value": "{\"type\":\"BURSAR_FEES_FINES\"}",
+      "metadata": {
+        "createdDate": "2025-01-15T10:00:00.000+00:00",
+        "createdByUserId": "625dd2b6-b6f2-4f77-90fe-68954b26ee3c",
+        "updatedDate": "2025-01-15T10:00:00.000+00:00",
+        "updatedByUserId": "625dd2b6-b6f2-4f77-90fe-68954b26ee3c"
+      }
+    }
+  ]
+}
+

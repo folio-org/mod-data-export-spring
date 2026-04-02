@@ -1,0 +1,17 @@
+{
+  "configs": [
+    {
+      "id": "a1111111-1111-1111-1111-111111111111",
+      "configName": "different_name",
+      "module": "mod-data-export-spring",
+      "value": "{\"type\":\"EDIFACT_ORDERS_EXPORT\",\"tenant\":\"other_tenant\",\"exportTypeSpecificParameters\":{\"vendorEdiOrdersExportConfig\":{}},\"schedulePeriod\":\"DAY\",\"scheduleFrequency\":1,\"scheduleTime\":\"12:00:00.000Z\"}",
+      "metadata": {
+        "createdDate": "2025-01-15T10:00:00.000+00:00",
+        "createdByUserId": "625dd2b6-b6f2-4f77-90fe-68954b26ee3c",
+        "updatedDate": "2025-01-15T10:00:00.000+00:00",
+        "updatedByUserId": "625dd2b6-b6f2-4f77-90fe-68954b26ee3c"
+      }
+    }
+  ]
+}
+
