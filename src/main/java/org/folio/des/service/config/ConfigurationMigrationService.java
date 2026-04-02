@@ -4,6 +4,7 @@ import static org.folio.des.scheduling.util.ScheduleUtil.moduleVersionToSemVer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.folio.client.ConfigurationClient;
+import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -79,7 +80,7 @@ public class ConfigurationMigrationService {
       var type = valueObj.path("type").asString(null);
       var exportTypeSpecificParameters = valueObj.path("exportTypeSpecificParameters");
 
-      if (StringUtils.isBlank(type) || type.equals("null") || exportTypeSpecificParameters.isMissingNode()) {
+      if (StringUtils.isBlank(type) || type.equals("null") || !validateExportTypeSpecificParams(exportTypeSpecificParameters)) {
         log.warn("migrateConfigEntry:: Skipping config {} due to missing type or exportTypeSpecificParameters", id);
         return;
       }
@@ -93,7 +94,7 @@ public class ConfigurationMigrationService {
         type,
         valueObj.path("tenant").asString(null),
         exportTypeSpecificParameters.toString(),
-        valueObj.path("scheduleFrequency").isMissingNode() ? null : valueObj.path("scheduleFrequency").asInt(),
+        valueObj.path("scheduleFrequency").asIntOpt().stream().boxed().findFirst().orElse(null),
         valueObj.path("schedulePeriod").asString(null),
         valueObj.path("scheduleTime").asString(null),
         weekDays.isMissingNode() ? null : weekDays.toString(),
@@ -107,4 +108,23 @@ public class ConfigurationMigrationService {
       log.error("migrateConfigEntry:: Failed to insert export config with id: {}", id, e);
     }
   }
+
+
+  /**
+   * Validates the exportTypeSpecificParameters by attempting to convert it to the ExportTypeSpecificParameters class.
+
+   * @param exportTypeSpecificParameters the JsonNode containing the export type specific parameters to validate
+   */
+  private boolean validateExportTypeSpecificParams(JsonNode exportTypeSpecificParameters) {
+    if (exportTypeSpecificParameters.isMissingNode()) {
+      return false;
+    }
+    try {
+      objectMapper.treeToValue(exportTypeSpecificParameters, ExportTypeSpecificParameters.class);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
 }

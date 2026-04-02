@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -146,12 +147,15 @@ class ConfigurationMigrationServiceTest extends BaseTest {
     assertEquals(0, exportConfigRepository.count());
   }
 
-  @Test
-  @DisplayName("Should skip config entries with missing exportTypeSpecificParameters")
-  void shouldSkipEntriesWithMissingExportTypeSpecificParameters() {
+  @ParameterizedTest
+  @DisplayName("Should skip config entries with invalid exportTypeSpecificParameters")
+  @ValueSource(strings = {
+    "data/configuration-entries/missing-params-response.json",
+    "data/configuration-entries/invalid-params-response.json"
+  })
+  void shouldSkipEntriesWithInvalidExportTypeSpecificParameters(String responsePath) {
     var attributes = tenantAttributes(null);
-    when(configurationClient.getConfigurations(anyString(), anyInt()))
-      .thenReturn(loadData("data/configuration-entries/missing-params-response.json"));
+    when(configurationClient.getConfigurations(anyString(), anyInt())).thenReturn(loadData(responsePath));
 
     assertDoesNotThrow(() -> migrationService.migrateConfigurationData(attributes, TENANT));
     assertEquals(0, exportConfigRepository.count());
