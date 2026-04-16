@@ -1,3 +1,31 @@
+## 2026-04-16 v3.6.0
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.5.0...v3.6.0)
+
+### Stories
+[MODEXPW-624](https://folio-org.atlassian.net/browse/MODEXPW-624) [Bursar] Support dry-run exports (export without transferring accounts)
+[MODEXPW-611](https://folio-org.atlassian.net/browse/MODEXPW-611) Remove mod-configuration usage to get tenant addresses
+[MODEXPW-595](https://folio-org.atlassian.net/browse/MODEXPW-595) Use mod-settings to get Language & locale setting selections
+[MODEXPS-308](https://folio-org.atlassian.net/browse/MODEXPS-308) Migrate_configuration_data_to_settings.ftl cannot read mod_configuration db table
+[MODEXPS-301](https://folio-org.atlassian.net/browse/MODEXPS-301) Implement migration script to populate newly created configs table
+[MODEXPS-298](https://folio-org.atlassian.net/browse/MODEXPS-298) Allow user to store job deletion intervals
+[MODEXPS-297](https://folio-org.atlassian.net/browse/MODEXPS-297) Remove Bulk edit job references
+[MODEXPS-296](https://folio-org.atlassian.net/browse/MODEXPS-296) Introduce table to store configs and adjust ConfigsController to use it
+[MODORDSTOR-448](https://folio-org.atlassian.net/browse/MODORDSTOR-448) Make user limit as string field & apply migration
+
+### Bug fixes
+[MODEXPS-289](https://folio-org.atlassian.net/browse/MODEXPS-289) EDIFACT Order export jobs are being deleted every 7 days
+[MODEXPS-290](https://folio-org.atlassian.net/browse/MODEXPS-290) data-export-spring/configs returning bad json
+[MODEXPS-287](https://folio-org.atlassian.net/browse/MODEXPS-287) Ramsons SP#3 - MARC authority headings updates (CSV) report and Failed updates: linked bibliographic fields (CSV) Reports fails when tenant language set to Spanish or any language that has these labels translated.
+[MODEXPS-290](https://folio-org.atlassian.net/browse/MODEXPS-290) data-export-spring/configs returning bad json
+
+### Technical tasks
+[MODEXPW-588](https://folio-org.atlassian.net/browse/MODEXPW-588) Move mod-data-export-spring, mod-data-export-worker and folio_export-manager from app-platform-complete due to their dependency on app-acquisitions interfaces
+[MODEXPS-305](https://folio-org.atlassian.net/browse/MODEXPS-305) Use GET/PUT /tenant-addresses to work with tenant addresses
+[MODEXPS-304](https://folio-org.atlassian.net/browse/MODEXPS-304) mod-data-export-spring: Use GitHub Workflows for Maven
+[MODEXPS-302](https://folio-org.atlassian.net/browse/MODEXPS-302) Upgrade module to SpringBoot4.0 and Spring7.0
+[MODEXPS-294](https://folio-org.atlassian.net/browse/MODEXPS-294) Setup dependabot for your module
+
 ## 2024-10-30 v3.5.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.4.3...v3.5.0)
