@@ -34,9 +34,9 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
     <job-deletion-intervals.yaml.file>${project.basedir}/src/main/resources/swagger.api/job-deletion-intervals.yaml</job-deletion-intervals.yaml.file>
 
-    <folio-spring-base.version>10.0.0-RC1</folio-spring-base.version>
-    <folio-service-tools.version>4.1.1</folio-service-tools.version>
-    <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
+    <folio-spring-base.version>10.0.0</folio-spring-base.version>
+    <folio-service-tools.version>6.0.0</folio-service-tools.version>
+    <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
     <lombok.version>1.18.42</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <mapstruct-binding.version>0.2.0</mapstruct-binding.version>
