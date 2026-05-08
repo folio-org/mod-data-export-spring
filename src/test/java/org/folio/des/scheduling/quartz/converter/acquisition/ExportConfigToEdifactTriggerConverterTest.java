@@ -139,6 +139,9 @@ class ExportConfigToEdifactTriggerConverterTest {
     EdiFtp ediFtp = new EdiFtp();
 
     vendorEdiOrdersExportConfig.setVendorId(vendorId);
+    vendorEdiOrdersExportConfig.setIntegrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.ORDERING);
+    vendorEdiOrdersExportConfig.setFileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.EDI);
+    vendorEdiOrdersExportConfig.setTransmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FTP);
 
     EdiConfig ediConfig =new EdiConfig();
     EdiSchedule accountEdiSchedule = new EdiSchedule();
@@ -158,6 +161,7 @@ class ExportConfigToEdifactTriggerConverterTest {
     ediConfig.setVendorEdiCode("1694510");
     ediConfig.setVendorEdiType(EdiConfig.VendorEdiTypeEnum._31B_US_SAN);
     ediFtp.setFtpPort(22);
+    ediFtp.setServerAddress("ftp.example.com");
 
     vendorEdiOrdersExportConfig.setEdiFtp(ediFtp);
 
