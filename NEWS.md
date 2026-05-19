@@ -1,3 +1,10 @@
+## 2026-05-19 v3.6.1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.6.0...v3.6.1)
+
+### Bug fixes
+[MODEXPS-312](https://folio-org.atlassian.net/browse/MODEXPS-312) Export Manager Search & filter pane fails if there are records in db `_mod_data_export_spring.job` with type BULK_EDIT_IDENTIFIERS or BULK_EDIT_UPDATE
+
 ## 2026-04-16 v3.6.0
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.5.0...v3.6.0)
