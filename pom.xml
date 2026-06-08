@@ -43,6 +43,9 @@
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-generator.version>6.2.1</openapi-generator.version>
 
+    <!-- overrides Spring Boot BOM default; can be removed once Spring Boot ships this version -->
+    <kafka.version>4.2.0</kafka.version>
+
     <!-- Test properties-->
     <testcontainers-bom.version>1.21.4</testcontainers-bom.version>
     <junit-extensions.version>2.4.0</junit-extensions.version>
