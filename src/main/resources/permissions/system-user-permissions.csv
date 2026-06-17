@@ -24,3 +24,5 @@ users.item.post
 users.item.put
 tenant-addresses.item.get
 locale.item.get
+email.message.post
+template-request.post
