@@ -100,7 +100,9 @@
             "transfers.collection.get",
             "users.collection.get",
             "users.item.post",
-            "users.item.put"
+            "users.item.put",
+            "email.message.post",
+            "template-request.post"
           ]
         },
         {
@@ -205,7 +207,9 @@
             "transfers.collection.get",
             "users.collection.get",
             "users.item.post",
-            "users.item.put"
+            "users.item.put",
+            "email.message.post",
+            "template-request.post"
           ]
         },
         {
@@ -471,7 +475,9 @@
         "users.item.post",
         "users.item.put",
         "tenant-addresses.item.get",
-        "locale.item.get"
+        "locale.item.get",
+        "email.message.post",
+        "template-request.post"
       ]
     }
   },
