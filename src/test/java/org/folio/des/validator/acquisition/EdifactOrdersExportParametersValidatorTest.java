@@ -25,7 +25,7 @@ class EdifactOrdersExportParametersValidatorTest {
 
   @Test
   @DisplayName("Should throw exception if edifact config is Null")
-  void shouldThrowExceptionIfBursarFeeFinesIsNull() {
+  void shouldThrowExceptionIfEdifactConfigIsNull() {
     Errors errors = mock(Errors.class);
     ExportTypeSpecificParameters specificParameters = new ExportTypeSpecificParameters();
     assertThrows(IllegalArgumentException.class, () ->  validator.validate(specificParameters, errors));
@@ -33,10 +33,14 @@ class EdifactOrdersExportParametersValidatorTest {
 
   @Test
   @DisplayName("Should pass validation if edifact is not Null")
-  void shouldPassValidationIfBursarFeeFinesIsNotNull() {
+  void shouldPassValidationIfEdifactConfigIsNotNull() {
     Errors errors = mock(Errors.class);
     ExportTypeSpecificParameters specificParameters = new ExportTypeSpecificParameters();
-    specificParameters.setVendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig());
+    VendorEdiOrdersExportConfig config = new VendorEdiOrdersExportConfig();
+    config.setIntegrationType(VendorEdiOrdersExportConfig.IntegrationTypeEnum.ORDERING);
+    config.setFileFormat(VendorEdiOrdersExportConfig.FileFormatEnum.CSV);
+    config.setTransmissionMethod(VendorEdiOrdersExportConfig.TransmissionMethodEnum.FILE_DOWNLOAD);
+    specificParameters.setVendorEdiOrdersExportConfig(config);
     validator.validate(specificParameters, errors);
   }
 }
