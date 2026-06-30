@@ -8,6 +8,7 @@ data-export.job.collection.get
 data-export.config.collection.get
 feefineactions.collection.get
 finance.expense-classes.item.get
+inventory-storage.contributor-name-types.item.get
 inventory-storage.holdings.item.get
 inventory-storage.identifier-types.item.get
 inventory-storage.locations.item.get
@@ -20,6 +21,7 @@ orders-storage.pieces.collection.get
 orders-storage.titles.item.get
 transfers.collection.get
 users.collection.get
+users.item.get
 users.item.post
 users.item.put
 tenant-addresses.item.get
