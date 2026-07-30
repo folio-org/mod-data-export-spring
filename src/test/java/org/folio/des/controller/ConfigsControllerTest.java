@@ -1,7 +1,9 @@
 package org.folio.des.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -16,20 +18,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Objects;
 
+import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.config.kafka.KafkaService.Topic;
 import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.event.DomainEvent;
+import org.folio.des.domain.dto.event.DomainEventType;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.folio.des.support.BaseTest;
+import org.folio.des.support.TestKafkaConsumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import lombok.SneakyThrows;
 
 @TestPropertySource(properties = "spring.jpa.properties.hibernate.default_schema=diku_mod_data_export_spring")
 class ConfigsControllerTest extends BaseTest {
@@ -47,6 +59,10 @@ class ConfigsControllerTest extends BaseTest {
 
   @Autowired
   private MockMvc mockMvc;
+  @Autowired
+  private KafkaService kafkaService;
+  @Autowired
+  private KafkaProperties kafkaProperties;
   @MockitoSpyBean
   private ExportConfigRepository repository;
   @MockitoSpyBean
@@ -143,6 +159,15 @@ class ConfigsControllerTest extends BaseTest {
           content().contentType("text/plain;charset=UTF-8"));
 
     verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
+
+    var event = pollConfigEventJson("0a3cba78-16e7-498e-b75b-98713000277b", DomainEventType.CREATE);
+    assertThat(event.getType()).isEqualTo(DomainEventType.CREATE);
+    assertThat(event.getTenant()).isEqualTo(TENANT);
+    assertNull(event.getOldValue());
+    assertThat(event.getNewValue())
+      .usingRecursiveComparison()
+      .ignoringFields("configName", "tenant")
+      .isEqualTo(OBJECT_MAPPER.readValue(NEW_CONFIG_REQUEST, ExportConfig.class));
   }
 
   @Test
@@ -174,7 +199,7 @@ class ConfigsControllerTest extends BaseTest {
   @Test
   @DisplayName("Success update config")
   void putConfig() throws Exception {
-    saveConfig(UPDATE_CONFIG_REQUEST);
+    saveConfig(NEW_CONFIG_REQUEST);
 
     mockMvc
         .perform(
@@ -185,6 +210,18 @@ class ConfigsControllerTest extends BaseTest {
         .andExpectAll(status().isNoContent());
 
     verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
+
+    var event = pollConfigEventJson("0a3cba78-16e7-498e-b75b-98713000277b", DomainEventType.UPDATE);
+    assertThat(event.getType()).isEqualTo(DomainEventType.UPDATE);
+    assertThat(event.getTenant()).isEqualTo(TENANT);
+    assertThat(event.getOldValue())
+      .usingRecursiveComparison()
+      .ignoringFields("configName", "tenant")
+      .isEqualTo(OBJECT_MAPPER.readValue(NEW_CONFIG_REQUEST, ExportConfig.class));
+    assertThat(event.getNewValue())
+      .usingRecursiveComparison()
+      .ignoringFields("configName", "tenant")
+      .isEqualTo(OBJECT_MAPPER.readValue(UPDATE_CONFIG_REQUEST, ExportConfig.class));
   }
 
   @Test
@@ -269,6 +306,22 @@ class ConfigsControllerTest extends BaseTest {
       .andExpectAll(status().isNotFound(),
          content().contentType(MediaType.APPLICATION_JSON_VALUE),
          jsonPath("$.errors[0].message", startsWith("NotFoundException")));
+  }
+
+  private DomainEvent<ExportConfig> pollConfigEventJson(String configId, DomainEventType type) {
+    var topic = kafkaService.getTenantTopicName(Topic.CONFIG, TENANT);
+    try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
+      return consumer.poll(configId).stream()
+        .map(event -> readEvent(event.value()))
+        .filter(event -> event.getType() == type)
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Expected " + type + " event for config " + configId));
+    }
+  }
+
+  @SneakyThrows
+  private DomainEvent<ExportConfig> readEvent(String json) {
+    return OBJECT_MAPPER.readValue(json, new TypeReference<>() {});
   }
 
   private void saveConfig(String config) throws Exception {

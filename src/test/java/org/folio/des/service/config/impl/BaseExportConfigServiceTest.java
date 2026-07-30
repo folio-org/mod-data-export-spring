@@ -58,7 +58,8 @@ class BaseExportConfigServiceTest {
     setInternalState(defaultExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
 
     repository = Mockito.mock(ExportConfigRepository.class);
-    service = new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+    service = new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
+      Mockito.mock(org.folio.des.service.config.ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper());
   }
 
   @Test
@@ -98,7 +99,8 @@ class BaseExportConfigServiceTest {
     var exportConfig = getBursarExportConfig();
 
     when(repository.findById(UUID.fromString(exportConfig.getId())))
-      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity().setType(ExportType.INVOICE_EXPORT.getValue())));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     service.updateConfig(exportConfig.getId(), exportConfig);
 

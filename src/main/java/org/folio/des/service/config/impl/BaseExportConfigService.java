@@ -7,12 +7,14 @@ import java.util.UUID;
 
 import org.folio.de.entity.ExportConfigEntity;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.exception.NotFoundException;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -33,17 +37,23 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final BaseExportConfigMapper exportConfigMapper;
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
+  protected final ExportConfigDomainEventService exportConfigDomainEventService;
+  protected final ObjectMapper objectMapper;
 
   @Override
   @Transactional
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("updateConfig:: configId={}, exportConfig={}", configId, exportConfig);
     validateIncomingExportConfig(exportConfig);
-    getExportConfigEntityOrThrow(configId);
+    var existingEntity = getExportConfigEntityOrThrow(configId);
+    var oldSnapshot = sanitize(toDto(existingEntity));
 
     var entity = exportConfigMapper.toEntity(exportConfig);
-    repository.save(entity);
+    entity = repository.save(entity);
     log.info("updateConfig:: Successfully updated config with id={}", configId);
+
+    var newSnapshot = sanitize(toDto(entity));
+    exportConfigDomainEventService.publishConfigUpdatedEvent(oldSnapshot, newSnapshot);
   }
 
   @Override
@@ -55,6 +65,8 @@ public class BaseExportConfigService implements ExportConfigService {
     var entity = exportConfigMapper.toEntity(exportConfig);
     entity = repository.save(entity);
     log.info("postConfig:: Successfully created config with id={}", exportConfig.getId());
+
+    exportConfigDomainEventService.publishConfigCreatedEvent(sanitize(toDto(entity)));
 
     return toDto(entity);
   }
@@ -97,6 +109,25 @@ public class BaseExportConfigService implements ExportConfigService {
   @SneakyThrows
   protected ExportConfig toDto(ExportConfigEntity exportConfigEntity) {
     return exportConfigMapperResolver.resolve(ExportType.fromValue(exportConfigEntity.getType())).toDto(exportConfigEntity);
+  }
+
+  /**
+   * Returns a deep copy of the given configuration with all credential-shaped fields removed, safe to publish on the
+   * event bus. The original object is left untouched so the REST response still carries the full data.
+   *
+   * @param config the configuration snapshot to sanitize
+   * @return a sanitized deep copy, or {@code null} if the input is {@code null}
+   */
+  protected ExportConfig sanitize(ExportConfig config) {
+    if (config == null) {
+      return null;
+    }
+    var sanitized = objectMapper.convertValue(config, ExportConfig.class);
+    Optional.ofNullable(sanitized.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+      .map(VendorEdiOrdersExportConfig::getEdiFtp)
+      .ifPresent(ediFtp -> ediFtp.setPassword(null));
+    return sanitized;
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {

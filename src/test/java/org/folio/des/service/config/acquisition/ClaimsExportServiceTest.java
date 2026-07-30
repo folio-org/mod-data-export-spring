@@ -19,6 +19,7 @@ import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.mapper.acquisition.ClaimsExportConfigMapperImpl;
 import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +62,8 @@ class ClaimsExportServiceTest {
     setInternalState(claimsExportConfigMapper, "validator", validator);
 
     repository = Mockito.mock(ExportConfigRepository.class);
-    service = new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+    service = new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
+      Mockito.mock(ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper());
   }
 
   @Test
@@ -78,7 +80,8 @@ class ClaimsExportServiceTest {
   @DisplayName("Update configuration")
   void testUpdateConfig() {
     when(repository.findById(UUID.fromString(CLAIMS_EXPORT_CONFIG.getId())))
-      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity().setType(ExportType.CLAIMS.getValue())));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     service.updateConfig(CLAIMS_EXPORT_CONFIG.getId(), CLAIMS_EXPORT_CONFIG);
 

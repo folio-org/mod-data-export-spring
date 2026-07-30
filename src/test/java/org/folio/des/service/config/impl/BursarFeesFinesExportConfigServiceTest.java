@@ -19,6 +19,7 @@ import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.bursar.BursarExportScheduler;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.BursarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,8 @@ class BursarFeesFinesExportConfigServiceTest {
 
     repository = Mockito.mock(ExportConfigRepository.class);
     bursarExportScheduler = Mockito.mock(BursarExportScheduler.class);
-    service = new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, bursarExportScheduler);
+    service = new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
+      Mockito.mock(ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper(), bursarExportScheduler);
   }
 
   @Test
@@ -68,7 +70,8 @@ class BursarFeesFinesExportConfigServiceTest {
     var exportConfig = getBursarExportConfig();
 
     when(repository.findById(UUID.fromString(exportConfig.getId())))
-      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity().setType(ExportType.BURSAR_FEES_FINES.getValue())));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     service.updateConfig(exportConfig.getId(), exportConfig);
 

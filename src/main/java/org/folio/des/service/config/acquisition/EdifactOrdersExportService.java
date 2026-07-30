@@ -4,14 +4,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.des.mapper.BaseExportConfigMapper;
-import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.ExportJobScheduler;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -22,8 +24,9 @@ public class EdifactOrdersExportService extends BaseExportConfigService {
 
   public EdifactOrdersExportService(ExportConfigRepository repository, BaseExportConfigMapper defaultExportConfigMapper,
                                     ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                    ExportConfigDomainEventService exportConfigDomainEventService, ObjectMapper objectMapper,
                                     ExportJobScheduler exportJobScheduler) {
-    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportConfigDomainEventService, objectMapper);
     this.exportJobScheduler = exportJobScheduler;
   }
 

@@ -74,7 +74,8 @@ class EdifactOrdersExportServiceTest {
 
     repository = Mockito.mock(ExportConfigRepository.class);
     edifactOrdersExportJobScheduler = Mockito.mock(ExportJobScheduler.class);
-    service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, edifactOrdersExportJobScheduler);
+    service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
+      Mockito.mock(org.folio.des.service.config.ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper(), edifactOrdersExportJobScheduler);
   }
 
   @Test
@@ -92,7 +93,8 @@ class EdifactOrdersExportServiceTest {
   @DisplayName("Update configuration")
   void testUpdateConfig() {
     when(repository.findById(UUID.fromString(EDIFACT_EXPORT_CONFIG.getId())))
-      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity().setType(ExportType.EDIFACT_ORDERS_EXPORT.getValue())));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     service.updateConfig(EDIFACT_EXPORT_CONFIG.getId(), EDIFACT_EXPORT_CONFIG);
 
