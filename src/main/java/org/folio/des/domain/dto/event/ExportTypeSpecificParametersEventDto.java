@@ -11,10 +11,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Event-only view of {@code ExportTypeSpecificParameters}. Only the credential-bearing branch
  * ({@code vendorEdiOrdersExportConfig}) is retyped to its redacted event variant; the remaining branches carry
  * no secrets and reuse the generated DTOs directly.
- *
- * <p>The {@code eHoldingsExportConfig} component keeps the lower-camel name of the generated REST DTO so both
- * MapStruct (target = record component name) and the source accessor ({@code geteHoldingsExportConfig}) resolve
- * to the same property.</p>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ExportTypeSpecificParametersEventDto(
