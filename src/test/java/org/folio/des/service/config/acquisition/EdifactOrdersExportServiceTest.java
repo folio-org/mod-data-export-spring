@@ -23,6 +23,7 @@ import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.mapper.acquisition.EdifactExportConfigMapperImpl;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.ExportJobScheduler;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.folio.des.validator.acquisition.EdifactOrdersScheduledParamsValidator;
@@ -75,7 +76,7 @@ class EdifactOrdersExportServiceTest {
     repository = Mockito.mock(ExportConfigRepository.class);
     edifactOrdersExportJobScheduler = Mockito.mock(ExportJobScheduler.class);
     service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
-      Mockito.mock(org.folio.des.service.config.ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper(), edifactOrdersExportJobScheduler);
+      Mockito.mock(ExportConfigDomainEventService.class), edifactOrdersExportJobScheduler);
   }
 
   @Test

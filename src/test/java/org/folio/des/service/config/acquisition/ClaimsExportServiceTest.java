@@ -63,7 +63,7 @@ class ClaimsExportServiceTest {
 
     repository = Mockito.mock(ExportConfigRepository.class);
     service = new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
-      Mockito.mock(ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper());
+      Mockito.mock(ExportConfigDomainEventService.class));
   }
 
   @Test

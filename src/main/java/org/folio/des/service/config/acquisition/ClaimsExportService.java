@@ -11,8 +11,6 @@ import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,8 +19,8 @@ public class ClaimsExportService extends BaseExportConfigService {
 
   public ClaimsExportService(ExportConfigRepository repository, BaseExportConfigMapper defaultExportConfigMapper,
                              ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
-                             ExportConfigDomainEventService exportConfigDomainEventService, ObjectMapper objectMapper) {
-    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportConfigDomainEventService, objectMapper);
+                             ExportConfigDomainEventService exportConfigDomainEventService) {
+    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportConfigDomainEventService);
   }
 
   @Override

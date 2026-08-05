@@ -1,10 +1,11 @@
 package org.folio.des.service.config;
 
+import java.util.UUID;
+
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.config.kafka.KafkaService.Topic;
-import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.event.DomainEvent;
-import org.folio.spring.FolioExecutionContext;
+import org.folio.des.domain.dto.event.ExportConfigEventDto;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -25,23 +26,23 @@ public class ExportConfigEventProducer {
 
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final KafkaService kafkaService;
-  private final FolioExecutionContext folioExecutionContext;
 
   /**
-   * Publishes an Export Configuration domain event to the tenant-scoped topic.
+   * Publishes an Export Configuration domain event to the tenant-scoped topic. The tenant is taken from the
+   * event envelope so the topic resolution and the {@code tenant} field on the payload can never diverge.
    *
    * @param configId the export configuration id, used as the Kafka record key
    * @param event    the domain event envelope to publish
    */
-  public void publish(String configId, DomainEvent<ExportConfig> event) {
-    var topic = kafkaService.getTenantTopicName(Topic.CONFIG, folioExecutionContext.getTenantId());
+  public void publish(UUID configId, DomainEvent<ExportConfigEventDto> event) {
+    var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), event.getTenant());
+    var key = configId.toString();
     try {
       log.info("publish:: Publishing {} event for config id={} on topic={}", event.getType(), configId, topic);
-      kafkaTemplate.send(topic, configId, event);
+      kafkaTemplate.send(topic, key, event);
       log.info("publish:: Successfully published {} event for config id={}", event.getType(), configId);
     } catch (Exception e) {
       log.error("publish:: Failed to publish {} event for config id={} on topic={}", event.getType(), configId, topic, e);
     }
   }
 }
-

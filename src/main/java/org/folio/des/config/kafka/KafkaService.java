@@ -42,7 +42,7 @@ public class KafkaService {
   @Getter
   public enum Topic {
     JOB_COMMAND("data-export.job.command"),
-    CONFIG("data-export-spring.config");
+    CONFIG("data-export.config");
     private final String topicName;
   }
 
@@ -85,24 +85,13 @@ public class KafkaService {
   }
 
   /**
-   * Returns topic name in the format - `{env}.{tenant}.topicName`
+   * Returns the tenant-scoped topic name in the format {@code {env}.{tenant}.topicName}.
    *
-   * @param topicName initial topic name as {@link String}
-   * @param tenantId tenant id as {@link String}
-   * @return topic name as {@link String} object
-   */
-  /**
-   * Returns the tenant-scoped topic name for the given {@link Topic} in the format {@code {env}.{tenant}.topicName}.
-   *
-   * @param topic  the logical topic
-   * @param tenant the tenant id
+   * @param topicName the logical topic name
+   * @param tenantId  the tenant id
    * @return the fully-qualified tenant topic name
    */
-  public String getTenantTopicName(Topic topic, String tenant) {
-    return getTenantTopicName(topic.getTopicName(), tenant);
-  }
-
-  private String getTenantTopicName(String topicName, String tenantId) {
+  public String getTenantTopicName(String topicName, String tenantId) {
     return KafkaUtils.getTenantTopicName(topicName, environment, tenantId);
   }
 

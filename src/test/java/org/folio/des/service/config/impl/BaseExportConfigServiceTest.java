@@ -24,6 +24,7 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.BursarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +60,7 @@ class BaseExportConfigServiceTest {
 
     repository = Mockito.mock(ExportConfigRepository.class);
     service = new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
-      Mockito.mock(org.folio.des.service.config.ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper());
+      Mockito.mock(ExportConfigDomainEventService.class));
   }
 
   @Test

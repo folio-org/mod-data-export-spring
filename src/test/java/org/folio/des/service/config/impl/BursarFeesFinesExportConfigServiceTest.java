@@ -48,7 +48,7 @@ class BursarFeesFinesExportConfigServiceTest {
     repository = Mockito.mock(ExportConfigRepository.class);
     bursarExportScheduler = Mockito.mock(BursarExportScheduler.class);
     service = new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
-      Mockito.mock(ExportConfigDomainEventService.class), new JacksonConfiguration().entityObjectMapper(), bursarExportScheduler);
+      Mockito.mock(ExportConfigDomainEventService.class), bursarExportScheduler);
   }
 
   @Test

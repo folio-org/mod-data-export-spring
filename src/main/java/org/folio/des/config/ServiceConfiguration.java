@@ -41,13 +41,10 @@ import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.ClaimsExportParametersValidator;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.quartz.Scheduler;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.Validator;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @ComponentScan("org.folio.des")
@@ -87,10 +84,9 @@ public class ServiceConfiguration {
                                                                ExportConfigMapperResolver exportConfigMapperResolver,
                                                                ExportConfigValidatorResolver exportConfigValidatorResolver,
                                                                ExportConfigDomainEventService exportConfigDomainEventService,
-                                                               @Qualifier("entityObjectMapper") ObjectMapper objectMapper,
                                                                BursarExportScheduler bursarExportScheduler) {
     return new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver,
-      exportConfigValidatorResolver, exportConfigDomainEventService, objectMapper, bursarExportScheduler);
+      exportConfigValidatorResolver, exportConfigDomainEventService, bursarExportScheduler);
   }
 
   @Bean
@@ -99,10 +95,9 @@ public class ServiceConfiguration {
                                                         ExportConfigMapperResolver exportConfigMapperResolver,
                                                         ExportConfigValidatorResolver exportConfigValidatorResolver,
                                                         ExportConfigDomainEventService exportConfigDomainEventService,
-                                                        @Qualifier("entityObjectMapper") ObjectMapper objectMapper,
                                                         ExportJobScheduler exportJobScheduler) {
     return new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver,
-      exportConfigValidatorResolver, exportConfigDomainEventService, objectMapper, exportJobScheduler);
+      exportConfigValidatorResolver, exportConfigDomainEventService, exportJobScheduler);
   }
 
   @Bean
@@ -110,10 +105,9 @@ public class ServiceConfiguration {
                                           ClaimsExportConfigMapper claimsExportConfigMapper,
                                           ExportConfigMapperResolver exportConfigMapperResolver,
                                           ExportConfigValidatorResolver exportConfigValidatorResolver,
-                                          ExportConfigDomainEventService exportConfigDomainEventService,
-                                          @Qualifier("entityObjectMapper") ObjectMapper objectMapper) {
+                                          ExportConfigDomainEventService exportConfigDomainEventService) {
     return new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver,
-      exportConfigValidatorResolver, exportConfigDomainEventService, objectMapper);
+      exportConfigValidatorResolver, exportConfigDomainEventService);
   }
 
   @Bean
@@ -121,10 +115,9 @@ public class ServiceConfiguration {
                                                      DefaultExportConfigMapper defaultExportConfigMapper,
                                                      ExportConfigMapperResolver exportConfigMapperResolver,
                                                      ExportConfigValidatorResolver exportConfigValidatorResolver,
-                                                     ExportConfigDomainEventService exportConfigDomainEventService,
-                                                     @Qualifier("entityObjectMapper") ObjectMapper objectMapper) {
+                                                     ExportConfigDomainEventService exportConfigDomainEventService) {
     return new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver,
-      exportConfigValidatorResolver, exportConfigDomainEventService, objectMapper);
+      exportConfigValidatorResolver, exportConfigDomainEventService);
   }
 
   @Bean

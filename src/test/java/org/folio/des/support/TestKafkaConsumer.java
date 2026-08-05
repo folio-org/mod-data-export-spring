@@ -1,5 +1,7 @@
 package org.folio.des.support;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 import static org.awaitility.Awaitility.await;
@@ -15,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -57,9 +60,11 @@ public final class TestKafkaConsumer implements Closeable {
    */
   public static TestKafkaConsumer subscribe(String topic, KafkaProperties properties) {
     createTopic(topic, properties);
-    properties.getConsumer().setGroupId("mod-data-export-spring-test-group-" + UUID.randomUUID());
-    properties.getConsumer().setAutoOffsetReset("earliest");
+    // Override consumer settings on a local copy only — never mutate the shared Spring KafkaProperties bean,
+    // otherwise concurrently-running tests inherit this consumer's group id / offset reset.
     Map<String, Object> config = new HashMap<>(properties.buildConsumerProperties());
+    config.put(GROUP_ID_CONFIG, "mod-data-export-spring-test-group-" + UUID.randomUUID());
+    config.put(AUTO_OFFSET_RESET_CONFIG, "earliest");
     config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
@@ -115,6 +120,34 @@ public final class TestKafkaConsumer implements Closeable {
         matched.addAll(found);
       });
     return matched;
+  }
+
+  /**
+   * Drains records for up to the given duration and returns every buffered record matching the key (possibly
+   * empty). Unlike {@link #poll(String)} this never fails on an empty result, so it can assert that <em>no</em>
+   * event was published. It blocks on the record queue rather than sleeping a fixed interval.
+   *
+   * @param key      the record key to filter on (the config id)
+   * @param duration the maximum time to wait for records to arrive
+   * @return the matching records seen within the window (empty if none arrived)
+   */
+  public List<ConsumerRecord<String, String>> drainFor(String key, Duration duration) {
+    long deadline = System.nanoTime() + duration.toNanos();
+    long remaining;
+    try {
+      while ((remaining = deadline - System.nanoTime()) > 0) {
+        var record = records.poll(remaining, TimeUnit.NANOSECONDS);
+        if (record != null) {
+          buffer.add(record);
+        }
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("Interrupted while draining test topic", e);
+    }
+    return buffer.stream()
+      .filter(e -> Objects.equals(e.key(), key))
+      .toList();
   }
 
   @Override

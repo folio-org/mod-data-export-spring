@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.folio.de.entity.ExportConfigEntity;
 import org.folio.des.domain.dto.ExportType;
-import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.mapper.BaseExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
@@ -23,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -38,7 +35,6 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
   protected final ExportConfigDomainEventService exportConfigDomainEventService;
-  protected final ObjectMapper objectMapper;
 
   @Override
   @Transactional
@@ -46,13 +42,13 @@ public class BaseExportConfigService implements ExportConfigService {
     log.info("updateConfig:: configId={}, exportConfig={}", configId, exportConfig);
     validateIncomingExportConfig(exportConfig);
     var existingEntity = getExportConfigEntityOrThrow(configId);
-    var oldSnapshot = sanitize(toDto(existingEntity));
+    var oldSnapshot = toDto(existingEntity);
 
     var entity = exportConfigMapper.toEntity(exportConfig);
     entity = repository.save(entity);
     log.info("updateConfig:: Successfully updated config with id={}", configId);
 
-    var newSnapshot = sanitize(toDto(entity));
+    var newSnapshot = toDto(entity);
     exportConfigDomainEventService.publishConfigUpdatedEvent(oldSnapshot, newSnapshot);
   }
 
@@ -64,11 +60,12 @@ public class BaseExportConfigService implements ExportConfigService {
 
     var entity = exportConfigMapper.toEntity(exportConfig);
     entity = repository.save(entity);
-    log.info("postConfig:: Successfully created config with id={}", exportConfig.getId());
+    log.info("postConfig:: Successfully created config with id={}", entity.getId());
 
-    exportConfigDomainEventService.publishConfigCreatedEvent(sanitize(toDto(entity)));
+    var savedConfig = toDto(entity);
+    exportConfigDomainEventService.publishConfigCreatedEvent(savedConfig);
 
-    return toDto(entity);
+    return savedConfig;
   }
 
   @Override
@@ -109,25 +106,6 @@ public class BaseExportConfigService implements ExportConfigService {
   @SneakyThrows
   protected ExportConfig toDto(ExportConfigEntity exportConfigEntity) {
     return exportConfigMapperResolver.resolve(ExportType.fromValue(exportConfigEntity.getType())).toDto(exportConfigEntity);
-  }
-
-  /**
-   * Returns a deep copy of the given configuration with all credential-shaped fields removed, safe to publish on the
-   * event bus. The original object is left untouched so the REST response still carries the full data.
-   *
-   * @param config the configuration snapshot to sanitize
-   * @return a sanitized deep copy, or {@code null} if the input is {@code null}
-   */
-  protected ExportConfig sanitize(ExportConfig config) {
-    if (config == null) {
-      return null;
-    }
-    var sanitized = objectMapper.convertValue(config, ExportConfig.class);
-    Optional.ofNullable(sanitized.getExportTypeSpecificParameters())
-      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
-      .map(VendorEdiOrdersExportConfig::getEdiFtp)
-      .ifPresent(ediFtp -> ediFtp.setPassword(null));
-    return sanitized;
   }
 
   protected void validateIncomingExportConfig(ExportConfig exportConfig) {
