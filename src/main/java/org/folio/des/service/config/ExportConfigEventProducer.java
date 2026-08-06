@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import org.folio.des.config.kafka.KafkaService;
 import org.folio.des.config.kafka.KafkaService.Topic;
+import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.event.DomainEvent;
-import org.folio.des.domain.dto.event.ExportConfigEventDto;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ public class ExportConfigEventProducer {
    * @param configId the export configuration id, used as the Kafka record key
    * @param event    the domain event envelope to publish
    */
-  public void publish(UUID configId, DomainEvent<ExportConfigEventDto> event) {
+  public void publish(UUID configId, DomainEvent<ExportConfig> event) {
     var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), event.getTenant());
     var key = configId.toString();
     try {
