@@ -3,6 +3,7 @@ package org.folio.des.service.config.acquisition;
 import static org.folio.des.support.TestUtils.setInternalState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,10 +73,10 @@ class EdifactOrdersExportServiceTest {
     setInternalState(edifactExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
     setInternalState(edifactExportConfigMapper, "validator", validator);
 
-    repository = Mockito.mock(ExportConfigRepository.class);
-    edifactOrdersExportJobScheduler = Mockito.mock(ExportJobScheduler.class);
+    repository = mock(ExportConfigRepository.class);
+    edifactOrdersExportJobScheduler = mock(ExportJobScheduler.class);
     service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
-      Mockito.mock(ExportConfigDomainEventService.class), edifactOrdersExportJobScheduler);
+      mock(ExportConfigDomainEventService.class), edifactOrdersExportJobScheduler);
   }
 
   @Test

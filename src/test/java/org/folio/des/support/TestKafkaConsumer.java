@@ -136,9 +136,9 @@ public final class TestKafkaConsumer implements Closeable {
     long remaining;
     try {
       while ((remaining = deadline - System.nanoTime()) > 0) {
-        var record = records.poll(remaining, TimeUnit.NANOSECONDS);
-        if (record != null) {
-          buffer.add(record);
+        var polled = records.poll(remaining, TimeUnit.NANOSECONDS);
+        if (polled != null) {
+          buffer.add(polled);
         }
       }
     } catch (InterruptedException e) {

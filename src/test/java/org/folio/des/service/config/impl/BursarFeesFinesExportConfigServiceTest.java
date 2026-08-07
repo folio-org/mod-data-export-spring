@@ -4,6 +4,7 @@ import static org.folio.des.support.TestUtils.getBursarExportConfig;
 import static org.folio.des.support.TestUtils.setInternalState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,10 +45,10 @@ class BursarFeesFinesExportConfigServiceTest {
     var exportConfigMapperResolver = new ExportConfigMapperResolver(Map.of(), defaultExportConfigMapper);
     setInternalState(defaultExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
 
-    repository = Mockito.mock(ExportConfigRepository.class);
-    bursarExportScheduler = Mockito.mock(BursarExportScheduler.class);
+    repository = mock(ExportConfigRepository.class);
+    bursarExportScheduler = mock(BursarExportScheduler.class);
     service = new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
-      Mockito.mock(ExportConfigDomainEventService.class), bursarExportScheduler);
+      mock(ExportConfigDomainEventService.class), bursarExportScheduler);
   }
 
   @Test

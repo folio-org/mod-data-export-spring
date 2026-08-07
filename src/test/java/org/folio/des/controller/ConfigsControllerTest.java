@@ -364,7 +364,7 @@ class ConfigsControllerTest extends BaseTest {
     var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), TENANT);
     try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
       return consumer.poll(configId).stream()
-        .filter(record -> readEvent(record.value()).getType() == type)
+        .filter(event -> readEvent(event.value()).getType() == type)
         .map(ConsumerRecord::value)
         .findFirst()
         .orElseThrow(() -> new AssertionError("Expected " + type + " event for config " + configId));
