@@ -28,6 +28,7 @@ import org.folio.des.scheduling.quartz.ScheduledJobsRemover;
 import org.folio.des.scheduling.quartz.converter.acquisition.ExportConfigToEdifactJobDetailConverter;
 import org.folio.des.scheduling.quartz.converter.acquisition.ExportConfigToEdifactTriggerConverter;
 import org.folio.des.scheduling.quartz.job.acquisition.EdifactJobKeyResolver;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.ClaimsExportService;
 import org.folio.des.service.config.acquisition.EdifactOrdersExportService;
@@ -82,8 +83,10 @@ public class ServiceConfiguration {
                                                                DefaultExportConfigMapper defaultExportConfigMapper,
                                                                ExportConfigMapperResolver exportConfigMapperResolver,
                                                                ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                                               ExportConfigDomainEventService exportConfigDomainEventService,
                                                                BursarExportScheduler bursarExportScheduler) {
-    return new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, bursarExportScheduler);
+    return new BursarFeesFinesExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver,
+      exportConfigValidatorResolver, exportConfigDomainEventService, bursarExportScheduler);
   }
 
   @Bean
@@ -91,24 +94,30 @@ public class ServiceConfiguration {
                                                         EdifactExportConfigMapper edifactExportConfigMapper,
                                                         ExportConfigMapperResolver exportConfigMapperResolver,
                                                         ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                                        ExportConfigDomainEventService exportConfigDomainEventService,
                                                         ExportJobScheduler exportJobScheduler) {
-    return new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportJobScheduler);
+    return new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver,
+      exportConfigValidatorResolver, exportConfigDomainEventService, exportJobScheduler);
   }
 
   @Bean
   ClaimsExportService claimsExportService(ExportConfigRepository repository,
                                           ClaimsExportConfigMapper claimsExportConfigMapper,
                                           ExportConfigMapperResolver exportConfigMapperResolver,
-                                          ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    return new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+                                          ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                          ExportConfigDomainEventService exportConfigDomainEventService) {
+    return new ClaimsExportService(repository, claimsExportConfigMapper, exportConfigMapperResolver,
+      exportConfigValidatorResolver, exportConfigDomainEventService);
   }
 
   @Bean
   BaseExportConfigService defaultExportConfigService(ExportConfigRepository repository,
                                                      DefaultExportConfigMapper defaultExportConfigMapper,
                                                      ExportConfigMapperResolver exportConfigMapperResolver,
-                                                     ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    return new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+                                                     ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                                     ExportConfigDomainEventService exportConfigDomainEventService) {
+    return new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver,
+      exportConfigValidatorResolver, exportConfigDomainEventService);
   }
 
   @Bean

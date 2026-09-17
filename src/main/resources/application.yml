@@ -41,6 +41,10 @@ spring:
     enabled: true
   kafka:
     bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+    producer:
+      client-id: mod-data-export-spring
+      acks: all
+      retries: 3
   datasource:
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}

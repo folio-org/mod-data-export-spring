@@ -1,7 +1,9 @@
 package org.folio.des.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -14,39 +16,62 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Duration;
 import java.util.Objects;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.folio.des.config.kafka.KafkaService;
+import org.folio.des.config.kafka.KafkaService.Topic;
 import org.folio.des.domain.dto.ExportConfig;
+import org.folio.des.domain.dto.event.DomainEvent;
+import org.folio.des.domain.dto.event.DomainEventType;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.bursar.BursarExportScheduler;
 import org.folio.des.support.BaseTest;
+import org.folio.des.support.TestKafkaConsumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import lombok.SneakyThrows;
 
 @TestPropertySource(properties = "spring.jpa.properties.hibernate.default_schema=diku_mod_data_export_spring")
 class ConfigsControllerTest extends BaseTest {
 
   private static final String NEW_CONFIG_REQUEST =
       "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"exportTypeSpecificParameters\":{\"bursarFeeFines\":{\"filter\":{\"type\":\"Pass\"},\"groupByPatron\":false,\"header\":[],\"data\":[],\"footer\":[],\"transferInfo\":{\"conditions\":[],\"else\":{\"account\":\"90c1820f-60bf-4b9a-99f5-d677ea78ddca\"}}}},\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
+  // schedulePeriod deliberately differs from NEW_CONFIG_REQUEST (DAY -> HOUR) so the UPDATE event can be
+  // asserted to carry an old snapshot that differs from the new one (AC2).
   private static final String UPDATE_CONFIG_REQUEST =
-      "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"exportTypeSpecificParameters\":{\"bursarFeeFines\":{\"filter\":{\"type\":\"Pass\"},\"groupByPatron\":false,\"header\":[],\"data\":[],\"footer\":[],\"transferInfo\":{\"conditions\":[],\"else\":{\"account\":\"90c1820f-60bf-4b9a-99f5-d677ea78ddca\"}}}},\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
+      "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"exportTypeSpecificParameters\":{\"bursarFeeFines\":{\"filter\":{\"type\":\"Pass\"},\"groupByPatron\":false,\"header\":[],\"data\":[],\"footer\":[],\"transferInfo\":{\"conditions\":[],\"else\":{\"account\":\"90c1820f-60bf-4b9a-99f5-d677ea78ddca\"}}}},\"scheduleFrequency\":5,\"schedulePeriod\":\"HOUR\",\"scheduleTime\":\"00:20:00.000Z\"}";
+  private static final String FAILED_CONFIG_ID = "c8303ff3-7dec-49a1-acc8-7ce4f311fe21";
   private static final String UPDATE_CONFIG_REQUEST_FAILED =
-    "{\"id\":\"0a3cba78-16e7-498e-b75b-98713000277b\",\"type\":\"BURSAR_FEES_FINES\",\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
+    "{\"id\":\"c8303ff3-7dec-49a1-acc8-7ce4f311fe21\",\"type\":\"BURSAR_FEES_FINES\",\"scheduleFrequency\":5,\"schedulePeriod\":\"DAY\",\"scheduleTime\":\"00:20:00.000Z\"}";
   private static final String EDIFACT_CONFIG_REQUEST =
     "{\"id\":\"5a3cba28-16e7-498e-b73b-98713000298e\", \"type\": \"EDIFACT_ORDERS_EXPORT\", \"exportTypeSpecificParameters\": { \"vendorEdiOrdersExportConfig\": {\"vendorId\": \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"configName\": \"edi_config\", \"integrationType\": \"Ordering\", \"fileFormat\": \"CSV\", \"transmissionMethod\": \"File download\", \"ediSchedule\": {\"enableScheduledExport\": true, \"scheduleParameters\": {\"scheduleFrequency\": 1, \"schedulePeriod\": \"HOUR\", \"scheduleTime\": \"15:30:00\"}}}}, \"schedulePeriod\": \"HOUR\"}";
   private static final String CLAIMS_REQUEST =
     "{\"id\":\"30ad9c6d-f2e7-425f-a171-b4e0cbce7204\",\"type\":\"CLAIMS\",\"tenant\":\"diku\",\"exportTypeSpecificParameters\":{\"vendorEdiOrdersExportConfig\":{\"exportConfigId\":\"30ad9c6d-f2e7-425f-a171-b4e0cbce7204\",\"vendorId\":\"1e958895-82a6-4fa1-b6fe-763063381946\",\"configName\":\"Test 1-3\",\"ediConfig\":{\"accountNoList\":[\"3\"],\"ediNamingConvention\":\"{organizationCode}-{integrationName}-{exportJobEndDate}\",\"libEdiType\":\"31B/US-SAN\",\"vendorEdiType\":\"31B/US-SAN\",\"sendAccountNumber\":false,\"supportOrder\":false,\"supportInvoice\":false},\"ediFtp\":{\"ftpConnMode\":\"Active\",\"ftpFormat\":\"SFTP\",\"ftpMode\":\"ASCII\"},\"isDefaultConfig\":false,\"integrationType\":\"Claiming\",\"transmissionMethod\":\"File download\",\"fileFormat\":\"CSV\"}},\"schedulePeriod\":\"NONE\"}";
+  private static final String PASSWORD_SENTINEL = "AC3-sentinel-12345";
+  private static final String CLAIMS_WITH_PASSWORD_ID = "12345678-1234-1234-1234-1234567890ab";
+  private static final String CLAIMS_REQUEST_WITH_PASSWORD =
+    "{\"id\":\"12345678-1234-1234-1234-1234567890ab\",\"type\":\"CLAIMS\",\"tenant\":\"diku\",\"exportTypeSpecificParameters\":{\"vendorEdiOrdersExportConfig\":{\"exportConfigId\":\"12345678-1234-1234-1234-1234567890ab\",\"vendorId\":\"1e958895-82a6-4fa1-b6fe-763063381946\",\"configName\":\"Test 1-3\",\"ediConfig\":{\"accountNoList\":[\"3\"],\"ediNamingConvention\":\"{organizationCode}-{integrationName}-{exportJobEndDate}\",\"libEdiType\":\"31B/US-SAN\",\"vendorEdiType\":\"31B/US-SAN\",\"sendAccountNumber\":false,\"supportOrder\":false,\"supportInvoice\":false},\"ediFtp\":{\"ftpConnMode\":\"Active\",\"ftpFormat\":\"SFTP\",\"ftpMode\":\"ASCII\",\"username\":\"ftp-user\",\"password\":\"AC3-sentinel-12345\"},\"isDefaultConfig\":false,\"integrationType\":\"Claiming\",\"transmissionMethod\":\"File download\",\"fileFormat\":\"CSV\"}},\"schedulePeriod\":\"NONE\"}";
 
   @Autowired
   private MockMvc mockMvc;
+  @Autowired
+  private KafkaService kafkaService;
+  @Autowired
+  private KafkaProperties kafkaProperties;
   @MockitoSpyBean
   private ExportConfigRepository repository;
   @MockitoSpyBean
@@ -143,6 +168,15 @@ class ConfigsControllerTest extends BaseTest {
           content().contentType("text/plain;charset=UTF-8"));
 
     verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
+
+    var event = pollConfigEventJson("0a3cba78-16e7-498e-b75b-98713000277b", DomainEventType.CREATE);
+    assertThat(event.getType()).isEqualTo(DomainEventType.CREATE);
+    assertThat(event.getTenant()).isEqualTo(TENANT);
+    assertNull(event.getOldValue());
+    assertThat(event.getNewValue())
+      .usingRecursiveComparison()
+      .ignoringFields("configName", "tenant")
+      .isEqualTo(OBJECT_MAPPER.readValue(NEW_CONFIG_REQUEST, ExportConfig.class));
   }
 
   @Test
@@ -172,9 +206,32 @@ class ConfigsControllerTest extends BaseTest {
   }
 
   @Test
+  @DisplayName("Should redact all credential-shaped fields from the published config event (AC3)")
+  void postConfigShouldRedactCredentials() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/configs")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(CLAIMS_REQUEST_WITH_PASSWORD))
+      .andExpectAll(status().isCreated());
+
+    var eventJson = pollConfigEventRawJson(CLAIMS_WITH_PASSWORD_ID, DomainEventType.CREATE);
+
+    assertThat(eventJson)
+      .doesNotContain(PASSWORD_SENTINEL)
+      .doesNotContain("\"password\"")
+      .doesNotContain("\"secret\"")
+      .doesNotContain("\"token\"")
+      .doesNotContain("\"apiKey\"")
+      .doesNotContain("\"credential\"")
+      .doesNotContain("\"privateKey\"");
+  }
+
+  @Test
   @DisplayName("Success update config")
   void putConfig() throws Exception {
-    saveConfig(UPDATE_CONFIG_REQUEST);
+    saveConfig(NEW_CONFIG_REQUEST);
 
     mockMvc
         .perform(
@@ -185,6 +242,22 @@ class ConfigsControllerTest extends BaseTest {
         .andExpectAll(status().isNoContent());
 
     verify(bursarExportScheduler).scheduleBursarJob(any(ExportConfig.class));
+
+    var event = pollConfigEventJson("0a3cba78-16e7-498e-b75b-98713000277b", DomainEventType.UPDATE);
+    assertThat(event.getType()).isEqualTo(DomainEventType.UPDATE);
+    assertThat(event.getTenant()).isEqualTo(TENANT);
+    assertThat(event.getOldValue())
+      .usingRecursiveComparison()
+      .ignoringFields("configName", "tenant")
+      .isEqualTo(OBJECT_MAPPER.readValue(NEW_CONFIG_REQUEST, ExportConfig.class));
+    assertThat(event.getNewValue())
+      .usingRecursiveComparison()
+      .ignoringFields("configName", "tenant")
+      .isEqualTo(OBJECT_MAPPER.readValue(UPDATE_CONFIG_REQUEST, ExportConfig.class));
+
+    assertThat(event.getOldValue().getSchedulePeriod()).isEqualTo(ExportConfig.SchedulePeriodEnum.DAY);
+    assertThat(event.getNewValue().getSchedulePeriod()).isEqualTo(ExportConfig.SchedulePeriodEnum.HOUR);
+    assertThat(event.getOldValue().getId()).isEqualTo(event.getNewValue().getId());
   }
 
   @Test
@@ -203,17 +276,22 @@ class ConfigsControllerTest extends BaseTest {
   }
 
   @Test
-  @DisplayName("Fail update config")
+  @DisplayName("Fail update config and publish no event on validation failure (AC4)")
   void putConfigFail() throws Exception {
-    mockMvc
-      .perform(
-          put("/data-export-spring/configs/c8303ff3-7dec-49a1-acc8-7ce4f311fe21")
-              .contentType(MediaType.APPLICATION_JSON_VALUE)
-              .headers(defaultHeaders())
-              .content(UPDATE_CONFIG_REQUEST_FAILED))
-      .andExpectAll(status().isBadRequest(),
-         content().contentType(MediaType.APPLICATION_JSON_VALUE),
-         jsonPath("$.errors[0].message", startsWith("MethodArgumentNotValidException")));
+    var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), TENANT);
+    try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
+      mockMvc
+        .perform(
+            put("/data-export-spring/configs/" + FAILED_CONFIG_ID)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .headers(defaultHeaders())
+                .content(UPDATE_CONFIG_REQUEST_FAILED))
+        .andExpectAll(status().isBadRequest(),
+           content().contentType(MediaType.APPLICATION_JSON_VALUE),
+           jsonPath("$.errors[0].message", startsWith("MethodArgumentNotValidException")));
+
+      assertThat(consumer.drainFor(FAILED_CONFIG_ID, Duration.ofSeconds(5))).isEmpty();
+    }
   }
 
   @Test
@@ -269,6 +347,33 @@ class ConfigsControllerTest extends BaseTest {
       .andExpectAll(status().isNotFound(),
          content().contentType(MediaType.APPLICATION_JSON_VALUE),
          jsonPath("$.errors[0].message", startsWith("NotFoundException")));
+  }
+
+  private DomainEvent<ExportConfig> pollConfigEventJson(String configId, DomainEventType type) {
+    var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), TENANT);
+    try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
+      return consumer.poll(configId).stream()
+        .map(event -> readEvent(event.value()))
+        .filter(event -> event.getType() == type)
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Expected " + type + " event for config " + configId));
+    }
+  }
+
+  private String pollConfigEventRawJson(String configId, DomainEventType type) {
+    var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), TENANT);
+    try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
+      return consumer.poll(configId).stream()
+        .filter(event -> readEvent(event.value()).getType() == type)
+        .map(ConsumerRecord::value)
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Expected " + type + " event for config " + configId));
+    }
+  }
+
+  @SneakyThrows
+  private DomainEvent<ExportConfig> readEvent(String json) {
+    return OBJECT_MAPPER.readValue(json, new TypeReference<>() {});
   }
 
   private void saveConfig(String config) throws Exception {

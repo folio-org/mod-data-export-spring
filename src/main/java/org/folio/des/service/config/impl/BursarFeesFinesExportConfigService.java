@@ -14,6 +14,7 @@ import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.scheduling.bursar.BursarExportScheduler;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.springframework.data.domain.PageRequest;
 
@@ -26,8 +27,9 @@ public class BursarFeesFinesExportConfigService extends BaseExportConfigService 
 
   public BursarFeesFinesExportConfigService(ExportConfigRepository repository, DefaultExportConfigMapper defaultExportConfigMapper,
                                             ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
+                                            ExportConfigDomainEventService exportConfigDomainEventService,
                                             BursarExportScheduler bursarExportScheduler) {
-    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportConfigDomainEventService);
     this.bursarExportScheduler = bursarExportScheduler;
   }
 

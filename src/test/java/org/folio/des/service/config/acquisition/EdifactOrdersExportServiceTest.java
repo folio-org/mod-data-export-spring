@@ -3,6 +3,7 @@ package org.folio.des.service.config.acquisition;
 import static org.folio.des.support.TestUtils.setInternalState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,7 @@ import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.mapper.acquisition.EdifactExportConfigMapperImpl;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.scheduling.ExportJobScheduler;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.des.validator.acquisition.EdifactOrdersExportParametersValidator;
 import org.folio.des.validator.acquisition.EdifactOrdersScheduledParamsValidator;
@@ -30,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,9 +73,10 @@ class EdifactOrdersExportServiceTest {
     setInternalState(edifactExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
     setInternalState(edifactExportConfigMapper, "validator", validator);
 
-    repository = Mockito.mock(ExportConfigRepository.class);
-    edifactOrdersExportJobScheduler = Mockito.mock(ExportJobScheduler.class);
-    service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, edifactOrdersExportJobScheduler);
+    repository = mock(ExportConfigRepository.class);
+    edifactOrdersExportJobScheduler = mock(ExportJobScheduler.class);
+    service = new EdifactOrdersExportService(repository, edifactExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
+      mock(ExportConfigDomainEventService.class), edifactOrdersExportJobScheduler);
   }
 
   @Test
@@ -92,7 +94,8 @@ class EdifactOrdersExportServiceTest {
   @DisplayName("Update configuration")
   void testUpdateConfig() {
     when(repository.findById(UUID.fromString(EDIFACT_EXPORT_CONFIG.getId())))
-      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity().setType(ExportType.EDIFACT_ORDERS_EXPORT.getValue())));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     service.updateConfig(EDIFACT_EXPORT_CONFIG.getId(), EDIFACT_EXPORT_CONFIG);
 

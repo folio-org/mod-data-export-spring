@@ -1,3 +1,8 @@
+## 2026-07-28 v3.7.0
+
+### Stories
+* Publish Kafka domain events (CREATE/UPDATE) for Export Configuration changes on `folio.ALL.data-export.config` with structural credential redaction
+
 ## 2026-05-19 v3.6.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.6.0...v3.6.1)

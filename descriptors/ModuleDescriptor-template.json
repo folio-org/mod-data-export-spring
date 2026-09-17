@@ -560,6 +560,11 @@
         "value": "folio"
       },
       {
+        "name": "KAFKA_PRODUCER_TENANT_COLLECTION",
+        "value": "ALL",
+        "description": "Tenant partitioning mode for Kafka topics. 'ALL' (default, matches folio-kafka-wrapper) publishes every tenant's events to a single topic per entity (e.g. 'folio.ALL.data-export.config'); consumers route by the 'tenant' field in the event envelope. Any other value falls back to per-tenant topics."
+      },
+      {
         "name": "JOB_EXPIRATION_PERIOD_DAYS",
         "value": "7"
       },

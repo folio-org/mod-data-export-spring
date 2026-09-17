@@ -41,7 +41,8 @@ public class KafkaService {
   @RequiredArgsConstructor
   @Getter
   public enum Topic {
-    JOB_COMMAND("data-export.job.command");
+    JOB_COMMAND("data-export.job.command"),
+    CONFIG("data-export.config");
     private final String topicName;
   }
 
@@ -84,13 +85,13 @@ public class KafkaService {
   }
 
   /**
-   * Returns topic name in the format - `{env}.{tenant}.topicName`
+   * Returns the tenant-scoped topic name in the format {@code {env}.{tenant}.topicName}.
    *
-   * @param topicName initial topic name as {@link String}
-   * @param tenantId tenant id as {@link String}
-   * @return topic name as {@link String} object
+   * @param topicName the logical topic name
+   * @param tenantId  the tenant id
+   * @return the fully-qualified tenant topic name
    */
-  private String getTenantTopicName(String topicName, String tenantId) {
+  public String getTenantTopicName(String topicName, String tenantId) {
     return KafkaUtils.getTenantTopicName(topicName, environment, tenantId);
   }
 

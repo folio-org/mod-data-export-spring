@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.validator.BursarFeesFinesExportParametersValidator;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +33,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -57,8 +58,9 @@ class BaseExportConfigServiceTest {
     var exportConfigMapperResolver = new ExportConfigMapperResolver(Map.of(), defaultExportConfigMapper);
     setInternalState(defaultExportConfigMapper, "objectMapper", new JacksonConfiguration().entityObjectMapper());
 
-    repository = Mockito.mock(ExportConfigRepository.class);
-    service = new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+    repository = mock(ExportConfigRepository.class);
+    service = new BaseExportConfigService(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver,
+      mock(ExportConfigDomainEventService.class));
   }
 
   @Test
@@ -98,7 +100,8 @@ class BaseExportConfigServiceTest {
     var exportConfig = getBursarExportConfig();
 
     when(repository.findById(UUID.fromString(exportConfig.getId())))
-      .thenReturn(java.util.Optional.of(new ExportConfigEntity()));
+      .thenReturn(java.util.Optional.of(new ExportConfigEntity().setType(ExportType.INVOICE_EXPORT.getValue())));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
     service.updateConfig(exportConfig.getId(), exportConfig);
 

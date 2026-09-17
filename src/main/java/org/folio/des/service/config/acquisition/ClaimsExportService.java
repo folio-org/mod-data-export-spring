@@ -3,11 +3,11 @@ package org.folio.des.service.config.acquisition;
 import lombok.extern.log4j.Log4j2;
 
 import org.folio.des.mapper.BaseExportConfigMapper;
-import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.impl.BaseExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 
@@ -18,8 +18,9 @@ import java.util.UUID;
 public class ClaimsExportService extends BaseExportConfigService {
 
   public ClaimsExportService(ExportConfigRepository repository, BaseExportConfigMapper defaultExportConfigMapper,
-                             ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver) {
-    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver);
+                             ExportConfigMapperResolver exportConfigMapperResolver, ExportConfigValidatorResolver exportConfigValidatorResolver,
+                             ExportConfigDomainEventService exportConfigDomainEventService) {
+    super(repository, defaultExportConfigMapper, exportConfigMapperResolver, exportConfigValidatorResolver, exportConfigDomainEventService);
   }
 
   @Override

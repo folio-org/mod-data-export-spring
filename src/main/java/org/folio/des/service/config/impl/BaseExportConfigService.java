@@ -13,6 +13,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
+import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.exception.NotFoundException;
@@ -33,17 +34,22 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final BaseExportConfigMapper exportConfigMapper;
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
+  protected final ExportConfigDomainEventService exportConfigDomainEventService;
 
   @Override
   @Transactional
   public void updateConfig(String configId, ExportConfig exportConfig) {
     log.info("updateConfig:: configId={}, exportConfig={}", configId, exportConfig);
     validateIncomingExportConfig(exportConfig);
-    getExportConfigEntityOrThrow(configId);
+    var existingEntity = getExportConfigEntityOrThrow(configId);
+    var oldSnapshot = toDto(existingEntity);
 
     var entity = exportConfigMapper.toEntity(exportConfig);
-    repository.save(entity);
+    entity = repository.save(entity);
     log.info("updateConfig:: Successfully updated config with id={}", configId);
+
+    var newSnapshot = toDto(entity);
+    exportConfigDomainEventService.publishConfigUpdatedEvent(oldSnapshot, newSnapshot);
   }
 
   @Override
@@ -54,9 +60,12 @@ public class BaseExportConfigService implements ExportConfigService {
 
     var entity = exportConfigMapper.toEntity(exportConfig);
     entity = repository.save(entity);
-    log.info("postConfig:: Successfully created config with id={}", exportConfig.getId());
+    log.info("postConfig:: Successfully created config with id={}", entity.getId());
 
-    return toDto(entity);
+    var savedConfig = toDto(entity);
+    exportConfigDomainEventService.publishConfigCreatedEvent(savedConfig);
+
+    return savedConfig;
   }
 
   @Override
