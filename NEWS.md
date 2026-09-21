@@ -2,6 +2,13 @@
 
 ### Stories
 * Publish Kafka domain events (CREATE/UPDATE) for Export Configuration changes on `folio.ALL.data-export.config` with structural credential redaction
+* [MODEXPW-638](https://folio-org.atlassian.net/browse/MODEXPW-638) Add custom-fields read permission for the order email export
+* [MODEXPW-642](https://folio-org.atlassian.net/browse/MODEXPW-642) Update folio-export-common: bcc email field and EDI email-format validation
+* [MODEXPW-635](https://folio-org.atlassian.net/browse/MODEXPW-635) Add request permissions to retrieve user and contributor name types
+* [MODEXPW-625](https://folio-org.atlassian.net/browse/MODEXPW-625) Send the export by email
+
+### Technical tasks
+* [MODEXPS-311](https://folio-org.atlassian.net/browse/MODEXPS-311) Share validation logic between Claims and EDIFACT order parameter validators
 
 ## 2026-05-19 v3.6.1
 
