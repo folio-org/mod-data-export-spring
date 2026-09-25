@@ -194,8 +194,82 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
+  /configs/{id}/execute:
+    post:
+      description:
+        Run an export configuration immediately for the given records, ignoring the
+        automatic export flags. Only Ordering EDIFACT orders export configurations are supported.
+      operationId: executeExportConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the export configuration
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/exportConfigExecuteRequest"
+        required: true
+      responses:
+        '201':
+          description: Export job created and sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/exportConfigExecuteResponse"
+        '400':
+          description: Bad request, e.g. the export configuration cannot be run manually
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        '404':
+          description: Export configuration with a given ID not found
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
 components:
   schemas:
+    exportConfigExecuteRequest:
+      description: Records to run an export configuration for
+      type: object
+      properties:
+        poLineIds:
+          description: PO line ids to export, ignoring the automatic export flags
+          type: array
+          minItems: 1
+          items:
+            description: UUID of the PO line
+            type: string
+      required:
+        - poLineIds
+    # Deliberately not the shared job.json schema: this spec is generated with dateLibrary 'java8'
+    # while jobs.yaml uses 'java', so generating Job here would overwrite it with OffsetDateTime fields.
+    exportConfigExecuteResponse:
+      description: Result of running an export configuration
+      type: object
+      properties:
+        jobId:
+          description: UUID of the created export job
+          type: string
+      required:
+        - jobId
     exportConfig:
       $ref: '../../../../folio-export-common/schemas/exportConfig.json#/ExportConfig'
     exportConfigWithLegacyBursar:
