@@ -98,6 +98,7 @@
             "orders-storage.purchase-orders.collection.get",
             "orders-storage.pieces.collection.get",
             "orders-storage.titles.item.get",
+            "orders-storage.custom-fields.collection.get",
             "transfers.collection.get",
             "users.collection.get",
             "users.item.get",
@@ -217,6 +218,7 @@
             "orders-storage.purchase-orders.collection.get",
             "orders-storage.pieces.collection.get",
             "orders-storage.titles.item.get",
+            "orders-storage.custom-fields.collection.get",
             "transfers.collection.get",
             "users.collection.get",
             "users.item.get",
@@ -425,7 +427,8 @@
         "organizations-storage.organizations.item.get",
         "orders-storage.po-lines.collection.get",
         "orders-storage.purchase-orders.collection.get",
-        "orders-storage.pieces.collection.get"
+        "orders-storage.pieces.collection.get",
+        "orders-storage.custom-fields.collection.get"
       ]
     },
     {
@@ -491,6 +494,7 @@
         "orders-storage.purchase-orders.collection.get",
         "orders-storage.pieces.collection.get",
         "orders-storage.titles.item.get",
+        "orders-storage.custom-fields.collection.get",
         "transfers.collection.get",
         "users.collection.get",
         "users.item.get",
