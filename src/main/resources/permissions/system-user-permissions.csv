@@ -20,6 +20,8 @@ orders-storage.purchase-orders.collection.get
 orders-storage.pieces.collection.get
 orders-storage.titles.item.get
 orders-storage.custom-fields.collection.get
+mgr-tenant-entitlements.entitlements.collection.get
+mgr-tenants.tenants.collection.get
 transfers.collection.get
 users.collection.get
 users.item.get
