@@ -8,6 +8,9 @@
 * [MODEXPW-635](https://folio-org.atlassian.net/browse/MODEXPW-635) Add request permissions to retrieve user and contributor name types
 * [MODEXPW-625](https://folio-org.atlassian.net/browse/MODEXPW-625) Send the export by email
 
+### Bug fixes
+* [MODEXPS-322](https://folio-org.atlassian.net/browse/MODEXPS-322) Allow default EDI configuration without vendor account numbers
+
 ### Technical tasks
 * [MODEXPS-311](https://folio-org.atlassian.net/browse/MODEXPS-311) Share validation logic between Claims and EDIFACT order parameter validators
 
