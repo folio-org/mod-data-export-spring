@@ -5,7 +5,8 @@ import org.folio.des.domain.dto.Error;
 public enum ErrorCodes {
 
   GENERIC_ERROR_CODE("genericError", "Generic error"),
-  MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY("idMismatch", "Mismatch between id in path and request body");
+  MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY("idMismatch", "Mismatch between id in path and request body"),
+  EXPORT_CONFIGURATION_NOT_EXECUTABLE("configNotExecutable", "Only an Ordering EDIFACT orders export configuration can be run for the given PO lines");
 
   private final String code;
   private final String description;
