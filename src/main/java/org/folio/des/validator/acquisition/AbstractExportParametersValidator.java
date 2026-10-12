@@ -65,7 +65,8 @@ public abstract class AbstractExportParametersValidator implements Validator {
   protected void validateEdiConfig(VendorEdiOrdersExportConfig exportConfig) {
     var ediConfig = exportConfig.getEdiConfig();
     if (ediConfig != null) {
-      if (CollectionUtils.isEmpty(ediConfig.getAccountNoList())) {
+      // A default configuration has no account numbers: it covers all accounts not listed by other configurations
+      if (!Boolean.TRUE.equals(exportConfig.getIsDefaultConfig()) && CollectionUtils.isEmpty(ediConfig.getAccountNoList())) {
         throw new IllegalArgumentException("Export configuration is incomplete, missing Vendor Account Number(s)");
       }
 
