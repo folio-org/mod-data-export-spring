@@ -46,6 +46,15 @@ public interface JobService {
   Job upsertAndSendToKafka(Job job, boolean withJobCommandSend, boolean validateConfigPresence);
 
   /**
+   * Inserts the job, validates job's config presence and sends it to kafka as a manual execution,
+   * i.e. a run a user triggered for explicitly selected records instead of the scheduler
+   *
+   * @param job the job to insert
+   * @return inserted job
+   */
+  Job upsertAndSendManualExecutionToKafka(Job job);
+
+  /**
    * Deletes old jobs.
    * This method skips deleting EDIFACT_ORDERS_EXPORT and CLAIMS jobs.
    * For bulk edit jobs, it uses custom expiration period defined in mod-configuration(by default 14 days).

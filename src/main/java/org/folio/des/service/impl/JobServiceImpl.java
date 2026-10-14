@@ -121,7 +121,26 @@ public class JobServiceImpl implements JobService {
                                                            boolean validateConfigPresence) {
     log.info("upsertAndSendToKafka:: with jobDto={} and withJobCommandSend={} and validateConfigPresence={}.",
                                                           jobDto, withJobCommandSend, validateConfigPresence);
+    var result = upsert(jobDto, validateConfigPresence);
 
+    if (withJobCommandSend) {
+      var jobCommand = jobExecutionService.prepareStartJobCommand(result);
+      jobExecutionService.sendJobCommand(jobCommand);
+    }
+
+    return entityToDto(result);
+  }
+
+  @Transactional
+  @Override
+  public org.folio.des.domain.dto.Job upsertAndSendManualExecutionToKafka(org.folio.des.domain.dto.Job jobDto) {
+    log.info("upsertAndSendManualExecutionToKafka:: with jobDto={}.", jobDto);
+    var result = upsert(jobDto, true);
+    jobExecutionService.sendJobCommand(jobExecutionService.prepareManualExecutionJobCommand(result));
+    return entityToDto(result);
+  }
+
+  private Job upsert(org.folio.des.domain.dto.Job jobDto, boolean validateConfigPresence) {
     if (validateConfigPresence) {
       log.info("upsertAndSendToKafka:: validate config presence for job id {}", jobDto.getId());
       Optional.ofNullable(jobDto.getExportTypeSpecificParameters())
@@ -181,14 +200,8 @@ public class JobServiceImpl implements JobService {
     }
 
     result = repository.save(result);
-    log.info("upsertAndSendToKafka:: job by id  {} was upserted.", result.getId());
-
-    if (withJobCommandSend) {
-      var jobCommand = jobExecutionService.prepareStartJobCommand(result);
-      jobExecutionService.sendJobCommand(jobCommand);
-    }
-
-    return entityToDto(result);
+    log.info("upsert:: job by id  {} was upserted.", result.getId());
+    return result;
   }
 
   @Transactional

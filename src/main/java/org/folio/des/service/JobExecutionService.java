@@ -59,6 +59,19 @@ public class  JobExecutionService {
     return jobCommand;
   }
 
+  /**
+   * Start command of a job a user ran for explicitly selected records (see {@code POST /configs/{id}/execute}).
+   * The {@link JobParameterNames#MANUAL_EXECUTION} parameter is only ever set here, so a job posted to
+   * {@code /jobs} cannot pose as a manual execution.
+   */
+  public JobCommand prepareManualExecutionJobCommand(Job job) {
+    var jobCommand = prepareStartJobCommand(job);
+    jobCommand.setJobParameters(new JobParametersBuilder(jobCommand.getJobParameters())
+      .addString(JobParameterNames.MANUAL_EXECUTION, Boolean.TRUE.toString())
+      .toJobParameters());
+    return jobCommand;
+  }
+
   public JobCommand prepareResendJobCommand(Job job) {
     log.info("prepareResendJobCommand:: for job={}.", job);
 

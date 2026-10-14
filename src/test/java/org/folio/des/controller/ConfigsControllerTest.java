@@ -1,6 +1,7 @@
 package org.folio.des.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.http.MediaType;
@@ -61,6 +63,11 @@ class ConfigsControllerTest extends BaseTest {
     "{\"id\":\"5a3cba28-16e7-498e-b73b-98713000298e\", \"type\": \"EDIFACT_ORDERS_EXPORT\", \"exportTypeSpecificParameters\": { \"vendorEdiOrdersExportConfig\": {\"vendorId\": \"046b6c7f-0b8a-43b9-b35d-6489e6daee91\", \"configName\": \"edi_config\", \"integrationType\": \"Ordering\", \"fileFormat\": \"CSV\", \"transmissionMethod\": \"File download\", \"ediSchedule\": {\"enableScheduledExport\": true, \"scheduleParameters\": {\"scheduleFrequency\": 1, \"schedulePeriod\": \"HOUR\", \"scheduleTime\": \"15:30:00\"}}}}, \"schedulePeriod\": \"HOUR\"}";
   private static final String CLAIMS_REQUEST =
     "{\"id\":\"30ad9c6d-f2e7-425f-a171-b4e0cbce7204\",\"type\":\"CLAIMS\",\"tenant\":\"diku\",\"exportTypeSpecificParameters\":{\"vendorEdiOrdersExportConfig\":{\"exportConfigId\":\"30ad9c6d-f2e7-425f-a171-b4e0cbce7204\",\"vendorId\":\"1e958895-82a6-4fa1-b6fe-763063381946\",\"configName\":\"Test 1-3\",\"ediConfig\":{\"accountNoList\":[\"3\"],\"ediNamingConvention\":\"{organizationCode}-{integrationName}-{exportJobEndDate}\",\"libEdiType\":\"31B/US-SAN\",\"vendorEdiType\":\"31B/US-SAN\",\"sendAccountNumber\":false,\"supportOrder\":false,\"supportInvoice\":false},\"ediFtp\":{\"ftpConnMode\":\"Active\",\"ftpFormat\":\"SFTP\",\"ftpMode\":\"ASCII\"},\"isDefaultConfig\":false,\"integrationType\":\"Claiming\",\"transmissionMethod\":\"File download\",\"fileFormat\":\"CSV\"}},\"schedulePeriod\":\"NONE\"}";
+  private static final String EDIFACT_CONFIG_ID = "5a3cba28-16e7-498e-b73b-98713000298e";
+  private static final String PO_LINE_ID_1 = "50fb922c-3fa9-494e-a972-f541df9b877e";
+  private static final String PO_LINE_ID_2 = "0009662b-8b80-4001-b704-ca10971f222d";
+  private static final String EXECUTE_REQUEST =
+    "{\"poLineIds\":[\"" + PO_LINE_ID_1 + "\",\"" + PO_LINE_ID_2 + "\"]}";
   private static final String PASSWORD_SENTINEL = "AC3-sentinel-12345";
   private static final String CLAIMS_WITH_PASSWORD_ID = "12345678-1234-1234-1234-1234567890ab";
   private static final String CLAIMS_REQUEST_WITH_PASSWORD =
@@ -349,6 +356,85 @@ class ConfigsControllerTest extends BaseTest {
          jsonPath("$.errors[0].message", startsWith("NotFoundException")));
   }
 
+  @Test
+  @DisplayName("Should run an Ordering edifact config for the given po line ids")
+  void shouldRunEdifactConfigForGivenPoLineIds() throws Exception {
+    saveConfig(EDIFACT_CONFIG_REQUEST);
+
+    var response = mockMvc
+      .perform(
+        post("/data-export-spring/configs/" + EDIFACT_CONFIG_ID + "/execute")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(EXECUTE_REQUEST))
+      .andExpectAll(status().isCreated(),
+        content().contentType(MediaType.APPLICATION_JSON_VALUE),
+        jsonPath("$.jobId").exists())
+      .andReturn().getResponse().getContentAsString();
+
+    var jobId = OBJECT_MAPPER.readTree(response).get("jobId").asText();
+    mockMvc
+      .perform(
+        get("/data-export-spring/jobs/" + jobId)
+          .accept(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders()))
+      .andExpectAll(status().isOk(),
+        jsonPath("$.type", is("EDIFACT_ORDERS_EXPORT")),
+        // attributed to the triggering user, not to the scheduler
+        jsonPath("$.isSystemSource", is(false)),
+        jsonPath("$.source", is("diku_admin")),
+        jsonPath("$.exportTypeSpecificParameters.vendorEdiOrdersExportConfig.poLineIds",
+          contains(PO_LINE_ID_1, PO_LINE_ID_2)));
+
+    // only this endpoint flags the job command as a manual execution for the worker
+    assertThat(pollJobCommandRawJson(jobId)).contains("\"manualExecution\"");
+  }
+
+  @Test
+  @DisplayName("Should not run a Claiming config")
+  void shouldNotRunClaimsConfig() throws Exception {
+    saveConfig(CLAIMS_REQUEST);
+
+    mockMvc
+      .perform(
+        post("/data-export-spring/configs/30ad9c6d-f2e7-425f-a171-b4e0cbce7204/execute")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(EXECUTE_REQUEST))
+      .andExpectAll(status().isBadRequest(),
+        content().contentType(MediaType.APPLICATION_JSON_VALUE),
+        jsonPath("$.errors[0].code", is("configNotExecutable")));
+  }
+
+  @Test
+  @DisplayName("Should not run a config that does not exist")
+  void shouldNotRunUnknownConfig() throws Exception {
+    mockMvc
+      .perform(
+        post("/data-export-spring/configs/c8303ff3-7dec-49a1-acc8-7ce4f311fe21/execute")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(EXECUTE_REQUEST))
+      .andExpectAll(status().isNotFound(),
+        content().contentType(MediaType.APPLICATION_JSON_VALUE),
+        jsonPath("$.errors[0].message", startsWith("NotFoundException")));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"{}", "{\"poLineIds\":[]}"})
+  @DisplayName("Should not run a config without po line ids")
+  void shouldNotRunConfigWithoutPoLineIds(String executeRequest) throws Exception {
+    saveConfig(EDIFACT_CONFIG_REQUEST);
+
+    mockMvc
+      .perform(
+        post("/data-export-spring/configs/" + EDIFACT_CONFIG_ID + "/execute")
+          .contentType(MediaType.APPLICATION_JSON_VALUE)
+          .headers(defaultHeaders())
+          .content(executeRequest))
+      .andExpectAll(status().isBadRequest());
+  }
+
   private DomainEvent<ExportConfig> pollConfigEventJson(String configId, DomainEventType type) {
     var topic = kafkaService.getTenantTopicName(Topic.CONFIG.getTopicName(), TENANT);
     try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
@@ -357,6 +443,16 @@ class ConfigsControllerTest extends BaseTest {
         .filter(event -> event.getType() == type)
         .findFirst()
         .orElseThrow(() -> new AssertionError("Expected " + type + " event for config " + configId));
+    }
+  }
+
+  private String pollJobCommandRawJson(String jobId) {
+    var topic = kafkaService.getTenantTopicName(Topic.JOB_COMMAND.getTopicName(), TENANT);
+    try (var consumer = TestKafkaConsumer.subscribe(topic, kafkaProperties)) {
+      return consumer.poll(jobId).stream()
+        .map(ConsumerRecord::value)
+        .findFirst()
+        .orElseThrow(() -> new AssertionError("Expected job command for job " + jobId));
     }
   }
 
