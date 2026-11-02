@@ -2,6 +2,8 @@ package org.folio.des.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.des.domain.dto.ConfigPoLineExportType;
+import org.folio.des.domain.dto.ConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportConfigExecuteRequest;
@@ -14,6 +16,7 @@ import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.rest.resource.ConfigsApi;
 import org.folio.des.service.JobService;
+import org.folio.des.service.config.acquisition.PoLineCriteria;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 
@@ -36,9 +40,13 @@ public class ConfigsController implements ConfigsApi {
   private final JobService jobService;
 
   @Override
-  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
-    log.info("getExportConfigs:: by query={} with limit={}", query, limit);
-    return ResponseEntity.ok(manager.getConfigCollection(query, limit));
+  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit, UUID vendorId, UUID acquisitionMethod,
+      String vendorAccount, ConfigPoLineExportType type, ConfigTransmissionMethod transmissionMethod) {
+    log.info("getExportConfigs:: by query={} with limit={}, vendorId={}, acquisitionMethod={}, vendorAccount={}, type={}, transmissionMethod={}",
+      query, limit, vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
+    var exportType = type == null ? null : ExportType.fromValue(type.getValue());
+    var criteria = new PoLineCriteria(vendorId, acquisitionMethod, vendorAccount, exportType, transmissionMethod);
+    return ResponseEntity.ok(manager.getConfigCollection(query, limit, criteria));
   }
 
   @Override

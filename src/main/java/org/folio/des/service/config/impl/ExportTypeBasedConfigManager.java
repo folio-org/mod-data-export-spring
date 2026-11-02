@@ -22,6 +22,7 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.acquisition.PoLineCriteria;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -61,6 +62,23 @@ public class ExportTypeBasedConfigManager {
     }
     log.info("postConfig:: defaultExportConfigService.postConfig flow's working.");
     return defaultExportConfigService.postConfig(exportConfig);
+  }
+
+  public ExportConfigCollection getConfigCollection(String query, Integer limit, PoLineCriteria criteria) {
+    if (criteria.isEmpty()) {
+      return getConfigCollection(query, limit);
+    }
+    validatePoLineMode(query, criteria);
+    return defaultExportConfigService.getConfigsForPoLine(criteria, limit);
+  }
+
+  private void validatePoLineMode(String query, PoLineCriteria criteria) {
+    if (criteria.vendorId() == null) {
+      throw new RequestValidationException(ErrorCodes.PO_LINE_VENDOR_ID_REQUIRED);
+    }
+    if (query != null) {
+      throw new RequestValidationException(ErrorCodes.PO_LINE_PARAMS_WITH_QUERY);
+    }
   }
 
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {

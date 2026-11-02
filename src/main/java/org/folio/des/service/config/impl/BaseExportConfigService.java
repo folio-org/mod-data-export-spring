@@ -15,6 +15,8 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.acquisition.PoLineConfigMatcher;
+import org.folio.des.service.config.acquisition.PoLineCriteria;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +37,7 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
   protected final ExportConfigDomainEventService exportConfigDomainEventService;
+  private final PoLineConfigMatcher poLineConfigMatcher = new PoLineConfigMatcher();
 
   @Override
   @Transactional
@@ -79,6 +82,17 @@ public class BaseExportConfigService implements ExportConfigService {
       .configs(page.getContent().stream()
         .map(exportConfigMapper::toDto)
         .toList());
+  }
+
+  @Override
+  public ExportConfigCollection getConfigsForPoLine(PoLineCriteria criteria, Integer limit) {
+    log.info("getConfigsForPoLine:: criteria={}, limit={}", criteria, limit);
+    var vendorConfigs = repository.findByTypesAndVendorId(criteria.typeValues(), criteria.vendorId().toString()).stream()
+      .map(this::toDto)
+      .toList();
+    var matches = poLineConfigMatcher.match(vendorConfigs, criteria);
+    return new ExportConfigCollection().totalRecords(matches.size())
+      .configs(matches.stream().limit(limit).toList());
   }
 
   @Override

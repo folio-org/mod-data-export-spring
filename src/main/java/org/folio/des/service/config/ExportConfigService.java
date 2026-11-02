@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
+import org.folio.des.service.config.acquisition.PoLineCriteria;
 
 public interface ExportConfigService {
 
@@ -12,6 +13,8 @@ public interface ExportConfigService {
   ExportConfig postConfig(ExportConfig exportConfig);
 
   ExportConfigCollection getConfigCollection(String query, Integer limit);
+
+  ExportConfigCollection getConfigsForPoLine(PoLineCriteria criteria, Integer limit);
 
   Optional<ExportConfig> getFirstConfig();
 
