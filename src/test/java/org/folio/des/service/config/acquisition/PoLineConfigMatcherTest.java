@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.UUID;
 
-import org.folio.des.domain.dto.ConfigTransmissionMethod;
+import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.EdiConfig;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -151,17 +151,17 @@ class PoLineConfigMatcherTest {
     var configs = List.of(ftpConfig, emailDefault);
 
     // the FTP config still excludes its account from the default although it is not requested
-    assertThat(matchByMethod(configs, ConfigTransmissionMethod.EMAIL, "111")).isEmpty();
-    assertThat(matchByMethod(configs, ConfigTransmissionMethod.EMAIL, "222")).containsExactly("B");
-    assertThat(matchByMethod(configs, ConfigTransmissionMethod.FTP, "111")).containsExactly("A");
-    assertThat(matchByMethod(configs, ConfigTransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
+    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.EMAIL, "111")).isEmpty();
+    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.EMAIL, "222")).containsExactly("B");
+    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.FTP, "111")).containsExactly("A");
+    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
   }
 
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
     return names(matcher.match(configs, new PoLineCriteria(VENDOR, acquisitionMethod, vendorAccount, null, null)));
   }
 
-  private List<String> matchByMethod(List<ExportConfig> configs, ConfigTransmissionMethod method, String vendorAccount) {
+  private List<String> matchByMethod(List<ExportConfig> configs, ExportConfigTransmissionMethod method, String vendorAccount) {
     return names(matcher.match(configs, new PoLineCriteria(VENDOR, PURCHASE, vendorAccount, null, method)));
   }
 

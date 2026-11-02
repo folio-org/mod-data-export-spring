@@ -2,8 +2,8 @@ package org.folio.des.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.des.domain.dto.ConfigPoLineExportType;
-import org.folio.des.domain.dto.ConfigTransmissionMethod;
+import org.folio.des.domain.dto.ExportConfigType;
+import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportConfigExecuteRequest;
@@ -41,7 +41,7 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit, UUID vendorId, UUID acquisitionMethod,
-      String vendorAccount, ConfigPoLineExportType type, ConfigTransmissionMethod transmissionMethod) {
+      String vendorAccount, ExportConfigType type, ExportConfigTransmissionMethod transmissionMethod) {
     log.info("getExportConfigs:: by query={} with limit={}, vendorId={}, acquisitionMethod={}, vendorAccount={}, type={}, transmissionMethod={}",
       query, limit, vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
     var exportType = type == null ? null : ExportType.fromValue(type.getValue());

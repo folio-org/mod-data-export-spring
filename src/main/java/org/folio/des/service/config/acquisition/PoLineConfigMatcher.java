@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.folio.des.domain.dto.ConfigTransmissionMethod;
+import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEnum;
@@ -33,7 +33,7 @@ public class PoLineConfigMatcher {
       .toList();
   }
 
-  private boolean matchesTransmissionMethod(ExportConfig config, ConfigTransmissionMethod transmissionMethod) {
+  private boolean matchesTransmissionMethod(ExportConfig config, ExportConfigTransmissionMethod transmissionMethod) {
     if (transmissionMethod == null) {
       return true;
     }

@@ -10,11 +10,11 @@ paths:
       parameters:
         - $ref: "#/components/parameters/trait_queryable_query"
         - $ref: "#/components/parameters/trait_pageable_limit"
-        - $ref: "#/components/parameters/po_line_vendor_id"
-        - $ref: "#/components/parameters/po_line_acquisition_method"
-        - $ref: "#/components/parameters/po_line_vendor_account"
-        - $ref: "#/components/parameters/po_line_export_type"
-        - $ref: "#/components/parameters/po_line_transmission_method"
+        - $ref: "#/components/parameters/vendor_id"
+        - $ref: "#/components/parameters/acquisition_method"
+        - $ref: "#/components/parameters/vendor_account"
+        - $ref: "#/components/parameters/export_type"
+        - $ref: "#/components/parameters/transmission_method"
       description: >
         Get a list of data export configurations. With vendorId and the other PO line parameters, returns the
         EDIFACT_ORDERS_EXPORT and CLAIMS configurations that match the PO line, sorted by configName. These parameters
@@ -294,13 +294,13 @@ components:
       $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
-    configPoLineExportType:
-      description: Export type of the integrations to match against a PO line
+    exportConfigType:
+      description: Export type of the integrations
       type: string
       enum:
         - EDIFACT_ORDERS_EXPORT
         - CLAIMS
-    configTransmissionMethod:
+    exportConfigTransmissionMethod:
       description: Transmission method of the integrations to match against a PO line
       type: string
       enum:
@@ -321,38 +321,38 @@ components:
       schema:
         default: 10
         type: integer
-    po_line_vendor_id:
+    vendor_id:
       name: vendorId
       in: query
       description: UUID of the order's vendor. Required when any other PO line parameter is sent
       schema:
         type: string
         format: uuid
-    po_line_acquisition_method:
+    acquisition_method:
       name: acquisitionMethod
       in: query
       description: UUID of the PO line's acquisition method. Without it, no EDIFACT_ORDERS_EXPORT configuration matches
       schema:
         type: string
         format: uuid
-    po_line_vendor_account:
+    vendor_account:
       name: vendorAccount
       in: query
       description: The PO line's vendor account number. Absent means the PO line has no account
       schema:
         type: string
-    po_line_export_type:
+    export_type:
       name: type
       in: query
       description: Return only matches of this type. Absent means both types
       schema:
-        $ref: "#/components/schemas/configPoLineExportType"
-    po_line_transmission_method:
+        $ref: "#/components/schemas/exportConfigType"
+    transmission_method:
       name: transmissionMethod
       in: query
       description: Return only matches with this transmission method
       schema:
-        $ref: "#/components/schemas/configTransmissionMethod"
+        $ref: "#/components/schemas/exportConfigTransmissionMethod"
   examples:
     errors:
       value:
