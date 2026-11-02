@@ -16,9 +16,9 @@ paths:
         - $ref: "#/components/parameters/export_type"
         - $ref: "#/components/parameters/transmission_method"
       description: >
-        Get a list of data export configurations. With vendorId and the other PO line parameters, returns the
-        EDIFACT_ORDERS_EXPORT and CLAIMS configurations that match the PO line, sorted by configName. These parameters
-        can't be combined with query, and totalRecords is the number of all matches.
+        Get a list of data export configurations. With vendorId and the other config criteria parameters, returns the
+        EDIFACT_ORDERS_EXPORT and CLAIMS configurations that match these criteria, sorted by configName. These
+        parameters can't be combined with the query parameter, and totalRecords is the number of all matches.
       operationId: getExportConfigs
       responses:
         '200':
@@ -28,7 +28,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/exportConfigCollection"
         '400':
-          description: Bad request, e.g. PO line parameters without vendorId or combined with query
+          description: Bad request, e.g. config parameters without vendorId or combined with the query parameter
           content:
             application/json:
               example:
