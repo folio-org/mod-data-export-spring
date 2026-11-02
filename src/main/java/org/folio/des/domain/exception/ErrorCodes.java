@@ -7,8 +7,8 @@ public enum ErrorCodes {
   GENERIC_ERROR_CODE("genericError", "Generic error"),
   MISMATCH_BETWEEN_ID_IN_PATH_AND_BODY("idMismatch", "Mismatch between id in path and request body"),
   EXPORT_CONFIGURATION_NOT_EXECUTABLE("configNotExecutable", "Only an Ordering EDIFACT orders export configuration can be run for the given PO lines"),
-  PO_LINE_VENDOR_ID_REQUIRED("poLineVendorIdRequired", "vendorId is required when PO line parameters are sent"),
-  PO_LINE_PARAMS_WITH_QUERY("poLineParamsWithQuery", "PO line parameters can't be combined with query");
+  EXPORT_CONFIG_VENDOR_ID_REQUIRED("configVendorIdRequired", "vendorId is required when PO line parameters are sent"),
+  EXPORT_CONFIG_CRITERIA_WITH_QUERY("configCriteriaWithQuery", "PO line parameters can't be combined with query");
 
   private final String code;
   private final String description;

@@ -11,7 +11,7 @@ import org.folio.des.domain.dto.ExportConfig;
  */
 interface ConfigMatchRule {
 
-  List<ExportConfig> match(List<ExportConfig> configsOfType, PoLineCriteria criteria);
+  List<ExportConfig> match(List<ExportConfig> configsOfType, ExportConfigCriteria criteria);
 
   /**
    * Specific lists win, the rest goes to the catch-all: a catch-all takes every value that no specific config selects,

@@ -16,7 +16,7 @@ import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.rest.resource.ConfigsApi;
 import org.folio.des.service.JobService;
-import org.folio.des.service.config.acquisition.PoLineCriteria;
+import org.folio.des.service.config.acquisition.ExportConfigCriteria;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +45,7 @@ public class ConfigsController implements ConfigsApi {
     log.info("getExportConfigs:: by query={} with limit={}, vendorId={}, acquisitionMethod={}, vendorAccount={}, type={}, transmissionMethod={}",
       query, limit, vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
     var exportType = type == null ? null : ExportType.fromValue(type.getValue());
-    var criteria = new PoLineCriteria(vendorId, acquisitionMethod, vendorAccount, exportType, transmissionMethod);
+    var criteria = new ExportConfigCriteria(vendorId, acquisitionMethod, vendorAccount, exportType, transmissionMethod);
     return ResponseEntity.ok(manager.getConfigCollection(query, limit, criteria));
   }
 

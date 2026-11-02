@@ -11,8 +11,8 @@ import org.folio.des.domain.dto.ExportType;
 /**
  * The PO line attributes the export configs are matched against.
  */
-public record PoLineCriteria(UUID vendorId, UUID acquisitionMethod, String vendorAccount, ExportType type,
-                             ExportConfigTransmissionMethod transmissionMethod) {
+public record ExportConfigCriteria(UUID vendorId, UUID acquisitionMethod, String vendorAccount, ExportType type,
+                                   ExportConfigTransmissionMethod transmissionMethod) {
 
   public boolean isEmpty() {
     return Stream.of(vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod).allMatch(Objects::isNull);

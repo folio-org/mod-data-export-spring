@@ -453,7 +453,7 @@ class ConfigsControllerTest extends BaseTest {
     "222, " + ORDERING_DEFAULT_ID,
   })
   @DisplayName("PO line params return the matching Ordering config and the vendor's Claims config")
-  void getConfigsForPoLine(String vendorAccount, String expectedOrderingId) throws Exception {
+  void getConfigsByCriteria(String vendorAccount, String expectedOrderingId) throws Exception {
     savePoLineConfigs();
 
     getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=" + vendorAccount)
@@ -464,7 +464,7 @@ class ConfigsControllerTest extends BaseTest {
 
   @Test
   @DisplayName("PO line without an account and without a matching acquisition method")
-  void getConfigsForPoLineWithoutAccountOrMethod() throws Exception {
+  void getConfigsByCriteriaWithoutAccountOrMethod() throws Exception {
     savePoLineConfigs();
 
     getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE)
@@ -477,7 +477,7 @@ class ConfigsControllerTest extends BaseTest {
 
   @Test
   @DisplayName("PO line params: type restricts the result, no match is an empty list")
-  void getConfigsForPoLineByType() throws Exception {
+  void getConfigsByCriteriaByType() throws Exception {
     savePoLineConfigs();
 
     getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=111&type=EDIFACT_ORDERS_EXPORT")
@@ -497,7 +497,7 @@ class ConfigsControllerTest extends BaseTest {
     "File download, " + ORDERING_DEFAULT_ID,
   })
   @DisplayName("PO line params: transmissionMethod binds by API value and narrows the result")
-  void getConfigsForPoLineByTransmissionMethod(String method, String expectedId) throws Exception {
+  void getConfigsByCriteriaByTransmissionMethod(String method, String expectedId) throws Exception {
     savePoLineConfigs();
     var account = ORDERING_DEFAULT_ID.equals(expectedId) ? "222" : "111";
 
@@ -511,7 +511,7 @@ class ConfigsControllerTest extends BaseTest {
 
   @Test
   @DisplayName("PO line params: Spring also binds the constant name, and an empty value counts as absent")
-  void getConfigsForPoLineTransmissionMethodFallbacks() throws Exception {
+  void getConfigsByCriteriaTransmissionMethodFallbacks() throws Exception {
     savePoLineConfigs();
 
     getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=FILE_DOWNLOAD")
@@ -522,7 +522,7 @@ class ConfigsControllerTest extends BaseTest {
 
   @Test
   @DisplayName("PO line params: limit truncates the list, totalRecords stays the number of matches")
-  void getConfigsForPoLineWithLimit() throws Exception {
+  void getConfigsByCriteriaWithLimit() throws Exception {
     savePoLineConfigs();
 
     getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&limit=1")
@@ -531,14 +531,14 @@ class ConfigsControllerTest extends BaseTest {
 
   @ParameterizedTest
   @CsvSource({
-    "acquisitionMethod=" + PURCHASE + ", poLineVendorIdRequired",
-    "vendorAccount=111, poLineVendorIdRequired",
-    "type=CLAIMS, poLineVendorIdRequired",
-    "transmissionMethod=FTP, poLineVendorIdRequired",
-    "vendorId=" + PO_LINE_VENDOR + "&query=type==CLAIMS, poLineParamsWithQuery",
+    "acquisitionMethod=" + PURCHASE + ", configVendorIdRequired",
+    "vendorAccount=111, configVendorIdRequired",
+    "type=CLAIMS, configVendorIdRequired",
+    "transmissionMethod=FTP, configVendorIdRequired",
+    "vendorId=" + PO_LINE_VENDOR + "&query=type==CLAIMS, configCriteriaWithQuery",
   })
   @DisplayName("PO line params: mode rules return 400")
-  void getConfigsForPoLineModeRules(String params, String expectedCode) throws Exception {
+  void getConfigsByCriteriaModeRules(String params, String expectedCode) throws Exception {
     getPoLineConfigs(params)
       .andExpectAll(status().isBadRequest(), jsonPath("$.errors[0].code", is(expectedCode)));
   }
@@ -552,7 +552,7 @@ class ConfigsControllerTest extends BaseTest {
     "acquisitionMethod, not-a-uuid",
   })
   @DisplayName("PO line params: unknown enum values and non-UUID ids return 400")
-  void getConfigsForPoLineInvalidValues(String param, String value) throws Exception {
+  void getConfigsByCriteriaInvalidValues(String param, String value) throws Exception {
     mockMvc.perform(get(CONFIGS_URL).headers(defaultHeaders()).param(param, value))
       .andExpectAll(status().isBadRequest(),
         jsonPath("$.errors[0].message", startsWith("MethodArgumentTypeMismatchException")));
