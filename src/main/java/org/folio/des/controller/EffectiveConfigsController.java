@@ -24,8 +24,8 @@ public class EffectiveConfigsController implements EffectiveConfigsApi {
   private final ExportTypeBasedConfigManager manager;
 
   @Override
-  public ResponseEntity<ExportConfigCollection> getEffectiveConfigs(UUID vendorId, UUID acquisitionMethod, String vendorAccount,
-      ExportType type, TransmissionMethod transmissionMethod) {
+  public ResponseEntity<ExportConfigCollection> getEffectiveConfigs(UUID vendorId, ExportType type, UUID acquisitionMethod,
+      String vendorAccount, TransmissionMethod transmissionMethod) {
     var criteria = new ConfigCriteria(vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
     log.info("getEffectiveConfigs:: by criteria={}.", criteria);
     return ResponseEntity.ok(manager.getEffectiveConfigs(criteria));

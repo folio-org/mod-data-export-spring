@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -35,6 +36,8 @@ class EffectiveConfigsControllerTest extends BaseTest {
 
   private static final String CONFIGS_URL = "/data-export-spring/configs";
   private static final String EFFECTIVE_CONFIGS_URL = "/data-export-spring/effective-configs";
+  private static final String ORDERING = "&type=EDIFACT_ORDERS_EXPORT";
+  private static final String CLAIMS = "&type=CLAIMS";
   private static final String VENDOR = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
   private static final String OTHER_VENDOR = "1e958895-82a6-4fa1-b6fe-763063381946";
   private static final String PURCHASE = "c858e4f2-2b6b-4385-842b-60732ee14abb";
@@ -59,14 +62,14 @@ class EffectiveConfigsControllerTest extends BaseTest {
     "111, " + ORDERING_WITH_ACCOUNT_ID,
     "222, " + ORDERING_DEFAULT_ID,
   })
-  @DisplayName("Returns the matching Ordering config and the vendor's Claims config")
+  @DisplayName("Returns the matching Ordering config")
   void getEffectiveConfigs(String vendorAccount, String expectedOrderingId) throws Exception {
     saveConfigs();
 
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=" + vendorAccount)
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=" + vendorAccount + ORDERING)
       .andExpectAll(status().isOk(),
-        jsonPath("$.totalRecords", is(2)),
-        jsonPath("$.configs[*].id", contains(CLAIMS_ID, expectedOrderingId)));
+        jsonPath("$.totalRecords", is(1)),
+        jsonPath("$.configs[*].id", contains(expectedOrderingId)));
   }
 
   @Test
@@ -74,11 +77,13 @@ class EffectiveConfigsControllerTest extends BaseTest {
   void getEffectiveConfigsWithoutAccountOrMethod() throws Exception {
     saveConfigs();
 
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE)
-      .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID, ORDERING_DEFAULT_ID)));
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + EXCHANGE + "&vendorAccount=111")
-      .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
-    getEffectiveConfigs("vendorId=" + VENDOR)
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + ORDERING)
+      .andExpect(jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + EXCHANGE + "&vendorAccount=111" + ORDERING)
+      .andExpect(jsonPath("$.configs", hasSize(0)));
+    getEffectiveConfigs("vendorId=" + VENDOR + ORDERING)
+      .andExpect(jsonPath("$.configs", hasSize(0)));
+    getEffectiveConfigs("vendorId=" + VENDOR + CLAIMS)
       .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
   }
 
@@ -95,23 +100,24 @@ class EffectiveConfigsControllerTest extends BaseTest {
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
     getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&type=BURSAR_FEES_FINES")
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
-    getEffectiveConfigs("vendorId=" + UUID.randomUUID())
+    getEffectiveConfigs("vendorId=" + UUID.randomUUID() + CLAIMS)
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)));
   }
 
   @ParameterizedTest
   @CsvSource({
-    "FTP, " + ORDERING_WITH_ACCOUNT_ID,
-    "Email, " + CLAIMS_ID,
-    "File download, " + ORDERING_DEFAULT_ID,
+    "EDIFACT_ORDERS_EXPORT, FTP, " + ORDERING_WITH_ACCOUNT_ID,
+    "CLAIMS, Email, " + CLAIMS_ID,
+    "EDIFACT_ORDERS_EXPORT, File download, " + ORDERING_DEFAULT_ID,
   })
   @DisplayName("transmissionMethod binds by API value and narrows the result")
-  void getEffectiveConfigsByTransmissionMethod(String method, String expectedId) throws Exception {
+  void getEffectiveConfigsByTransmissionMethod(String type, String method, String expectedId) throws Exception {
     saveConfigs();
     var account = ORDERING_DEFAULT_ID.equals(expectedId) ? "222" : "111";
 
     mockMvc.perform(get(EFFECTIVE_CONFIGS_URL).headers(defaultHeaders())
         .param("vendorId", VENDOR)
+        .param("type", type)
         .param("acquisitionMethod", PURCHASE)
         .param("vendorAccount", account)
         .param("transmissionMethod", method))
@@ -123,10 +129,10 @@ class EffectiveConfigsControllerTest extends BaseTest {
   void getEffectiveConfigsTransmissionMethodFallbacks() throws Exception {
     saveConfigs();
 
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=FILE_DOWNLOAD")
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=FILE_DOWNLOAD" + ORDERING)
       .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=")
-      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(CLAIMS_ID, ORDERING_DEFAULT_ID)));
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=" + ORDERING)
+      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
   }
 
   @Test
@@ -136,16 +142,27 @@ class EffectiveConfigsControllerTest extends BaseTest {
       saveConfig(vendorConfig(UUID.randomUUID().toString(), "CLAIMS", "Claiming", VENDOR, "Email", false, "[]", ""));
     }
 
-    getEffectiveConfigs("vendorId=" + VENDOR + "&limit=1")
+    getEffectiveConfigs("vendorId=" + VENDOR + CLAIMS + "&limit=1")
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(11)), jsonPath("$.configs", hasSize(11)));
   }
 
   @Test
   @DisplayName("A missing vendorId returns 400")
   void getEffectiveConfigsWithoutVendorId() throws Exception {
-    getEffectiveConfigs("acquisitionMethod=" + PURCHASE)
+    getEffectiveConfigs("acquisitionMethod=" + PURCHASE + CLAIMS)
       .andExpectAll(status().isBadRequest(),
         jsonPath("$.errors[0].message", startsWith("MissingServletRequestParameterException")));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", "&type="})
+  @DisplayName("A missing type returns 400, there is no default type")
+  void getEffectiveConfigsWithoutType(String type) throws Exception {
+    saveConfigs();
+
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + type)
+      .andExpectAll(status().isBadRequest(),
+        jsonPath("$.errors[0].message", is("ConstraintViolationException: getEffectiveConfigs.type: must not be null")));
   }
 
   @ParameterizedTest
@@ -160,6 +177,9 @@ class EffectiveConfigsControllerTest extends BaseTest {
     var request = get(EFFECTIVE_CONFIGS_URL).headers(defaultHeaders()).param(param, value);
     if (!"vendorId".equals(param)) {
       request.param("vendorId", VENDOR);
+    }
+    if (!"type".equals(param)) {
+      request.param("type", "CLAIMS");
     }
 
     mockMvc.perform(request)
@@ -176,7 +196,7 @@ class EffectiveConfigsControllerTest extends BaseTest {
       .andExpectAll(status().isOk(),
         jsonPath("$.configs[*].id", containsInAnyOrder(ORDERING_WITH_ACCOUNT_ID, ORDERING_DEFAULT_ID, CLAIMS_ID,
           OTHER_VENDOR_CONFIG_ID)));
-    verify(repository, never()).findByTypesAndVendorId(any(), any());
+    verify(repository, never()).findByTypeAndVendorId(any(), any());
   }
 
   private ResultActions getEffectiveConfigs(String params) throws Exception {

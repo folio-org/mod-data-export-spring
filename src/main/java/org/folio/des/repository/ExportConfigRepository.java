@@ -1,6 +1,5 @@
 package org.folio.des.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,10 +17,10 @@ public interface ExportConfigRepository extends JpaCqlRepository<ExportConfigEnt
 
   @Query(value = """
     SELECT * FROM export_config
-    WHERE type IN (:types)
+    WHERE type = :type
       AND export_type_specific_parameters -> 'vendorEdiOrdersExportConfig' ->> 'vendorId' = :vendorId
     ORDER BY config_name""", nativeQuery = true)
-  List<ExportConfigEntity> findByTypesAndVendorId(@Param("types") Collection<String> types, @Param("vendorId") String vendorId);
+  List<ExportConfigEntity> findByTypeAndVendorId(@Param("type") String type, @Param("vendorId") String vendorId);
 
 }
 

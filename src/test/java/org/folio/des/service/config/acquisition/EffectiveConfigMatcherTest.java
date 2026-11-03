@@ -126,19 +126,26 @@ class EffectiveConfigMatcherTest {
   void claimsAlwaysMatch() {
     var configs = List.of(claims("C", List.of(PURCHASE), List.of("111")));
 
-    assertThat(match(configs, EXCHANGE, "222")).containsExactly("C");
-    assertThat(match(configs, null, null)).containsExactly("C");
+    assertThat(matchByType(configs, ExportType.CLAIMS, EXCHANGE, "222")).containsExactly("C");
+    assertThat(matchByType(configs, ExportType.CLAIMS, null, null)).containsExactly("C");
   }
 
   @Test
-  @DisplayName("Several matches of both types are sorted by config name")
+  @DisplayName("A type without a rule matches nothing")
+  void typeWithoutRule() {
+    var configs = List.of(ordering("A", List.of(PURCHASE), List.of()));
+
+    assertThat(matchByType(configs, ExportType.BURSAR_FEES_FINES, PURCHASE, null)).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Several matches are sorted by config name")
   void severalMatchesSorted() {
     var configs = List.of(
       ordering("D", List.of(PURCHASE), List.of()),
-      claims("C", List.of(), List.of()),
       ordering("A", List.of(PURCHASE), List.of()));
 
-    assertThat(match(configs, PURCHASE, null)).containsExactly("A", "C", "D");
+    assertThat(match(configs, PURCHASE, null)).containsExactly("A", "D");
   }
 
   @Test
@@ -158,11 +165,15 @@ class EffectiveConfigMatcherTest {
   }
 
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
-    return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, null, null)));
+    return matchByType(configs, ExportType.EDIFACT_ORDERS_EXPORT, acquisitionMethod, vendorAccount);
+  }
+
+  private List<String> matchByType(List<ExportConfig> configs, ExportType type, UUID acquisitionMethod, String vendorAccount) {
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, type, null)));
   }
 
   private List<String> matchByMethod(List<ExportConfig> configs, TransmissionMethod method, String vendorAccount) {
-    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, null, method)));
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, ExportType.EDIFACT_ORDERS_EXPORT, method)));
   }
 
   private static List<String> names(List<ExportConfig> configs) {

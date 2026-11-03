@@ -3,7 +3,6 @@ package org.folio.des.service.config.acquisition;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -20,14 +19,15 @@ public class EffectiveConfigMatcher {
     ExportType.CLAIMS, new ClaimsMatchRule());
 
   /**
-   * @param vendorConfigs all configs of the vendor, also those of other transmission methods: the rules need them
+   * @param vendorConfigs all configs of the vendor and the criteria's type, also those of other transmission methods:
+   *                      the rules need them
    */
   public List<ExportConfig> match(List<ExportConfig> vendorConfigs, ConfigCriteria criteria) {
-    return vendorConfigs.stream()
-      .collect(Collectors.groupingBy(ExportConfig::getType))
-      .entrySet().stream()
-      .filter(configsOfType -> RULES.containsKey(configsOfType.getKey()))
-      .flatMap(configsOfType -> RULES.get(configsOfType.getKey()).match(configsOfType.getValue(), criteria).stream())
+    var rule = RULES.get(criteria.type());
+    if (rule == null) {
+      return List.of();
+    }
+    return rule.match(vendorConfigs, criteria).stream()
       .filter(config -> matchesTransmissionMethod(config, criteria.transmissionMethod()))
       .sorted(Comparator.comparing(ExportConfig::getConfigName))
       .toList();

@@ -6,6 +6,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportConfigExecuteRequest;
 import org.folio.des.domain.dto.ExportConfigExecuteResponse;
+import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -36,7 +37,7 @@ public class ConfigsController implements ConfigsApi {
 
   @Override
   public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
-    log.info("getExportConfigs:: by query={} with limit={}.", query, limit);
+    log.info("getExportConfigs:: by query={} with limit={}", query, limit);
     return ResponseEntity.ok(manager.getConfigCollection(query, limit));
   }
 

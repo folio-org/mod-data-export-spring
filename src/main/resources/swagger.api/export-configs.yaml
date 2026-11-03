@@ -247,8 +247,8 @@ paths:
   /effective-configs:
     get:
       description: >
-        Get the EDIFACT_ORDERS_EXPORT and CLAIMS configurations of a vendor that apply to the config criteria, sorted by
-        configName. An absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't
+        Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. Only
+        EDIFACT_ORDERS_EXPORT and CLAIMS configurations can match. An absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't
         require the value match. The result depends on all configurations of the vendor, and totalRecords is the number
         of all matches. Order and PO line state, such as the automatic export flag, is not checked.
       operationId: getEffectiveConfigs
@@ -266,7 +266,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/exportConfigCollection"
         '400':
-          description: Bad request, e.g. a missing vendorId, a non-UUID id or an unknown enum value
+          description: Bad request, e.g. a missing vendorId or type, a non-UUID id or an unknown enum value
           content:
             application/json:
               example:
@@ -355,7 +355,8 @@ components:
     export_type:
       name: type
       in: query
-      description: Return only matches of this type. Absent means both EDIFACT_ORDERS_EXPORT and CLAIMS, the only types that can match
+      description: Export type of the configurations
+      required: true
       schema:
         allOf:
           - $ref: "#/components/schemas/exportType"

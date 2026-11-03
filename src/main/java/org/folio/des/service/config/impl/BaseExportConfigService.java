@@ -87,7 +87,7 @@ public class BaseExportConfigService implements ExportConfigService {
   @Override
   public ExportConfigCollection getEffectiveConfigs(ConfigCriteria criteria) {
     log.info("getEffectiveConfigs:: criteria={}", criteria);
-    var vendorConfigs = repository.findByTypesAndVendorId(criteria.typeValues(), criteria.vendorId().toString()).stream()
+    var vendorConfigs = repository.findByTypeAndVendorId(criteria.type().getValue(), criteria.vendorId().toString()).stream()
       .map(this::toDto)
       .toList();
     var matches = effectiveConfigMatcher.match(vendorConfigs, criteria);
