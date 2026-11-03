@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEnum;
 
 /**
@@ -22,7 +22,7 @@ public class ConfigMatcher {
   /**
    * @param vendorConfigs all configs of the vendor, also those of other transmission methods: the rules need them
    */
-  public List<ExportConfig> match(List<ExportConfig> vendorConfigs, EffectiveConfigCriteria criteria) {
+  public List<ExportConfig> match(List<ExportConfig> vendorConfigs, ConfigCriteria criteria) {
     return vendorConfigs.stream()
       .collect(Collectors.groupingBy(ExportConfig::getType))
       .entrySet().stream()
@@ -33,7 +33,7 @@ public class ConfigMatcher {
       .toList();
   }
 
-  private boolean matchesTransmissionMethod(ExportConfig config, ExportConfigTransmissionMethod transmissionMethod) {
+  private boolean matchesTransmissionMethod(ExportConfig config, TransmissionMethod transmissionMethod) {
     if (transmissionMethod == null) {
       return true;
     }

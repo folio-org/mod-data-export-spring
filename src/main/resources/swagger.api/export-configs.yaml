@@ -317,13 +317,6 @@ components:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
     exportType:
       $ref: '../../../../folio-export-common/schemas/exportType.json#/ExportType'
-    exportConfigTransmissionMethod:
-      description: Transmission method of the integrations to match against a PO line
-      type: string
-      enum:
-        - FTP
-        - File download
-        - Email
   parameters:
     trait_queryable_query:
       name: query
@@ -371,7 +364,7 @@ components:
       in: query
       description: Return only matches with this transmission method
       schema:
-        $ref: "#/components/schemas/exportConfigTransmissionMethod"
+        $ref: '../../../../folio-export-common/schemas/acquisitions/vendorEdiOrdersExportConfig.json#/VendorEdiOrdersExportConfig/properties/transmissionMethod'
   examples:
     errors:
       value:

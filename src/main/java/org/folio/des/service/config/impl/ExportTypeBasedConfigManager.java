@@ -22,7 +22,7 @@ import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.service.config.ExportConfigService;
-import org.folio.des.service.config.acquisition.EffectiveConfigCriteria;
+import org.folio.des.service.config.acquisition.ConfigCriteria;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -64,7 +64,7 @@ public class ExportTypeBasedConfigManager {
     return defaultExportConfigService.postConfig(exportConfig);
   }
 
-  public ExportConfigCollection getConfigsByCriteria(EffectiveConfigCriteria criteria) {
+  public ExportConfigCollection getConfigsByCriteria(ConfigCriteria criteria) {
     return defaultExportConfigService.getConfigsByCriteria(criteria);
   }
 

@@ -16,7 +16,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 class OrderingMatchRule implements ConfigMatchRule {
 
   @Override
-  public List<ExportConfig> match(List<ExportConfig> configsOfType, EffectiveConfigCriteria criteria) {
+  public List<ExportConfig> match(List<ExportConfig> configsOfType, ConfigCriteria criteria) {
     var accountsOfNonDefaultConfigs = configsOfType.stream()
       .map(OrderingMatchRule::parameters)
       .filter(parameters -> !isDefault(parameters))
@@ -29,14 +29,14 @@ class OrderingMatchRule implements ConfigMatchRule {
       .toList();
   }
 
-  private boolean matchesAcquisitionMethod(VendorEdiOrdersExportConfig parameters, EffectiveConfigCriteria criteria) {
+  private boolean matchesAcquisitionMethod(VendorEdiOrdersExportConfig parameters, ConfigCriteria criteria) {
     return criteria.acquisitionMethod() != null
       && ediConfig(parameters).map(EdiConfig::getDefaultAcquisitionMethods)
         .filter(methods -> methods.contains(criteria.acquisitionMethod()))
         .isPresent();
   }
 
-  private boolean matchesAccount(VendorEdiOrdersExportConfig parameters, EffectiveConfigCriteria criteria,
+  private boolean matchesAccount(VendorEdiOrdersExportConfig parameters, ConfigCriteria criteria,
                                  Set<String> accountsOfNonDefaultConfigs) {
     if (isDefault(parameters)) {
       return ConfigMatchRule.isRest(criteria.vendorAccount(), accountsOfNonDefaultConfigs);

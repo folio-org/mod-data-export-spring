@@ -11,7 +11,7 @@ import org.folio.des.domain.dto.ExportConfig;
 class ClaimsMatchRule implements ConfigMatchRule {
 
   @Override
-  public List<ExportConfig> match(List<ExportConfig> configsOfType, EffectiveConfigCriteria criteria) {
+  public List<ExportConfig> match(List<ExportConfig> configsOfType, ConfigCriteria criteria) {
     return configsOfType;
   }
 

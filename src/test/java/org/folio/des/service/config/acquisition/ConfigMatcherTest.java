@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.UUID;
 
-import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
+import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.domain.dto.EdiConfig;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
@@ -151,18 +151,18 @@ class ConfigMatcherTest {
     var configs = List.of(ftpConfig, emailDefault);
 
     // the FTP config still excludes its account from the default although it is not requested
-    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.EMAIL, "111")).isEmpty();
-    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.EMAIL, "222")).containsExactly("B");
-    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.FTP, "111")).containsExactly("A");
-    assertThat(matchByMethod(configs, ExportConfigTransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
+    assertThat(matchByMethod(configs, TransmissionMethod.EMAIL, "111")).isEmpty();
+    assertThat(matchByMethod(configs, TransmissionMethod.EMAIL, "222")).containsExactly("B");
+    assertThat(matchByMethod(configs, TransmissionMethod.FTP, "111")).containsExactly("A");
+    assertThat(matchByMethod(configs, TransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
   }
 
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
-    return names(matcher.match(configs, new EffectiveConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, null, null)));
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, null, null)));
   }
 
-  private List<String> matchByMethod(List<ExportConfig> configs, ExportConfigTransmissionMethod method, String vendorAccount) {
-    return names(matcher.match(configs, new EffectiveConfigCriteria(VENDOR, PURCHASE, vendorAccount, null, method)));
+  private List<String> matchByMethod(List<ExportConfig> configs, TransmissionMethod method, String vendorAccount) {
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, null, method)));
   }
 
   private static List<String> names(List<ExportConfig> configs) {

@@ -3,10 +3,10 @@ package org.folio.des.controller;
 import java.util.UUID;
 
 import org.folio.des.domain.dto.ExportConfigCollection;
-import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportType;
+import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.rest.resource.EffectiveConfigsApi;
-import org.folio.des.service.config.acquisition.EffectiveConfigCriteria;
+import org.folio.des.service.config.acquisition.ConfigCriteria;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +25,8 @@ public class EffectiveConfigsController implements EffectiveConfigsApi {
 
   @Override
   public ResponseEntity<ExportConfigCollection> getEffectiveConfigs(UUID vendorId, UUID acquisitionMethod, String vendorAccount,
-      ExportType type, ExportConfigTransmissionMethod transmissionMethod) {
-    var criteria = new EffectiveConfigCriteria(vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
+      ExportType type, TransmissionMethod transmissionMethod) {
+    var criteria = new ConfigCriteria(vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
     log.info("getEffectiveConfigs:: by criteria={}.", criteria);
     return ResponseEntity.ok(manager.getConfigsByCriteria(criteria));
   }

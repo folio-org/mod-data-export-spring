@@ -15,8 +15,8 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
+import org.folio.des.service.config.acquisition.ConfigCriteria;
 import org.folio.des.service.config.acquisition.ConfigMatcher;
-import org.folio.des.service.config.acquisition.EffectiveConfigCriteria;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.data.domain.PageRequest;
@@ -85,7 +85,7 @@ public class BaseExportConfigService implements ExportConfigService {
   }
 
   @Override
-  public ExportConfigCollection getConfigsByCriteria(EffectiveConfigCriteria criteria) {
+  public ExportConfigCollection getConfigsByCriteria(ConfigCriteria criteria) {
     log.info("getConfigsByCriteria:: criteria={}", criteria);
     var vendorConfigs = repository.findByTypesAndVendorId(criteria.typeValues(), criteria.vendorId().toString()).stream()
       .map(this::toDto)
