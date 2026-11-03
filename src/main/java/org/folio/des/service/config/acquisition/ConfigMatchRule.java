@@ -6,7 +6,7 @@ import java.util.List;
 import org.folio.des.domain.dto.ExportConfig;
 
 /**
- * Decides which configs of one export type apply to a PO line. Gets all configs of that type of the vendor, because a
+ * Decides which configs of one export type apply to the config criteria. Gets all configs of that type of the vendor, because a
  * catch-all config depends on what the other configs select.
  */
 interface ConfigMatchRule {

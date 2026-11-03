@@ -11,7 +11,7 @@ import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEnum;
 
 /**
- * Selects the configs of a vendor that apply to a PO line.
+ * Selects the configs of a vendor that apply to the config criteria.
  */
 public class EffectiveConfigMatcher {
 

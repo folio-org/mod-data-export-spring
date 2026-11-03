@@ -247,10 +247,10 @@ paths:
   /effective-configs:
     get:
       description: >
-        Get the EDIFACT_ORDERS_EXPORT and CLAIMS configurations of a vendor that apply to a PO line, sorted by
-        configName. The parameters describe the PO line, so an absent acquisitionMethod or vendorAccount means the PO
-        line has none. The result depends on all configurations of the vendor, and totalRecords is the number of all
-        matches. Order and PO line state, such as the automatic export flag, is not checked.
+        Get the EDIFACT_ORDERS_EXPORT and CLAIMS configurations of a vendor that apply to the config criteria, sorted by
+        configName. An absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't
+        require the value match. The result depends on all configurations of the vendor, and totalRecords is the number
+        of all matches. Order and PO line state, such as the automatic export flag, is not checked.
       operationId: getEffectiveConfigs
       parameters:
         - $ref: "#/components/parameters/vendor_id"

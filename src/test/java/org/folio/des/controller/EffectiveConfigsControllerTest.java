@@ -70,7 +70,7 @@ class EffectiveConfigsControllerTest extends BaseTest {
   }
 
   @Test
-  @DisplayName("PO line without an account and without a matching acquisition method")
+  @DisplayName("Config criteria without an account and without a matching acquisition method")
   void getEffectiveConfigsWithoutAccountOrMethod() throws Exception {
     saveConfigs();
 
