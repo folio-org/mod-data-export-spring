@@ -11,7 +11,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 
 /**
  * The worker's Ordering config rule, MapToEdifactOrdersTasklet#getPoLineQuery and
- * #getVendorAccountFilter, with the account numbers of default configs ignored (MODEXPW-664).
+ * #getVendorAccountFilter, with the account numbers of default configs ignored.
  */
 class OrderingMatchRule implements EffectiveConfigMatchRule {
 

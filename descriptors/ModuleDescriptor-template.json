@@ -346,8 +346,8 @@
     },
     {
       "permissionName": "data-export.effective-configs.collection.get",
-      "displayName": "Get the effective data export configurations",
-      "description": "Get the data export configurations of a vendor that apply to the config criteria"
+      "displayName": "Get the effective export configurations",
+      "description": "Get the export configurations of a vendor that apply to the config criteria"
     },
     {
       "permissionName": "data-export.job.item.resend",
