@@ -9,7 +9,7 @@ import org.folio.des.domain.dto.ExportConfig;
  * Decides which configs of one export type apply to the config criteria. Gets all configs of that type of the vendor, because a
  * catch-all config depends on what the other configs select.
  */
-interface ConfigMatchRule {
+interface EffectiveConfigMatchRule {
 
   List<ExportConfig> match(List<ExportConfig> configsOfType, ConfigCriteria criteria);
 

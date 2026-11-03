@@ -4,8 +4,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import org.folio.des.domain.dto.EffectiveConfigType;
 import org.folio.des.domain.dto.ExportConfig;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEnum;
 
@@ -14,20 +14,16 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEn
  */
 public class EffectiveConfigMatcher {
 
-  private static final Map<ExportType, ConfigMatchRule> RULES = Map.of(
-    ExportType.EDIFACT_ORDERS_EXPORT, new OrderingMatchRule(),
-    ExportType.CLAIMS, new ClaimsMatchRule());
+  private static final Map<EffectiveConfigType, EffectiveConfigMatchRule> RULES = Map.of(
+    EffectiveConfigType.EDIFACT_ORDERS_EXPORT, new OrderingMatchRule(),
+    EffectiveConfigType.CLAIMS, new ClaimsMatchRule());
 
   /**
    * @param vendorConfigs all configs of the vendor and the criteria's type, also those of other transmission methods:
    *                      the rules need them
    */
   public List<ExportConfig> match(List<ExportConfig> vendorConfigs, ConfigCriteria criteria) {
-    var rule = RULES.get(criteria.type());
-    if (rule == null) {
-      return List.of();
-    }
-    return rule.match(vendorConfigs, criteria).stream()
+    return RULES.get(criteria.type()).match(vendorConfigs, criteria).stream()
       .filter(config -> matchesTransmissionMethod(config, criteria.transmissionMethod()))
       .sorted(Comparator.comparing(ExportConfig::getConfigName))
       .toList();

@@ -13,7 +13,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
  * The config rule of the worker's PO line selection, MapToEdifactOrdersTasklet#getPoLineQuery and
  * #getVendorAccountFilter, with the account numbers of default configs ignored (MODEXPW-664).
  */
-class OrderingMatchRule implements ConfigMatchRule {
+class OrderingMatchRule implements EffectiveConfigMatchRule {
 
   @Override
   public List<ExportConfig> match(List<ExportConfig> configsOfType, ConfigCriteria criteria) {
@@ -39,7 +39,7 @@ class OrderingMatchRule implements ConfigMatchRule {
   private boolean matchesAccount(VendorEdiOrdersExportConfig parameters, ConfigCriteria criteria,
                                  Set<String> accountsOfNonDefaultConfigs) {
     if (isDefault(parameters)) {
-      return ConfigMatchRule.isRest(criteria.vendorAccount(), accountsOfNonDefaultConfigs);
+      return EffectiveConfigMatchRule.isRest(criteria.vendorAccount(), accountsOfNonDefaultConfigs);
     }
     var accounts = accounts(parameters);
     return accounts.isEmpty() || criteria.vendorAccount() != null && accounts.contains(criteria.vendorAccount());

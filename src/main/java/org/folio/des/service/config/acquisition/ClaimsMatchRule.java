@@ -8,7 +8,7 @@ import org.folio.des.domain.dto.ExportConfig;
  * Every Claims config of the vendor applies. mod-orders creates one job per Claims config of the vendor and ignores
  * acquisition methods and accounts.
  */
-class ClaimsMatchRule implements ConfigMatchRule {
+class ClaimsMatchRule implements EffectiveConfigMatchRule {
 
   @Override
   public List<ExportConfig> match(List<ExportConfig> configsOfType, ConfigCriteria criteria) {

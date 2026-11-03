@@ -98,8 +98,6 @@ class EffectiveConfigsControllerTest extends BaseTest {
       .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
     getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + EXCHANGE + "&type=EDIFACT_ORDERS_EXPORT")
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&type=BURSAR_FEES_FINES")
-      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
     getEffectiveConfigs("vendorId=" + UUID.randomUUID() + CLAIMS)
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)));
   }
@@ -162,17 +160,18 @@ class EffectiveConfigsControllerTest extends BaseTest {
 
     getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + type)
       .andExpectAll(status().isBadRequest(),
-        jsonPath("$.errors[0].message", is("ConstraintViolationException: getEffectiveConfigs.type: must not be null")));
+        jsonPath("$.errors[0].message", startsWith("MissingServletRequestParameterException")));
   }
 
   @ParameterizedTest
   @CsvSource({
     "type, unknown",
+    "type, BURSAR_FEES_FINES",
     "transmissionMethod, unknown",
     "vendorId, not-a-uuid",
     "acquisitionMethod, not-a-uuid",
   })
-  @DisplayName("Unknown enum values and non-UUID ids return 400")
+  @DisplayName("Unknown or unsupported enum values and non-UUID ids return 400")
   void getEffectiveConfigsInvalidValues(String param, String value) throws Exception {
     var request = get(EFFECTIVE_CONFIGS_URL).headers(defaultHeaders()).param(param, value);
     if (!"vendorId".equals(param)) {

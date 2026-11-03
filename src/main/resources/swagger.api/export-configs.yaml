@@ -247,9 +247,9 @@ paths:
   /effective-configs:
     get:
       description: >
-        Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. Only
-        EDIFACT_ORDERS_EXPORT and CLAIMS configurations can match. An absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't
-        require the value match. The result depends on all configurations of the vendor, and totalRecords is the number
+        Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. An
+        absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't require the value
+        match. The result depends on all configurations of the vendor, and totalRecords is the number
         of all matches. Order and PO line state, such as the automatic export flag, is not checked.
       operationId: getEffectiveConfigs
       parameters:
@@ -266,7 +266,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/exportConfigCollection"
         '400':
-          description: Bad request, e.g. a missing vendorId or type, a non-UUID id or an unknown enum value
+          description: Bad request, e.g. a missing vendorId or type, a non-UUID id or an unknown or unsupported enum value
           content:
             application/json:
               example:
@@ -315,8 +315,12 @@ components:
       $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
-    exportType:
-      $ref: '../../../../folio-export-common/schemas/exportType.json#/ExportType'
+    effectiveConfigType:
+      description: Export type of the configurations
+      type: string
+      enum:
+        - EDIFACT_ORDERS_EXPORT
+        - CLAIMS
   parameters:
     trait_queryable_query:
       name: query
@@ -358,8 +362,7 @@ components:
       description: Export type of the configurations
       required: true
       schema:
-        allOf:
-          - $ref: "#/components/schemas/exportType"
+        $ref: "#/components/schemas/effectiveConfigType"
     transmission_method:
       name: transmissionMethod
       in: query

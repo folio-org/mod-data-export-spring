@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.domain.dto.EdiConfig;
+import org.folio.des.domain.dto.EffectiveConfigType;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
@@ -126,16 +127,8 @@ class EffectiveConfigMatcherTest {
   void claimsAlwaysMatch() {
     var configs = List.of(claims("C", List.of(PURCHASE), List.of("111")));
 
-    assertThat(matchByType(configs, ExportType.CLAIMS, EXCHANGE, "222")).containsExactly("C");
-    assertThat(matchByType(configs, ExportType.CLAIMS, null, null)).containsExactly("C");
-  }
-
-  @Test
-  @DisplayName("A type without a rule matches nothing")
-  void typeWithoutRule() {
-    var configs = List.of(ordering("A", List.of(PURCHASE), List.of()));
-
-    assertThat(matchByType(configs, ExportType.BURSAR_FEES_FINES, PURCHASE, null)).isEmpty();
+    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, EXCHANGE, "222")).containsExactly("C");
+    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, null, null)).containsExactly("C");
   }
 
   @Test
@@ -165,15 +158,15 @@ class EffectiveConfigMatcherTest {
   }
 
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
-    return matchByType(configs, ExportType.EDIFACT_ORDERS_EXPORT, acquisitionMethod, vendorAccount);
+    return matchByType(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, acquisitionMethod, vendorAccount);
   }
 
-  private List<String> matchByType(List<ExportConfig> configs, ExportType type, UUID acquisitionMethod, String vendorAccount) {
+  private List<String> matchByType(List<ExportConfig> configs, EffectiveConfigType type, UUID acquisitionMethod, String vendorAccount) {
     return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, type, null)));
   }
 
   private List<String> matchByMethod(List<ExportConfig> configs, TransmissionMethod method, String vendorAccount) {
-    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, ExportType.EDIFACT_ORDERS_EXPORT, method)));
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, method)));
   }
 
   private static List<String> names(List<ExportConfig> configs) {
