@@ -10,15 +10,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/trait_queryable_query"
         - $ref: "#/components/parameters/trait_pageable_limit"
-        - $ref: "#/components/parameters/vendor_id"
-        - $ref: "#/components/parameters/acquisition_method"
-        - $ref: "#/components/parameters/vendor_account"
-        - $ref: "#/components/parameters/export_type"
-        - $ref: "#/components/parameters/transmission_method"
-      description: >
-        Get a list of data export configurations. With vendorId and the other config criteria parameters, returns the
-        EDIFACT_ORDERS_EXPORT and CLAIMS configurations that match these criteria, sorted by configName. These
-        parameters can't be combined with the query parameter, and totalRecords is the number of all matches.
+      description: Get a list of data export configurations
       operationId: getExportConfigs
       responses:
         '200':
@@ -27,14 +19,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/exportConfigCollection"
-        '400':
-          description: Bad request, e.g. config parameters without vendorId or combined with the query parameter
-          content:
-            application/json:
-              example:
-                $ref: "#/components/examples/errors"
-              schema:
-                $ref: "#/components/schemas/errors"
         '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
@@ -260,6 +244,43 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
+  /effective-configs:
+    get:
+      description: >
+        Get the EDIFACT_ORDERS_EXPORT and CLAIMS configurations of a vendor that apply to a PO line, sorted by
+        configName. The parameters describe the PO line, so an absent acquisitionMethod or vendorAccount means the PO
+        line has none. The result depends on all configurations of the vendor, and totalRecords is the number of all
+        matches. Order and PO line state, such as the automatic export flag, is not checked.
+      operationId: getEffectiveConfigs
+      parameters:
+        - $ref: "#/components/parameters/vendor_id"
+        - $ref: "#/components/parameters/acquisition_method"
+        - $ref: "#/components/parameters/vendor_account"
+        - $ref: "#/components/parameters/export_type"
+        - $ref: "#/components/parameters/transmission_method"
+      responses:
+        '200':
+          description: The matching configurations, or an empty list if none applies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/exportConfigCollection"
+        '400':
+          description: Bad request, e.g. a missing vendorId, a non-UUID id or an unknown enum value
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
 components:
   schemas:
     exportConfigExecuteRequest:
@@ -294,12 +315,8 @@ components:
       $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
-    exportConfigType:
-      description: Export type of the integrations
-      type: string
-      enum:
-        - EDIFACT_ORDERS_EXPORT
-        - CLAIMS
+    exportType:
+      $ref: '../../../../folio-export-common/schemas/exportType.json#/ExportType'
     exportConfigTransmissionMethod:
       description: Transmission method of the integrations to match against a PO line
       type: string
@@ -324,7 +341,8 @@ components:
     vendor_id:
       name: vendorId
       in: query
-      description: UUID of the order's vendor. Required when any other PO line parameter is sent
+      description: UUID of the order's vendor
+      required: true
       schema:
         type: string
         format: uuid
@@ -344,9 +362,10 @@ components:
     export_type:
       name: type
       in: query
-      description: Return only matches of this type. Absent means both types
+      description: Return only matches of this type. Absent means both EDIFACT_ORDERS_EXPORT and CLAIMS, the only types that can match
       schema:
-        $ref: "#/components/schemas/exportConfigType"
+        allOf:
+          - $ref: "#/components/schemas/exportType"
     transmission_method:
       name: transmissionMethod
       in: query

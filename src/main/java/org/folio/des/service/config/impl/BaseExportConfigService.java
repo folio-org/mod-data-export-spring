@@ -15,8 +15,8 @@ import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
-import org.folio.des.service.config.acquisition.ExportConfigMatcher;
-import org.folio.des.service.config.acquisition.ExportConfigCriteria;
+import org.folio.des.service.config.acquisition.ConfigMatcher;
+import org.folio.des.service.config.acquisition.EffectiveConfigCriteria;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +37,7 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
   protected final ExportConfigDomainEventService exportConfigDomainEventService;
-  private final ExportConfigMatcher exportConfigMatcher = new ExportConfigMatcher();
+  private final ConfigMatcher configMatcher = new ConfigMatcher();
 
   @Override
   @Transactional
@@ -85,14 +85,13 @@ public class BaseExportConfigService implements ExportConfigService {
   }
 
   @Override
-  public ExportConfigCollection getConfigsByCriteria(ExportConfigCriteria criteria, Integer limit) {
-    log.info("getConfigsByCriteria:: criteria={}, limit={}", criteria, limit);
+  public ExportConfigCollection getConfigsByCriteria(EffectiveConfigCriteria criteria) {
+    log.info("getConfigsByCriteria:: criteria={}", criteria);
     var vendorConfigs = repository.findByTypesAndVendorId(criteria.typeValues(), criteria.vendorId().toString()).stream()
       .map(this::toDto)
       .toList();
-    var matches = exportConfigMatcher.match(vendorConfigs, criteria);
-    return new ExportConfigCollection().totalRecords(matches.size())
-      .configs(matches.stream().limit(limit).toList());
+    var matches = configMatcher.match(vendorConfigs, criteria);
+    return new ExportConfigCollection().totalRecords(matches.size()).configs(matches);
   }
 
   @Override

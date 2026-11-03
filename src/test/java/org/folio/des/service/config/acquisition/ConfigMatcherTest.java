@@ -15,13 +15,13 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEn
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ExportConfigMatcherTest {
+class ConfigMatcherTest {
 
   private static final UUID VENDOR = UUID.randomUUID();
   private static final UUID PURCHASE = UUID.randomUUID();
   private static final UUID EXCHANGE = UUID.randomUUID();
 
-  private final ExportConfigMatcher matcher = new ExportConfigMatcher();
+  private final ConfigMatcher matcher = new ConfigMatcher();
 
   @Test
   @DisplayName("Ordering config matches only the acquisition methods it selects")
@@ -158,11 +158,11 @@ class ExportConfigMatcherTest {
   }
 
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
-    return names(matcher.match(configs, new ExportConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, null, null)));
+    return names(matcher.match(configs, new EffectiveConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, null, null)));
   }
 
   private List<String> matchByMethod(List<ExportConfig> configs, ExportConfigTransmissionMethod method, String vendorAccount) {
-    return names(matcher.match(configs, new ExportConfigCriteria(VENDOR, PURCHASE, vendorAccount, null, method)));
+    return names(matcher.match(configs, new EffectiveConfigCriteria(VENDOR, PURCHASE, vendorAccount, null, method)));
   }
 
   private static List<String> names(List<ExportConfig> configs) {

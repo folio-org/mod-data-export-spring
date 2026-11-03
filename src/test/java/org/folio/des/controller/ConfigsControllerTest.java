@@ -2,14 +2,11 @@ package org.folio.des.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -45,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -72,14 +68,6 @@ class ConfigsControllerTest extends BaseTest {
   private static final String PO_LINE_ID_2 = "0009662b-8b80-4001-b704-ca10971f222d";
   private static final String EXECUTE_REQUEST =
     "{\"poLineIds\":[\"" + PO_LINE_ID_1 + "\",\"" + PO_LINE_ID_2 + "\"]}";
-  private static final String PO_LINE_VENDOR = "046b6c7f-0b8a-43b9-b35d-6489e6daee91";
-  private static final String OTHER_VENDOR = "1e958895-82a6-4fa1-b6fe-763063381946";
-  private static final String PURCHASE = "c858e4f2-2b6b-4385-842b-60732ee14abb";
-  private static final String EXCHANGE = "0a4163a5-d225-4007-ad90-2fb41b73efab";
-  private static final String ORDERING_WITH_ACCOUNT_ID = "11111111-1111-4111-8111-111111111111";
-  private static final String ORDERING_DEFAULT_ID = "22222222-2222-4222-8222-222222222222";
-  private static final String CLAIMS_ID = "33333333-3333-4333-8333-333333333333";
-  private static final String CONFIGS_URL = "/data-export-spring/configs";
   private static final String PASSWORD_SENTINEL = "AC3-sentinel-12345";
   private static final String CLAIMS_WITH_PASSWORD_ID = "12345678-1234-1234-1234-1234567890ab";
   private static final String CLAIMS_REQUEST_WITH_PASSWORD =
@@ -445,152 +433,6 @@ class ConfigsControllerTest extends BaseTest {
           .headers(defaultHeaders())
           .content(executeRequest))
       .andExpectAll(status().isBadRequest());
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-    "111, " + ORDERING_WITH_ACCOUNT_ID,
-    "222, " + ORDERING_DEFAULT_ID,
-  })
-  @DisplayName("PO line params return the matching Ordering config and the vendor's Claims config")
-  void getConfigsByCriteria(String vendorAccount, String expectedOrderingId) throws Exception {
-    savePoLineConfigs();
-
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=" + vendorAccount)
-      .andExpectAll(status().isOk(),
-        jsonPath("$.totalRecords", is(2)),
-        jsonPath("$.configs[*].id", contains(CLAIMS_ID, expectedOrderingId)));
-  }
-
-  @Test
-  @DisplayName("PO line without an account and without a matching acquisition method")
-  void getConfigsByCriteriaWithoutAccountOrMethod() throws Exception {
-    savePoLineConfigs();
-
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE)
-      .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID, ORDERING_DEFAULT_ID)));
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + EXCHANGE + "&vendorAccount=111")
-      .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR)
-      .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
-  }
-
-  @Test
-  @DisplayName("PO line params: type restricts the result, no match is an empty list")
-  void getConfigsByCriteriaByType() throws Exception {
-    savePoLineConfigs();
-
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=111&type=EDIFACT_ORDERS_EXPORT")
-      .andExpect(jsonPath("$.configs[*].id", contains(ORDERING_WITH_ACCOUNT_ID)));
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&type=CLAIMS")
-      .andExpect(jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + EXCHANGE + "&type=EDIFACT_ORDERS_EXPORT")
-      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
-    getPoLineConfigs("vendorId=" + OTHER_VENDOR)
-      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)));
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-    "FTP, " + ORDERING_WITH_ACCOUNT_ID,
-    "Email, " + CLAIMS_ID,
-    "File download, " + ORDERING_DEFAULT_ID,
-  })
-  @DisplayName("PO line params: transmissionMethod binds by API value and narrows the result")
-  void getConfigsByCriteriaByTransmissionMethod(String method, String expectedId) throws Exception {
-    savePoLineConfigs();
-    var account = ORDERING_DEFAULT_ID.equals(expectedId) ? "222" : "111";
-
-    mockMvc.perform(get(CONFIGS_URL).headers(defaultHeaders())
-        .param("vendorId", PO_LINE_VENDOR)
-        .param("acquisitionMethod", PURCHASE)
-        .param("vendorAccount", account)
-        .param("transmissionMethod", method))
-      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(expectedId)));
-  }
-
-  @Test
-  @DisplayName("PO line params: Spring also binds the constant name, and an empty value counts as absent")
-  void getConfigsByCriteriaTransmissionMethodFallbacks() throws Exception {
-    savePoLineConfigs();
-
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=FILE_DOWNLOAD")
-      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=")
-      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(CLAIMS_ID, ORDERING_DEFAULT_ID)));
-  }
-
-  @Test
-  @DisplayName("PO line params: limit truncates the list, totalRecords stays the number of matches")
-  void getConfigsByCriteriaWithLimit() throws Exception {
-    savePoLineConfigs();
-
-    getPoLineConfigs("vendorId=" + PO_LINE_VENDOR + "&acquisitionMethod=" + PURCHASE + "&limit=1")
-      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(2)), jsonPath("$.configs", hasSize(1)));
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-    "acquisitionMethod=" + PURCHASE + ", configVendorIdRequired",
-    "vendorAccount=111, configVendorIdRequired",
-    "type=CLAIMS, configVendorIdRequired",
-    "transmissionMethod=FTP, configVendorIdRequired",
-    "vendorId=" + PO_LINE_VENDOR + "&query=type==CLAIMS, configCriteriaWithQuery",
-  })
-  @DisplayName("PO line params: mode rules return 400")
-  void getConfigsByCriteriaModeRules(String params, String expectedCode) throws Exception {
-    getPoLineConfigs(params)
-      .andExpectAll(status().isBadRequest(), jsonPath("$.errors[0].code", is(expectedCode)));
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-    "type, BURSAR_FEES_FINES",
-    "type, unknown",
-    "transmissionMethod, unknown",
-    "vendorId, not-a-uuid",
-    "acquisitionMethod, not-a-uuid",
-  })
-  @DisplayName("PO line params: unknown enum values and non-UUID ids return 400")
-  void getConfigsByCriteriaInvalidValues(String param, String value) throws Exception {
-    mockMvc.perform(get(CONFIGS_URL).headers(defaultHeaders()).param(param, value))
-      .andExpectAll(status().isBadRequest(),
-        jsonPath("$.errors[0].message", startsWith("MethodArgumentTypeMismatchException")));
-  }
-
-  @Test
-  @DisplayName("Calls without PO line params don't use the matching")
-  void getConfigsWithoutPoLineParams() throws Exception {
-    savePoLineConfigs();
-
-    mockMvc.perform(get(CONFIGS_URL).headers(defaultHeaders()))
-      .andExpectAll(status().isOk(),
-        jsonPath("$.configs[*].id", containsInAnyOrder(ORDERING_WITH_ACCOUNT_ID, ORDERING_DEFAULT_ID, CLAIMS_ID,
-          "44444444-4444-4444-8444-444444444444")));
-    verify(repository, never()).findByTypesAndVendorId(any(), any());
-  }
-
-  private ResultActions getPoLineConfigs(String params) throws Exception {
-    return mockMvc.perform(get(CONFIGS_URL + "?" + params).headers(defaultHeaders()));
-  }
-
-  private void savePoLineConfigs() throws Exception {
-    saveConfig(vendorConfig(ORDERING_WITH_ACCOUNT_ID, "EDIFACT_ORDERS_EXPORT", "Ordering", PO_LINE_VENDOR, "FTP", false,
-      "[\"111\"]", "\"ediFtp\":{\"serverAddress\":\"sftp://example.org\",\"ftpPort\":22},"));
-    saveConfig(vendorConfig(ORDERING_DEFAULT_ID, "EDIFACT_ORDERS_EXPORT", "Ordering", PO_LINE_VENDOR, "File download", true,
-      "[]", ""));
-    saveConfig(vendorConfig(CLAIMS_ID, "CLAIMS", "Claiming", PO_LINE_VENDOR, "Email", false, "[]", ""));
-    saveConfig(vendorConfig("44444444-4444-4444-8444-444444444444", "EDIFACT_ORDERS_EXPORT", "Ordering", OTHER_VENDOR,
-      "File download", true, "[]", ""));
-  }
-
-  private static String vendorConfig(String id, String type, String integrationType, String vendorId, String method,
-                                     boolean isDefault, String accounts, String extra) {
-    return """
-      {"id":"%s","type":"%s","exportTypeSpecificParameters":{"vendorEdiOrdersExportConfig":{"vendorId":"%s",\
-      "configName":"%s","integrationType":"%s","fileFormat":"CSV","transmissionMethod":"%s","isDefaultConfig":%s,%s\
-      "ediConfig":{"accountNoList":%s,"defaultAcquisitionMethods":["%s"]}}},"schedulePeriod":"NONE"}"""
-      .formatted(id, type, vendorId, id, integrationType, method, isDefault, extra, accounts, PURCHASE);
   }
 
   private DomainEvent<ExportConfig> pollConfigEventJson(String configId, DomainEventType type) {

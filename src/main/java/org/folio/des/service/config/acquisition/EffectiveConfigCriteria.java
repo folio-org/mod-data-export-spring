@@ -1,22 +1,16 @@
 package org.folio.des.service.config.acquisition;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportType;
 
 /**
- * The PO line attributes the export configs are matched against.
+ * The attributes the export configs are matched against.
  */
-public record ExportConfigCriteria(UUID vendorId, UUID acquisitionMethod, String vendorAccount, ExportType type,
+public record EffectiveConfigCriteria(UUID vendorId, UUID acquisitionMethod, String vendorAccount, ExportType type,
                                    ExportConfigTransmissionMethod transmissionMethod) {
-
-  public boolean isEmpty() {
-    return Stream.of(vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod).allMatch(Objects::isNull);
-  }
 
   public List<String> typeValues() {
     return type != null

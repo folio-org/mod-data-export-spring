@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
-import org.folio.des.service.config.acquisition.ExportConfigCriteria;
+import org.folio.des.service.config.acquisition.EffectiveConfigCriteria;
 
 public interface ExportConfigService {
 
@@ -14,7 +14,7 @@ public interface ExportConfigService {
 
   ExportConfigCollection getConfigCollection(String query, Integer limit);
 
-  ExportConfigCollection getConfigsByCriteria(ExportConfigCriteria criteria, Integer limit);
+  ExportConfigCollection getConfigsByCriteria(EffectiveConfigCriteria criteria);
 
   Optional<ExportConfig> getFirstConfig();
 

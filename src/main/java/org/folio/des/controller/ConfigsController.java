@@ -2,13 +2,10 @@ package org.folio.des.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.des.domain.dto.ExportConfigType;
-import org.folio.des.domain.dto.ExportConfigTransmissionMethod;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportConfigCollection;
 import org.folio.des.domain.dto.ExportConfigExecuteRequest;
 import org.folio.des.domain.dto.ExportConfigExecuteResponse;
-import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
 import org.folio.des.domain.dto.Job;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
@@ -16,7 +13,6 @@ import org.folio.des.domain.exception.ErrorCodes;
 import org.folio.des.domain.exception.RequestValidationException;
 import org.folio.des.rest.resource.ConfigsApi;
 import org.folio.des.service.JobService;
-import org.folio.des.service.config.acquisition.ExportConfigCriteria;
 import org.folio.des.service.config.impl.ExportTypeBasedConfigManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.folio.des.domain.dto.ExportType.EDIFACT_ORDERS_EXPORT;
 
@@ -40,13 +35,9 @@ public class ConfigsController implements ConfigsApi {
   private final JobService jobService;
 
   @Override
-  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit, UUID vendorId, UUID acquisitionMethod,
-      String vendorAccount, ExportConfigType type, ExportConfigTransmissionMethod transmissionMethod) {
-    log.info("getExportConfigs:: by query={} with limit={}, vendorId={}, acquisitionMethod={}, vendorAccount={}, type={}, transmissionMethod={}",
-      query, limit, vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
-    var exportType = type == null ? null : ExportType.fromValue(type.getValue());
-    var criteria = new ExportConfigCriteria(vendorId, acquisitionMethod, vendorAccount, exportType, transmissionMethod);
-    return ResponseEntity.ok(manager.getConfigCollection(query, limit, criteria));
+  public ResponseEntity<ExportConfigCollection> getExportConfigs(String query, Integer limit) {
+    log.info("getExportConfigs:: by query={} with limit={}.", query, limit);
+    return ResponseEntity.ok(manager.getConfigCollection(query, limit));
   }
 
   @Override
