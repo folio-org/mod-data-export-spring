@@ -249,8 +249,7 @@ paths:
       description: >
         Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. An
         absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't require the value
-        match. The result depends on all configurations of the vendor, and totalRecords is the number
-        of all matches. Other export conditions, such as the automatic export flag, are not checked.
+        match. The result depends on all configurations of the vendor, and totalRecords is the number of all matches.
       operationId: getEffectiveConfigs
       parameters:
         - $ref: "#/components/parameters/vendor_id"
