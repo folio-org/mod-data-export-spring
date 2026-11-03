@@ -10,7 +10,7 @@ import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 
 /**
- * The config rule of the worker's PO line selection, MapToEdifactOrdersTasklet#getPoLineQuery and
+ * The worker's Ordering config rule, MapToEdifactOrdersTasklet#getPoLineQuery and
  * #getVendorAccountFilter, with the account numbers of default configs ignored (MODEXPW-664).
  */
 class OrderingMatchRule implements EffectiveConfigMatchRule {
