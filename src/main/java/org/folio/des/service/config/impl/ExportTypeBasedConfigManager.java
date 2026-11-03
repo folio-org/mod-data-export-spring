@@ -64,8 +64,8 @@ public class ExportTypeBasedConfigManager {
     return defaultExportConfigService.postConfig(exportConfig);
   }
 
-  public ExportConfigCollection getConfigsByCriteria(ConfigCriteria criteria) {
-    return defaultExportConfigService.getConfigsByCriteria(criteria);
+  public ExportConfigCollection getEffectiveConfigs(ConfigCriteria criteria) {
+    return defaultExportConfigService.getEffectiveConfigs(criteria);
   }
 
   public ExportConfigCollection getConfigCollection(String query, Integer limit) {

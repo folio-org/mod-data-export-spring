@@ -13,7 +13,7 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEn
 /**
  * Selects the configs of a vendor that apply to a PO line.
  */
-public class ConfigMatcher {
+public class EffectiveConfigMatcher {
 
   private static final Map<ExportType, ConfigMatchRule> RULES = Map.of(
     ExportType.EDIFACT_ORDERS_EXPORT, new OrderingMatchRule(),

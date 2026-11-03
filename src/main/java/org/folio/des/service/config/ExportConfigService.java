@@ -14,7 +14,7 @@ public interface ExportConfigService {
 
   ExportConfigCollection getConfigCollection(String query, Integer limit);
 
-  ExportConfigCollection getConfigsByCriteria(ConfigCriteria criteria);
+  ExportConfigCollection getEffectiveConfigs(ConfigCriteria criteria);
 
   Optional<ExportConfig> getFirstConfig();
 

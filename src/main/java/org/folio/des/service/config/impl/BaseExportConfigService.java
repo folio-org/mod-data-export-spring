@@ -16,7 +16,7 @@ import org.folio.des.repository.ExportConfigRepository;
 import org.folio.des.service.config.ExportConfigDomainEventService;
 import org.folio.des.service.config.ExportConfigService;
 import org.folio.des.service.config.acquisition.ConfigCriteria;
-import org.folio.des.service.config.acquisition.ConfigMatcher;
+import org.folio.des.service.config.acquisition.EffectiveConfigMatcher;
 import org.folio.des.validator.ExportConfigValidatorResolver;
 import org.folio.spring.exception.NotFoundException;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +37,7 @@ public class BaseExportConfigService implements ExportConfigService {
   protected final ExportConfigMapperResolver exportConfigMapperResolver;
   protected final ExportConfigValidatorResolver exportConfigValidatorResolver;
   protected final ExportConfigDomainEventService exportConfigDomainEventService;
-  private final ConfigMatcher configMatcher = new ConfigMatcher();
+  private final EffectiveConfigMatcher effectiveConfigMatcher = new EffectiveConfigMatcher();
 
   @Override
   @Transactional
@@ -85,12 +85,12 @@ public class BaseExportConfigService implements ExportConfigService {
   }
 
   @Override
-  public ExportConfigCollection getConfigsByCriteria(ConfigCriteria criteria) {
-    log.info("getConfigsByCriteria:: criteria={}", criteria);
+  public ExportConfigCollection getEffectiveConfigs(ConfigCriteria criteria) {
+    log.info("getEffectiveConfigs:: criteria={}", criteria);
     var vendorConfigs = repository.findByTypesAndVendorId(criteria.typeValues(), criteria.vendorId().toString()).stream()
       .map(this::toDto)
       .toList();
-    var matches = configMatcher.match(vendorConfigs, criteria);
+    var matches = effectiveConfigMatcher.match(vendorConfigs, criteria);
     return new ExportConfigCollection().totalRecords(matches.size()).configs(matches);
   }
 

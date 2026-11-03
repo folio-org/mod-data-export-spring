@@ -15,13 +15,13 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEn
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ConfigMatcherTest {
+class EffectiveConfigMatcherTest {
 
   private static final UUID VENDOR = UUID.randomUUID();
   private static final UUID PURCHASE = UUID.randomUUID();
   private static final UUID EXCHANGE = UUID.randomUUID();
 
-  private final ConfigMatcher matcher = new ConfigMatcher();
+  private final EffectiveConfigMatcher matcher = new EffectiveConfigMatcher();
 
   @Test
   @DisplayName("Ordering config matches only the acquisition methods it selects")

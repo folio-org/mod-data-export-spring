@@ -28,7 +28,7 @@ public class EffectiveConfigsController implements EffectiveConfigsApi {
       ExportType type, TransmissionMethod transmissionMethod) {
     var criteria = new ConfigCriteria(vendorId, acquisitionMethod, vendorAccount, type, transmissionMethod);
     log.info("getEffectiveConfigs:: by criteria={}.", criteria);
-    return ResponseEntity.ok(manager.getConfigsByCriteria(criteria));
+    return ResponseEntity.ok(manager.getEffectiveConfigs(criteria));
   }
 
 }
