@@ -1,7 +1,7 @@
 ## 2026-07-28 v3.7.0
 
 ### Stories
-* [MODEXPS-323](https://folio-org.atlassian.net/browse/MODEXPS-323) Add `GET /data-export-spring/effective-configs` to return the export configurations that match the config criteria
+* [MODEXPS-323](https://folio-org.atlassian.net/browse/MODEXPS-323) Add `GET /data-export-spring/effective-configs` to return the export configurations that match the config criteria; Claims configurations match by acquisition method
 * Publish Kafka domain events (CREATE/UPDATE) for Export Configuration changes on `folio.ALL.data-export.config` with structural credential redaction
 * [MODEXPS-316](https://folio-org.atlassian.net/browse/MODEXPS-316) Add `POST /data-export-spring/configs/{id}/execute` to run an Ordering EDIFACT orders export configuration for given PO lines (interface `data-export-spring` 2.1)
 * [MODEXPW-638](https://folio-org.atlassian.net/browse/MODEXPW-638) Add custom-fields read permission for the order email export

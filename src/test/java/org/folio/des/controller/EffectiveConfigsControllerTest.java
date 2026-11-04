@@ -46,6 +46,7 @@ class EffectiveConfigsControllerTest extends BaseTest {
   private static final String ORDERING_DEFAULT_ID = "22222222-2222-4222-8222-222222222222";
   private static final String CLAIMS_ID = "33333333-3333-4333-8333-333333333333";
   private static final String OTHER_VENDOR_CONFIG_ID = "44444444-4444-4444-8444-444444444444";
+  private static final String CLAIMS_CATCH_ALL_ID = "55555555-5555-4555-8555-555555555555";
 
   @Autowired
   private MockMvc mockMvc;
@@ -100,6 +101,21 @@ class EffectiveConfigsControllerTest extends BaseTest {
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
     getEffectiveConfigs("vendorId=" + UUID.randomUUID() + CLAIMS)
       .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)));
+  }
+
+  @Test
+  @DisplayName("Claims configs match by acquisition method, and without one all of them match")
+  void getEffectiveConfigsClaimsByAcquisitionMethod() throws Exception {
+    saveConfig(vendorConfig(CLAIMS_ID, "CLAIMS", "Claiming", VENDOR, "Email", false, "[]", "[\"" + PURCHASE + "\"]", ""));
+    saveConfig(vendorConfig(CLAIMS_CATCH_ALL_ID, "CLAIMS", "Claiming", VENDOR, "Email", false, "[]", "[]", ""));
+
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + CLAIMS)
+      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(1)), jsonPath("$.configs[*].id", contains(CLAIMS_ID)));
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + EXCHANGE + CLAIMS)
+      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(1)), jsonPath("$.configs[*].id", contains(CLAIMS_CATCH_ALL_ID)));
+    getEffectiveConfigs("vendorId=" + VENDOR + CLAIMS)
+      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(2)),
+        jsonPath("$.configs[*].id", containsInAnyOrder(CLAIMS_ID, CLAIMS_CATCH_ALL_ID)));
   }
 
   @ParameterizedTest
@@ -214,11 +230,16 @@ class EffectiveConfigsControllerTest extends BaseTest {
 
   private static String vendorConfig(String id, String type, String integrationType, String vendorId, String method,
                                      boolean isDefault, String accounts, String extra) {
+    return vendorConfig(id, type, integrationType, vendorId, method, isDefault, accounts, "[\"" + PURCHASE + "\"]", extra);
+  }
+
+  private static String vendorConfig(String id, String type, String integrationType, String vendorId, String method,
+                                     boolean isDefault, String accounts, String acquisitionMethods, String extra) {
     return """
       {"id":"%s","type":"%s","exportTypeSpecificParameters":{"vendorEdiOrdersExportConfig":{"vendorId":"%s",\
       "configName":"%s","integrationType":"%s","fileFormat":"CSV","transmissionMethod":"%s","isDefaultConfig":%s,%s\
-      "ediConfig":{"accountNoList":%s,"defaultAcquisitionMethods":["%s"]}}},"schedulePeriod":"NONE"}"""
-      .formatted(id, type, vendorId, id, integrationType, method, isDefault, extra, accounts, PURCHASE);
+      "ediConfig":{"accountNoList":%s,"defaultAcquisitionMethods":%s}}},"schedulePeriod":"NONE"}"""
+      .formatted(id, type, vendorId, id, integrationType, method, isDefault, extra, accounts, acquisitionMethods);
   }
 
   private void saveConfig(String config) throws Exception {

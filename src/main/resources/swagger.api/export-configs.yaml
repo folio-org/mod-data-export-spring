@@ -247,9 +247,11 @@ paths:
   /effective-configs:
     get:
       description: >
-        Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. An
-        absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that don't require the value
-        match. The result depends on all configurations of the vendor, and totalRecords is the number of all matches.
+        Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. For
+        EDIFACT_ORDERS_EXPORT, an absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that
+        don't require the value match. For CLAIMS, an absent acquisitionMethod returns all configurations of the vendor;
+        with one, configurations that select it match, and those without selected methods match if no other selects it.
+        The result depends on all configurations of the vendor, and totalRecords is the number of all matches.
       operationId: getEffectiveConfigs
       parameters:
         - $ref: "#/components/parameters/vendor_id"
@@ -345,7 +347,7 @@ components:
     acquisition_method:
       name: acquisitionMethod
       in: query
-      description: UUID of the acquisition method. Without it, no EDIFACT_ORDERS_EXPORT configuration matches
+      description: UUID of the acquisition method. Without it, no EDIFACT_ORDERS_EXPORT configuration and every CLAIMS configuration matches
       schema:
         type: string
         format: uuid

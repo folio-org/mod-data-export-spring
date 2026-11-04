@@ -123,12 +123,86 @@ class EffectiveConfigMatcherTest {
   }
 
   @Test
-  @DisplayName("Claims configs always match, whatever they select")
-  void claimsAlwaysMatch() {
-    var configs = List.of(claims("C", List.of(PURCHASE), List.of("111")));
+  @DisplayName("Without an acquisition method every Claims config matches")
+  void claimsWithoutAcquisitionMethod() {
+    var configs = List.of(claims("A", List.of(PURCHASE)), claims("B", List.of()));
 
-    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, EXCHANGE, "222")).containsExactly("C");
-    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, null, null)).containsExactly("C");
+    assertThat(matchClaims(configs, null)).containsExactly("A", "B");
+  }
+
+  @Test
+  @DisplayName("Claims config with selected methods matches only those")
+  void claimsSpecificOnly() {
+    var configs = List.of(claims("A", List.of(PURCHASE)));
+
+    assertThat(matchClaims(configs, PURCHASE)).containsExactly("A");
+    assertThat(matchClaims(configs, EXCHANGE)).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Claims config without selected methods takes only the methods no other config selects")
+  void claimsSpecificWinsOverCatchAll() {
+    var configs = List.of(claims("A", List.of(PURCHASE)), claims("B", List.of()));
+
+    assertThat(matchClaims(configs, PURCHASE)).containsExactly("A");
+    assertThat(matchClaims(configs, EXCHANGE)).containsExactly("B");
+  }
+
+  @Test
+  @DisplayName("Several Claims configs without selected methods each take the same rest")
+  void claimsSeveralCatchAlls() {
+    var configs = List.of(claims("A", List.of(PURCHASE)), claims("B", List.of()), claims("C", List.of()));
+
+    assertThat(matchClaims(configs, PURCHASE)).containsExactly("A");
+    assertThat(matchClaims(configs, EXCHANGE)).containsExactly("B", "C");
+  }
+
+  @Test
+  @DisplayName("A method selected on several Claims configs matches all of them but not the catch-all")
+  void claimsOverlap() {
+    var configs = List.of(claims("A", List.of(PURCHASE)), claims("B", List.of(PURCHASE)), claims("C", List.of()));
+
+    assertThat(matchClaims(configs, PURCHASE)).containsExactly("A", "B");
+  }
+
+  @Test
+  @DisplayName("Claims config without an EDI config or method list is a catch-all")
+  void claimsWithoutEdiConfig() {
+    var noEdiConfig = claims("A", List.of());
+    parameters(noEdiConfig).setEdiConfig(null);
+    var noList = claims("B", List.of());
+    parameters(noList).setEdiConfig(new EdiConfig().defaultAcquisitionMethods(null));
+    var configs = List.of(noEdiConfig, noList, claims("C", List.of(PURCHASE)));
+
+    assertThat(matchClaims(configs, EXCHANGE)).containsExactly("A", "B");
+    assertThat(matchClaims(configs, PURCHASE)).containsExactly("C");
+  }
+
+  @Test
+  @DisplayName("Accounts and the default flag play no part for Claims")
+  void claimsIgnoreAccountsAndDefault() {
+    var specific = config("A", ExportType.CLAIMS, List.of(PURCHASE), List.of("111"), false);
+    var catchAll = config("B", ExportType.CLAIMS, List.of(), List.of("222"), false);
+    var specificDefault = config("C", ExportType.CLAIMS, List.of(EXCHANGE), List.of(), true);
+    var configs = List.of(specific, catchAll, specificDefault);
+
+    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, PURCHASE, "222")).containsExactly("A");
+    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, EXCHANGE, "111")).containsExactly("C");
+    assertThat(matchByType(configs, EffectiveConfigType.CLAIMS, UUID.randomUUID(), "111")).containsExactly("B");
+  }
+
+  @Test
+  @DisplayName("The transmission method narrows the Claims matches after the rule ran")
+  void claimsTransmissionMethodDoesNotChangeRule() {
+    var ftpConfig = claims("A", List.of(PURCHASE));
+    parameters(ftpConfig).setTransmissionMethod(TransmissionMethodEnum.FTP);
+    var emailCatchAll = claims("B", List.of());
+    parameters(emailCatchAll).setTransmissionMethod(TransmissionMethodEnum.EMAIL);
+    var configs = List.of(ftpConfig, emailCatchAll);
+
+    // the FTP config still takes its method away from the catch-all although it is not requested
+    assertThat(matchByMethod(configs, EffectiveConfigType.CLAIMS, TransmissionMethod.EMAIL, null)).isEmpty();
+    assertThat(matchByMethod(configs, EffectiveConfigType.CLAIMS, TransmissionMethod.FTP, null)).containsExactly("A");
   }
 
   @Test
@@ -151,10 +225,10 @@ class EffectiveConfigMatcherTest {
     var configs = List.of(ftpConfig, emailDefault);
 
     // the FTP config still excludes its account from the default although it is not requested
-    assertThat(matchByMethod(configs, TransmissionMethod.EMAIL, "111")).isEmpty();
-    assertThat(matchByMethod(configs, TransmissionMethod.EMAIL, "222")).containsExactly("B");
-    assertThat(matchByMethod(configs, TransmissionMethod.FTP, "111")).containsExactly("A");
-    assertThat(matchByMethod(configs, TransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
+    assertThat(matchByMethod(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, TransmissionMethod.EMAIL, "111")).isEmpty();
+    assertThat(matchByMethod(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, TransmissionMethod.EMAIL, "222")).containsExactly("B");
+    assertThat(matchByMethod(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, TransmissionMethod.FTP, "111")).containsExactly("A");
+    assertThat(matchByMethod(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, TransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
   }
 
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
@@ -165,8 +239,12 @@ class EffectiveConfigMatcherTest {
     return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, type, null)));
   }
 
-  private List<String> matchByMethod(List<ExportConfig> configs, TransmissionMethod method, String vendorAccount) {
-    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, method)));
+  private List<String> matchClaims(List<ExportConfig> configs, UUID acquisitionMethod) {
+    return matchByType(configs, EffectiveConfigType.CLAIMS, acquisitionMethod, null);
+  }
+
+  private List<String> matchByMethod(List<ExportConfig> configs, EffectiveConfigType type, TransmissionMethod method, String vendorAccount) {
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, type, method)));
   }
 
   private static List<String> names(List<ExportConfig> configs) {
@@ -185,8 +263,8 @@ class EffectiveConfigMatcherTest {
     return config(name, ExportType.EDIFACT_ORDERS_EXPORT, methods, accounts, true);
   }
 
-  private static ExportConfig claims(String name, List<UUID> methods, List<String> accounts) {
-    return config(name, ExportType.CLAIMS, methods, accounts, false);
+  private static ExportConfig claims(String name, List<UUID> methods) {
+    return config(name, ExportType.CLAIMS, methods, List.of(), false);
   }
 
   private static ExportConfig config(String name, ExportType type, List<UUID> methods, List<String> accounts, boolean isDefault) {
