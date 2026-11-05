@@ -11,7 +11,8 @@ import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 
 /**
  * The worker's Ordering config rule, MapToEdifactOrdersTasklet#getPoLineQuery and
- * #getVendorAccountFilter, with the account numbers of default configs ignored.
+ * #getVendorAccountFilter, with the account numbers of default configs ignored. An absent vendor account applies no
+ * account filter, an empty one means a line without an account number.
  */
 class OrderingMatchRule implements EffectiveConfigMatchRule {
 
@@ -38,11 +39,14 @@ class OrderingMatchRule implements EffectiveConfigMatchRule {
 
   private boolean matchesAccount(VendorEdiOrdersExportConfig parameters, ConfigCriteria criteria,
                                  Set<String> accountsOfNonDefaultConfigs) {
+    if (criteria.vendorAccount() == null) {
+      return true;
+    }
     if (isDefault(parameters)) {
       return EffectiveConfigMatchRule.isRest(criteria.vendorAccount(), accountsOfNonDefaultConfigs);
     }
     var accounts = accounts(parameters);
-    return accounts.isEmpty() || criteria.vendorAccount() != null && accounts.contains(criteria.vendorAccount());
+    return accounts.isEmpty() || accounts.contains(criteria.vendorAccount());
   }
 
   private static VendorEdiOrdersExportConfig parameters(ExportConfig config) {

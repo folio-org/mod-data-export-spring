@@ -63,7 +63,21 @@ class EffectiveConfigMatcherTest {
 
     assertThat(match(configs, PURCHASE, "111")).containsExactly("A");
     assertThat(match(configs, PURCHASE, "222")).isEmpty();
-    assertThat(match(configs, PURCHASE, null)).isEmpty();
+    assertThat(match(configs, PURCHASE, "")).isEmpty();
+    assertThat(match(configs, PURCHASE, null)).containsExactly("A");
+  }
+
+  @Test
+  @DisplayName("An absent account applies no account filter, but the acquisition method still has to match")
+  void absentAccountAppliesNoFilter() {
+    var configs = List.of(
+      ordering("A", List.of(PURCHASE), List.of("111")),
+      ordering("B", List.of(PURCHASE), List.of()),
+      defaultOrdering("C", List.of(PURCHASE), List.of()),
+      ordering("D", List.of(EXCHANGE), List.of("222")));
+
+    assertThat(match(configs, PURCHASE, null)).containsExactly("A", "B", "C");
+    assertThat(match(configs, EXCHANGE, null)).containsExactly("D");
   }
 
   @Test
@@ -72,6 +86,7 @@ class EffectiveConfigMatcherTest {
     var configs = List.of(ordering("A", List.of(PURCHASE), List.of()));
 
     assertThat(match(configs, PURCHASE, "111")).containsExactly("A");
+    assertThat(match(configs, PURCHASE, "")).containsExactly("A");
     assertThat(match(configs, PURCHASE, null)).containsExactly("A");
   }
 
@@ -82,6 +97,7 @@ class EffectiveConfigMatcherTest {
 
     assertThat(match(configs, PURCHASE, "111")).containsExactly("B");
     assertThat(match(configs, PURCHASE, "222")).containsExactly("B");
+    assertThat(match(configs, PURCHASE, "")).containsExactly("B");
     assertThat(match(configs, PURCHASE, null)).containsExactly("B");
   }
 
@@ -94,7 +110,8 @@ class EffectiveConfigMatcherTest {
 
     assertThat(match(configs, PURCHASE, "111")).containsExactly("A");
     assertThat(match(configs, PURCHASE, "222")).containsExactly("B");
-    assertThat(match(configs, PURCHASE, null)).containsExactly("B");
+    assertThat(match(configs, PURCHASE, "")).containsExactly("B");
+    assertThat(match(configs, PURCHASE, null)).containsExactly("A", "B");
   }
 
   @Test

@@ -74,11 +74,13 @@ class EffectiveConfigsControllerTest extends BaseTest {
   }
 
   @Test
-  @DisplayName("Config criteria without an account and without a matching acquisition method")
+  @DisplayName("An absent account applies no filter, an empty one means no account, and the acquisition method has to match")
   void getEffectiveConfigsWithoutAccountOrMethod() throws Exception {
     saveConfigs();
 
     getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + ORDERING)
+      .andExpect(jsonPath("$.configs[*].id", contains(ORDERING_WITH_ACCOUNT_ID, ORDERING_DEFAULT_ID)));
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=" + ORDERING)
       .andExpect(jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
     getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + EXCHANGE + "&vendorAccount=111" + ORDERING)
       .andExpect(jsonPath("$.configs", hasSize(0)));
@@ -145,7 +147,7 @@ class EffectiveConfigsControllerTest extends BaseTest {
 
     getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=FILE_DOWNLOAD" + ORDERING)
       .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
-    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&transmissionMethod=" + ORDERING)
+    getEffectiveConfigs("vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=222&transmissionMethod=" + ORDERING)
       .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
   }
 
