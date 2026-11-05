@@ -251,7 +251,8 @@ paths:
         EDIFACT_ORDERS_EXPORT, an absent acquisitionMethod or vendorAccount is not a wildcard: only configurations that
         don't require the value match. For CLAIMS, an absent acquisitionMethod returns all configurations of the vendor;
         with one, configurations that select it match, and those without selected methods match if no other selects it.
-        The result depends on all configurations of the vendor, and totalRecords is the number of all matches.
+        The result depends on all configurations of the vendor, and totalRecords is the number of all matches. Without
+        scheduled, matches are returned whether they have a schedule or not.
       operationId: getEffectiveConfigs
       parameters:
         - $ref: "#/components/parameters/vendor_id"
@@ -259,6 +260,7 @@ paths:
         - $ref: "#/components/parameters/vendor_account"
         - $ref: "#/components/parameters/export_type"
         - $ref: "#/components/parameters/transmission_method"
+        - $ref: "#/components/parameters/scheduled"
       responses:
         '200':
           description: The matching configurations, or an empty list if none applies
@@ -370,6 +372,14 @@ components:
       description: Return only matches with this transmission method
       schema:
         $ref: '../../../../folio-export-common/schemas/acquisitions/vendorEdiOrdersExportConfig.json#/VendorEdiOrdersExportConfig/properties/transmissionMethod'
+    scheduled:
+      name: scheduled
+      in: query
+      description: >
+        true returns only matches that run on a schedule, false only matches that don't. CLAIMS configurations never run
+        on a schedule.
+      schema:
+        type: boolean
   examples:
     errors:
       value:

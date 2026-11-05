@@ -7,14 +7,19 @@ import java.util.UUID;
 
 import org.folio.des.domain.dto.TransmissionMethod;
 import org.folio.des.domain.dto.EdiConfig;
+import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.EffectiveConfigType;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.ScheduleParameters;
+import org.folio.des.domain.dto.ScheduleParameters.SchedulePeriodEnum;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig.TransmissionMethodEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class EffectiveConfigMatcherTest {
 
@@ -231,12 +236,95 @@ class EffectiveConfigMatcherTest {
     assertThat(matchByMethod(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, TransmissionMethod.FILE_DOWNLOAD, "111")).isEmpty();
   }
 
+  @ParameterizedTest
+  @CsvSource(nullValues = "null", value = {
+    "111, null,  A",
+    "111, true,  A",
+    "111, false, ",
+    "222, null,  B",
+    "222, true,  B",
+    "222, false, ",
+    "333, null,  C",
+    "333, true,  ",
+    "333, false, C",
+  })
+  @DisplayName("scheduled narrows the matches after the rule ran: C has no schedule but still excludes its account from the default")
+  void scheduledNarrowsMatches(String account, Boolean scheduled, String expected) {
+    var configs = List.of(
+      scheduled(ordering("A", List.of(PURCHASE), List.of("111"))),
+      scheduled(defaultOrdering("B", List.of(PURCHASE), List.of())),
+      ordering("C", List.of(PURCHASE), List.of("333")));
+
+    assertThat(matchBySchedule(configs, account, scheduled))
+      .isEqualTo(expected == null ? List.of() : List.of(expected));
+  }
+
+  @Test
+  @DisplayName("An Ordering config counts as scheduled only if the export is enabled and has a period other than NONE")
+  void orderingScheduleStates() {
+    var enabled = withSchedule(ordering("A", List.of(PURCHASE), List.of()), true, SchedulePeriodEnum.WEEK);
+    var disabled = withSchedule(ordering("B", List.of(PURCHASE), List.of()), false, SchedulePeriodEnum.WEEK);
+    var unsetFlag = withSchedule(ordering("C", List.of(PURCHASE), List.of()), null, SchedulePeriodEnum.WEEK);
+    var periodNone = withSchedule(ordering("D", List.of(PURCHASE), List.of()), true, SchedulePeriodEnum.NONE);
+    var noPeriod = withSchedule(ordering("E", List.of(PURCHASE), List.of()), true, null);
+    var noParameters = ordering("F", List.of(PURCHASE), List.of());
+    parameters(noParameters).setEdiSchedule(new EdiSchedule().enableScheduledExport(true));
+    var noSchedule = ordering("G", List.of(PURCHASE), List.of());
+    var configs = List.of(enabled, disabled, unsetFlag, periodNone, noPeriod, noParameters, noSchedule);
+
+    assertThat(matchBySchedule(configs, null, true)).containsExactly("A");
+    assertThat(matchBySchedule(configs, null, false)).containsExactly("B", "C", "D", "E", "F", "G");
+    assertThat(matchBySchedule(configs, null, null)).containsExactly("A", "B", "C", "D", "E", "F", "G");
+  }
+
+  @Test
+  @DisplayName("scheduled and transmissionMethod combine")
+  void scheduledWithTransmissionMethod() {
+    var scheduledFtp = scheduled(ordering("A", List.of(PURCHASE), List.of()));
+    parameters(scheduledFtp).setTransmissionMethod(TransmissionMethodEnum.FTP);
+    var scheduledEmail = scheduled(ordering("B", List.of(PURCHASE), List.of()));
+    parameters(scheduledEmail).setTransmissionMethod(TransmissionMethodEnum.EMAIL);
+    var unscheduledFtp = ordering("C", List.of(PURCHASE), List.of());
+    parameters(unscheduledFtp).setTransmissionMethod(TransmissionMethodEnum.FTP);
+    var configs = List.of(scheduledFtp, scheduledEmail, unscheduledFtp);
+
+    var criteria = new ConfigCriteria(VENDOR, PURCHASE, null, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, TransmissionMethod.FTP, true);
+
+    assertThat(names(matcher.match(configs, criteria))).containsExactly("A");
+  }
+
+  @Test
+  @DisplayName("Claims configs are never scheduled, whatever their stored schedule says")
+  void claimsAreNeverScheduled() {
+    var configs = List.of(scheduled(claims("A", List.of())));
+
+    assertThat(names(matcher.match(configs, new ConfigCriteria(VENDOR, null, null, EffectiveConfigType.CLAIMS, null, true)))).isEmpty();
+    assertThat(names(matcher.match(configs, new ConfigCriteria(VENDOR, null, null, EffectiveConfigType.CLAIMS, null, false)))).containsExactly("A");
+    assertThat(names(matcher.match(configs, new ConfigCriteria(VENDOR, null, null, EffectiveConfigType.CLAIMS, null, null)))).containsExactly("A");
+  }
+
   private List<String> match(List<ExportConfig> configs, UUID acquisitionMethod, String vendorAccount) {
     return matchByType(configs, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, acquisitionMethod, vendorAccount);
   }
 
   private List<String> matchByType(List<ExportConfig> configs, EffectiveConfigType type, UUID acquisitionMethod, String vendorAccount) {
-    return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, type, null)));
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, acquisitionMethod, vendorAccount, type, null, null)));
+  }
+
+  private List<String> matchBySchedule(List<ExportConfig> configs, String vendorAccount, Boolean scheduled) {
+    var criteria = new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, EffectiveConfigType.EDIFACT_ORDERS_EXPORT, null, scheduled);
+    return names(matcher.match(configs, criteria));
+  }
+
+  private static ExportConfig scheduled(ExportConfig config) {
+    return withSchedule(config, true, SchedulePeriodEnum.DAY);
+  }
+
+  private static ExportConfig withSchedule(ExportConfig config, Boolean enabled, SchedulePeriodEnum period) {
+    parameters(config).setEdiSchedule(new EdiSchedule()
+      .enableScheduledExport(enabled)
+      .scheduleParameters(new ScheduleParameters().schedulePeriod(period)));
+    return config;
   }
 
   private List<String> matchClaims(List<ExportConfig> configs, UUID acquisitionMethod) {
@@ -244,7 +332,7 @@ class EffectiveConfigMatcherTest {
   }
 
   private List<String> matchByMethod(List<ExportConfig> configs, EffectiveConfigType type, TransmissionMethod method, String vendorAccount) {
-    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, type, method)));
+    return names(matcher.match(configs, new ConfigCriteria(VENDOR, PURCHASE, vendorAccount, type, method, null)));
   }
 
   private static List<String> names(List<ExportConfig> configs) {

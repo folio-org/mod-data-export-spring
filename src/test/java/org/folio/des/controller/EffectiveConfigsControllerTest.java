@@ -179,11 +179,38 @@ class EffectiveConfigsControllerTest extends BaseTest {
         jsonPath("$.errors[0].message", startsWith("MissingServletRequestParameterException")));
   }
 
+  @Test
+  @DisplayName("scheduled returns only matches with or without a schedule, and without it all matches return")
+  void getEffectiveConfigsByScheduled() throws Exception {
+    saveConfig(vendorConfig(ORDERING_WITH_ACCOUNT_ID, "EDIFACT_ORDERS_EXPORT", "Ordering", VENDOR, "File download", false,
+      "[\"111\"]", ""));
+    saveConfig(vendorConfig(ORDERING_DEFAULT_ID, "EDIFACT_ORDERS_EXPORT", "Ordering", VENDOR, "File download", true, "[]", """
+      "ediSchedule":{"enableScheduledExport":true,"scheduleParameters":{"schedulePeriod":"DAY","scheduleFrequency":1,\
+      "scheduleTime":"12:00:00","timeZone":"UTC"}},"""));
+    var scheduledLine = "vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=222" + ORDERING;
+    var unscheduledLine = "vendorId=" + VENDOR + "&acquisitionMethod=" + PURCHASE + "&vendorAccount=111" + ORDERING;
+
+    getEffectiveConfigs(scheduledLine)
+      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
+    getEffectiveConfigs(scheduledLine + "&scheduled=true")
+      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_DEFAULT_ID)));
+    getEffectiveConfigs(scheduledLine + "&scheduled=false")
+      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
+
+    getEffectiveConfigs(unscheduledLine)
+      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_WITH_ACCOUNT_ID)));
+    getEffectiveConfigs(unscheduledLine + "&scheduled=true")
+      .andExpectAll(status().isOk(), jsonPath("$.totalRecords", is(0)), jsonPath("$.configs", hasSize(0)));
+    getEffectiveConfigs(unscheduledLine + "&scheduled=false")
+      .andExpectAll(status().isOk(), jsonPath("$.configs[*].id", contains(ORDERING_WITH_ACCOUNT_ID)));
+  }
+
   @ParameterizedTest
   @CsvSource({
     "type, unknown",
     "type, BURSAR_FEES_FINES",
     "transmissionMethod, unknown",
+    "scheduled, unknown",
     "vendorId, not-a-uuid",
     "acquisitionMethod, not-a-uuid",
   })
