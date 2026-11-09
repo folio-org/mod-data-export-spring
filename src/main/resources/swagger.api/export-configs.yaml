@@ -244,6 +244,47 @@ paths:
                 $ref: "#/components/examples/errors"
               schema:
                 $ref: "#/components/schemas/errors"
+  /effective-configs:
+    get:
+      description: >
+        Get the configurations of an export type and vendor that apply to the config criteria, sorted by configName. For
+        EDIFACT_ORDERS_EXPORT, an absent acquisitionMethod matches no configuration, an absent vendorAccount applies no
+        account filter, and an empty vendorAccount means no account number. For CLAIMS, vendorAccount is ignored and an
+        absent acquisitionMethod returns all configurations of the vendor;
+        with one, configurations that select it match, and those without selected methods match if no other selects it.
+        The result depends on all configurations of the vendor, and totalRecords is the number of all matches. Without
+        scheduled, matches are returned whether they have a schedule or not.
+      operationId: getEffectiveConfigs
+      parameters:
+        - $ref: "#/components/parameters/vendor_id"
+        - $ref: "#/components/parameters/acquisition_method"
+        - $ref: "#/components/parameters/vendor_account"
+        - $ref: "#/components/parameters/export_type"
+        - $ref: "#/components/parameters/transmission_method"
+        - $ref: "#/components/parameters/scheduled"
+      responses:
+        '200':
+          description: The matching configurations, or an empty list if none applies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/exportConfigCollection"
+        '400':
+          description: Bad request, e.g. a missing vendorId or type, a non-UUID id or an unknown or unsupported enum value
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            application/json:
+              example:
+                $ref: "#/components/examples/errors"
+              schema:
+                $ref: "#/components/schemas/errors"
 components:
   schemas:
     exportConfigExecuteRequest:
@@ -278,6 +319,12 @@ components:
       $ref: '../../../../folio-export-common/schemas/exportConfigCollection.json#/ExportConfigCollection'
     errors:
       $ref: '../../../../folio-export-common/schemas/common/errors.json#/Errors'
+    effectiveConfigType:
+      description: Export type of the configurations
+      type: string
+      enum:
+        - EDIFACT_ORDERS_EXPORT
+        - CLAIMS
   parameters:
     trait_queryable_query:
       name: query
@@ -292,6 +339,48 @@ components:
       schema:
         default: 10
         type: integer
+    vendor_id:
+      name: vendorId
+      in: query
+      description: UUID of the order's vendor
+      required: true
+      schema:
+        type: string
+        format: uuid
+    acquisition_method:
+      name: acquisitionMethod
+      in: query
+      description: UUID of the acquisition method. Without it, no EDIFACT_ORDERS_EXPORT configuration and every CLAIMS configuration matches
+      schema:
+        type: string
+        format: uuid
+    vendor_account:
+      name: vendorAccount
+      in: query
+      description: The vendor account number. Absent applies no account filter, empty means no account number
+      schema:
+        type: string
+    export_type:
+      name: type
+      in: query
+      description: Export type of the configurations
+      required: true
+      schema:
+        $ref: "#/components/schemas/effectiveConfigType"
+    transmission_method:
+      name: transmissionMethod
+      in: query
+      description: Return only matches with this transmission method
+      schema:
+        $ref: '../../../../folio-export-common/schemas/acquisitions/vendorEdiOrdersExportConfig.json#/VendorEdiOrdersExportConfig/properties/transmissionMethod'
+    scheduled:
+      name: scheduled
+      in: query
+      description: >
+        true returns only matches that run on a schedule, false only matches that don't. CLAIMS configurations never run
+        on a schedule.
+      schema:
+        type: boolean
   examples:
     errors:
       value:

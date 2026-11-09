@@ -156,6 +156,16 @@
           "methods": [
             "GET"
           ],
+          "pathPattern": "/data-export-spring/effective-configs",
+          "permissionsRequired": [
+            "data-export.effective-configs.collection.get"
+          ],
+          "modulePermissions": []
+        },
+        {
+          "methods": [
+            "GET"
+          ],
           "pathPattern": "/data-export-spring/configs/{id}",
           "permissionsRequired": [
             "data-export.config.item.get"
@@ -335,6 +345,11 @@
       "description": "Get data export configurations"
     },
     {
+      "permissionName": "data-export.effective-configs.collection.get",
+      "displayName": "Get the effective export configurations",
+      "description": "Get the export configurations of a vendor that apply to the config criteria"
+    },
+    {
       "permissionName": "data-export.job.item.resend",
       "displayName": "Resend EDIFACT export",
       "description": "Resend EDIFACT export"
@@ -396,6 +411,7 @@
       "description": "All permissions for data export configurations",
       "subPermissions": [
         "data-export.config.collection.get",
+        "data-export.effective-configs.collection.get",
         "data-export.config.item.get",
         "data-export.config.item.post",
         "data-export.config.item.put",
