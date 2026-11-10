@@ -2,7 +2,11 @@ package org.folio.des.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.UUID;
 
 import org.folio.de.entity.ExportConfigEntity;
@@ -11,6 +15,7 @@ import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Metadata;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +92,70 @@ class DefaultExportConfigMapperTest {
     assertEquals(ExportConfig.SchedulePeriodEnum.WEEK, dto.getSchedulePeriod());
     assertEquals("10:00:00", dto.getScheduleTime());
     assertNotNull(dto.getExportTypeSpecificParameters());
+  }
+
+  @Test
+  @DisplayName("Should map entity audit fields to metadata")
+  void testToDtoMapsMetadata() {
+    // Given
+    var createdBy = UUID.randomUUID();
+    var updatedBy = UUID.randomUUID();
+    var createdDate = LocalDateTime.of(2026, 1, 2, 3, 4, 5);
+    var updatedDate = LocalDateTime.of(2026, 2, 3, 4, 5, 6);
+    var entity = new ExportConfigEntity()
+      .setId(UUID.randomUUID())
+      .setType(ExportType.BURSAR_FEES_FINES.getValue())
+      .setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+    entity.setCreatedDate(createdDate);
+    entity.setCreatedBy(createdBy);
+    entity.setUpdatedDate(updatedDate);
+    entity.setUpdatedBy(updatedBy);
+
+    // When
+    var metadata = mapper.toDto(entity).getMetadata();
+
+    // Then
+    assertNotNull(metadata);
+    assertEquals(Date.from(createdDate.toInstant(ZoneOffset.UTC)), metadata.getCreatedDate());
+    assertEquals(createdBy, metadata.getCreatedByUserId());
+    assertEquals(Date.from(updatedDate.toInstant(ZoneOffset.UTC)), metadata.getUpdatedDate());
+    assertEquals(updatedBy, metadata.getUpdatedByUserId());
+  }
+
+  @Test
+  @DisplayName("Should map empty metadata when entity has no audit data")
+  void testToDtoWithoutAuditData() {
+    // Given
+    var entity = new ExportConfigEntity()
+      .setId(UUID.randomUUID())
+      .setType(ExportType.BURSAR_FEES_FINES.getValue())
+      .setExportTypeSpecificParameters(new ExportTypeSpecificParameters());
+
+    // When
+    var metadata = mapper.toDto(entity).getMetadata();
+
+    // Then
+    assertEquals(new Metadata(), metadata);
+  }
+
+  @Test
+  @DisplayName("Should ignore client-provided metadata when mapping to entity")
+  void testToEntityIgnoresMetadata() {
+    // Given
+    var dto = new ExportConfig()
+      .id(UUID.randomUUID().toString())
+      .type(ExportType.BURSAR_FEES_FINES)
+      .exportTypeSpecificParameters(new ExportTypeSpecificParameters())
+      .metadata(new Metadata().createdDate(new Date()).createdByUserId(UUID.randomUUID()));
+
+    // When
+    var entity = mapper.toEntity(dto);
+
+    // Then
+    assertNull(entity.getCreatedDate());
+    assertNull(entity.getCreatedBy());
+    assertNull(entity.getUpdatedDate());
+    assertNull(entity.getUpdatedBy());
   }
 
   @Test

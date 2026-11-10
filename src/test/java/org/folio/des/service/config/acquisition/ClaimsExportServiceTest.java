@@ -15,6 +15,7 @@ import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
@@ -73,7 +74,9 @@ class ClaimsExportServiceTest {
 
     var response = service.postConfig(CLAIMS_EXPORT_CONFIG);
 
-    assertEquals(CLAIMS_EXPORT_CONFIG, response);
+    // the mocked repository does not run JPA auditing, so the mapped metadata is empty
+    assertEquals(new Metadata(), response.getMetadata());
+    assertEquals(CLAIMS_EXPORT_CONFIG, response.metadata(null));
   }
 
   @Test

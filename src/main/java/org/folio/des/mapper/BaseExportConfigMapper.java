@@ -32,6 +32,12 @@ public abstract class BaseExportConfigMapper {
   public abstract ExportConfigEntity toEntity(ExportConfig dto);
 
   @Mapping(target = "exportTypeSpecificParameters", expression = "java(objectMapper.convertValue(entity.getExportTypeSpecificParameters(), ExportTypeSpecificParameters.class))")
+  @Mapping(target = "metadata.createdDate", source = "createdDate")
+  @Mapping(target = "metadata.createdByUserId", source = "createdBy")
+  @Mapping(target = "metadata.createdByUsername", ignore = true)
+  @Mapping(target = "metadata.updatedDate", source = "updatedDate")
+  @Mapping(target = "metadata.updatedByUserId", source = "updatedBy")
+  @Mapping(target = "metadata.updatedByUsername", ignore = true)
   public abstract ExportConfig toDto(ExportConfigEntity entity);
 
   @Mapping(target = "exportTypeSpecificParameters", expression = "java(objectMapper.convertValue(entity.getExportTypeSpecificParameters(), ExportTypeSpecificParametersWithLegacyBursar.class))")

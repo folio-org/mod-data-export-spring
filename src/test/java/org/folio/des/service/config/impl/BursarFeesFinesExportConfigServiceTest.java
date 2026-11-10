@@ -16,6 +16,7 @@ import org.folio.de.entity.ExportConfigEntity;
 import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.repository.ExportConfigRepository;
@@ -60,7 +61,9 @@ class BursarFeesFinesExportConfigServiceTest {
 
     var response = service.postConfig(exportConfig);
 
-    assertEquals(exportConfig, response);
+    // the mocked repository does not run JPA auditing, so the mapped metadata is empty
+    assertEquals(new Metadata(), response.getMetadata());
+    assertEquals(exportConfig, response.metadata(null));
     verify(bursarExportScheduler, times(1)).scheduleBursarJob(exportConfig);
   }
 

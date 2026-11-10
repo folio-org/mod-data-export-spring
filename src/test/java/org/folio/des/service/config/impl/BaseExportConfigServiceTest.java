@@ -8,11 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +24,7 @@ import org.folio.des.config.JacksonConfiguration;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.mapper.DefaultExportConfigMapper;
 import org.folio.des.mapper.ExportConfigMapperResolver;
 import org.folio.des.repository.ExportConfigRepository;
@@ -33,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -71,7 +75,9 @@ class BaseExportConfigServiceTest {
 
     var response = service.postConfig(exportConfig);
 
-    assertEquals(exportConfig, response);
+    // the mocked repository does not run JPA auditing, so the mapped metadata is empty
+    assertEquals(new Metadata(), response.getMetadata());
+    assertEquals(exportConfig, response.metadata(null));
   }
 
   @Test
@@ -106,6 +112,28 @@ class BaseExportConfigServiceTest {
     service.updateConfig(exportConfig.getId(), exportConfig);
 
     verify(repository).save(any());
+  }
+
+  @Test
+  @DisplayName("Update configuration keeps creation audit fields and flushes before publishing the snapshot")
+  void shouldPreserveCreationMetadataAndFlush_whenConfigUpdated() {
+    var exportConfig = getBursarExportConfig();
+    var createdBy = UUID.randomUUID();
+    var createdDate = LocalDateTime.of(2026, 1, 2, 3, 4, 5);
+    var existingEntity = new ExportConfigEntity().setType(ExportType.BURSAR_FEES_FINES.getValue());
+    existingEntity.setCreatedDate(createdDate);
+    existingEntity.setCreatedBy(createdBy);
+    when(repository.findById(UUID.fromString(exportConfig.getId()))).thenReturn(java.util.Optional.of(existingEntity));
+    when(repository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+    var savedEntity = ArgumentCaptor.forClass(ExportConfigEntity.class);
+
+    service.updateConfig(exportConfig.getId(), exportConfig);
+
+    var inOrder = inOrder(repository);
+    inOrder.verify(repository).save(savedEntity.capture());
+    inOrder.verify(repository).flush();
+    assertEquals(createdDate, savedEntity.getValue().getCreatedDate());
+    assertEquals(createdBy, savedEntity.getValue().getCreatedBy());
   }
 
   @Test

@@ -4,6 +4,7 @@ import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_
 import static org.folio.des.service.config.ExportConfigConstants.DEFAULT_CONFIG_QUERY;
 import static org.folio.des.support.TestUtils.getBursarExportConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,7 +59,10 @@ class ExportTypeBasedConfigManagerTest extends BaseTest {
 
     var response = service.postConfig(exportConfig);
 
-    assertEquals(exportConfig, response);
+    assertNotNull(response.getMetadata());
+    assertNotNull(response.getMetadata().getCreatedDate());
+    assertNotNull(response.getMetadata().getUpdatedDate());
+    assertEquals(exportConfig, response.metadata(null));
     verify(repository).save(any());
   }
 
