@@ -2,12 +2,13 @@ package org.folio.des.service;
 
 import static org.folio.des.domain.dto.ExportType.BURSAR_FEES_FINES;
 import static org.folio.des.domain.dto.ExportType.CLAIMS;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
+import lombok.SneakyThrows;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
 import org.folio.des.CopilotGenerated;
@@ -47,10 +48,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.SneakyThrows;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)

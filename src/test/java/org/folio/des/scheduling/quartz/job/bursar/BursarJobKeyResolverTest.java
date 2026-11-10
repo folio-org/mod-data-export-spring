@@ -1,9 +1,10 @@
 package org.folio.des.scheduling.quartz.job.bursar;
 
 import static org.folio.des.scheduling.quartz.QuartzConstants.BURSAR_EXPORT_GROUP_NAME;
-import static org.junit.Assert.assertNull;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
