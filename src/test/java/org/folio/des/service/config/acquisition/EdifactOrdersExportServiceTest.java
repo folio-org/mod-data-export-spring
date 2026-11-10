@@ -17,6 +17,7 @@ import org.folio.des.domain.dto.EdiSchedule;
 import org.folio.des.domain.dto.ExportConfig;
 import org.folio.des.domain.dto.ExportType;
 import org.folio.des.domain.dto.ExportTypeSpecificParameters;
+import org.folio.des.domain.dto.Metadata;
 import org.folio.des.domain.dto.ScheduleParameters;
 import org.folio.des.domain.dto.VendorEdiOrdersExportConfig;
 import org.folio.des.mapper.DefaultExportConfigMapper;
@@ -86,7 +87,9 @@ class EdifactOrdersExportServiceTest {
 
     var response = service.postConfig(EDIFACT_EXPORT_CONFIG);
 
-    assertEquals(EDIFACT_EXPORT_CONFIG, response);
+    // the mocked repository does not run JPA auditing, so the mapped metadata is empty
+    assertEquals(new Metadata(), response.getMetadata());
+    assertEquals(EDIFACT_EXPORT_CONFIG, response.metadata(null));
     verify(edifactOrdersExportJobScheduler, times(1)).scheduleExportJob(EDIFACT_EXPORT_CONFIG);
   }
 

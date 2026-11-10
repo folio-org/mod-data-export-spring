@@ -182,8 +182,11 @@ class ConfigsControllerTest extends BaseTest {
     assertNull(event.getOldValue());
     assertThat(event.getNewValue())
       .usingRecursiveComparison()
-      .ignoringFields("configName", "tenant")
+      .ignoringFields("configName", "tenant", "metadata")
       .isEqualTo(OBJECT_MAPPER.readValue(NEW_CONFIG_REQUEST, ExportConfig.class));
+    assertThat(event.getNewValue().getMetadata()).isNotNull();
+    assertThat(event.getNewValue().getMetadata().getCreatedDate()).isNotNull();
+    assertThat(event.getNewValue().getMetadata().getUpdatedDate()).isNotNull();
   }
 
   @Test
@@ -255,12 +258,18 @@ class ConfigsControllerTest extends BaseTest {
     assertThat(event.getTenant()).isEqualTo(TENANT);
     assertThat(event.getOldValue())
       .usingRecursiveComparison()
-      .ignoringFields("configName", "tenant")
+      .ignoringFields("configName", "tenant", "metadata")
       .isEqualTo(OBJECT_MAPPER.readValue(NEW_CONFIG_REQUEST, ExportConfig.class));
     assertThat(event.getNewValue())
       .usingRecursiveComparison()
-      .ignoringFields("configName", "tenant")
+      .ignoringFields("configName", "tenant", "metadata")
       .isEqualTo(OBJECT_MAPPER.readValue(UPDATE_CONFIG_REQUEST, ExportConfig.class));
+
+    var oldMetadata = event.getOldValue().getMetadata();
+    var newMetadata = event.getNewValue().getMetadata();
+    assertThat(newMetadata.getCreatedDate()).isEqualTo(oldMetadata.getCreatedDate());
+    assertThat(newMetadata.getCreatedByUserId()).isEqualTo(oldMetadata.getCreatedByUserId());
+    assertThat(newMetadata.getUpdatedDate()).isAfterOrEqualTo(oldMetadata.getUpdatedDate());
 
     assertThat(event.getOldValue().getSchedulePeriod()).isEqualTo(ExportConfig.SchedulePeriodEnum.DAY);
     assertThat(event.getNewValue().getSchedulePeriod()).isEqualTo(ExportConfig.SchedulePeriodEnum.HOUR);

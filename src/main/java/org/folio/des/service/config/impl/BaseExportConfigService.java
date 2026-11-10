@@ -48,7 +48,11 @@ public class BaseExportConfigService implements ExportConfigService {
     var oldSnapshot = toDto(existingEntity);
 
     var entity = exportConfigMapper.toEntity(exportConfig);
+    entity.setCreatedDate(existingEntity.getCreatedDate());
+    entity.setCreatedBy(existingEntity.getCreatedBy());
     entity = repository.save(entity);
+
+    repository.flush();
     log.info("updateConfig:: Successfully updated config with id={}", configId);
 
     var newSnapshot = toDto(entity);
