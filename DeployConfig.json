@@ -1,0 +1,274 @@
+{
+  "description": "mod-data-export-spring configuration template",
+  "moduleDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for container"
+      },
+      {
+        "name": "memory",
+        "value": "2048",
+        "description": "Memory hard limit for container"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "1844",
+        "description": "Memory reservation for container"
+      }
+    ],
+    "java": [
+      {
+        "name": "xmx",
+        "value": "1292m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "256m",
+        "description": "Maximum Java metaspace size"
+      },
+      {
+        "name": "MetaspaceSize",
+        "value": "192m",
+        "description": "Initial Java metaspace size"
+      }
+    ],
+    "deployment": {
+      "isHaSupported": true,
+      "replicasRecommendedCount": 2,
+      "description": "Deployment configuration for the backend module. Adjust replicas based on expected load and HA requirements. Set to false if only single instance is supported or required."
+    },
+    "kong": {
+      "timeouts": {
+        "connect": "60s",
+        "send": "60s",
+        "read": "60s"
+      },
+      "description": "Custom Kong proxy timeouts. Use this only if different from default Kong configuration"
+    },
+    "EnvVars": [
+      {
+        "name": "DB_CHARSET",
+        "value": "UTF-8",
+        "description": "Database character set",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_DATABASE",
+        "value": null,
+        "description": "Database name",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_HOST",
+        "value": null,
+        "description": "Database host",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_MAXPOOLSIZE",
+        "value": "5",
+        "description": "Maximum database connection pool size",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": null,
+        "description": "Database password",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PORT",
+        "value": null,
+        "description": "Database port",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_QUERYTIMEOUT",
+        "value": "60000",
+        "description": "Database query timeout in milliseconds",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": null,
+        "description": "Database username",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Environment",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTIONS",
+        "value": null,
+        "description": "Java options",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "DATA_EXPORT_JOB_COMMAND_TOPIC_PARTITIONS",
+        "value": "50",
+        "description": "Partitions count for data-export.job.command topic",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_HOST",
+        "value": null,
+        "description": "Kafka host",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_PORT",
+        "value": null,
+        "description": "Kafka port",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_PRODUCER_TENANT_COLLECTION",
+        "value": "ALL",
+        "description": "Tenant partitioning mode for Kafka topics",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS",
+        "value": "5000",
+        "description": "Connection timeout in milliseconds for downloading job files",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "JOB_EXPIRATION_PERIOD_DAYS",
+        "value": "7",
+        "description": "Export job expiration period in days",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "OKAPI_URL",
+        "value": null,
+        "description": "Okapi url",
+        "type": "FUNCTIONAL",
+        "essential": true
+      },
+      {
+        "name": "SYSTEM_USER_ENABLED",
+        "value": true,
+        "description": "Defines if system user must be created at service tenant initialization or used for egress service requests",
+        "type": "FUNCTIONAL",
+        "essential": true
+      },
+      {
+        "name": "SYSTEM_USER_NAME",
+        "value": "data-export-system-user",
+        "description": "Username of the system user",
+        "type": "FUNCTIONAL",
+        "essential": true
+      },
+      {
+        "name": "SYSTEM_USER_PASSWORD",
+        "value": "{SYSTEM_USER_PASSWORD}",
+        "description": "Password of the system user",
+        "type": "FUNCTIONAL",
+        "essential": true
+      },
+      {
+        "name": "TIME_ZONE",
+        "value": "UTC",
+        "description": "Time zone for Quartz bursar scheduler",
+        "type": "FUNCTIONAL",
+        "essential": false
+      }
+    ]
+  },
+  "sidecarDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for container"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "512",
+        "description": "Memory reservation for container"
+      }
+    ],
+    "java": [
+      {
+        "name": "xms",
+        "value": "256m",
+        "description": "Initial Java heap size"
+      },
+      {
+        "name": "xmx",
+        "value": "256m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "96m",
+        "description": "Maximum Java metaspace size"
+      }
+    ],
+    "EnvVars": [
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Environment",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Additional JVM options for the sidecar process",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "MODULE_NAME",
+        "value": "mod-data-export-spring",
+        "description": "Name of the backend module the sidecar fronts",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_URL",
+        "value": null,
+        "description": "Internal URL (host:port) at which the mod-data-export-spring backend container is reachable from its sidecar",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_VERSION",
+        "value": null,
+        "description": "Version of the mod-data-export-spring module deployed alongside this sidecar",
+        "type": "CONFIG",
+        "essential": true
+      }
+    ]
+  }
+}
