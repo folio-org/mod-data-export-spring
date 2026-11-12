@@ -21,17 +21,17 @@
     "java": [
       {
         "name": "xmx",
-        "value": "1292m",
+        "value": "1536m",
         "description": "Maximum Java heap size"
       },
       {
         "name": "MaxMetaspaceSize",
-        "value": "256m",
+        "value": "512m",
         "description": "Maximum Java metaspace size"
       },
       {
         "name": "MetaspaceSize",
-        "value": "192m",
+        "value": "384m",
         "description": "Initial Java metaspace size"
       }
     ],
@@ -78,6 +78,13 @@
         "essential": false
       },
       {
+        "name": "DB_MAXSHAREDPOOLSIZE",
+        "value": "20",
+        "description": "Maximum shared database connection pool size",
+        "type": "DB",
+        "essential": false
+      },
+      {
         "name": "DB_PASSWORD",
         "value": null,
         "description": "Database password",
@@ -95,6 +102,13 @@
         "name": "DB_QUERYTIMEOUT",
         "value": "60000",
         "description": "Database query timeout in milliseconds",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_EXPLAIN_QUERY_THRESHOLD",
+        "value": "300000",
+        "description": "Database explain query threshold in milliseconds",
         "type": "DB",
         "essential": false
       },
@@ -170,7 +184,7 @@
       },
       {
         "name": "SYSTEM_USER_ENABLED",
-        "value": true,
+        "value": false,
         "description": "Defines if system user must be created at service tenant initialization or used for egress service requests",
         "type": "FUNCTIONAL",
         "essential": true
@@ -219,7 +233,7 @@
     "java": [
       {
         "name": "xms",
-        "value": "256m",
+        "value": "128m",
         "description": "Initial Java heap size"
       },
       {
