@@ -1,4 +1,4 @@
-## 2026-07-28 v3.7.0
+## YYYY-MM-DD v3.7.0
 
 ### Stories
 * [MODEXPS-323](https://folio-org.atlassian.net/browse/MODEXPS-323) Add `GET /data-export-spring/effective-configs` to return the export configurations that match the config criteria; Claims configurations match by acquisition method; optional `scheduled` filter
@@ -14,6 +14,14 @@
 
 ### Technical tasks
 * [MODEXPS-311](https://folio-org.atlassian.net/browse/MODEXPS-311) Share validation logic between Claims and EDIFACT order parameter validators
+
+## 2026-11-12 v3.6.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.6.1...v3.6.2)
+
+### Technical tasks
+* [MODEXPS-321](https://folio-org.atlassian.net/browse/MODEXPS-321) Trillium CSP#1 - Upgrade to SpringBoot 4.1
+* [MODEXPS-318](https://folio-org.atlassian.net/browse/MODEXPS-318) Add DeployConfig.json (ADR-0013 Configuration Management)
 
 ## 2026-05-19 v3.6.1
 
