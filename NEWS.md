@@ -1,3 +1,11 @@
+## 2026-11-12 v3.6.2
+
+[Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.6.1...v3.6.2)
+
+### Technical tasks
+* [MODEXPS-321](https://folio-org.atlassian.net/browse/MODEXPS-321) Trillium CSP#1 - Upgrade to SpringBoot 4.1
+* [MODEXPS-318](https://folio-org.atlassian.net/browse/MODEXPS-318) Add DeployConfig.json (ADR-0013 Configuration Management)
+
 ## 2026-05-19 v3.6.1
 
 [Full Changelog](https://github.com/folio-org/mod-data-export-spring/compare/v3.6.0...v3.6.1)
