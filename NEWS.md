@@ -1,3 +1,9 @@
+## 2026-11-12 v3.7.1
+
+### Technical tasks
+* [MODEXPS-321](https://folio-org.atlassian.net/browse/MODEXPS-321) Trillium CSP#1 - Upgrade to SpringBoot 4.1
+* [MODEXPS-318](https://folio-org.atlassian.net/browse/MODEXPS-318) Add DeployConfig.json (ADR-0013 Configuration Management)
+
 ## 2026-07-28 v3.7.0
 
 ### Stories
