@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.folio.de.entity.Job;
 import org.folio.de.entity.JobCommand;
@@ -45,6 +46,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -126,6 +131,47 @@ class JobServiceTest {
     JobCommand command = jobExecutionService.prepareResendJobCommand(job);
     Assertions.assertEquals("TestFile.csv", command.getJobParameters().getParameter("FILE_NAME").value());
     Assertions.assertNotNull(command.getJobParameters().getParameter("EDIFACT_ORDERS_EXPORT"));
+  }
+
+  static Stream<Arguments> outputFormatCases() {
+    return Stream.of(
+      Arguments.of(ExportType.EDIFACT_ORDERS_EXPORT, ordersExportParameters(VendorEdiOrdersExportConfig.FileFormatEnum.CSV),
+        null, "Comma-Separated Values (CSV)"),
+      Arguments.of(ExportType.EDIFACT_ORDERS_EXPORT, ordersExportParameters(VendorEdiOrdersExportConfig.FileFormatEnum.EDI),
+        null, "EDIFACT orders export (EDI)"),
+      Arguments.of(ExportType.EDIFACT_ORDERS_EXPORT, ordersExportParameters(null), null, "EDIFACT orders export (EDI)"),
+      Arguments.of(ExportType.EDIFACT_ORDERS_EXPORT, null, null, "EDIFACT orders export (EDI)"),
+      Arguments.of(ExportType.EDIFACT_ORDERS_EXPORT, ordersExportParameters(VendorEdiOrdersExportConfig.FileFormatEnum.CSV),
+        "Preset format", "Preset format"),
+      Arguments.of(ExportType.CIRCULATION_LOG, null, null, "Comma-Separated Values (CSV)"),
+      Arguments.of(ExportType.CLAIMS, ordersExportParameters(VendorEdiOrdersExportConfig.FileFormatEnum.CSV), null, null)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("outputFormatCases")
+  void shouldResolveOutputFormatOnUpsert(ExportType type, ExportTypeSpecificParameters parameters,
+                                         String presetOutputFormat, String expectedOutputFormat) {
+    var folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, new HashMap<>());
+    var internalJobService = new JobServiceImpl(exportWorkerClient, jobExecutionService, repository, folioExecutionContext,
+      null, deletionIntervalService, defaultExportConfigService);
+    var jobDto = new org.folio.des.domain.dto.Job()
+      .name("000001")
+      .type(type)
+      .exportTypeSpecificParameters(parameters)
+      .outputFormat(presetOutputFormat);
+    when(repository.save(any(Job.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    internalJobService.upsertAndSendToKafka(jobDto, false, false);
+
+    var captor = ArgumentCaptor.forClass(Job.class);
+    verify(repository).save(captor.capture());
+    Assertions.assertEquals(expectedOutputFormat, captor.getValue().getOutputFormat());
+  }
+
+  private static ExportTypeSpecificParameters ordersExportParameters(VendorEdiOrdersExportConfig.FileFormatEnum fileFormat) {
+    return new ExportTypeSpecificParameters()
+      .vendorEdiOrdersExportConfig(new VendorEdiOrdersExportConfig().fileFormat(fileFormat));
   }
 
   @Test
