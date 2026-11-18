@@ -127,6 +127,13 @@
         "essential": false
       },
       {
+        "name": "MODULE_VERSION",
+        "value": null,
+        "description": "Exact module version including CI build number. Must be identical to MODULE_VERSION of the associated sidecar container.",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
         "name": "JAVA_OPTIONS",
         "value": null,
         "description": "Java options",
@@ -153,6 +160,34 @@
         "description": "Kafka port",
         "type": "KAFKA",
         "essential": true
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ENABLED",
+        "value": "false",
+        "description": "Enables Kafka tenant filtering: messages are processed only for tenants entitled to this module version",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_TENANT_DISABLED_STRATEGY",
+        "value": "skip",
+        "description": "Strategy applied to a Kafka message of a non-entitled tenant",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ALL_TENANTS_DISABLED_STRATEGY",
+        "value": "fail",
+        "description": "Strategy applied when no tenant is entitled to this module version",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ENTITLEMENT_REFRESH_INTERVAL_SECONDS",
+        "value": "900",
+        "description": "Interval in seconds for refreshing the tenant entitlement cache",
+        "type": "KAFKA",
+        "essential": false
       },
       {
         "name": "KAFKA_PRODUCER_TENANT_COLLECTION",
