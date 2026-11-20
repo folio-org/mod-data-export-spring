@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -34,7 +34,7 @@
     <export-configs.yaml.file>${project.basedir}/src/main/resources/swagger.api/export-configs.yaml</export-configs.yaml.file>
     <job-deletion-intervals.yaml.file>${project.basedir}/src/main/resources/swagger.api/job-deletion-intervals.yaml</job-deletion-intervals.yaml.file>
 
-    <folio-spring-base.version>10.0.1</folio-spring-base.version>
+    <folio-spring-base.version>10.1.0-SNAPSHOT</folio-spring-base.version>
     <folio-service-tools.version>6.0.1</folio-service-tools.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
     <lombok.version>1.18.48</lombok.version>
@@ -67,6 +67,11 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-base</artifactId>
+      <version>${folio-spring-base.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-kafka</artifactId>
       <version>${folio-spring-base.version}</version>
     </dependency>
     <dependency>
@@ -113,11 +118,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-quartz</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-kafka</artifactId>
     </dependency>
 
     <dependency>

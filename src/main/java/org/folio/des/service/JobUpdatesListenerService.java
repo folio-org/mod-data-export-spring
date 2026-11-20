@@ -25,7 +25,8 @@ public class JobUpdatesListenerService {
     id = KafkaService.EVENT_LISTENER_ID,
     containerFactory = "kafkaListenerContainerFactory",
     topicPattern = "${application.kafka.topic-pattern}",
-    groupId = "${application.kafka.group-id}")
+    groupId = "${application.kafka.group-id}",
+    filter = "tenantAwareMessageFilter")
   public void receiveJobExecutionUpdate(@Payload Job jobExecutionUpdate, @Headers Map<String, Object> messageHeaders) {
     var defaultFolioExecutionContext = DefaultFolioExecutionContext.fromMessageHeaders(folioModuleMetadata, messageHeaders);
     try (var context = new FolioExecutionContextSetter(defaultFolioExecutionContext)) {
