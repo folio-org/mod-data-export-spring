@@ -10,6 +10,7 @@
 * [MODEXPW-625](https://folio-org.atlassian.net/browse/MODEXPW-625) Send the export by email
 
 ### Bug fixes
+* [MODEXPS-326](https://folio-org.atlassian.net/browse/MODEXPS-326) Show "Comma-Separated Values (CSV)" as output type of CSV orders export jobs
 * [MODEXPS-322](https://folio-org.atlassian.net/browse/MODEXPS-322) Allow default EDI configuration without vendor account numbers
 
 ### Technical tasks
