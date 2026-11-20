@@ -31,7 +31,7 @@ logging:
     liquibase: debug
     org.folio.des.client.*: debug
 okapi:
-  url: ${OKAPI_URL:http://okapi:9130}
+  url: ${folio.okapi-url}
 spring:
   application:
     name: mod-data-export-spring
