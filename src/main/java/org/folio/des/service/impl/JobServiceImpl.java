@@ -60,6 +60,7 @@ public class JobServiceImpl implements JobService {
   @Value("${job.downloadFileConnectionTimeoutMs}")
   private int jobDownloadFileConnectionTimeout;
 
+  private static final String CSV_ORDERS_EXPORT = "Comma-Separated Values (CSV)";
   private static final Map<ExportType, String> OUTPUT_FORMATS = new EnumMap<>(ExportType.class);
 
   static {
@@ -190,7 +191,7 @@ public class JobServiceImpl implements JobService {
     result.setUpdatedByUserId(userId);
     result.setUpdatedByUsername(userName);
     if (StringUtils.isBlank(result.getOutputFormat())) {
-      result.setOutputFormat(OUTPUT_FORMATS.get(result.getType()));
+      result.setOutputFormat(resolveOutputFormat(result));
     }
     if (result.getBatchStatus() == null) {
       result.setBatchStatus(BatchStatus.UNKNOWN);
@@ -318,6 +319,21 @@ public class JobServiceImpl implements JobService {
     result.setErrorDetails(dto.getErrorDetails());
 
     return result;
+  }
+
+  private String resolveOutputFormat(Job job) {
+    if (job.getType() == ExportType.EDIFACT_ORDERS_EXPORT && isCsvOrdersExport(job)) {
+      return CSV_ORDERS_EXPORT;
+    }
+    return OUTPUT_FORMATS.get(job.getType());
+  }
+
+  private boolean isCsvOrdersExport(Job job) {
+    return Optional.ofNullable(job.getExportTypeSpecificParameters())
+      .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
+      .map(VendorEdiOrdersExportConfig::getFileFormat)
+      .filter(VendorEdiOrdersExportConfig.FileFormatEnum.CSV::equals)
+      .isPresent();
   }
 
   private String getUserName(FolioExecutionContext context) {
