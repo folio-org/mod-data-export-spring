@@ -1,4 +1,11 @@
 folio:
+  kafka:
+    tenant-filter:
+      enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}
+      ignore-empty-batch: true
+      tenant-disabled-strategy: ${KAFKA_TENANT_FILTER_TENANT_DISABLED_STRATEGY:skip}
+      all-tenants-disabled-strategy: ${KAFKA_TENANT_FILTER_ALL_TENANTS_DISABLED_STRATEGY:fail}
+      entitlement-refresh-interval-seconds: ${KAFKA_TENANT_FILTER_ENTITLEMENT_REFRESH_INTERVAL_SECONDS:900}
   system-user:
     enabled: ${SYSTEM_USER_ENABLED:true}
     username: ${SYSTEM_USER_NAME:data-export-system-user}
@@ -23,9 +30,12 @@ logging:
   level:
     liquibase: debug
     org.folio.des.client.*: debug
+okapi:
+  url: ${folio.okapi-url}
 spring:
   application:
     name: mod-data-export-spring
+    version: ${MODULE_VERSION:@project.version@}
   jpa:
     hibernate:
       ddl-auto: none
@@ -94,7 +104,7 @@ application:
       "data-export.job.command":
         partitions: ${DATA_EXPORT_JOB_COMMAND_TOPIC_PARTITIONS:50}
     topic-pattern: ${ENV:folio}.(.*\.)?data-export.job.update
-    group-id: ${ENV:folio}-mod-data-export-spring-events-group
+    group-id: ${ENV:folio}-mod-data-export-spring-events-group-${spring.application.version}
 job:
   expirationPeriodDays: ${JOB_EXPIRATION_PERIOD_DAYS:7}
   downloadFileConnectionTimeoutMs: ${JOB_DOWNLOAD_FILE_CONNECTION_TIMEOUT_MS:5000}
