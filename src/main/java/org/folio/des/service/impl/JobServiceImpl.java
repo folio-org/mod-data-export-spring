@@ -321,14 +321,14 @@ public class JobServiceImpl implements JobService {
     return result;
   }
 
-  private static String resolveOutputFormat(Job job) {
+  private String resolveOutputFormat(Job job) {
     if (job.getType() == ExportType.EDIFACT_ORDERS_EXPORT && isCsvOrdersExport(job)) {
       return CSV_ORDERS_EXPORT;
     }
     return OUTPUT_FORMATS.get(job.getType());
   }
 
-  private static boolean isCsvOrdersExport(Job job) {
+  private boolean isCsvOrdersExport(Job job) {
     return Optional.ofNullable(job.getExportTypeSpecificParameters())
       .map(ExportTypeSpecificParameters::getVendorEdiOrdersExportConfig)
       .map(VendorEdiOrdersExportConfig::getFileFormat)
